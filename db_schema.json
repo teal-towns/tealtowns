@@ -1,0 +1,30 @@
+{
+    "user": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
+        "email": "{String}",
+        "password": "{String} [hashed password]",
+        "firstName": "{String}",
+        "lastName": "{String}",
+        "sessionIds": [
+            "{String} [string of one of current session ids] 3l4klaskj3"
+        ],
+        "passwordResetKey":"{String} [string of random string to allow resetting password] lk3jlkja",
+        "status": "{String} ['guest' until email verified, 'member'] member",
+        "roles": [
+            "{String} [one of '', 'admin']"
+        ],
+        "emailVerificationKey": "{String}",
+        "emailVerified": "{Number} 1 or 0",
+        "username": "{String}"
+    },
+    "image": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
+        "url": "{String}",
+        "title": "{String}",
+        "userIdCreator": "{String}"
+    }
+}

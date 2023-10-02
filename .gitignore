@@ -1,0 +1,43 @@
+.DS_Store
+
+__pycache__
+
+debug.log
+error.log
+
+/config.yml
+/config-*.yml
+
+/config-*.conf
+
+.env*
+.env-*
+
+uploads
+
+.python-version
+
+
+# Miscellaneous
+*.class
+*.lock
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Visual Studio Code related
+.classpath
+.project
+.settings/
+.vscode/

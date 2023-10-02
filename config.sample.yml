@@ -1,0 +1,47 @@
+web_server:
+  port: 8081
+  port_redirect: 8082
+  index: 
+    route: /
+    files: frontend/build/web
+  static:
+    route: /static
+    files: frontend/build/web
+  static_folders:
+    - uploads
+    - static-files
+    - .well-known
+  ssl:
+    enabled: 0
+    key_path: /ssl/KEY.key
+    cert_path: /ssl/CERT.crt
+    port: 443
+  urls:
+    base: https://YOUR-DOMAIN.com
+    base_server: https://YOUR-DOMAIN.com
+  cors_urls:
+    - http://127.0.0.1:8081
+    - http://127.0.0.1:3030
+    - http://localhost:8081
+    - http://localhost:3030
+    - http://localhost:8082
+    - http://127.0.0.1:8082
+mongodb:
+  url: YOUR-MONGODB-URL-HERE
+  db_name: YOUR-MONGODB-DATABASE-NAME-HERE
+notifications:
+  email:
+    from: notify@YOUR-DOMAIN.com
+    to_admin: YOUR-EMAIL-HERE
+    mailchimp:
+      api_key: YOUR-MAILCHIMP-API-KEY-HERE
+      server_prefix: PREFIX-HERE
+    sendgrid:
+      api_key: YOUR-SENDGRID-API-KEY-HERE
+logging: yes
+1logging_config_file: YOUR-LOGGLY-ETC-CONFIG-FILE-HERE.conf
+debug: yes
+log_level: 20
+log_tracker:
+  min_per_hour: 1
+  max_per_hour: 150

@@ -1,0 +1,10 @@
+[Unit]
+Description=web server entry script
+
+[Service]
+WorkingDirectory=/var/www/tealtowns
+ExecStart=/usr/bin/python3 web_server.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

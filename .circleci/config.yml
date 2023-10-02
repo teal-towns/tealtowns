@@ -1,0 +1,42 @@
+version: 2.1
+parameters:
+  run:
+    default: false
+    type: boolean
+
+orbs:
+  python: circleci/python@2.0.3
+jobs:
+  test_backend:
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Run tests
+          command: cp config.sample.yml config.yml && python -m pytest
+  deploy_prod:
+    executor: python/default
+    steps:
+      - checkout
+      - run:
+          name: Deploy
+          command: ssh -oStrictHostKeyChecking=no root@tealtowns.com 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && flutter upgrade && cd frontend && flutter build web && systemctl restart systemd_web_server_tealtowns.service'
+workflows:
+  test_app:
+    when: << pipeline.parameters.run >>
+    jobs:
+      - test_backend
+  deploy_app:
+    jobs:
+      - test_backend:
+          filters:
+            branches:
+              only: main
+      - deploy_prod:
+          requires:
+            - test_backend
+          filters:
+            branches:
+              only: main
