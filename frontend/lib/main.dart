@@ -15,6 +15,8 @@ import './modules/user_auth/current_user_state.dart';
 import './routes.dart';
 import './styles/custom_theme.dart';
 
+import './modules/blog/blog_state.dart';
+
 main() async {
   await dotenv.load(fileName: '.env');
 
@@ -54,6 +56,7 @@ main() async {
     providers: [
       //ChangeNotifierProvider(create: (context) => AppState()),
       ChangeNotifierProvider(create: (context) => CurrentUserState()),
+      ChangeNotifierProvider(create: (context) => BlogState()),
     ],
     child: MyApp(),
   ));

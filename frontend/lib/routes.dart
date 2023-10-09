@@ -9,6 +9,10 @@ import './modules/user_auth/user_logout.dart';
 import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
 
+import './modules/blog/blog_list.dart';
+import './modules/blog/blog_save.dart';
+import './modules/blog/blog_view.dart';
+
 class Routes {
   static const home = '/home';
   static const notFound = '/route-not-found';
@@ -17,6 +21,10 @@ class Routes {
   static const logout = '/logout';
   static const passwordReset = '/password-reset';
   static const signup = '/signup';
+
+  static const blogList = '/blog';
+  static const blogSave = '/blog-save';
+  static const blogView = '/b/:slug';
 }
 
 class AppGoRouter {
@@ -51,6 +59,26 @@ class AppGoRouter {
         path: Routes.passwordReset,
         builder: (context, state) => UserPasswordResetComponent(),
       ),
+      
+      GoRoute(
+        path: Routes.blogList,
+        builder: (context, state) => BlogList(),
+      ),
+      GoRoute(
+        path: Routes.blogSave,
+        builder: (context, state) => BlogSave(),
+      ),
+      GoRoute(
+        path: Routes.blogView,
+        builder: (BuildContext context, GoRouterState state) {
+          String? slug = state.pathParameters["slug"];
+          if (slug != null) {
+            return BlogView(slug: slug);
+          }
+          return BlogList();
+        },
+      ),
+
       GoRoute(
         path: Routes.notFound,
         builder: (context, state) => RouteNotFoundPage(),

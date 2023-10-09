@@ -3,6 +3,7 @@ import time
 
 import ml_config
 
+from blog import blog as _blog
 from image import file_upload as _file_upload
 from image import image as _image
 from permission import permission_user
@@ -31,6 +32,8 @@ def routeIt(route, data, auth):
     ]
 
     admin = [
+        "removeBlog",
+        "saveBlog",
     ]
     if route in perms or route in userIdRequired or route in admin:
         if len(auth['userId']) == 0:
@@ -172,6 +175,21 @@ def routeIt(route, data, auth):
         ret['valid'] = '1'
         ret['user'] = user
         ret = formatRet(data, ret)
+    
+    elif route == 'saveBlog':
+        ret = _blog.Save(data['blog'], auth['userId'])
+    elif route == 'getBlogs':
+        title = data['title'] if 'title' in data else ''
+        tags = data['tags'] if 'tags' in data else []
+        userIdCreator = data['userIdCreator'] if 'userIdCreator' in data else ''
+        slug = data['slug'] if 'slug' in data else ''
+        limit = data['limit'] if 'limit' in data else 25
+        skip = data['skip'] if 'skip' in data else 0
+        sortKey = data['sortKey'] if 'sortKey' in data else ''
+        ret = _blog.Get(title, tags, userIdCreator, slug, limit = limit, skip = skip,
+            sortKey = sortKey)
+    elif route == 'removeBlog':
+        ret = _blog.Remove(data['id'])
 
     ret['_msgId'] = msgId
     return ret

@@ -26,5 +26,19 @@
         "url": "{String}",
         "title": "{String}",
         "userIdCreator": "{String}"
+    },
+    "blog": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "title": "{String}",
+        "slug": "{String} [auto-generated from title]",
+        "text": "{String}",
+        "userIdCreator": "{String}",
+        "tags": [
+            "{String}"
+        ],
+        "imageUrl": "{String}",
+        "imageCredit": "{String}"
     }
 }

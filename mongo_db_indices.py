@@ -7,3 +7,6 @@ def create_all_indices(db):
 
     db['image'].create_index([('title', pymongo.ASCENDING), \
         ('url', pymongo.ASCENDING), ('userIdCreator', pymongo.ASCENDING)], unique=True)
+    
+    db['blog'].create_index([('title', pymongo.ASCENDING), \
+        ('tags', pymongo.ASCENDING)], unique=True)
