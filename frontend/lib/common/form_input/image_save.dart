@@ -176,7 +176,11 @@ class _ImageSaveState extends State<ImageSaveComponent> {
                 }
                 if (valid) {
                   _loadingUpload = true;
-                  _fileUploadService.uploadFiles(filesInfo, (List<String> fileUrls) {
+                  _fileUploadService.uploadFiles(filesInfo, (Map<String, dynamic> fileData) {
+                    List<String> fileUrls = [];
+                    fileData.forEach((key, fileData1) {
+                      fileUrls.add(fileData1['url']);
+                    });
                     if (widget.multiple) {
                       widget.formVals[widget.formValsKey] = fileUrls;
                     } else {
@@ -438,7 +442,11 @@ class _ImageSaveState extends State<ImageSaveComponent> {
         for (var file in formValsImageSave["image_simple"]) {
           filesInfo.add({ 'file': file, 'title': '' });
         }
-        _fileUploadService.uploadFiles(filesInfo, (List<String> fileUrls) {
+        _fileUploadService.uploadFiles(filesInfo, (Map<String, dynamic> fileData) {
+          List<String> fileUrls = [];
+          fileData.forEach((key, fileData1) {
+            fileUrls.add(fileData1['url']);
+          });
           if (widget.multiple) {
               widget.formVals[widget.formValsKey] = fileUrls;
             } else {

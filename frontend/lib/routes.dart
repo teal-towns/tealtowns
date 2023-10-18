@@ -13,6 +13,8 @@ import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
 import './modules/blog/blog_view.dart';
 
+import './modules/plan/land/land_page.dart';
+
 class Routes {
   static const home = '/home';
   static const notFound = '/route-not-found';
@@ -25,6 +27,8 @@ class Routes {
   static const blogList = '/blog';
   static const blogSave = '/blog-save';
   static const blogView = '/b/:slug';
+
+  static const land = '/land';
 }
 
 class AppGoRouter {
@@ -77,6 +81,21 @@ class AppGoRouter {
           }
           return BlogList();
         },
+      ),
+
+      GoRoute(
+        path: Routes.land,
+        builder: (BuildContext context, GoRouterState state) => LandPage(
+            goRouterState: state,
+            lat: double.parse(state.uri.queryParameters['lat']?? '-999'),
+            lng: double.parse(state.uri.queryParameters['lng']?? '-999'),
+            timeframe: state.uri.queryParameters['tf']?? '',
+            year: int.parse(state.uri.queryParameters['year']?? '-999'),
+            underlay: state.uri.queryParameters['u']?? '',
+            tileSize: state.uri.queryParameters['size']?? '',
+            dataType: state.uri.queryParameters['dt']?? '',
+            polygonUName: state.uri.queryParameters['pg'] ?? '',
+          )
       ),
 
       GoRoute(

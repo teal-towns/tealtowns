@@ -17,8 +17,9 @@ _launchURL(url) async {
 
 class AppScaffoldComponent extends StatefulWidget {
   Widget? body;
+  double width;
 
-  AppScaffoldComponent({this.body});
+  AppScaffoldComponent({this.body, this.width = 1200});
 
   @override
   _AppScaffoldState createState() => _AppScaffoldState();
@@ -233,7 +234,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
               child: Align(
                 alignment: Alignment.center,
                 child: Container(
-                  width: 1200,
+                  width: widget.width,
                   child: widget.body,
                   color: Colors.white,
                 )
@@ -248,7 +249,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       child: Align(
         alignment: Alignment.center,
         child: Container(
-          width: 1200,
+          width: widget.width,
           child: widget.body,
           color: Colors.white,
         )

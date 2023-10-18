@@ -10,6 +10,9 @@ from permission import permission_user
 import user_auth
 import websocket_clients as _websocket_clients
 
+from vector_tiles import vector_tiles_data as _vector_tiles_data
+from vector_tiles import vector_tiles_polygon as _vector_tiles_polygon
+
 config = ml_config.get_config()
 
 def routeIt(route, data, auth):
@@ -165,6 +168,16 @@ def routeIt(route, data, auth):
                     userImage = { 'url': ret['url'], 'title': title, 'userIdCreator': auth['userId'] }
                     retUserImage = _image.Save(userImage)
                     ret['userImage'] = formatRet(data, retUserImage)
+        # TODO
+        # elif 'routeKey' in data and data['routeKey'] == 'polygonUpload':
+        #     ret = _upload_coordinates.UploadFileDataToBucket(data['fileData'], fileType = data['fileType'],
+        #         fileName = data['fileName'], title = data['title'])
+        # elif 'routeKey' in data and data['routeKey'] == 'polygonUploadToTiles':
+        #     ret = _upload_coordinates.UploadFileDataToBucket(data['fileData'], fileType = data['fileType'],
+        #         fileName = data['fileName'], title = data['title'])
+        #     retPolygon = _vector_tiles_polygon.GetPolygonFileTilesInfo(ret['fileUrl'])
+        #     for key in retPolygon:
+        #         ret[key] = retPolygon[key]
         else:
             ret = _file_upload.SaveFileData(data['fileData'], config['web_server']['urls']['base_server'], data['fileName'])
     elif route == "saveImageData":
@@ -190,6 +203,24 @@ def routeIt(route, data, auth):
             sortKey = sortKey)
     elif route == 'removeBlog':
         ret = _blog.Remove(data['id'])
+    
+    elif route == "getLandTiles":
+        xCount = data['xCount'] if 'xCount' in data else None
+        yCount = data['yCount'] if 'yCount' in data else None
+        zoom = data['zoom'] if 'zoom' in data else None
+        ret = _vector_tiles_data.GetTiles(data['timeframe'], data['year'], data['latCenter'],
+            data['lngCenter'], xCount = xCount, yCount = yCount, zoom = zoom)
+    elif route == "saveLandTile":
+        valid = 1
+        requiredFields = ['timeframe', 'year', 'zoom', 'tile']
+        for field in requiredFields:
+            if field not in data:
+                ret = { 'valid': 0, 'msg': 'Missing required fields' }
+                valid = 0
+                break
+        if valid:
+            ret = _vector_tiles_data.SaveTile(data['timeframe'], data['year'], data['zoom'],
+                data['tile'])
 
     ret['_msgId'] = msgId
     return ret

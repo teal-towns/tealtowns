@@ -29,6 +29,7 @@ web_server:
 mongodb:
   url: YOUR-MONGODB-URL-HERE
   db_name: YOUR-MONGODB-DATABASE-NAME-HERE
+  url_vector_tiles_actual: MONGODB-URL-HERE
 notifications:
   email:
     from: notify@YOUR-DOMAIN.com
@@ -45,3 +46,5 @@ log_level: 20
 log_tracker:
   min_per_hour: 1
   max_per_hour: 150
+mapbox:
+  access_token: YOUR-TOKEN-HERE

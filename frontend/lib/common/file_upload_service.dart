@@ -2,6 +2,7 @@ import 'dart:convert';
 //import 'dart:io';
 import 'dart:math';
 //import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import './socket_service.dart';
@@ -16,13 +17,13 @@ class FileUploadService {
   SocketService _socketService = SocketService();
 
   List<String> _routeIds = [];
-  bool _inited = false;
+  Map<String, bool> _inited = {};
   var _callbacksById = {};
 
-  void init() {
-    if (!_inited) {
-      _inited = true;
-      _routeIds.add(_socketService.onRoute('saveFileData', callback: (String resString) {
+  void init({ String serverKey = 'default', }) {
+    if (!_inited.containsKey(serverKey)) {
+      _inited[serverKey] = true;
+      _routeIds.add(_socketService.onRoute('saveFileData', serverKey: serverKey, callback: (String resString) {
         var res = jsonDecode(resString);
         var data = res['data'];
         String id = '';
@@ -30,39 +31,43 @@ class FileUploadService {
           id = data['_msgId'].toString();
         }
         if (_callbacksById.containsKey(id)) {
-          _callbacksById[id](data['url']);
+          _callbacksById[id](data);
           _callbacksById.remove(id);
         }
       }));
     }
   }
 
-  void uploadFiles(var filesInfo, Function(List<String>) callback,
-    { String fileType = 'image', bool saveToUserImages = false, int maxImageSize = 600 }) {
-    init();
+  void uploadFiles(var filesInfo, Function(Map<String, dynamic>) callback,
+    { String fileType = 'image', bool saveToUserImages = false, int maxImageSize = 600,
+    String serverKey = 'default', String routeKey = '', }) {
+    init(serverKey: serverKey);
     //String randId = new Random().nextInt(1000000).toString();
     //_callbacksById[randId] = {
     //  'callback': callback,
     //  ''
     //};
-    List<String> callbackUrls = [];
+    List<Map<String, dynamic>> callbackUrls = [];
     int countDone = 0;
     for (int ii = 0; ii < filesInfo.length; ii++) {
       // Seed with an empty value.
-      callbackUrls.add('');
+      //callbackUrls.add('');
       var fileInfo = filesInfo[ii];
-      upload(fileInfo['file'].bytes, fileInfo['file'].name, fileInfo['title'], (String fileUrl) {
-        callbackUrls[ii] = fileUrl;
+      upload(fileInfo['file'].bytes, fileInfo['file'].name, fileInfo['title'], (Map<String, dynamic> resData) {
+        //callbackUrls[ii] = resData;
         countDone += 1;
         if (countDone == filesInfo.length) {
-          callback(callbackUrls);
+          //callback(callbackUrls);
+          callback(resData);
         }
-      }, fileType: fileType, saveToUserImages: saveToUserImages, maxImageSize: maxImageSize);
+      }, fileType: fileType, saveToUserImages: saveToUserImages, maxImageSize: maxImageSize,
+        serverKey: serverKey, routeKey: routeKey );
     }
   }
 
-  void upload(var binaryData, String fileName, String title, Function(String) callback,
-    { String fileType = 'image', bool saveToUserImages = false, int maxImageSize = 600 }) {
+  void upload(var binaryData, String fileName, String title, Function(Map<String, dynamic>) callback,
+    { String fileType = 'image', bool saveToUserImages = false, int maxImageSize = 600,
+    String serverKey = 'default', String routeKey = '' }) {
     if (title.length < 1) {
       title = 'title';
     }
@@ -76,12 +81,13 @@ class FileUploadService {
       'saveToUserImages': saveToUserImages,
       'title': title,
       'maxSize': maxImageSize,
+      'routeKey': routeKey,
     };
     //if (fileType == 'image') {
     //  var extInfo = getExtensionInfo(fileName);
     //  dataSend['extension'] = extInfo['ext'];
     //}
-    _socketService.emit('saveFileData', dataSend);
+    _socketService.emit('saveFileData', dataSend, serverKey: serverKey);
   }
 
   //Map<String, String> getExtensionInfo(String fileName) {
