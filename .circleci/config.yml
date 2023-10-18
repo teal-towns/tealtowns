@@ -15,7 +15,7 @@ jobs:
           pkg-manager: pip
       - run:
           name: Run tests
-          command: cp config.sample.yml config.yml && python -m pytest
+          command: cp config.sample.yml config.yml && MAPBOX_TOKEN=$MAPBOX_TOKEN python -m pytest
   deploy_prod:
     executor: python/default
     steps:
