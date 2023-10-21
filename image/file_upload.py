@@ -45,7 +45,8 @@ def HandleImage(filePath, baseUrl, filename = '', maxSize = 900, removeOriginalF
                 filename += '.jpg'
         newFilePath = 'uploads/images/' + filename
         img.save(newFilePath)
-        ret['url'] = baseUrl + '/' + newFilePath
+        # ret['url'] = baseUrl + '/' + newFilePath
+        ret['url'] = '/' + newFilePath
         ret['valid'] = 1
 
         if removeOriginalFile:
@@ -78,7 +79,8 @@ def SaveFileData(fileData, baseUrl, filename = '', dataFormat = 'uint8'):
         else:
             f.write(fileData)
     ret['filePath'] = filePath
-    ret['url'] = baseUrl + '/' + filePath
+    # ret['url'] = baseUrl + '/' + filePath
+    ret['url'] = '/' + filePath
 
     return ret
 

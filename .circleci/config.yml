@@ -22,7 +22,7 @@ jobs:
       - checkout
       - run:
           name: Deploy
-          command: ssh -oStrictHostKeyChecking=no root@tealtowns.com 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && flutter upgrade && cd frontend && flutter build web && systemctl restart systemd_web_server_tealtowns.service'
+          command: ssh -oStrictHostKeyChecking=no root@tealtowns.org 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && flutter upgrade && cd frontend && flutter build web && systemctl restart systemd_web_server_tealtowns.service'
 workflows:
   test_app:
     when: << pipeline.parameters.run >>
