@@ -26,8 +26,19 @@ main() async {
     String url = Uri.base.toString();
     // dot env is not loading properly if on www? So just assume if null to redirect.
     // Check www first so can also redirect http to https after if necessary.
+    if ((dotenv.env['REDIRECT_DOMAINS'] != null && dotenv.env['DOMAIN'] != null &&
+      dotenv.env['REDIRECT_DOMAINS']!.length > 0 && dotenv.env['DOMAIN']!.length > 0)) {
+      List<String> domains = dotenv.env['REDIRECT_DOMAINS']!.split(',');
+      for (String domain in domains) {
+        if (url.contains(domain)) {
+          url = url.replaceAll(domain, dotenv.env['DOMAIN']!);
+          redirectIt = true;
+          break;
+        }
+      }
+    }
     if ((dotenv.env['REDIRECT_WWW'] == '1' ||
-            dotenv.env['REDIRECT_WWW'] == null) &&
+      dotenv.env['REDIRECT_WWW'] == null) &&
         url.contains('www.')) {
       if (url.contains('https://') || url.contains('http://')) {
         url = url.replaceAll('www.', '');
