@@ -19,7 +19,25 @@ class _HomeComponentState extends State<HomeComponent> {
     return AppScaffoldComponent(
       body: ListView(
         children: [
-          Text('Home'),
+          SizedBox(height: 30),
+          Text("We believe the loneliness and climate crises can be solved by connecting people together to work on local green (nature based) projects. Specifically, to build TealTowns: connected X-minute cities where humans and nature thrive."),
+          SizedBox(height: 10),
+          Text("We use technology (AI Urban Planner and 3D Visualizer) and local leaders to make it easy for people to meet their neighbors and green their city, through both public and private (home improvement) projects."),
+          SizedBox(height: 10),
+          Text("Our values are: 1. Do the Right Thing, 2. Shine Bright, 3. Rising Tide Lifts All Boats, 4. Play!"),
+          SizedBox(height: 10),
+          Text("We are a Teal (self-organizing, flat) organization where anyone can get involved, whether they have 2 hours per month or 10+ hours per week to contribute. To get involved: A. centalized (distributed / remote team): 1. join an existing product initiative, 2. start your own, B. local: 1. join an existing local TealTowns group doing local green projects, 2. connect with your neighbors to start a TealTowns group in your city."),
+          SizedBox(height: 10),
+          Text("We are a non-profit, donation based organization of mostly local volunteers plus a paid team at \$30k, \$60k, \$90k, \$120k levels, with a goal to reduce cost of living so everyone can live happily on \$60k or less (with a transition phase of working quarter or part time as each person works toward that). It must be obvious to anyone that mission comes above money."),
+          SizedBox(height: 10),
+          Text("We have 4 initiatives: 1. Connect (grow 100+ people local TealTowns teams doing local green projects), 2. Plan (build an AI Urban Planner web product), 3. Visualize (build an Unreal 3D immersive experience of the plans), 4. House (build a TealTowns housing network to provide \$0 down payment housing). We have 5 core teams around these 4 initiatives plus a centralized Support team."),
+          SizedBox(height: 10),
+          Text("Our first focus is to build up our group in Concord, CA, USA and build the AI Urban Planner and Visualizer products around initial projects in Concord (Superblocks and Concord ReUse). Through that we will also trial out and select our first 6 to 8 paid team members and then raise \$3 million in donations to start paying them."),
+          SizedBox(height: 10),
+          Text("See our blog for more details!"),
+          SizedBox(height: 10),
+          Text("Contact us to get involved: luke.madera@gmail.com"),
+          SizedBox(height: 30),
         ]
       )
     );
