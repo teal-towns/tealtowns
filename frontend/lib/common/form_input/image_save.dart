@@ -178,12 +178,13 @@ class _ImageSaveState extends State<ImageSaveComponent> {
                   _loadingUpload = true;
                   _fileUploadService.uploadFiles(filesInfo, (Map<String, dynamic> fileData) {
                     List<String> fileUrls = [];
-                    fileData.forEach((key, fileData1) {
-                      fileUrls.add(fileData1['url']);
-                    });
                     if (widget.multiple) {
+                      fileData.forEach((key, fileData1) {
+                        fileUrls.add(fileData1['url']);
+                      });
                       widget.formVals[widget.formValsKey] = fileUrls;
                     } else {
+                      fileUrls.add(fileData['url']);
                       widget.formVals[widget.formValsKey] = fileUrls[0];
                     }
                     // Copy to local state to display images.
@@ -444,12 +445,13 @@ class _ImageSaveState extends State<ImageSaveComponent> {
         }
         _fileUploadService.uploadFiles(filesInfo, (Map<String, dynamic> fileData) {
           List<String> fileUrls = [];
-          fileData.forEach((key, fileData1) {
-            fileUrls.add(fileData1['url']);
-          });
           if (widget.multiple) {
+              fileData.forEach((key, fileData1) {
+                fileUrls.add(fileData1['url']);
+              });
               widget.formVals[widget.formValsKey] = fileUrls;
             } else {
+              fileUrls.add(fileData['url']);
               widget.formVals[widget.formValsKey] = fileUrls[0];
             }
             // Copy to local state to display images.
