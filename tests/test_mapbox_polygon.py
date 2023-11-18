@@ -6,7 +6,7 @@ import os
 from common import math_polygon as _math_polygon
 from common import upload_coordinates as _upload_coordinates
 from common import image_subdivide as _image_subdivide
-from common import mapbox_polygon as _mapbox_polygon
+from mapbox import mapbox_polygon as _mapbox_polygon
 import mongo_mock as _mongo_mock
 
 _mongo_mock.InitAllCollections()
@@ -55,9 +55,9 @@ def xtest_mapboxImageTilesExtents():
 
     # extents = 2
     extents = 1
-    # lngLatCenter = [19.27794, 40.49500]
     # lngLatCenter = [19.28643, 40.49618]
-    lngLatCenter = [-8.96051, 38.98802]
+    # lngLatCenter = [-8.96051, 38.98802]
+    lngLatCenter = [-122.033802, 37.977362]
 
     # TESTING
     # xMeters = 1000
@@ -134,3 +134,14 @@ def xtest_mapboxImageTilesExtents():
     zScale = zPixelRange * 1/512 * 100
     zOffset = (zPixelRange / 2 + ret['elevationMetersPixelMin']) * 100
     print ('zScale', zScale, 'zOffset', zOffset)
+
+def test_GetVectorTiles():
+    lngLatCenter = [-122.033802, 37.977362]
+    zoom = 16
+    xMeters = 1250
+    yMeters = 1250
+    polygonLngLats = _mapbox_polygon.PointToRectangleBounds(lngLatCenter, xMeters, yMeters)
+    boundsLngLat = _math_polygon.MinMaxBounds(polygonLngLats)['bounds']
+    retTiles = _mapbox_polygon.GetVectorTiles(boundsLngLat, zoom = zoom,
+        lngLatCenter = lngLatCenter)
+    print ('ret polygons', len(retTiles['polygons']),retTiles['polygons'])

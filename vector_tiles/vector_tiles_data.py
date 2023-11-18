@@ -18,7 +18,7 @@
 import math
 import json
 
-from common import mapbox_polygon as _mapbox_polygon
+from mapbox import mapbox_polygon as _mapbox_polygon
 from common import math_polygon as _math_polygon
 import lodash
 import mongo_db

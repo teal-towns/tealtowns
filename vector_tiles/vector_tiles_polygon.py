@@ -2,7 +2,7 @@ import math
 import geopandas
 
 from common import math_polygon as _math_polygon
-from common import mapbox_polygon as _mapbox_polygon
+from mapbox import mapbox_polygon as _mapbox_polygon
 from vector_tiles import vector_tiles_data as _vector_tiles_data
 import number
 

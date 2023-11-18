@@ -2,8 +2,9 @@ import geopandas
 from shapely import wkt
 from shapely.ops import linemerge, unary_union, polygonize
 
-from common import mapbox_polygon as _mapbox_polygon
+from mapbox import mapbox_polygon as _mapbox_polygon
 from common import math_polygon as _math_polygon
+from mapbox import mapbox_vector_tile as _mapbox_vector_tile
 
 # Find all road classes & descriptions -> https://docs.mapbox.com/data/tilesets/reference/mapbox-streets-v8/#road
 def GetStreetLinesFromMapbox(polygonDataFrame, includeRoadClasses=None):
@@ -12,7 +13,7 @@ def GetStreetLinesFromMapbox(polygonDataFrame, includeRoadClasses=None):
         'min': [bounds[0], bounds[1]],
         'max': [bounds[2], bounds[3]]
     }
-    ret = _mapbox_polygon.GetStreetTiles(boundsLngLat)
+    ret = _mapbox_polygon.GetVectorTiles(boundsLngLat, tileType = 'street')
 
     jsonTiles = ret['jsonTiles']
     roadsLineStrings = []
@@ -29,19 +30,19 @@ def GetStreetLinesFromMapbox(polygonDataFrame, includeRoadClasses=None):
                     for idx, coordinates in enumerate(feature['geometry']['coordinates']):
                         if feature['geometry']['type'] == 'LineString':
                             # need to debug the converted lng lats are off, roads are bigger than actual
-                            lngLat = _math_polygon.MapboxTileBaseCoordToLatLng(
+                            lngLat = _mapbox_vector_tile.MapboxTileBaseCoordToLngLat(
                                 coordinates[0], coordinates[1], lngLatTopRight, lngLatBottomLeft, extent)
                             feature['geometry']['coordinates'].remove(
                                 coordinates)
                             feature['geometry']['coordinates'].insert(
-                                idx, [lngLat['lng'], lngLat['lat']])
+                                idx, lngLat)
                         elif feature['geometry']['type'] == 'MultiLineString':
                             for idx, coord in enumerate(coordinates):
-                                lngLat = _math_polygon.MapboxTileBaseCoordToLatLng(
+                                lngLat = _mapbox_vector_tile.MapboxTileBaseCoordToLngLat(
                                     coord[0], coord[1], lngLatTopRight, lngLatBottomLeft, extent)
                                 coordinates.remove(coord)
                                 coordinates.insert(
-                                    idx, [lngLat['lng'], lngLat['lat']])
+                                    idx, lngLat)
                 else:
                     tile['road']['features'].remove(feature)
             line = geopandas.GeoDataFrame.from_features(

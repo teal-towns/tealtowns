@@ -1,11 +1,11 @@
 import copy
 import cv2
 import math
-import numpy
+import numpy as np
 
 import log
 from common import math_polygon as _math_polygon
-from common import mapbox_polygon as _mapbox_polygon
+from mapbox import mapbox_polygon as _mapbox_polygon
 
 def NonForestLngLatsByImage(parcelLngLats, zoom = None, thresholdValue = None, thresholdType = 0,
     minAreaMeters = None, maxMetersPerPixel = None, maxTiles = None):
@@ -119,3 +119,25 @@ def LngLatsToPixels(polygonLngLats, lngLatOrigin, metersPerPixel):
         pixelY = math.floor(retOffset['offsetSouthMeters'] / metersPerPixel)
         polygonPixels.append([pixelX, pixelY])
     return polygonPixels
+
+def ImageColorsToPolygons(imageUrl, blurKernal = 10, histogramThreshold = 2000):
+    ret = { 'valid': 1, 'polygonsLngLats': [] }
+    img = cv2.imread(imageUrl)
+    # Blur image to remove noise.
+    # https://docs.opencv.org/4.x/d4/d13/tutorial_py_filtering.html
+    img = cv2.blur(img, (blurKernal, blurKernal))
+    cv2.imwrite('./uploads/colors-blur.jpg', img)
+
+    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    hist = cv2.calcHist([imgGray],[0],None,[256],[0,256])
+    print ('hist', hist)
+    colors = np.where(hist > histogramThreshold)
+    print ('colors', colors)
+    for imgNumber, color in enumerate(colors[0]):
+        splitImage = img.copy()
+        splitImage[np.where(imgGray != color)] = 0
+        path = "./uploads/split-" +str(imgNumber) + ".jpg"
+        cv2.imwrite(path, splitImage)
+        print(color, path)
+
+    return ret

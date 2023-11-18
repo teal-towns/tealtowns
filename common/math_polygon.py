@@ -119,15 +119,16 @@ def PolygonCenter2D(polygonLngLats):
     lngLatCenter = [xSum / numPoints, ySum / numPoints]
     return lngLatCenter
 
-# Reverse of mapbox tile base coordinate encoding: https://github.com/tilezen/mapbox-vector-tile#coordinate-transformations-for-encoding
-def MapboxTileBaseCoordToLatLng(xTileCoord, yTileCoord, lngLatTopRight, lngLatBottomLeft, extent):
-    minLat = lngLatBottomLeft[1]
-    minLng = lngLatBottomLeft[0]
-    latSpan = lngLatTopRight[1] - lngLatBottomLeft[1]
-    lngSpan = lngLatTopRight[0] - lngLatBottomLeft[0]
-    lngLat = {'lat': yTileCoord * latSpan / extent + minLat , 'lng': xTileCoord * lngSpan / extent + minLng}
-    return lngLat
-
+def PolygonCenter(verticesXYZ):
+    numPoints = len(verticesXYZ)
+    xSum = 0
+    ySum = 0
+    zSum = 0
+    for point in verticesXYZ:
+        xSum += point[0]
+        ySum += point[1]
+        zSum += point[2]
+    return [xSum / numPoints, ySum / numPoints, zSum / numPoints]
 
 # def geojsonCentroid(filePath):
 #     df = geopandas.read_file(filePath).dissolve()

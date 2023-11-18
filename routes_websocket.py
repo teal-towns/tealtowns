@@ -15,6 +15,23 @@ from vector_tiles import vector_tiles_polygon as _vector_tiles_polygon
 
 config = ml_config.get_config()
 
+_routes = {}
+
+def SocketRouter(route: str, data, auth: dict):
+    if route in _routes:
+        return _routes[route](data, auth)
+    else:
+        return {'valid': '0', 'msg': 'Invalid route'}
+
+def AddRoute(route: str, func):
+    _routes[route] = func
+
+def RemoveRoute(route: str):
+    if route in _routes:
+        del _routes[route]
+
+from vector_tiles import vector_tiles_routes
+
 def routeIt(route, data, auth):
     msgId = data['_msgId'] if '_msgId' in data else ''
     ret = { 'valid': '0', 'msg': '', '_msgId': msgId }
@@ -221,6 +238,9 @@ def routeIt(route, data, auth):
         if valid:
             ret = _vector_tiles_data.SaveTile(data['timeframe'], data['year'], data['zoom'],
                 data['tile'])
+    
+    else:
+        ret = SocketRouter(route, data, auth)
 
     ret['_msgId'] = msgId
     return ret

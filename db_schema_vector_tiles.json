@@ -22,7 +22,7 @@
                 "sourceType": "{String}",
                 "confidencePercent": "{Number}",
                 "notes": "{String}",
-                "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
+                "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700"
             }
         ],
         "elevations": [
@@ -40,7 +40,7 @@
             "sourceType": "{String}",
             "confidencePercent": "{Number}",
             "notes": "{String}",
-            "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
+            "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700"
         },
         "temperatureCelsiusAnnual": {
             "value": "{Number}",
@@ -50,91 +50,32 @@
             "sourceType": "{String}",
             "confidencePercent": "{Number}",
             "notes": "{String}",
-            "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
+            "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700"
         }
-    },
-    "landTilePoint": {
-        "_id": "{ObjectId} ObjectId('123l4k234l')",
-        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-        "tileX": "{Number}",
-        "tileY": "{Number}",
-        "tileZoom": "{Number}",
-        "tileNumber": "{Number} [convenience field for lookups - unique number for this tile that is tileY * tileX]",
-        "points": [
-            {
-                "category": "{String} plant",
-                "name": "{String}",
-                "xOffset": "{Number}",
-                "yOffset": "{Number}",
-                "zOffset": "{Number}",
-                "sizeX": "{Number}",
-                "sizeY": "{Number}",
-                "sizeZ": "{Number}",
-                "source": "{String}",
-                "sourceType": "{String}",
-                "confidencePercent": "{Number}",
-                "notes": "{String}",
-                "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-            }
-        ]
-    },
-    "landTileLine": {
-        "_id": "{ObjectId} ObjectId('123l4k234l')",
-        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-        "tileX": "{Number}",
-        "tileY": "{Number}",
-        "tileZoom": "{Number}",
-        "tileNumber": "{Number} [convenience field for lookups - unique number for this tile that is tileY * tileX]",
-        "lines": [
-            {
-                "category": "{String} water | road | bicycle | foot",
-                "name": "{String}",
-                "points": [
-                    {
-                        "xOffset": "{Number}",
-                        "yOffset": "{Number}",
-                        "zOffset": "{Number}",
-                    }
-                ],
-                "sizeX": "{Number}",
-                "sizeY": "{Number}",
-                "sizeZ": "{Number}",
-                "source": "{String}",
-                "sourceType": "{String}",
-                "confidencePercent": "{Number}",
-                "notes": "{String}",
-                "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-            }
-        ]
     },
     "landTilePolygon": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-        "tileX": "{Number}",
-        "tileY": "{Number}",
-        "tileZoom": "{Number}",
-        "tileNumber": "{Number} [convenience field for lookups - unique number for this tile that is tileY * tileX]",
-        "polygons": [
-            {
-                "category": "{String} water | landCover | building",
-                "name": "{String}",
-                "points": [
-                    {
-                        "xOffset": "{Number}",
-                        "yOffset": "{Number}",
-                        "zOffset": "{Number}",
-                    }
-                ],
-                "sizeZ": "{Number}",
-                "source": "{String}",
-                "sourceType": "{String}",
-                "confidencePercent": "{Number}",
-                "notes": "{String}",
-                "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700",
-            }
-        ]
+        "landTileId": "{String}",
+        "uName": "{String}",
+        "vertices": [
+            "{String} 5.0,4.5,0.3"
+        ],
+        "posCenter": "{String} 5.0,4.5,0.3",
+        "type": "{String} [e.g. tree|road|building|water]",
+        "shape": "{String} polygon|path|point",
+        "pairsString": "{String} [See vector_tiles_data.md for valid keys and examples] mesh=buildingBackOfHouse&rot=0.0000,0.0000,300&scale=0.31,0.31,0.31",
+        "squareMeters": "{Number}",
+        "parentUName": "{String}",
+        "childUNames": [
+            "{String} uName1"
+        ],
+        "verticesBuffer": "{Number}",
+        "averageChildDiameter": "{Number}",
+        "source": "{String}",
+        "sourceType": "{String}",
+        "confidencePercent": "{Number}",
+        "notes": "{String}"
     }
 }

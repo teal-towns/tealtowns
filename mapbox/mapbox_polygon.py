@@ -8,6 +8,7 @@ import mapbox_vector_tile
 import log
 from common import image_subdivide as _image_subdivide
 from common import math_polygon as _math_polygon
+from mapbox import mapbox_vector_tile as _mapbox_vector_tile
 import ml_config
 import number
 
@@ -94,7 +95,7 @@ def PointToRectangleBounds(lngLat, xMeters, yMeters):
 def GetTileNumbers(boundsLngLat, zoom = None, maxMetersPerPixel = None, maxTiles = None,
     lngLatCenter = None, latExtents = 2, lngExtents = 2, pixelsPerTile = 256):
     retNumbers = { 'valid': 1, 'zoom': zoom, 'tileNumberBounds': {}, 'totalTiles': 0 }
-    if lngLatCenter is not None:
+    if lngLatCenter is not None and latExtents is not None and lngExtents is not None:
         tileLat = LatitudeToTile(lngLatCenter[1], zoom)
         tileLng = LongitudeToTile(lngLatCenter[0], zoom)
         retNumbers['tileNumberBounds'] = {
@@ -146,21 +147,22 @@ def GetElevationTiles(boundsLngLat, zoom = None, maxMetersPerPixel = None, maxTi
     ret['metersPerPixel'] = MetersPerPixel(ret['lngLatTopLeft'], ret['zoom'], pixelsPerTile = pixelsPerTile)
     return ret
 
-def GetStreetTiles(boundsLngLat, zoom = None, maxMetersPerPixel = None, maxTiles = None,
-    lngLatCenter = None, latExtents = 2, lngExtents = 2, pixelsPerTile = 512):
+def GetVectorTiles(boundsLngLat, zoom = None, maxTiles = None,
+    lngLatCenter = None, latExtents = None, lngExtents = None,
+    layerTypes = None, tileType = 'street'):
     ret = { 'valid': 1, 'zoom': zoom, 'metersPerPixel': -1, 'lngLatTopLeft': [], 'jsonTiles': None }
-    retNumbers = GetTileNumbers(boundsLngLat, zoom = zoom, maxMetersPerPixel = maxMetersPerPixel,
-        maxTiles = maxTiles, lngLatCenter = lngLatCenter, latExtents = latExtents, lngExtents = lngExtents,
-        pixelsPerTile = pixelsPerTile)
+    retNumbers = GetTileNumbers(boundsLngLat, zoom = zoom,
+        maxTiles = maxTiles, lngLatCenter = lngLatCenter, latExtents = latExtents, lngExtents = lngExtents)
     zoom = retNumbers['zoom']
     ret['zoom'] = retNumbers['zoom']
     ret['totalTiles'] = retNumbers['totalTiles']
-    retVector = GetVectorTileByNumbers(retNumbers['tileNumberBounds'], zoom)
-    log.log('info', 'mapbox_polygon.GetStreetTiles tiles received and joined')
+    retVector = GetVectorTilesByNumbers(retNumbers['tileNumberBounds'], zoom,
+        tileType = tileType, layerTypes = layerTypes, lngLatCenter = lngLatCenter)
+    log.log('info', 'mapbox_polygon.GetVectorTiles tiles received and joined')
+    ret['polygons'] = retVector['polygons']
     ret['jsonTiles'] = retVector['jsonTiles']
     ret['lngLatBottomLeft'] = SlippyTileToLngLat(ret['zoom'], retNumbers['tileNumberBounds']['left'], retNumbers['tileNumberBounds']['bottom'])
     ret['lngLatTopRight'] = SlippyTileToLngLat(ret['zoom'], retNumbers['tileNumberBounds']['right'], retNumbers['tileNumberBounds']['top'])
-    ret['metersPerPixel'] = MetersPerPixel(ret['lngLatBottomLeft'], ret['zoom'], pixelsPerTile = pixelsPerTile)
     return ret
 
 def GetTerrainWithHeightMap(lngLatCenter, xMeters, yMeters, zoom = 14, pixelsPerTile = 512,
@@ -259,6 +261,31 @@ def GetTileBounds(boundsLngLat, zoom = None, maxMetersPerPixel = None, maxTiles 
 
     return ret
 
+def GetImageTileByLngLat(lngLat, zoom, tileType = 'satellite', pixelsPerTile = 512):
+    ret = { 'valid': 1, 'img': None }
+    row = LatitudeToTile(lngLat[1], zoom)
+    column = LongitudeToTile(lngLat[0], zoom)
+    suffix = '@2x' if pixelsPerTile == 512 else ''
+    url = '/v4/mapbox.satellite/' + str(zoom) + '/' + str(column) + '/' + str(row) + suffix + '.jpg'
+    if tileType == 'elevation':
+        url = '/v4/mapbox.terrain-rgb/' + str(zoom) + '/' + str(column) + '/' + str(row) + suffix + '.pngraw'
+    retTile = Request('get', url, {}, responseType = '')
+    bytesArray = numpy.frombuffer(retTile['data'].content, dtype = numpy.uint8)
+    ret['img'] = cv2.imdecode(bytesArray, 1)
+    return ret
+
+def GetVectorTileByLngLat(lngLat, zoom, tileType = 'street'):
+    ret = { 'valid': 1, 'tile': {} }
+    row = LatitudeToTile(lngLat[1], zoom)
+    column = LongitudeToTile(lngLat[0], zoom)
+    url = '/v4/mapbox.mapbox-streets-v8/' + str(zoom) + '/' + str(column) + '/' + str(row) + '.mvt'
+    retTile = Request('get', url, {}, responseType = '')
+    ret['tile'] = mapbox_vector_tile.decode(retTile['data'].content)
+    # Saving lngLat bounds of each tile for reversing coordinates encodding
+    ret['tile']['xLngLatTopRight'] = SlippyTileToLngLat(zoom, column + 1, row)
+    ret['tile']['xLngLatBottomLeft'] = SlippyTileToLngLat(zoom, column, row + 1)
+    return ret
+
 def GetTilesByNumbers(tileNumberBounds, zoom, tileType = 'satellite', pixelsPerTile = 256):
     ret = { 'valid': 1, 'img': None }
     img = None
@@ -294,15 +321,10 @@ def GetTilesByNumbers(tileNumberBounds, zoom, tileType = 'satellite', pixelsPerT
 
     return ret
 
-def MetersPerPixel(lngLat, zoom, pixelsPerTile = 256):
-    earthRadiusMeters = 6378137
-    circumference = 2 * math.pi * earthRadiusMeters
-    metersPerTile = circumference * math.cos(lngLat[1] * math.pi / 180) / math.pow(2, zoom)
-    metersPerPixel = metersPerTile / pixelsPerTile
-    return metersPerPixel
-
-def GetVectorTileByNumbers(tileNumberBounds, zoom, tileType = 'street'):
-    ret = { 'valid': 1, 'jsonTiles': [] }
+def GetVectorTilesByNumbers(tileNumberBounds, zoom, tileType = 'street',
+    layerTypes = None, lngLatCenter = None):
+    layerTypes = layerTypes if layerTypes is not None else ['building', 'road', 'water']
+    ret = { 'valid': 1, 'polygons': [], 'jsonTiles': [] }
     row = tileNumberBounds['top']
     while row <= tileNumberBounds['bottom']:
         column = tileNumberBounds['left']
@@ -315,12 +337,20 @@ def GetVectorTileByNumbers(tileNumberBounds, zoom, tileType = 'street'):
             lngLatBottomLeft = SlippyTileToLngLat(zoom, column, row + 1)
             decodedData['lngLatTopRight'] = lngLatTopRight
             decodedData['lngLatBottomLeft'] = lngLatBottomLeft
-            
+            ret['polygons'] += _mapbox_vector_tile.GetPolygons(decodedData, lngLatCenter = lngLatCenter)['polygons']
+            # TODO - only should use polygons, so remove this?
             ret['jsonTiles'].append(decodedData)
             column += 1
         row += 1
-        log.log('info', 'mapbox_polygon.GetVectorTileByNumbers row', row, 'of', tileNumberBounds['bottom'], 'tileCount', len(ret['jsonTiles']))
+        log.log('info', 'mapbox_polygon.GetVectorTilesByNumbers row', row, 'of', tileNumberBounds['bottom'], 'tileCount', len(ret['jsonTiles']))
     return ret
+
+def MetersPerPixel(lngLat, zoom, pixelsPerTile = 256):
+    earthRadiusMeters = 6378137
+    circumference = 2 * math.pi * earthRadiusMeters
+    metersPerTile = circumference * math.cos(lngLat[1] * math.pi / 180) / math.pow(2, zoom)
+    metersPerPixel = metersPerTile / pixelsPerTile
+    return metersPerPixel
 
 def GetElevation(R, G, B):
     return -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)

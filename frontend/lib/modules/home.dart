@@ -24,6 +24,8 @@ class _HomeComponentState extends State<HomeComponent> {
           SizedBox(height: 10),
           Text("We use technology (AI Urban Planner and 3D Visualizer) and local leaders to make it easy for people to meet their neighbors and green their city, through both public and private (home improvement) projects."),
           SizedBox(height: 10),
+          Text("We connect people and food hyper locally. We do this by adding in soil boxes, community gardens, regenerative farms and Superblocks to existing cities, and we design new cities where these are the default."),
+          SizedBox(height: 10),
           Text("Our values are: 1. Do the Right Thing, 2. Shine Bright, 3. Rising Tide Lifts All Boats, 4. Play!"),
           SizedBox(height: 10),
           Text("We are a Teal (self-organizing, flat) organization where anyone can get involved, whether they have 2 hours per month or 10+ hours per week to contribute. To get involved: A. centalized (distributed / remote team): 1. join an existing product initiative, 2. start your own, B. local: 1. join an existing local TealTowns group doing local green projects, 2. connect with your neighbors to start a TealTowns group in your city."),
