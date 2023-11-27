@@ -49,13 +49,13 @@ def GetPolygons(tile, layerTypes = ['building', 'road', 'water'], classesByType 
                                     lngLat = MapboxTileBaseCoordToLngLat(coord[0], coord[1],
                                         lngLatTopRight, lngLatBottomLeft, extent)
                                     retOffset = _math_polygon.LngLatOffsetMeters(lngLat, lngLatCenter)
-                                    polygon['vertices'].append([-1 * retOffset['offsetSouthMeters'], retOffset['offsetEastMeters'], 0])
+                                    polygon['vertices'].append([retOffset['offsetEastMeters'], retOffset['offsetSouthMeters'], 0])
                             elif feature['geometry']['type'] in ['LineString']:
                                 # need to debug the converted lng lats are off, roads are bigger than actual
                                 lngLat = MapboxTileBaseCoordToLngLat(coordinates[0], coordinates[1],
                                     lngLatTopRight, lngLatBottomLeft, extent)
                                 retOffset = _math_polygon.LngLatOffsetMeters(lngLat, lngLatCenter)
-                                polygon['vertices'].append([-1 * retOffset['offsetSouthMeters'], retOffset['offsetEastMeters'], 0])
+                                polygon['vertices'].append([retOffset['offsetEastMeters'], retOffset['offsetSouthMeters'], 0])
                         polygon['posCenter'] = _data_convert.VertexToString(_math_polygon.PolygonCenter(polygon['vertices']))
                         polygon['vertices'] = _data_convert.VerticesToStrings(polygon['vertices'])
                         ret['polygons'].append(polygon)
