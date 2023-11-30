@@ -8,7 +8,7 @@ orbs:
   python: circleci/python@2.0.3
   flutter: circleci/flutter@2.0.2
 jobs:
-  test_backend:
+  test_python:
     executor: python/default
     steps:
       - checkout
@@ -43,16 +43,22 @@ workflows:
   test_app:
     when: << pipeline.parameters.run >>
     jobs:
-      - test_backend
+      - test_python
+      - test_flutter
   deploy_app:
     jobs:
-      - test_backend:
+      - test_python:
+          filters:
+            branches:
+              only: main
+      - test_flutter:
           filters:
             branches:
               only: main
       - deploy_prod:
           requires:
-            - test_backend
+            - test_python
+            - test_flutter
           filters:
             branches:
               only: main
