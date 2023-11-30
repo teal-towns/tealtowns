@@ -18,6 +18,8 @@ def updateWithEnvironmentVars(config):
         config['web_server']['static']['files'] = os.environ['WEB_SERVER_STATIC_FILES']
     if 'PORT' in os.environ:
         config['web_server']['port'] = os.environ['PORT']
+    if 'MAPBOX_TOKEN' in os.environ:
+        config['mapbox']['access_token'] = os.environ['MAPBOX_TOKEN']
     return config
 
 def get_db(config):

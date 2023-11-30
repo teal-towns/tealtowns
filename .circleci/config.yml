@@ -1,7 +1,7 @@
 version: 2.1
 parameters:
   run:
-    default: false
+    default: true
     type: boolean
 
 orbs:
