@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-import '../../../common/form_input/input_fields.dart';
-import '../../../common/form_input/input_file.dart';
-import '../../../common/socket_service.dart';
+import '../../common/form_input/input_fields.dart';
+import '../../common/form_input/input_file.dart';
+import '../../common/socket_service.dart';
 import './polygon_upload.dart';
 
 class PolygonSelect extends StatefulWidget {

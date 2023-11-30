@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_gl/mapbox_gl.dart';
 
-import '../../../common/lodash_service.dart';
+import '../../common/lodash_service.dart';
 import './mapbox_draw_service.dart';
 
 class Mapbox extends StatefulWidget {

@@ -6,6 +6,7 @@ parameters:
 
 orbs:
   python: circleci/python@2.0.3
+  flutter: circleci/flutter@2.0.2
 jobs:
   test_backend:
     executor: python/default
@@ -16,6 +17,21 @@ jobs:
       - run:
           name: Run tests
           command: cp config.sample.yml config.yml && MAPBOX_TOKEN=$MAPBOX_TOKEN python -m pytest
+  test_flutter:
+    executor: flutter/default
+    parameters:
+        app-dir:
+            default: ./frontend
+        cache-version:
+            default: v1
+    steps:
+      - checkout
+      - install_pub:
+          app-dir: <<parameters.app-dir>>
+          cache-version: <<parameters.cache-version>>
+      - run:
+          name: Run Flutter Tests
+          command: cp .sample-env .env && flutter test
   deploy_prod:
     executor: python/default
     steps:

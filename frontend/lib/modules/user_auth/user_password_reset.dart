@@ -100,9 +100,9 @@ class _UserPasswordResetState extends State<UserPasswordResetComponent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _inputFields.inputEmail(context, formVals, 'email'),
-                    _inputFields.inputText(context, formVals, 'passwordResetKey', minLen: 2, label: 'Reset Key'),
-                    _inputFields.inputPassword(context, formVals, 'password', minLen: 6),
+                    _inputFields.inputEmail(formVals, 'email'),
+                    _inputFields.inputText(formVals, 'passwordResetKey', minLen: 2, label: 'Reset Key'),
+                    _inputFields.inputPassword(formVals, 'password', minLen: 6),
                     _buildSubmit(context),
                     _buildMessage(context),
                   ]

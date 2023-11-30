@@ -17,7 +17,7 @@ class InputFields {
 
   ParseService _parseService = ParseService();
 
-  Widget inputEmail(BuildContext context, var formVals, String? formValsKey, { String label = 'Email',
+  Widget inputEmail(var formVals, String? formValsKey, { String label = 'Email',
     String hint = 'your@email.com', var fieldKey = null, bool required = false }) {
     String initialVal = '';
     if (formValsKey == null) {
@@ -52,7 +52,7 @@ class InputFields {
     );
   }
 
-  Widget inputPassword(BuildContext context, var formVals, String? formValsKey, { String label = 'Password',
+  Widget inputPassword(var formVals, String? formValsKey, { String label = 'Password',
     int minLen = -1, int maxLen = -1, var fieldKey = null, bool required = false }) {
     String initialVal = '';
     if (formValsKey == null) {
@@ -87,7 +87,7 @@ class InputFields {
     );
   }
 
-  Widget inputText(BuildContext context, var formVals, String? formValsKey, { String label = '', String hint = '',
+  Widget inputText(var formVals, String? formValsKey, { String label = '', String hint = '',
     int minLen = -1, int maxLen = -1, var fieldKey = null, int maxLines = 1, int minLines = 1,
     int debounceChange = 1000, Function(String)? onChange = null, bool required = false}) {
     Timer? debounce = null;
@@ -149,7 +149,7 @@ class InputFields {
     );
   }
 
-  Widget inputNumber(BuildContext context, var formVals, String? formValsKey, { String label = '', String hint = '',
+  Widget inputNumber(var formVals, String? formValsKey, { String label = '', String hint = '',
     double? min = null, double? max = null, var fieldKey = null,
     int debounceChange = 1000, Function(double?)? onChange = null, bool required = false }) {
     Timer? debounce = null;
@@ -214,7 +214,7 @@ class InputFields {
     );
   }
 
-  Widget inputDateTime(BuildContext context, var formVals, String? formValsKey, { String label = '', String hint = '',
+  Widget inputDateTime(var formVals, String? formValsKey, { String label = '', String hint = '',
     String dateTimeMin = '', String dateTimeMax = '', String datetimeFormat = 'yyyy-MM-ddTHH:mm:ss',
     var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null, bool required = false }) {
 
@@ -285,7 +285,7 @@ class InputFields {
     );
   }
 
-  Widget inputCheckbox(BuildContext context, var formVals, String formValsKey, { String label = '',
+  Widget inputCheckbox(var formVals, String formValsKey, { String label = '',
     var fieldKey = null }) {
     bool initialVal = false;
     if (formValsKey == null) {
@@ -310,7 +310,7 @@ class InputFields {
     );
   }
 
-  Widget inputSelect(var options, BuildContext context, var formVals, String? formValsKey, { String label = '',
+  Widget inputSelect(var options, var formVals, String? formValsKey, { String label = '',
     String hint = '', var fieldKey = null, bool required = false, onChanged = null }) {
     String? value = null;
     if (formValsKey == null) {

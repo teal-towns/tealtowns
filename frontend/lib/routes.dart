@@ -13,7 +13,7 @@ import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
 import './modules/blog/blog_view.dart';
 
-import './modules/plan/land/land_page.dart';
+import './modules/land/land_page.dart';
 
 class Routes {
   static const home = '/home';

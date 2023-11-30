@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../common/form_input/input_file.dart';
-import '../../../common/file_upload_service.dart';
+import '../../common/form_input/input_file.dart';
+import '../../common/file_upload_service.dart';
 
 class PolygonUpload extends StatefulWidget {
   Function(Map<String, dynamic>)? onChange;

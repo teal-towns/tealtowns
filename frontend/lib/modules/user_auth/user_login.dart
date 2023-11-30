@@ -126,8 +126,8 @@ class _UserLoginState extends State<UserLoginComponent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _inputFields.inputEmail(context, formVals, 'email', fieldKey: _formFieldKeyEmail),
-                    _inputFields.inputPassword(context, formVals, 'password', minLen: 6),
+                    _inputFields.inputEmail(formVals, 'email', fieldKey: _formFieldKeyEmail),
+                    _inputFields.inputPassword(formVals, 'password', minLen: 6),
                     _buildSubmitButtons(context),
                     _buildMessage(context),
                     TextButton(
