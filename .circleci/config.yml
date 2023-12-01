@@ -10,7 +10,7 @@ parameters:
     default: v1
     type: string
   flutter-docker-image:
-    default: ghcr.io/cirruslabs/flutter:3.17.0
+    default: ghcr.io/cirruslabs/flutter:3.17.0-0.0.pre
     type: string
 orbs:
   python: circleci/python@2.0.3
