@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app_scaffold.dart';
+import '../../app_scaffold.dart';
 import './land.dart';
 
 class LandPage extends StatefulWidget {

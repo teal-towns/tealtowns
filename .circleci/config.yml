@@ -3,11 +3,20 @@ parameters:
   run:
     default: true
     type: boolean
-
+  flutter-dir:
+    default: ./frontend
+    type: string
+  flutter-cache-version:
+    default: v1
+    type: string
+  flutter-docker-image:
+    default: ghcr.io/cirruslabs/flutter:3.17.0-0.0.pre
+    type: string
 orbs:
   python: circleci/python@2.0.3
+  flutter: circleci/flutter@2.0.2
 jobs:
-  test_backend:
+  test_python:
     executor: python/default
     steps:
       - checkout
@@ -16,6 +25,22 @@ jobs:
       - run:
           name: Run tests
           command: cp config.sample.yml config.yml && MAPBOX_TOKEN=$MAPBOX_TOKEN python -m pytest
+  test_flutter:
+    docker:
+      - image: <<pipeline.parameters.flutter-docker-image>>
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+              - pub-<<pipeline.parameters.flutter-cache-version>>-{{ checksum "<< pipeline.parameters.flutter-dir >>/pubspec.lock" }}-{{ arch }}
+      - run:
+          name: Run Flutter Tests
+          command: cp .sample-env .env && flutter pub get && flutter test
+          working_directory: <<pipeline.parameters.flutter-dir>>
+      - save_cache:
+          key: pub-<<pipeline.parameters.flutter-cache-version>>-{{ checksum "<< pipeline.parameters.flutter-dir >>/pubspec.lock" }}-{{ arch }}
+          paths:
+              - <<pipeline.parameters.flutter-dir>>/.dart_tool
   deploy_prod:
     executor: python/default
     steps:
@@ -27,16 +52,22 @@ workflows:
   test_app:
     when: << pipeline.parameters.run >>
     jobs:
-      - test_backend
+      - test_python
+      - test_flutter
   deploy_app:
     jobs:
-      - test_backend:
+      - test_python:
+          filters:
+            branches:
+              only: main
+      - test_flutter:
           filters:
             branches:
               only: main
       - deploy_prod:
           requires:
-            - test_backend
+            - test_python
+            - test_flutter
           filters:
             branches:
               only: main

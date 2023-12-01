@@ -127,18 +127,18 @@ class _BlogSaveState extends State<BlogSave> {
                     ImageSaveComponent(formVals: formVals, formValsKey: 'imageUrl', multiple: false,
                       label: 'Image', imageUploadSimple: true, maxImageSize: 1200),
                     SizedBox(height: 10),
-                    _inputFields.inputText(context, formVals, 'imageCredit', label: 'Image Credit', required: false),
+                    _inputFields.inputText(formVals, 'imageCredit', label: 'Image Credit', required: false),
                     SizedBox(height: 20),
-                    _inputFields.inputText(context, formVals, 'title', label: 'Title', required: true),
+                    _inputFields.inputText(formVals, 'title', label: 'Title', required: true),
                     SizedBox(height: 10),
-                    //_inputFields.inputMultiSelectCreate(selectOptsTag, getTags, context, formVals, 'tags', label: 'Tags' ),
+                    //_inputFields.inputMultiSelectCreate(selectOptsTag, getTags, formVals, 'tags', label: 'Tags' ),
                     //SizedBox(height: 10),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           flex: 1,
-                          child: _inputFields.inputText(context, formVals, 'text', label: 'Text (use Markdown for formatting)',
+                          child: _inputFields.inputText(formVals, 'text', label: 'Text (use Markdown for formatting)',
                             required: true, minLines: 50, maxLines: 50, debounceChange: 1000, onChange: (String text) {
                             setState(() {
                               _textPreview = formVals['text'];

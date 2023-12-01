@@ -1,6 +1,6 @@
 import 'package:mapbox_gl/mapbox_gl.dart';
 
-import '../../../common/colors_service.dart';
+import '../../common/colors_service.dart';
 
 class MapboxDrawService {
   MapboxDrawService._privateConstructor();

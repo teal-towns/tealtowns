@@ -145,7 +145,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
           children: <Widget>[
             Image.memory(formValsUploadFiles[formValsUploadFilesKey]['file'].bytes),
             SizedBox(height: 5),
-            _inputFields.inputText(context, formValsUploadFiles[formValsUploadFilesKey], 'title', label: 'Title', hint: 'Image Title'),
+            _inputFields.inputText(formValsUploadFiles[formValsUploadFilesKey], 'title', label: 'Title', hint: 'Image Title'),
           ]
         )
       )
@@ -325,7 +325,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
         widgetSelect = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            _inputFields.inputSelect(selectOpts, context, formValsImageSave, 'from_type', onChanged: (String newVal) {
+            _inputFields.inputSelect(selectOpts, formValsImageSave, 'from_type', onChanged: (String newVal) {
               _getImages('', currentUserState);
               setState(() {
                 formValsImageSave = formValsImageSave;
@@ -362,7 +362,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
         widgetByType = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            _inputFields.inputText(context, formValsImageSave, 'search_images', hint: 'Search for images', debounceChange: 1000, onChange: (String val) {
+            _inputFields.inputText(formValsImageSave, 'search_images', hint: 'Search for images', debounceChange: 1000, onChange: (String val) {
               _getImages(val, currentUserState);
             }),
             SizedBox(height: 10),

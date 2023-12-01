@@ -101,8 +101,8 @@ class _UserEmailVerifyState extends State<UserEmailVerifyComponent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _inputFields.inputEmail(context, formVals, 'email'),
-                    _inputFields.inputText(context, formVals, 'emailVerificationKey', minLen: 2, label: 'Verification Key'),
+                    _inputFields.inputEmail(formVals, 'email'),
+                    _inputFields.inputText(formVals, 'emailVerificationKey', minLen: 2, label: 'Verification Key'),
                     _buildSubmit(context),
                     _buildMessage(context),
                   ]

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-import '../../../common/socket_service.dart';
-import '../../../common/form_input/input_fields.dart';
+import '../../common/socket_service.dart';
+import '../../common/form_input/input_fields.dart';
 
 class LandTileSave extends StatefulWidget {
   final landTile;
@@ -77,13 +77,13 @@ class _LandTileSaveState extends State<LandTileSave> {
       cols += [
         Text('${widget.landTile['latTopLeft'].toStringAsFixed(4)}, ${widget.landTile['lngTopLeft'].toStringAsFixed(4)}'),
         SizedBox(height: 10),
-        //_inputFields.inputText(context, widget.landTile, 'country', label: 'Country', hint: 'Country'),
+        //_inputFields.inputText(widget.landTile, 'country', label: 'Country', hint: 'Country'),
         //SizedBox(height: 10),
-        //_inputFields.inputText(context, widget.landTile, 'state', label: 'State', hint: 'State'),
+        //_inputFields.inputText(widget.landTile, 'state', label: 'State', hint: 'State'),
         //SizedBox(height: 10),
-        //_inputFields.inputText(context, widget.landTile, 'ecozone', label: 'Ecozone', hint: 'Ecozone'),
+        //_inputFields.inputText(widget.landTile, 'ecozone', label: 'Ecozone', hint: 'Ecozone'),
         //SizedBox(height: 10),
-        //_inputFields.inputNumber(context, widget.landTile, 'slopeDegreesAverage', label: 'Slope Degrees (average)', hint: 'Slope Degrees (average)'),
+        //_inputFields.inputNumber(widget.landTile, 'slopeDegreesAverage', label: 'Slope Degrees (average)', hint: 'Slope Degrees (average)'),
         //SizedBox(height: 10),
       ];
     } else if (widget.dataType == 'precipitationMmAnnual') {
@@ -159,21 +159,21 @@ class _LandTileSaveState extends State<LandTileSave> {
           children: [
             Container(
               width: width,
-              child: _inputFields.inputNumber(context, widget.landTile[key], 'value', label: 'Value', hint: '', onChange: (double? val)  {
+              child: _inputFields.inputNumber(widget.landTile[key], 'value', label: 'Value', hint: '', onChange: (double? val)  {
                 widget.landTile[key]['value'] = val;
               }),
             ),
             //SizedBox(height: 10),
             Container(
               width: width,
-              child: _inputFields.inputNumber(context, widget.landTile[key], 'min', label: 'Min', hint: '', onChange: (double? val)  {
+              child: _inputFields.inputNumber(widget.landTile[key], 'min', label: 'Min', hint: '', onChange: (double? val)  {
                 widget.landTile[key]['min'] = val;
               }),
             ),
             //SizedBox(height: 10),
             Container(
               width: width,
-              child: _inputFields.inputNumber(context, widget.landTile[key], 'max', label: 'Max', hint: '', onChange: (double? val)  {
+              child: _inputFields.inputNumber(widget.landTile[key], 'max', label: 'Max', hint: '', onChange: (double? val)  {
                 widget.landTile[key]['max'] = val;
               }),
             ),
@@ -184,7 +184,7 @@ class _LandTileSaveState extends State<LandTileSave> {
       ];
     } else {
       inputs += [
-        _inputFields.inputText(context, widget.landTile[key], 'value', label: 'Value', hint: '', onChange: (String val)  {
+        _inputFields.inputText(widget.landTile[key], 'value', label: 'Value', hint: '', onChange: (String val)  {
           widget.landTile[key]['value'] = val;
         }),
         SizedBox(height: 10),
@@ -194,16 +194,16 @@ class _LandTileSaveState extends State<LandTileSave> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...inputs,
-        _inputFields.inputText(context, widget.landTile[key], 'source', label: 'Source', hint: 'Source', onChange: (String val)  {
+        _inputFields.inputText(widget.landTile[key], 'source', label: 'Source', hint: 'Source', onChange: (String val)  {
           widget.landTile[key]['source'] = val;
         }),
         SizedBox(height: 10),
-        _inputFields.inputNumber(context, widget.landTile[key], 'confidencePercent', min: 0.0, max: 100.0,
+        _inputFields.inputNumber(widget.landTile[key], 'confidencePercent', min: 0.0, max: 100.0,
           label: 'Confidence (0 to 100)', hint: 'Confidence (0 to 100)', onChange: (double? val)  {
           widget.landTile[key]['confidencePercent'] = val;
         }),
         SizedBox(height: 10),
-        _inputFields.inputText(context, widget.landTile[key], 'notes', label: 'Notes', hint: 'Notes', onChange: (String val)  {
+        _inputFields.inputText(widget.landTile[key], 'notes', label: 'Notes', hint: 'Notes', onChange: (String val)  {
           widget.landTile[key]['notes'] = val;
         }),
         SizedBox(height: 10),

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import '../../../common/colors_service.dart';
-import '../../../common/socket_service.dart';
-import '../../../common/form_input/input_fields.dart';
+import '../../common/colors_service.dart';
+import '../../common/socket_service.dart';
+import '../../common/form_input/input_fields.dart';
 
 class LandTileRaster extends StatefulWidget {
   var tileRows = [];

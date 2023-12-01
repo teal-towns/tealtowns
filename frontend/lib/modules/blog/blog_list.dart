@@ -242,14 +242,14 @@ class _BlogListState extends State<BlogList> {
                         children: <Widget>[
                           SizedBox(
                             width: 200,
-                            child: _inputFields.inputText(context, filters, 'title', hint: 'title',
+                            child: _inputFields.inputText(filters, 'title', hint: 'title',
                               label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
                               _getBlogs();
                             }),
                           ),
                           //SizedBox(width: 10),
                           //SizedBox(width: 200,
-                          //  child: _inputFields.inputText(context, filters, 'tags', hint: 'tag',
+                          //  child: _inputFields.inputText(filters, 'tags', hint: 'tag',
                           //    label: 'Filter by Tag', debounceChange: 1000, onChange: (String val) {
                           //    _getBlogs();
                           //  }),
