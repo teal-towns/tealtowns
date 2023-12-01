@@ -9,7 +9,9 @@ parameters:
   flutter-cache-version:
     default: v1
     type: string
-
+  flutter-docker-image:
+    default: ghcr.io/cirruslabs/flutter:3.17.0
+    type: string
 orbs:
   python: circleci/python@2.0.3
   flutter: circleci/flutter@2.0.2
@@ -24,7 +26,8 @@ jobs:
           name: Run tests
           command: cp config.sample.yml config.yml && MAPBOX_TOKEN=$MAPBOX_TOKEN python -m pytest
   test_flutter:
-    executor: python/default
+    docker:
+      - image: <<pipeline.parameters.flutter-docker-image>>
     steps:
       - checkout
       - restore_cache:
