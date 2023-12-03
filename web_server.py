@@ -11,16 +11,18 @@ import time
 import threading
 import traceback
 
+from common import socket as _socket
 import log
 import ml_config
 import mongo_db
 import notifications
+from permission import route_permissions as _route_permissions
 import websocket_clients as _websocket_clients
 
 import routes_http
-import routes_websocket
+# import routes_websocket
 
-import user_auth
+from user_auth import user_auth
 from image import file_upload as _file_upload
 
 from migration import migrations as _migrations
@@ -35,6 +37,13 @@ notifications.set_config(config_notifications)
 
 _migrations.RunAll()
 
+# Import routes; this will auto add themselves
+from blog import blog_routes as _blog_routes
+from common import common_routes as _common_routes
+from image import image_routes as _image_routes
+from user_auth import user_auth_routes as _user_auth_routes
+from vector_tiles import vector_tiles_routes as _vector_tiles_routes
+
 paths_index = config['web_server']['index'] if 'index' in config['web_server'] else None
 paths_static = config['web_server']['static'] if 'static' in config['web_server'] else None
 
@@ -44,13 +53,13 @@ log.log('warn', 'web_server starting')
 async def websocket_handler(request):
 
     # print ('websocket_handler', request)
-    ws = web.WebSocketResponse(max_msg_size = 25 * 1024 * 1024)
-    await ws.prepare(request)
+    websocket = web.WebSocketResponse(max_msg_size = 25 * 1024 * 1024)
+    await websocket.prepare(request)
 
-    async for msg in ws:
-        # print ('msg', msg, ws)
+    async for msg in websocket:
+        # print ('msg', msg, websocket, msg.type)
         if msg.type == aiohttp.WSMsgType.ERROR:
-            print('ws connection closed with exception %s' % ws.exception())
+            print('websocket connection closed with exception %s' % websocket.exception())
         else:
             if msg.type == aiohttp.WSMsgType.TEXT:
                 dataString = msg.data
@@ -58,83 +67,87 @@ async def websocket_handler(request):
                 dataString = msg.data.decode(encoding='utf-8')
             # print ('dataString', dataString)
             try:
-                data = json.loads(dataString)
+                dataRaw = json.loads(dataString)
+                auth = dataRaw["auth"] if "auth" in dataRaw else {}
+                msgId = dataRaw['data']['_msgId'] if '_msgId' in dataRaw['data'] else ''
+                retData = _route_permissions.Allowed(dataRaw["route"], auth, dataRaw["data"])
+                if retData['valid']:
+                    route_type = _socket.get_route_type(dataRaw["route"])
+                    if route_type == "async":
+                        await _socket.socket_router_async(websocket, dataRaw["route"], dataRaw["data"], auth)
+                    elif route_type == "sync":
+                        retData = _socket.socket_router(websocket, dataRaw["route"], dataRaw["data"], auth)
+                retData['_msgId'] = msgId
+                ret = _socket.form_send_data(dataRaw["route"], retData, auth)
+                # await websocket.send_text(json.dumps(ret))
+                utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
+                await websocket.send_bytes(utf8Bytes)
 
-                auth = data['auth'] if 'auth' in data else {}
+                # data = json.loads(dataString)
 
-                # if msg.data == 'close':
-                #     await ws.close()
+                # auth = data['auth'] if 'auth' in data else {}
+
+                # retData = routes_websocket.routeIt(data['route'], data['data'], auth)
+
+                # # Handle socket connections.
+                # if '_socketAdd' in retData:
+                #     _websocket_clients.AddClient(retData['_socketAdd']['userId'], websocket)
+                #     del retData['_socketAdd']
+                # if '_socketGroupAdd' in retData:
+                #     _websocket_clients.AddUsersToGroup(retData['_socketGroupAdd']['group_name'],
+                #         retData['_socketGroupAdd']['userIds'])
+                #     del retData['_socketGroupAdd']
+
+                # if '_socketSendSeparate' in retData:
+                #     for sendInfo in retData['_socketSendSeparate']:
+                #         sendTemp = { "route": sendInfo['route'],
+                #             "data": sendInfo['data'],
+                #             "auth": auth }
+                #         utf8Bytes = json.dumps(sendTemp).encode(encoding='utf-8')
+                #         if 'userIds' in sendInfo:
+                #             await _websocket_clients.SendToUsers(utf8Bytes, sendInfo['userIds'])
+                #         elif 'groups' in sendInfo:
+                #             await _websocket_clients.SendToGroups(utf8Bytes, sendInfo['groups'])
+                #     del retData['_socketSendSeparate']
+
+                # # Must be after send, in case want to send a message before remove.
+                # if '_socketRemove' in retData:
+                #     _websocket_clients.RemoveClientsByUser(retData['_socketRemove']['userId'])
+                #     del retData['_socketRemove']
+
+                # # See if should send to multiple connections.
+                # if '_socketSend' in retData:
+                #     skipUserIds = retData['_socketSend']['skipUserIds'] if 'skipUserIds' in \
+                #         retData['_socketSend'] else []
+                #     if 'groups' in retData['_socketSend']:
+                #         groups = retData['_socketSend']['groups']
+                #         del retData['_socketSend']
+                #         ret = { "route": data['route'], "data": retData, "auth": auth }
+                #         utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
+                #         await _websocket_clients.SendToGroups(utf8Bytes, groups, skipUserIds)
+                #     elif 'users' in retData['_socketSend']:
+                #         del retData['_socketSend']
+                #         users = retData['_socketSend']['users']
+                #         ret = { "route": data['route'], "data": retData, "auth": auth }
+                #         utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
+                #         await _websocket_clients.SendToUsers(utf8Bytes, users, skipUserIds)
+                # elif '_socketSkip' in retData:
+                #     pass
                 # else:
-                #     await ws.send_str(msg.data + '/answer')
-
-                # if data['route'] == 'route1':
-                #     ret = { "route": data['route'], "data": data['data'], "auth": auth }
-                #     await ws.send_json(ret)
-                # elif data['route'] == 'route2':
-                #     ret = { "route": data['route'], "data": data['data'], "auth": auth }
-                #     await ws.send_json(ret)
-
-                retData = routes_websocket.routeIt(data['route'], data['data'], auth)
-
-                # Handle socket connections.
-                if '_socketAdd' in retData:
-                    _websocket_clients.AddClient(retData['_socketAdd']['userId'], ws)
-                    del retData['_socketAdd']
-                if '_socketGroupAdd' in retData:
-                    _websocket_clients.AddUsersToGroup(retData['_socketGroupAdd']['group_name'],
-                        retData['_socketGroupAdd']['userIds'])
-                    del retData['_socketGroupAdd']
-
-                if '_socketSendSeparate' in retData:
-                    for sendInfo in retData['_socketSendSeparate']:
-                        sendTemp = { "route": sendInfo['route'],
-                            "data": sendInfo['data'],
-                            "auth": auth }
-                        utf8Bytes = json.dumps(sendTemp).encode(encoding='utf-8')
-                        if 'userIds' in sendInfo:
-                            await _websocket_clients.SendToUsers(utf8Bytes, sendInfo['userIds'])
-                        elif 'groups' in sendInfo:
-                            await _websocket_clients.SendToGroups(utf8Bytes, sendInfo['groups'])
-                    del retData['_socketSendSeparate']
-
-                # Must be after send, in case want to send a message before remove.
-                if '_socketRemove' in retData:
-                    _websocket_clients.RemoveClientsByUser(retData['_socketRemove']['userId'])
-                    del retData['_socketRemove']
-
-                # See if should send to multiple connections.
-                if '_socketSend' in retData:
-                    skipUserIds = retData['_socketSend']['skipUserIds'] if 'skipUserIds' in \
-                        retData['_socketSend'] else []
-                    if 'groups' in retData['_socketSend']:
-                        groups = retData['_socketSend']['groups']
-                        del retData['_socketSend']
-                        ret = { "route": data['route'], "data": retData, "auth": auth }
-                        utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
-                        await _websocket_clients.SendToGroups(utf8Bytes, groups, skipUserIds)
-                    elif 'users' in retData['_socketSend']:
-                        del retData['_socketSend']
-                        users = retData['_socketSend']['users']
-                        ret = { "route": data['route'], "data": retData, "auth": auth }
-                        utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
-                        await _websocket_clients.SendToUsers(utf8Bytes, users, skipUserIds)
-                elif '_socketSkip' in retData:
-                    pass
-                else:
-                    ret = { "route": data['route'], "data": retData, "auth": auth }
-                    # await ws.send_json(ret)
-                    # utf8Bytes = bytes(json.dumps(ret), 'utf-8')
-                    utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
-                    await ws.send_bytes(utf8Bytes)
+                #     ret = { "route": data['route'], "data": retData, "auth": auth }
+                #     # await websocket.send_json(ret)
+                #     # utf8Bytes = bytes(json.dumps(ret), 'utf-8')
+                #     utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
+                #     await websocket.send_bytes(utf8Bytes)
             except Exception as e:
                 print ('json parse exception', dataString, e)
                 traceback.print_exc()
                 log.log('warn', 'web_server json parse exception', dataString, str(e))
 
-    _websocket_clients.RemoveClient(id(ws))
+    _websocket_clients.RemoveClient(id(websocket))
     print('websocket connection closed')
 
-    return ws
+    return websocket
 
 async def index(request):
     print ('index', request)

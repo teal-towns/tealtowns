@@ -156,13 +156,31 @@ def GetVectorTiles(boundsLngLat, zoom = None, maxTiles = None,
     zoom = retNumbers['zoom']
     ret['zoom'] = retNumbers['zoom']
     ret['totalTiles'] = retNumbers['totalTiles']
+    ret['lngLatBottomLeft'] = SlippyTileToLngLat(ret['zoom'], retNumbers['tileNumberBounds']['left'], retNumbers['tileNumberBounds']['bottom'])
+    ret['lngLatTopRight'] = SlippyTileToLngLat(ret['zoom'], retNumbers['tileNumberBounds']['right'], retNumbers['tileNumberBounds']['top'])
     retVector = GetVectorTilesByNumbers(retNumbers['tileNumberBounds'], zoom,
         tileType = tileType, layerTypes = layerTypes, lngLatCenter = lngLatCenter)
     log.log('info', 'mapbox_polygon.GetVectorTiles tiles received and joined')
     ret['polygons'] = retVector['polygons']
     ret['jsonTiles'] = retVector['jsonTiles']
+    return ret
+
+async def GetVectorTilesAsync(boundsLngLat, zoom = None, maxTiles = None,
+    lngLatCenter = None, latExtents = None, lngExtents = None,
+    layerTypes = None, tileType = 'street', onUpdate = None):
+    ret = { 'valid': 1, 'zoom': zoom, 'metersPerPixel': -1, 'lngLatTopLeft': [], 'polygons': [] }
+    retNumbers = GetTileNumbers(boundsLngLat, zoom = zoom,
+        maxTiles = maxTiles, lngLatCenter = lngLatCenter, latExtents = latExtents, lngExtents = lngExtents)
+    zoom = retNumbers['zoom']
+    ret['zoom'] = retNumbers['zoom']
+    ret['currentTile'] = 0
+    ret['totalTiles'] = retNumbers['totalTiles']
     ret['lngLatBottomLeft'] = SlippyTileToLngLat(ret['zoom'], retNumbers['tileNumberBounds']['left'], retNumbers['tileNumberBounds']['bottom'])
     ret['lngLatTopRight'] = SlippyTileToLngLat(ret['zoom'], retNumbers['tileNumberBounds']['right'], retNumbers['tileNumberBounds']['top'])
+    if onUpdate is not None:
+        await onUpdate(ret)
+    await GetVectorTilesByNumbersAsync(retNumbers['tileNumberBounds'], zoom,
+        tileType = tileType, layerTypes = layerTypes, lngLatCenter = lngLatCenter, onUpdate = onUpdate)
     return ret
 
 def GetTerrainWithHeightMap(lngLatCenter, xMeters, yMeters, zoom = 14, pixelsPerTile = 512,
@@ -344,6 +362,33 @@ def GetVectorTilesByNumbers(tileNumberBounds, zoom, tileType = 'street',
         row += 1
         log.log('info', 'mapbox_polygon.GetVectorTilesByNumbers row', row, 'of', tileNumberBounds['bottom'], 'tileCount', len(ret['jsonTiles']))
     return ret
+
+async def GetVectorTilesByNumbersAsync(tileNumberBounds, zoom, tileType = 'street',
+    layerTypes = None, lngLatCenter = None, onUpdate = None):
+    layerTypes = layerTypes if layerTypes is not None else ['building', 'road', 'water']
+    ret = { 'valid': 1, 'polygons': [], 'currentTile': 0  }
+    ret['totalTiles'] = (tileNumberBounds['right'] - tileNumberBounds['left'] + 1) * \
+        (tileNumberBounds['bottom'] - tileNumberBounds['top'] + 1)
+    row = tileNumberBounds['top']
+    while row <= tileNumberBounds['bottom']:
+        column = tileNumberBounds['left']
+        while column <= tileNumberBounds['right']:
+            url = '/v4/mapbox.mapbox-streets-v8/' + str(zoom) + '/' + str(column) + '/' + str(row) + '.mvt'
+            retTile = Request('get', url, {}, responseType = '')
+            decodedData = mapbox_vector_tile.decode(retTile['data'].content)
+            # Saving lngLat bounds of each tile for reversing coordinates encodding
+            lngLatTopRight = SlippyTileToLngLat(zoom, column + 1, row)
+            lngLatBottomLeft = SlippyTileToLngLat(zoom, column, row + 1)
+            decodedData['lngLatTopRight'] = lngLatTopRight
+            decodedData['lngLatBottomLeft'] = lngLatBottomLeft
+            ret['polygons'] = _mapbox_vector_tile.GetPolygons(decodedData, lngLatCenter = lngLatCenter)['polygons']
+            ret['currentTile'] += 1
+            if onUpdate is not None:
+                await onUpdate(ret)
+            column += 1
+        row += 1
+        log.log('info', 'mapbox_polygon.GetVectorTilesByNumbersAsync row', row, 'of',
+            tileNumberBounds['bottom'], 'currentTile', ret['currentTile'], 'totalTiles', ret['totalTiles'])
 
 def MetersPerPixel(lngLat, zoom, pixelsPerTile = 256):
     earthRadiusMeters = 6378137
