@@ -1,5 +1,5 @@
 import mongo_db
-import user_auth
+from user_auth import user_auth
 
 def LoggedIn(userId, sessionId):
     ret = user_auth.getSession(userId, sessionId)

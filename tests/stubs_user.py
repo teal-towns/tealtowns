@@ -1,7 +1,7 @@
 # import random
 
 import mongo_db
-import user_auth as _user_auth
+from user_auth import user_auth as _user_auth
 
 _users = [
     {

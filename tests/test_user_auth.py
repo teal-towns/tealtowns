@@ -1,5 +1,5 @@
 import mongo_mock as _mongo_mock
-import user_auth as _user_auth
+from user_auth import user_auth as _user_auth
 import stubs_user as _stubs_user
 
 def test_signup():

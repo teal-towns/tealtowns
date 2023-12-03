@@ -2,7 +2,7 @@ from aiohttp import web
 import os
 
 import ci_webhook
-import user_auth
+from user_auth import user_auth
 from image import file_upload as _file_upload
 import ml_config
 
