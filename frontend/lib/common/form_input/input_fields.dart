@@ -374,7 +374,7 @@ class InputFields {
         },
         items: options.map<DropdownMenuItem<String>>((opt) {
           return DropdownMenuItem<String>(
-            value: opt['value'],
+            value: opt['value'].toString(),
             child: Text(opt['label']),
           );
         }).toList(),

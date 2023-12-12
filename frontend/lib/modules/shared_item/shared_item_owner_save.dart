@@ -41,14 +41,14 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     'totalPaid': 0,
     'totalOwed': 0,
     'generation': 1,
-    'investorOnly': '0',
+    'investorOnly': 0,
   };
-  List<Map<String, String>> _selectOptsInvestorOnly = [
-    {'value': '0', 'label': 'Co-Owner'},
-    {'value': '1', 'label': 'Investor Only'},
+  List<Map<String, dynamic>> _selectOptsInvestorOnly = [
+    {'value': 0, 'label': 'Co-Owner'},
+    {'value': 1, 'label': 'Investor Only'},
   ];
   Map<String, dynamic> _formValsInfo = {
-    'numOwners': '0',
+    'numOwners': 0,
   };
   List<Map<String, String>> _selectOptsNumOwners = [];
   String _paymentDetails = '';
@@ -74,7 +74,10 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
           for (int ii = _sharedItem.minOwners; ii <= _sharedItem.maxOwners; ii++) {
             _selectOptsNumOwners.add({'value': ii.toString(), 'label': ii.toString()});
           }
-          _formValsInfo['numOwners'] = _sharedItem.minOwners;
+          // _formValsInfo['numOwners'] = _sharedItem.minOwners;
+          _formValsInfo['numOwners'] = _sharedItemService.GetMinOwnersFromMaxMonthlyPayment(
+            _sharedItemOwner.monthlyPayment, _sharedItem.minOwners, _sharedItem.maxOwners, _sharedItem.currentPrice,
+            _sharedItem.monthsToPayBack, _sharedItem.maintenancePerYear);
           setState(() {
             _sharedItemOwner = _sharedItemOwner;
             _sharedItem = _sharedItem;
@@ -83,6 +86,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
           });
           setFormVals(_sharedItemOwner);
           SetPaymentDetails();
+          SetInvestmentDetails();
         }
       } else {
         setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Error, please try again.'; });
@@ -231,6 +235,21 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
   }
 
   Widget SharedItemOwnerForm() {
+    List<Widget> colsInvest = [];
+    if (_sharedItem.bought <= 0) {
+      colsInvest += [
+        SizedBox(height: 30),
+        Text('Investor'),
+        SizedBox(height: 10),
+        _inputFields.inputNumber(_formVals, 'totalPaid', label: 'Investment amount', onChange: (double? val) {
+          SetInvestmentDetails();
+        }),
+        SizedBox(height: 10),
+        Text(_investmentDetails),
+        SizedBox(height: 10),
+        _inputFields.inputSelect(_selectOptsInvestorOnly, _formVals, 'investorOnly', label: 'Will you co-own (also)?'),
+      ];
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -241,16 +260,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
         }),
         SizedBox(height: 10),
         Text(_paymentDetails),
-        SizedBox(height: 30),
-        Text('Investor'),
-        SizedBox(height: 10),
-        _inputFields.inputNumber(_formVals, 'totalPaid', label: 'Investment amount', onChange: (double? val) {
-          SetInvestmentDetails();
-        }),
-        SizedBox(height: 10),
-        Text(_investmentDetails),
-        SizedBox(height: 30),
-        _inputFields.inputSelect(_selectOptsInvestorOnly, _formVals, 'investorOnly', label: 'Will you co-own (also)?'),
+        ...colsInvest,
         SizedBox(height: 10),
       ],
     );

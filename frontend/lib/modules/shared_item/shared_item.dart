@@ -297,9 +297,11 @@ class _SharedItemState extends State<SharedItem> {
     String perPersonMaxOwners = "${texts['perPerson']} with max owners (${sharedItem.maxOwners})";
 
     String fundingRequired = "${_currency.Format(sharedItem.fundingRequired, sharedItem.currency!)} funding required";
-    List<Widget> buttonsInvest = [];
+    List<Widget> colsInvest = [];
     if (sharedItem.fundingRequired! > 0) {
-      buttonsInvest = [
+      colsInvest = [
+        Text('${fundingRequired}'),
+        SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
             String id = sharedItem.sharedItemOwner_current.id;
@@ -338,12 +340,10 @@ class _SharedItemState extends State<SharedItem> {
               String id = sharedItem.sharedItemOwner_current.id;
               context.go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}');
             },
-            child: Text('Co-Purchase'),
+            child: Text('Co-Buy'),
           ),
           SizedBox(height: 10),
-          Text('${fundingRequired}'),
-          SizedBox(height: 10),
-          ...buttonsInvest,
+          ...colsInvest,
           Text('${sharedItem.description}'),
           SizedBox(height: 10),
           Row(
