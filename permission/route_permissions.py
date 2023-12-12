@@ -17,6 +17,9 @@ def Allowed(route, auth, data):
     ]
 
     userIdRequired = [
+        "removeSharedItem",
+        "saveSharedItem",
+        "saveUser",
     ]
 
     admin = [

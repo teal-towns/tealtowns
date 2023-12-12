@@ -41,9 +41,9 @@ class _PolygonUploadState extends State<PolygonUpload> {
           for (var file in _formVals['files']) {
             filesInfo.add({ 'file': file, 'title': file.name, });
           }
-          _fileUploadService.uploadFiles(filesInfo, (Map<String, dynamic> fileData) {
+          _fileUploadService.uploadFiles(filesInfo, (List<Map<String, dynamic>> fileData) {
             if (widget.onChange != null) {
-              widget.onChange!(fileData);
+              widget.onChange!(fileData[0]);
             }
           }, fileType: '', routeKey: 'polygonUploadToTiles', );
         }

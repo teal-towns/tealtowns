@@ -37,6 +37,13 @@ class InputFields {
           formVals[formValsKey] = value;
         }
       },
+      onChanged: (value) {
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
+        }
+      },
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
@@ -66,6 +73,13 @@ class InputFields {
       //initialValue: initialVal,
       controller: controller,
       onSaved: (value) {
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
+        }
+      },
+      onChanged: (value) {
         if (formValsKey == null) {
           formVals = value;
         } else {
@@ -112,6 +126,11 @@ class InputFields {
       },
       //onEditingComplete: () { print ('onEditingComplete ${controller.text}'); },
       onChanged: (value) {
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
+        }
         if (onChange != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
@@ -124,11 +143,6 @@ class InputFields {
               onChange(value);
             });
           } else {
-            if (formValsKey == null) {
-              formVals = value;
-            } else {
-              formVals[formValsKey] = value;
-            }
             onChange(value);
           }
         }
@@ -177,6 +191,11 @@ class InputFields {
         }
       },
       onChanged: (value) {
+        if (formValsKey == null) {
+          formVals = _parseService.toDouble(value, allowNull: true);
+        } else {
+          formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
+        }
         if (onChange != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
@@ -189,11 +208,6 @@ class InputFields {
               onChange(_parseService.toDouble(value, allowNull: true));
             });
           } else {
-            if (formValsKey == null) {
-              formVals = _parseService.toDouble(value, allowNull: true);
-            } else {
-              formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
-            }
             onChange(_parseService.toDouble(value, allowNull: true));
           }
         }
@@ -251,6 +265,11 @@ class InputFields {
       },
       //onEditingComplete: () { print ('onEditingComplete ${controller.text}'); },
       onChanged: (value) {
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
+        }
         if (onChange != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
@@ -263,11 +282,6 @@ class InputFields {
               onChange(value);
             });
           } else {
-            if (formValsKey == null) {
-              formVals = value;
-            } else {
-              formVals[formValsKey] = value;
-            }
             onChange(value);
           }
         }
@@ -304,6 +318,13 @@ class InputFields {
           formVals[formValsKey] = value;
         }
       },
+      onChanged: (value) {
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
+        }
+      },
       validator: (value) {
         return null;
       },
@@ -316,7 +337,7 @@ class InputFields {
     if (formValsKey == null) {
       value = formVals;
     } else {
-      value = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : null;
+      value = (formVals.containsKey(formValsKey)) ? formVals[formValsKey].toString() : null;
     }
     return Container(
       child: DropdownButtonFormField(
@@ -432,6 +453,11 @@ class InputFields {
               hintText: hint,
             ),
             onChanged: (value) {
+              if (formValsKey == null) {
+                formVals = value;
+              } else {
+                formVals[formValsKey] = value;
+              }
               if (onKeyUp != null) {
                 if (debounceChange > 0) {
                   if (debounce?.isActive ?? false) debounce?.cancel();
@@ -444,11 +470,6 @@ class InputFields {
                     onKeyUp(value);
                   });
                 } else {
-                  if (formValsKey == null) {
-                    formVals = value;
-                  } else {
-                    formVals[formValsKey] = value;
-                  }
                   onKeyUp(value);
                 }
               }

@@ -38,7 +38,7 @@ class FileUploadService {
     }
   }
 
-  void uploadFiles(var filesInfo, Function(Map<String, dynamic>) callback,
+  void uploadFiles(var filesInfo, Function(List<Map<String, dynamic>>) callback,
     { String fileType = 'image', bool saveToUserImages = false, int maxImageSize = 600,
     String serverKey = 'default', String routeKey = '', }) {
     init(serverKey: serverKey);
@@ -47,18 +47,18 @@ class FileUploadService {
     //  'callback': callback,
     //  ''
     //};
-    List<Map<String, dynamic>> callbackUrls = [];
+    List<Map<String, dynamic>> callbackDatas = [];
     int countDone = 0;
     for (int ii = 0; ii < filesInfo.length; ii++) {
       // Seed with an empty value.
-      //callbackUrls.add('');
+      // callbackDatas.add('');
       var fileInfo = filesInfo[ii];
       upload(fileInfo['file'].bytes, fileInfo['file'].name, fileInfo['title'], (Map<String, dynamic> resData) {
-        //callbackUrls[ii] = resData;
+        callbackDatas.add(resData);
         countDone += 1;
         if (countDone == filesInfo.length) {
-          //callback(callbackUrls);
-          callback(resData);
+          callback(callbackDatas);
+          // callback(resData);
         }
       }, fileType: fileType, saveToUserImages: saveToUserImages, maxImageSize: maxImageSize,
         serverKey: serverKey, routeKey: routeKey );

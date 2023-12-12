@@ -41,6 +41,8 @@ _migrations.RunAll()
 from blog import blog_routes as _blog_routes
 from common import common_routes as _common_routes
 from image import image_routes as _image_routes
+from shared_item import shared_item_routes as _shared_item_routes
+from shared_item import shared_item_owner_routes as _shared_item_owner_routes
 from user_auth import user_auth_routes as _user_auth_routes
 from vector_tiles import vector_tiles_routes as _vector_tiles_routes
 

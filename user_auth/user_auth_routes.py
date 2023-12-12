@@ -3,6 +3,7 @@
 from common import route_parse as _route_parse
 from common import socket as _socket
 from user_auth import user_auth as _user_auth
+from user_auth import user as _user
 
 # router = APIRouter()
 
@@ -74,5 +75,9 @@ def addRoutes():
                 ret['user']['roles'] = ",".join(ret['user']['roles'])
         return ret
     _socket.add_route('signup', Signup)
+
+    def Save(data, auth, websocket):
+        return _user.SaveUser(data['user'])
+    _socket.add_route('saveUser', Save)
 
 addRoutes()

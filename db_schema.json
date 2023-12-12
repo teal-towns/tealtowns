@@ -17,7 +17,11 @@
         ],
         "emailVerificationKey": "{String}",
         "emailVerified": "{Number} 1 or 0",
-        "username": "{String}"
+        "username": "{String}",
+        "location": {
+            "type": "Point [https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb]",
+            "coordinates": ["{Number} [lng]", "{Number} [lat]"]
+        }
     },
     "image": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -40,5 +44,72 @@
         ],
         "imageUrl": "{String}",
         "imageCredit": "{String}"
+    },
+    "sharedItem": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "title": "{String}",
+        "description": "{String}",
+        "imageUrls": [ "{String}" ],
+        "currentOwnerUserId": "{String}",
+        "tags": [
+            "{String}"
+        ],
+        "location": {
+            "type": "Point [https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb]",
+            "coordinates": ["{Number} [lng]", "{Number} [lat]"]
+        },
+        "originalPrice": "{Number}",
+        "currentPrice": "{Number}",
+        "currency": "{String}",
+        "generation": "{Number} [0 before first ownership / purchase, 1+ after]",
+        "monthsStarted": "{Number} [number of months started since current generation start, e.g. day 1 of month 3 means 2 months]",
+        "monthsToPayBack": "{Number}",
+        "maintenancePerYear": "{Number}",
+        "maintenanceAvailable": "{Number} [unspent maintenance savings that can be used]",
+        "minOwners": "{Number}",
+        "maxOwners": "{Number}",
+        "status": "{String} available|purchasing|owned [Only available items show up to add new owners to a future generation (be co-purchased and co-owned)]",
+        "pledgedOwners": "{Number} [cached for search: number of owners who have pledged from sharedItemOwner (in future generation)]",
+        "fundingRequired": "{Number} [cached for search: currentPrice - (totalPaid of all pledged owners (in future generation))]"
+    },
+    "sharedItemOwner": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "sharedItemId": "{String}",
+        "userId": "{String}",
+        "monthlyPayment": "{Number} [Negative if this user is owed each month. Pledge if future generation.]",
+        "totalPaid": "{Number} [Investor pledge if future generation]",
+        "totalOwed": "{Number} [amount this user owes; negative if this user is owed money]",
+        "generation": "{Number} [If above sharedItem.generation, numbers are pledges to start the next generation of owners]",
+        "investorOnly": "{Number} [1 if this owner pays only (is NOT a shared owner), 0 otherwise]"
+    },
+    "TODOsharedItemMaintenance": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "sharedItemId": "{String}",
+        "userId": "{String}",
+        "requestedAmount": "{Number}",
+        "paidAmount": "{Number}",
+        "approvalUserIds": [ "{String}" ],
+        "rejectionUserIds": [ "{String}" ],
+        "status": "{String} open|approved|rejected"
+    },
+    "TODOuserMoney": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "userId": "{String}",
+        "balance": "{Number}"
+    },
+    "TODOuserPaymentMethod": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "userId": "{String}",
+        "TODO": "depends on (3rd party) payment processing system"
     }
 }
