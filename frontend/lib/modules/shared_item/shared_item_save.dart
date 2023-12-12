@@ -12,6 +12,7 @@ import '../../common/classes/location_class.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/form_input/image_save.dart';
+import '../../common/parse_service.dart';
 import './shared_item_class.dart';
 import './shared_item_state.dart';
 import './shared_item_service.dart';
@@ -30,20 +31,33 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   SharedItemService _sharedItemService = SharedItemService();
   CurrencyService _currency = CurrencyService();
   LayoutService _layoutService = LayoutService();
+  ParseService _parseService = ParseService();
 
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> _formVals = {
+    'bought': 0,
     'currency': 'USD',
     'generation': 0,
     'monthsToPayBack': 12,
     'maintenancePerYear': 50,
-    'minOwners': 1,
+    'minOwners': 2,
     'maxOwners': 10,
+    'maxMeters': 8000,
     'status': 'available',
   };
   List<Map<String, String>> _selectOptsStatus = [
     {'value': 'available', 'label': 'Available'},
     {'value': 'owned', 'label': 'Owned'},
+  ];
+  List<Map<String, String>> _selectOptsBought = [
+    {'value': '1', 'label': 'Already bought (I own this)'},
+    {'value': '0', 'label': 'Need to buy'},
+  ];
+  List<Map<String, String>> _selectOptsMaxMeters = [
+    {'value': '500', 'label': '5 min walk'},
+    {'value': '1500', 'label': '15 min walk'},
+    {'value': '3500', 'label': '15 min bike'},
+    {'value': '8000', 'label': '15 min car'},
   ];
   Map<String, dynamic?> _formValsInfo = {
     'maxCurrentPrice': null,
@@ -73,7 +87,17 @@ class _SharedItemSaveState extends State<SharedItemSave> {
       var data = res['data'];
       if (data['valid'] == 1) {
         String sharedItemId = data['sharedItem']['_id'];
-        context.go('/shared-item-owner-save?sharedItemId=${sharedItemId}');
+        String sharedItemOwnerId = '';
+        if (data.containsKey('sharedItemOwner') && data['sharedItemOwner'].containsKey('_id')) {
+          sharedItemOwnerId = data['sharedItemOwner']['_id'];
+        }
+        // If new item that is already bought, user is already an owner and there is nothing to invest, so skip owner page.
+        if ((!_formVals.containsKey('_id') ||_formVals['_id'].length < 1) &&
+          _parseService.toIntNoNull(_formVals['bought']) > 0) {
+          context.go('/own');
+        } else {
+          context.go('/shared-item-owner-save?sharedItemId=${sharedItemId}&id=${sharedItemOwnerId}');
+        }
       } else {
         setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Error, please try again.'; });
       }
@@ -136,7 +160,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
           Align(
             alignment: Alignment.center,
             child: Container(
-              width: 900,
+              width: 800,
               padding: EdgeInsets.only(top: 20, left: 10, right: 10),
               child: Form(
                 key: _formKey,
@@ -184,7 +208,8 @@ class _SharedItemSaveState extends State<SharedItemSave> {
                     ),
                     SizedBox(height: 10),
                     _layoutService.WrapWidth([
-                      _inputFields.inputNumber(_formVals, 'originalPrice', label: 'Original Price ', required: true, onChange: (double? val) {
+                      _inputFields.inputSelect(_selectOptsBought, _formVals, 'bought', label: 'Do you already own this item?', ),
+                      _inputFields.inputNumber(_formVals, 'originalPrice', label: 'Original (New) Price ', required: true, onChange: (double? val) {
                         ValidateSharedItem();
                         }),
                       // SizedBox(height: 10),
@@ -213,11 +238,11 @@ class _SharedItemSaveState extends State<SharedItemSave> {
                       _inputFields.inputNumber(_formVals, 'maxOwners', label: 'Maximum Owners', required: true, onChange: (double? val) {
                         ValidateSharedItem();
                         }),
+                      _inputFields.inputSelect(_selectOptsMaxMeters, _formVals, 'maxMeters', label: 'Owners max distance away', ),
+                      _inputFields.inputSelect(_selectOptsStatus, _formVals, 'status', label: 'Status', required: true),
                     ]),
                     SizedBox(height: 10),
                     ...colsMinMax,
-                    _inputFields.inputSelect(_selectOptsStatus, _formVals, 'status', label: 'Status', required: true),
-                    SizedBox(height: 10),
                     _buildSubmit(context, currentUserState),
                     _buildMessage(context),
                     SizedBox(height: 50),
@@ -363,7 +388,6 @@ class _SharedItemSaveState extends State<SharedItemSave> {
 
   void ValidateSharedItem() {
     bool shouldUpdate = false;
-    print ('1 _formVals ${_formVals}');
     if (_formVals['originalPrice'] != null && _formVals['generation'] != null && _formVals['currentPrice'] != null) {
       double maxCurrentPrice = _sharedItemService.MaxCurrentPrice(_formVals['originalPrice'], _formVals['generation']);
       _formValsInfo['maxCurrentPrice'] = maxCurrentPrice;

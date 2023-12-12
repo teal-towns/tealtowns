@@ -1,6 +1,6 @@
 from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
-# import lodash
+from shared_item import shared_item_owner as _shared_item_owner
 
 def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [], fundingRequired_min: float = -1,
     fundingRequired_max: float = -1, limit: int = 25, skip: int = 0, withOwnerUserId: str = ''):
@@ -47,13 +47,30 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
     return ret
 
 def Save(sharedItem: dict):
+    ret = { 'valid': 1, 'message': '', 'sharedItem': {}, 'sharedItemOwner': {} }
     if 'pledgedOwners' not in sharedItem:
         sharedItem['pledgedOwners'] = 0
     if 'fundingRequired' not in sharedItem:
         sharedItem['fundingRequired'] = sharedItem['currentPrice']
     if 'currency' not in sharedItem:
         sharedItem['currency'] = 'USD'
-    return _mongo_db_crud.Save('sharedItem', sharedItem)
+    ret = _mongo_db_crud.Save('sharedItem', sharedItem)
+    # Add current user as owner if new item.
+    if ret['insert']:
+        totalPaid = ret['sharedItem']['currentPrice'] if int(ret['sharedItem']['bought']) > 0 else 0
+        sharedItemOwner = {
+            'sharedItemId': ret['sharedItem']['_id'],
+            'userId': ret['sharedItem']['currentOwnerUserId'],
+            'monthlyPayment': 0,
+            'totalPaid': totalPaid,
+            'totalOwed': 0,
+            'generation': int(ret['sharedItem']['generation']) + 1,
+            'investorOnly': 0,
+        }
+        retOwner = _shared_item_owner.Save(sharedItemOwner)
+        ret['sharedItemOwner'] = retOwner['sharedItemOwner']
+
+    return ret
 
 def UpdateCachedOwners(sharedItemId: str):
     sharedItem = _mongo_db_crud.GetById('sharedItem', sharedItemId)['sharedItem']
@@ -65,11 +82,14 @@ def UpdateCachedOwners(sharedItemId: str):
     sharedItemNew = {
         '_id': sharedItem['_id'],
         'pledgedOwners': 0,
-        'fundingRequired': sharedItem['currentPrice'],
+        'fundingRequired': 0 if int(sharedItem['bought']) > 0 else float(sharedItem['currentPrice']),
     }
     for owner in sharedItemOwners:
-        if not owner['investorOnly']:
+        if not int(owner['investorOnly']):
             sharedItemNew['pledgedOwners'] += 1
-        sharedItemNew['fundingRequired'] -= owner['totalPaid']
+        if int(sharedItem['bought']) < 1:
+            sharedItemNew['fundingRequired'] -= owner['totalPaid']
+    if sharedItemNew['fundingRequired'] < 0:
+        sharedItemNew['fundingRequired'] = 0
     ret = _mongo_db_crud.Save('sharedItem', sharedItemNew)
     return ret

@@ -87,4 +87,16 @@ class SharedItemService {
       'perPersonDownLast': perPersonTextDownLast,
     };
   }
+
+  int GetMinOwnersFromMaxMonthlyPayment(double maxMonthlyPayment, int minOwners, int maxOwners, double currentPrice,
+    int monthsToPayBack, double maintenancePerYear) {
+    Map<String, dynamic> paymentsInfo;
+    for (int ii = minOwners; ii <= maxOwners; ii++) {
+      paymentsInfo = GetPayments(currentPrice, monthsToPayBack, ii, maintenancePerYear);
+      if (paymentsInfo['monthlyPayment'] <= maxMonthlyPayment) {
+        return ii;
+      }
+    }
+    return maxOwners;
+  }
 }
