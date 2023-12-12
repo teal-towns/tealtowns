@@ -4,7 +4,7 @@ class BlogClass {
   BlogClass(this.id, this.title, this.slug, this.text, this.imageUrl, this.imageCredit, this.userIdCreator, this.createdAt,
     this.tags);
   BlogClass.fromJson(Map<String, dynamic> json) {
-    this.id = json.containsKey('_id') ? json['_id'] : '';
+    this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.title = json.containsKey('title') ? json['title'] : '';
     this.slug = json.containsKey('slug') ? json['slug'] : '';
     this.userIdCreator = json.containsKey('userIdCreator') ? json['userIdCreator'] : '';

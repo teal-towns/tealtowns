@@ -43,6 +43,23 @@ class ParseService {
     return val;
   }
 
+  int toIntNoNull(dynamic val) {
+    if (val.runtimeType == String) {
+      if (val.isEmpty || val == '') {
+        return 0;
+      }
+      int? newVal = int.tryParse(val);
+      if (newVal == null) {
+        return 0;
+      }
+      return newVal;
+    }
+    if (val == null) {
+      return 0;
+    }
+    return val;
+  }
+
   Map<String, double> parseMapStringDouble(Map<String, dynamic> jsonData) {
     Map<String, double> data = {};
     jsonData.forEach((key, val) {
@@ -60,6 +77,26 @@ class ParseService {
       });
     }
     return data;
+  }
+
+  List<String> parseListString(List<dynamic> itemsRaw) {
+    List<String> items = [];
+    if (itemsRaw != null) {
+      for (var item in itemsRaw) {
+        items.add(item);
+      }
+    }
+    return items;
+  }
+
+  List<double> doubleList(List<dynamic> itemsRaw) {
+    List<double> items = [];
+    if (itemsRaw != null) {
+      for (var item in itemsRaw) {
+        items.add(toDoubleNoNull(item));
+      }
+    }
+    return items;
   }
 
   //dynamic toDoubleEmpty(var val) {

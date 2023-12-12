@@ -6,7 +6,7 @@
         "tileX": "{Number}",
         "tileY": "{Number}",
         "tileZoom": "{Number}",
-        "tileNumber": "{Number} [convenience field for lookups - unique number for this tile that is tileY * tileX]",
+        "tileNumber": "{Number} [convenience field for lookups - unique number for this tile that is (tileY - 1) * tilesPerRow + tileX]",
         "xMeters": "{Number}",
         "yMeters": "{Number}",
         "latTopLeft": "{Number}",

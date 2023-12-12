@@ -15,6 +15,10 @@ import './modules/blog/blog_view.dart';
 
 import './modules/land/land_page.dart';
 
+import './modules/shared_item/shared_item.dart';
+import './modules/shared_item/shared_item_save.dart';
+import './modules/shared_item/shared_item_owner_save.dart';
+
 class Routes {
   static const home = '/home';
   static const notFound = '/route-not-found';
@@ -29,6 +33,10 @@ class Routes {
   static const blogView = '/b/:slug';
 
   static const land = '/land';
+
+  static const sharedItem = '/own';
+  static const sharedItemSave = '/shared-item-save';
+  static const sharedItemOwnerSave = '/shared-item-owner-save';
 }
 
 class AppGoRouter {
@@ -96,6 +104,26 @@ class AppGoRouter {
             dataType: state.uri.queryParameters['dt']?? '',
             polygonUName: state.uri.queryParameters['pg'] ?? '',
           )
+      ),
+
+      GoRoute(
+        path: Routes.sharedItem,
+        builder: (BuildContext context, GoRouterState state) => SharedItem(),
+      ),
+      GoRoute(
+        path: Routes.sharedItemSave,
+        builder: (BuildContext context, GoRouterState state) => SharedItemSave(),
+      ),
+
+      GoRoute(
+        path: Routes.sharedItemOwnerSave,
+        builder: (BuildContext context, GoRouterState state) => SharedItemOwnerSave(
+          sharedItemOwnerId: state.uri.queryParameters['id'] ?? '',
+          sharedItemId: state.uri.queryParameters['sharedItemId'] ?? '',
+          userId: state.uri.queryParameters['userId'] ?? '',
+          generation: state.uri.queryParameters['generation'] != null ?
+            int.parse(state.uri.queryParameters['generation']!) : 0,
+        ),
       ),
 
       GoRoute(

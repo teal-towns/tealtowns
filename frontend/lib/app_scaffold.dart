@@ -183,6 +183,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
         flex: 1,
         child: _buildNavButton('/blog', 'Blog', Icons.article, context, width: double.infinity, fontSize: 10),
       ),
+      Expanded(
+        flex: 1,
+        child: _buildNavButton('/own', 'Own', Icons.build, context, width: double.infinity, fontSize: 10),
+      ),
     ];
     if (!currentUserState.isLoggedIn) {
       rows.add(Expanded(
@@ -273,6 +277,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
         actions: <Widget>[
           _buildNavButton('/home', 'Home', Icons.home, context),
           _buildNavButton('/blog', 'Blog', Icons.article, context),
+          _buildNavButton('/own', 'Own', Icons.build, context),
           _buildUserButton(context, currentUserState),
           _buildDrawerButton(context),
         ],

@@ -176,15 +176,15 @@ class _ImageSaveState extends State<ImageSaveComponent> {
                 }
                 if (valid) {
                   _loadingUpload = true;
-                  _fileUploadService.uploadFiles(filesInfo, (Map<String, dynamic> fileData) {
+                  _fileUploadService.uploadFiles(filesInfo, (List<Map<String, dynamic>> fileData) {
                     List<String> fileUrls = [];
                     if (widget.multiple) {
-                      fileData.forEach((key, fileData1) {
-                        fileUrls.add(fileData1['url']);
-                      });
+                      for (int ii = 0; ii < fileData.length; ii++) {
+                        fileUrls.add(fileData[ii]['url']);
+                      }
                       widget.formVals[widget.formValsKey] = fileUrls;
                     } else {
-                      fileUrls.add(fileData['url']);
+                      fileUrls.add(fileData[0]['url']);
                       widget.formVals[widget.formValsKey] = fileUrls[0];
                     }
                     // Copy to local state to display images.
@@ -339,11 +339,12 @@ class _ImageSaveState extends State<ImageSaveComponent> {
       }
 
       if (formValsImageSave['from_type'] == 'upload') {
+        String hint = 'Choose File' + (widget.multiple ? 's' : '');
         widgetByType = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             InputFile(multiple: widget.multiple, fileType: 'image', extensions: ['jpg', 'jpeg', 'png'], formVals: formValsImageSave,
-              formValsKey: 'image_files', label: 'Image', showChips: false, onChanged: (String v) {
+              formValsKey: 'image_files', label: 'Image', showChips: false, hint: hint, onChanged: (String v) {
               if (formValsImageSave['image_files'] != null && formValsImageSave['image_files'].length > 0) {
                 formValsUploadFiles = {};
                 for (var file in formValsImageSave['image_files']) {
@@ -434,8 +435,9 @@ class _ImageSaveState extends State<ImageSaveComponent> {
   Widget _buildImageSimple(BuildContext context) {
     Widget input = SizedBox.shrink();
     if (!_loadingUpload) {
-      input = InputFile(multiple: false, fileType: 'image', extensions: ['jpg', 'jpeg', 'png'], formVals: formValsImageSave,
-        formValsKey: 'image_simple', showChips: false, onChanged: (String v) {
+      String hint = 'Choose File' + (widget.multiple ? 's' : '');
+      input = InputFile(multiple: widget.multiple, fileType: 'image', extensions: ['jpg', 'jpeg', 'png'], formVals: formValsImageSave,
+        formValsKey: 'image_simple', showChips: false, hint: hint, onChanged: (String v) {
         setState(() {
           _loadingUpload = true;
         });
@@ -443,24 +445,24 @@ class _ImageSaveState extends State<ImageSaveComponent> {
         for (var file in formValsImageSave["image_simple"]) {
           filesInfo.add({ 'file': file, 'title': '' });
         }
-        _fileUploadService.uploadFiles(filesInfo, (Map<String, dynamic> fileData) {
+        _fileUploadService.uploadFiles(filesInfo, (List<Map<String, dynamic>> fileData) {
           List<String> fileUrls = [];
           if (widget.multiple) {
-              fileData.forEach((key, fileData1) {
-                fileUrls.add(fileData1['url']);
-              });
-              widget.formVals[widget.formValsKey] = fileUrls;
-            } else {
-              fileUrls.add(fileData['url']);
-              widget.formVals[widget.formValsKey] = fileUrls[0];
+            for (int ii = 0; ii < fileData.length; ii++) {
+              fileUrls.add(fileData[ii]['url']);
             }
-            // Copy to local state to display images.
-            formValsImageSave['image_urls'] = fileUrls;
-            setState(() {
-              formValsImageSave = formValsImageSave;
-              _editing = false;
-              _loadingUpload = false;
-            });
+            widget.formVals[widget.formValsKey] = fileUrls;
+          } else {
+            fileUrls.add(fileData[0]['url']);
+            widget.formVals[widget.formValsKey] = fileUrls[0];
+          }
+          // Copy to local state to display images.
+          formValsImageSave['image_urls'] = fileUrls;
+          setState(() {
+            formValsImageSave = formValsImageSave;
+            _editing = false;
+            _loadingUpload = false;
+          });
         }, fileType: 'image', maxImageSize: widget.maxImageSize);
       });
     }
