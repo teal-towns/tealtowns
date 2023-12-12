@@ -8,7 +8,7 @@ def create_all_indices(db):
 
     db['blog'].create_index([('title', 1), ('tags', 1)], unique=True)
 
-    db['sharedItem'].drop_indexes()
+    # db['sharedItem'].drop_indexes()
     # db['sharedItem'].drop()
     db['sharedItem'].create_index([('title', 1), ('currentOwnerUserId', 1), ('tags', 1), \
         ('currentPrice', 1), ('minOwners', 1), ('maxOwners', 1), ('maxMeters', 1), ('bought', 1), \
@@ -18,5 +18,5 @@ def create_all_indices(db):
     # print ('sharedItem index', db['sharedItem'].index_information())
 
     # db['sharedItemOwner'].drop()
-    db['sharedItemOwner'].drop_indexes()
+    # db['sharedItemOwner'].drop_indexes()
     db['sharedItemOwner'].create_index([('sharedItemId', 1), ('userId', 1), ('generation', 1)], unique=True)
