@@ -52,8 +52,14 @@ workflows:
   test_app:
     when: << pipeline.parameters.run >>
     jobs:
-      - test_python
-      - test_flutter
+      - test_python:
+          filters:
+            branches:
+              ignore: main
+      - test_flutter:
+          filters:
+            branches:
+              ignore: main
   deploy_app:
     jobs:
       - test_python:
