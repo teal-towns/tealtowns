@@ -111,7 +111,7 @@ class AppGoRouter {
         builder: (BuildContext context, GoRouterState state) => SharedItem(
           lat: double.parse(state.uri.queryParameters['lat'] ?? '-999'),
           lng: double.parse(state.uri.queryParameters['lng'] ?? '-999'),
-          maxMeters: double.parse(state.uri.queryParameters['range'] ?? '8000'),
+          maxMeters: double.parse(state.uri.queryParameters['range'] ?? '1500'),
         ),
       ),
       GoRoute(

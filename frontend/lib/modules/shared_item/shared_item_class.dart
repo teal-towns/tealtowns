@@ -10,7 +10,7 @@ class SharedItemClass {
   String id = '', title = '', description = '', currentOwnerUserId = '', status = '', currency = '';
   List<String> tags = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
-  double originalPrice = 1000, currentPrice = 1000, maintenancePerYear = 50, maintenanceAvailable = 0, maxMeters = 8000, fundingRequired = 0;
+  double originalPrice = 1000, currentPrice = 1000, maintenancePerYear = 50, maintenanceAvailable = 0, maxMeters = 1500, fundingRequired = 0;
   int bought = 0, generation = 0, monthsStarted = 0, monthsToPayBack = 0, minOwners = 1, maxOwners = 10, pledgedOwners = 0;
   // Map<String, dynamic> xOwner = {};
   double xDistanceKm = -999;
@@ -40,7 +40,7 @@ class SharedItemClass {
     this.maintenanceAvailable = json['maintenanceAvailable'] != null ? _parseService.toDoubleNoNull(json['maintenanceAvailable']) : 0;
     this.minOwners = json.containsKey('minOwners') ? _parseService.toIntNoNull(json['minOwners']) : 1;
     this.maxOwners = json.containsKey('maxOwners') ? _parseService.toIntNoNull(json['maxOwners']) : 10;
-    this.maxMeters = json.containsKey('maxMeters') ? _parseService.toDoubleNoNull(json['maxMeters']) : 8000;
+    this.maxMeters = json.containsKey('maxMeters') ? _parseService.toDoubleNoNull(json['maxMeters']) : 1500;
     this.status = json['status'] ?? '';
     this.pledgedOwners = json.containsKey('pledgedOwners') ? _parseService.toIntNoNull(json['pledgedOwners']) : 0;
     this.fundingRequired = json.containsKey('fundingRequired') ? _parseService.toDoubleNoNull(json['fundingRequired']) : 0;

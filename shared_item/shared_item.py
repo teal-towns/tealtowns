@@ -28,11 +28,15 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
     sharedItemIndexMap = {}
     # Calculate distance
     # May also be able to use geoNear https://stackoverflow.com/questions/33864461/mongodb-print-distance-between-two-points
-    for index, item in enumerate(ret['sharedItems']):
+    for index, item in reversed(list(enumerate(ret['sharedItems']))):
         ret['sharedItems'][index]['xDistanceKm'] = _math_polygon.Haversine(item['location']['coordinates'],
             lngLat, units = 'kilometers')
-        sharedItemIds.append(item['_id'])
-        sharedItemIndexMap[item['_id']] = index
+        # Remove if too far away (based on sharedItem.maxMeters)
+        if ret['sharedItems'][index]['xDistanceKm'] * 1000 > float(ret['sharedItems'][index]['maxMeters']):
+            del ret['sharedItems'][index]
+        else:
+            sharedItemIds.append(item['_id'])
+            sharedItemIndexMap[item['_id']] = index
 
     if len(sharedItemIds) > 0 and len(withOwnerUserId) > 0:
         listKeyVals = {'sharedItemId': sharedItemIds }
