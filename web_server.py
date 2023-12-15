@@ -180,7 +180,7 @@ async def start_async_app():
 
         # Add CORS: https://docs.aiohttp.org/en/stable/web_advanced.html#cors-support
         corsUrls = config['web_server']['cors_urls']
-        defaults = {};
+        defaults = {}
         for url in corsUrls:
             if url == 'WILDCARD':
                 defaults['*'] = aiohttp_cors.ResourceOptions(allow_credentials=True, expose_headers="*", allow_headers="*")
@@ -220,10 +220,16 @@ async def start_async_app():
             for path1 in config['web_server']['static_folders']:
                 if not os.path.isdir(path1):
                     os.mkdir(path1)
-                defaults[url] = aiohttp_cors.ResourceOptions()
+                # defaults[url] = aiohttp_cors.ResourceOptions()
                 app.add_routes([web.static('/' + path1 + '/', path1)])
                 app.add_routes([web.static('/' + path1, path1)])
-                # app.router.add_static('/' + path1 + '/', path1)
+
+        # Ensure have CORS for all routes
+        for route in list(app.router.routes()):
+            try:
+                cors.add(route)
+            except:
+                pass
 
         # https://stackoverflow.com/questions/34565705/asyncio-and-aiohttp-route-all-urls-paths-to-handler
         app.router.add_get('/{tail:.*}', index)

@@ -1,12 +1,17 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../../app_scaffold.dart';
 import '../../common/currency_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
+import '../../common/form_input/input_location.dart';
+import '../../common/layout_service.dart';
 import './shared_item_class.dart';
 import './shared_item_state.dart';
 import './shared_item_service.dart';
@@ -15,6 +20,12 @@ import '../user_auth/current_user_state.dart';
 
 
 class SharedItem extends StatefulWidget {
+  final double lat;
+  final double lng;
+  final double maxMeters;
+
+  SharedItem({ this.lat = -999, this.lng = -999, this.maxMeters = 8000, });
+
   @override
   _SharedItemState createState() => _SharedItemState();
 }
@@ -23,6 +34,8 @@ class _SharedItemState extends State<SharedItem> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
+  LayoutService _layoutService = LayoutService();
+  Location _location = Location();
   CurrencyService _currency = CurrencyService();
   SharedItemService _sharedItemService = SharedItemService();
 
@@ -30,11 +43,13 @@ class _SharedItemState extends State<SharedItem> {
   Map<String, dynamic?> _filters = {
     'title': '',
     //'tags': '',
-    'lng': -999.0,
-    'lat': -999.0,
+    // 'lng': -79.574983,
+    // 'lat': 8.993036,
     'maxMeters': '8000',
     'fundingRequired_min': '',
     'fundingRequired_max': '',
+    // 'lngLat': [-79.574983, 8.993036],
+    'lngLat': [-999, -999],
   };
   bool _loading = false;
   String _message = '';
@@ -50,11 +65,11 @@ class _SharedItemState extends State<SharedItem> {
     'id': '',
   };
 
-  List<Map<String, String>> _selectOptsMaxMeters = [
-    {'value': '500', 'label': '5 min walk'},
-    {'value': '1500', 'label': '15 min walk'},
-    {'value': '3500', 'label': '15 min bike'},
-    {'value': '8000', 'label': '15 min car'},
+  List<Map<String, dynamic>> _selectOptsMaxMeters = [
+    {'value': 500, 'label': '5 min walk'},
+    {'value': 1500, 'label': '15 min walk'},
+    {'value': 3500, 'label': '15 min bike'},
+    {'value': 8000, 'label': '15 min car'},
   ];
 
   @override
@@ -97,6 +112,17 @@ class _SharedItemState extends State<SharedItem> {
       });
     }));
 
+    if (widget.lat != -999 && widget.lng != -999) {
+      _filters['lngLat'] = [widget.lng, widget.lat];
+      _skipCurrentLocation = true;
+    }
+    for (int ii = 0; ii < _selectOptsMaxMeters.length; ii++) {
+      if (_selectOptsMaxMeters[ii]['value'] == widget.maxMeters) {
+        _filters['maxMeters'] = widget.maxMeters;
+        break;
+      }
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_){
       _init();
     });
@@ -129,6 +155,7 @@ class _SharedItemState extends State<SharedItem> {
     ];
 
     return AppScaffoldComponent(
+      width: 1500,
       body: ListView(
         children: [
           Align(
@@ -144,41 +171,27 @@ class _SharedItemState extends State<SharedItem> {
                     child: Form(
                       key: _formKey,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                      child: Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 200,
-                            child: _inputFields.inputText(_filters, 'title', hint: 'title',
-                              label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
-                              _searchSharedItems();
-                            }),
-                          ),
-                          SizedBox(
-                            width: 200,
-                            child: _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
-                              label: 'Range', onChanged: (String val) {
-                              _searchSharedItems();
-                            }),
-                          ),
-                          SizedBox(
-                            width: 200,
-                            child: _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
-                              label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
-                              _searchSharedItems();
-                            }),
-                          ),
-                          SizedBox(
-                            width: 200,
-                            child: _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
-                              label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
-                              _searchSharedItems();
-                            }),
-                          ),
-                        ]
-                      ),
+                      child: _layoutService.WrapWidth([
+                        InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', onChange: (List<double?> val) {
+                          _searchSharedItems();
+                          }),
+                        _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
+                            label: 'Range', onChanged: (String val) {
+                            _searchSharedItems();
+                          }),
+                        _inputFields.inputText(_filters, 'title', hint: 'title',
+                            label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
+                            _searchSharedItems();
+                          }),
+                        _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
+                            label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                            _searchSharedItems();
+                          }),
+                        _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
+                            label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                            _searchSharedItems();
+                          }),
+                      ], width: 225),
                     ),
                   ),
                   Align(
@@ -202,13 +215,35 @@ class _SharedItemState extends State<SharedItem> {
   }
 
   void _init() async {
-    if (!_skipCurrentLocation) {
-      List<dynamic> _userLngLat = await Provider.of<CurrentUserState>(context, listen: false).getUserLocation();
-      _filters['lat'] =  _userLngLat.elementAt(1);
-      _filters['lng'] =  _userLngLat.elementAt(0);
-      _locationLoaded = true;
-      checkFirstLoad();
+    // if (!_skipCurrentLocation) {
+    //   List<dynamic> _userLngLat = await Provider.of<CurrentUserState>(context, listen: false).getUserLocation();
+    //   // _filters['lat'] =  _userLngLat.elementAt(1);
+    //   // _filters['lng'] =  _userLngLat.elementAt(0);
+    //   _filters['lngLat'] = [_userLngLat.elementAt(0), _userLngLat.elementAt(1)];
+    //   _locationLoaded = true;
+    //   checkFirstLoad();
+    // }
+
+    var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+    if (currentUser.location.coordinates.length > 0) {
+      setState(() {
+        _filters['lngLat'] = [currentUser.location.coordinates[0], currentUser.location.coordinates[1]];
+        // _formValsLngLat['longitude'] = currentUser.location.coordinates[0];
+        // _formValsLngLat['latitude'] = currentUser.location.coordinates[1];
+      });
     }
+    else if (!_skipCurrentLocation) {
+      var coordinates = await _location.getLocation();
+      if (coordinates.latitude != null) {
+        setState(() {
+          // _formValsLngLat['latitude'] = coordinates.latitude!;
+          // _formValsLngLat['longitude'] = coordinates.longitude!;
+          _filters['lngLat'] = [coordinates.longitude!, coordinates.latitude!];
+        });
+      }
+    }
+    _locationLoaded = true;
+    checkFirstLoad();
   }
 
   Widget _buildMessage(BuildContext context) {
@@ -401,7 +436,8 @@ class _SharedItemState extends State<SharedItem> {
       //'sortKey': '-created_at',
       //'tags': [],
       // 'withOwnerInfo': 1,
-      'lngLat': [_filters['lng'], _filters['lat']],
+      // 'lngLat': [_filters['lng'], _filters['lat']],
+      'lngLat': _filters['lngLat'],
       'maxMeters': _filters['maxMeters'],
       'withOwnerUserId': currentUser.id,
     };
@@ -415,6 +451,17 @@ class _SharedItemState extends State<SharedItem> {
     //  data['tags'] = [ _filters['tags'] ];
     //}
     _socketService.emit('searchSharedItems', data);
+    _UpdateUrl();
+  }
+  
+  void _UpdateUrl() {
+    if(kIsWeb) {
+      String? lng = _filters['lngLat'][0]?.toString();
+      String? lat = _filters['lngLat'][1]?.toString();
+      String? maxMeters = _filters['maxMeters']?.toString();
+      html.window.history.pushState({}, '', '/own?lng=${lng}&lat=${lat}&range=${maxMeters}');
+      // final url =  html.window.history.state.toString();
+    }
   }
 
 }

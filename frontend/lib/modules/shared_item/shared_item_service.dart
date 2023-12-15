@@ -16,6 +16,7 @@ class SharedItemService {
   double _maintenancePerPersonPerYearMin = 5;
   double _investmentReturnPerYearFactor = 0.1;
   double _feeFactor = 0.04;
+  double _lowFeeAmount = 300;
   double _downPerPersonMinFactor = 0.05;
   double _downTotalFactor = 0.33;
   double _downPerPersonMax = 10000;
@@ -67,12 +68,20 @@ class SharedItemService {
 
     return {
       'monthlyPayment': monthlyPayment.ceil().toDouble(),
-      'monthlyPaymentWithFee': (monthlyPayment * (1 + _feeFactor)).ceil().toDouble(),
+      'monthlyPaymentWithFee': AddFee(monthlyPayment),
       'downPerPerson': downPerPerson.ceil().toDouble(),
-      'downPerPersonWithFee': (downPerPerson * (1 + _feeFactor)).ceil().toDouble(),
+      'downPerPersonWithFee': AddFee(downPerPerson),
       'investorProfit': investorProfit.floor().toDouble(),
       'monthsToPayBack': monthsToPayBack.toDouble(),
     };
+  }
+
+  double AddFee(double amount) {
+    double withFee = (amount * (1 + _feeFactor)).ceil().toDouble();
+    if (amount < _lowFeeAmount && amount >= 1) {
+      withFee += 1;
+    }
+    return withFee;
   }
 
   Map<String, String> GetTexts(double downPerPerson, double monthlyPayment, int monthsToPayBack,

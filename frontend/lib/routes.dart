@@ -95,20 +95,24 @@ class AppGoRouter {
         path: Routes.land,
         builder: (BuildContext context, GoRouterState state) => LandPage(
             goRouterState: state,
-            lat: double.parse(state.uri.queryParameters['lat']?? '-999'),
-            lng: double.parse(state.uri.queryParameters['lng']?? '-999'),
-            timeframe: state.uri.queryParameters['tf']?? '',
-            year: int.parse(state.uri.queryParameters['year']?? '-999'),
-            underlay: state.uri.queryParameters['u']?? '',
-            tileSize: state.uri.queryParameters['size']?? '',
-            dataType: state.uri.queryParameters['dt']?? '',
+            lat: double.parse(state.uri.queryParameters['lat'] ?? '-999'),
+            lng: double.parse(state.uri.queryParameters['lng'] ?? '-999'),
+            timeframe: state.uri.queryParameters['tf'] ?? '',
+            year: int.parse(state.uri.queryParameters['year'] ?? '-999'),
+            underlay: state.uri.queryParameters['u'] ?? '',
+            tileSize: state.uri.queryParameters['size'] ?? '',
+            dataType: state.uri.queryParameters['dt'] ?? '',
             polygonUName: state.uri.queryParameters['pg'] ?? '',
           )
       ),
 
       GoRoute(
         path: Routes.sharedItem,
-        builder: (BuildContext context, GoRouterState state) => SharedItem(),
+        builder: (BuildContext context, GoRouterState state) => SharedItem(
+          lat: double.parse(state.uri.queryParameters['lat'] ?? '-999'),
+          lng: double.parse(state.uri.queryParameters['lng'] ?? '-999'),
+          maxMeters: double.parse(state.uri.queryParameters['range'] ?? '8000'),
+        ),
       ),
       GoRoute(
         path: Routes.sharedItemSave,

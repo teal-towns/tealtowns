@@ -1,9 +1,11 @@
 import '../../common/classes/location_class.dart';
+import '../../common/image_service.dart';
 import '../../common/parse_service.dart';
 import './shared_item_owner_class.dart';
 
 class SharedItemClass {
   ParseService _parseService = ParseService();
+  ImageService _imageService = ImageService();
 
   String id = '', title = '', description = '', currentOwnerUserId = '', status = '', currency = '';
   List<String> tags = [], imageUrls = [];
@@ -23,7 +25,7 @@ class SharedItemClass {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.title = json['title'] ?? '';
     this.description = json['description'] ?? '';
-    this.imageUrls = _parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : []);
+    this.imageUrls = _imageService.GetUrls(_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : []));
     this.currentOwnerUserId = json['currentOwnerUserId'] ?? '';
     this.tags = _parseService.parseListString(json['tags'] != null ? json['tags'] : []);
     this.location = LocationClass.fromJson(json['location'] ?? {});

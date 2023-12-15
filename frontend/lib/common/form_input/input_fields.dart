@@ -103,7 +103,8 @@ class InputFields {
 
   Widget inputText(var formVals, String? formValsKey, { String label = '', String hint = '',
     int minLen = -1, int maxLen = -1, var fieldKey = null, int maxLines = 1, int minLines = 1,
-    int debounceChange = 1000, Function(String)? onChange = null, bool required = false}) {
+    int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
+    Function()? onTap = null,}) {
     Timer? debounce = null;
     String initialVal = '';
     if (formValsKey == null) {
@@ -160,6 +161,7 @@ class InputFields {
       },
       maxLines: maxLines,
       minLines: minLines,
+      onTap: onTap,
     );
   }
 
