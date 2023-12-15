@@ -11,7 +11,9 @@ import '../../common/layout_service.dart';
 import '../../common/classes/location_class.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
+import '../../common/form_input/input_location.dart';
 import '../../common/form_input/image_save.dart';
+import '../../common/location_service.dart';
 import '../../common/parse_service.dart';
 import './shared_item_class.dart';
 import './shared_item_state.dart';
@@ -31,6 +33,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   SharedItemService _sharedItemService = SharedItemService();
   CurrencyService _currency = CurrencyService();
   LayoutService _layoutService = LayoutService();
+  LocationService _locationService = LocationService();
   ParseService _parseService = ParseService();
 
   final _formKey = GlobalKey<FormState>();
@@ -42,7 +45,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     'maintenancePerYear': 50,
     'minOwners': 2,
     'maxOwners': 10,
-    'maxMeters': 8000,
+    'maxMeters': 1500,
     'status': 'available',
   };
   List<Map<String, String>> _selectOptsStatus = [
@@ -53,11 +56,11 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     {'value': '1', 'label': 'Already bought (I own this)'},
     {'value': '0', 'label': 'Need to buy'},
   ];
-  List<Map<String, String>> _selectOptsMaxMeters = [
-    {'value': '500', 'label': '5 min walk'},
-    {'value': '1500', 'label': '15 min walk'},
-    {'value': '3500', 'label': '15 min bike'},
-    {'value': '8000', 'label': '15 min car'},
+  List<Map<String, dynamic>> _selectOptsMaxMeters = [
+    {'value': 500, 'label': '5 min walk'},
+    {'value': 1500, 'label': '15 min walk'},
+    {'value': 3500, 'label': '15 min bike'},
+    {'value': 8000, 'label': '15 min car'},
   ];
   Map<String, dynamic?> _formValsInfo = {
     'maxCurrentPrice': null,
@@ -70,9 +73,10 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   };
   bool _loading = false;
   String _message = '';
-  var _formValsLngLat = {
-    'latitude': -999.0,
-    'longitude': -999.0,
+  Map<String, dynamic> _formValsLngLat = {
+    'lngLat': [-999.0, -999.0],
+    // 'latitude': -999.0,
+    // 'longitude': -999.0,
   };
 
   bool _loadedSharedItem = false;
@@ -178,36 +182,37 @@ class _SharedItemSaveState extends State<SharedItemSave> {
                     SizedBox(height: 10),
                     _inputFields.inputText(_formVals, 'description', label: 'Description', required: false, minLines: 5, maxLines: 5),
                     SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: _inputFields.inputNumber(_formValsLngLat, 'longitude', label: 'Longitude', required: true, onChange: (double? val) {
-                            if (val != null) {
-                              setState(() { _formValsLngLat['longitude'] = val!; });
-                            }
-                          }),
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          flex: 1,
-                          child: _inputFields.inputNumber(_formValsLngLat, 'latitude', label: 'Latitude', required: true, onChange: (double? val) {
-                            if (val != null) {
-                              setState(() { _formValsLngLat['latitude'] = val!; });
-                            }
-                          }),
-                        ),
-                        // SizedBox(width: 10),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     saveUser(currentUserState);
-                        //   },
-                        //   child: Text('Save'),
-                        // ),
-                      ]
-                    ),
-                    SizedBox(height: 10),
+                    // Row(
+                    //   children: [
+                    //     Expanded(
+                    //       flex: 1,
+                    //       child: _inputFields.inputNumber(_formValsLngLat, 'longitude', label: 'Longitude', required: true, onChange: (double? val) {
+                    //         if (val != null) {
+                    //           setState(() { _formValsLngLat['longitude'] = val!; });
+                    //         }
+                    //       }),
+                    //     ),
+                    //     SizedBox(width: 10),
+                    //     Expanded(
+                    //       flex: 1,
+                    //       child: _inputFields.inputNumber(_formValsLngLat, 'latitude', label: 'Latitude', required: true, onChange: (double? val) {
+                    //         if (val != null) {
+                    //           setState(() { _formValsLngLat['latitude'] = val!; });
+                    //         }
+                    //       }),
+                    //     ),
+                    //     // SizedBox(width: 10),
+                    //     // ElevatedButton(
+                    //     //   onPressed: () {
+                    //     //     saveUser(currentUserState);
+                    //     //   },
+                    //     //   child: Text('Save'),
+                    //     // ),
+                    //   ]
+                    // ),
+                    // SizedBox(height: 10),
                     _layoutService.WrapWidth([
+                      InputLocation(formVals: _formValsLngLat, formValsKey: 'lngLat', label: 'Location'),
                       _inputFields.inputSelect(_selectOptsBought, _formVals, 'bought', label: 'Do you already own this item?', ),
                       _inputFields.inputNumber(_formVals, 'originalPrice', label: 'Original (New) Price ', required: true, onChange: (double? val) {
                         ValidateSharedItem();
@@ -257,22 +262,28 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   }
 
   void _init() async {
-    var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-    if (currentUser.location.coordinates.length > 0) {
+    if (!_skipCurrentLocation) {
+      List<double> lngLat = await _locationService.GetLocation(context);
       setState(() {
-        _formValsLngLat['longitude'] = currentUser.location.coordinates[0];
-        _formValsLngLat['latitude'] = currentUser.location.coordinates[1];
+        _formValsLngLat['lngLat'] = lngLat;
       });
     }
-    else if (!_skipCurrentLocation) {
-      var coordinates = await _location.getLocation();
-      if (coordinates.latitude != null) {
-        setState(() {
-          _formValsLngLat['latitude'] = coordinates.latitude!;
-          _formValsLngLat['longitude'] = coordinates.longitude!;
-        });
-      }
-    }
+    // var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+    // if (currentUser.location.coordinates.length > 0) {
+    //   setState(() {
+    //     _formValsLngLat['longitude'] = currentUser.location.coordinates[0];
+    //     _formValsLngLat['latitude'] = currentUser.location.coordinates[1];
+    //   });
+    // }
+    // else if (!_skipCurrentLocation) {
+    //   var coordinates = await _location.getLocation();
+    //   if (coordinates.latitude != null) {
+    //     setState(() {
+    //       _formValsLngLat['latitude'] = coordinates.latitude!;
+    //       _formValsLngLat['longitude'] = coordinates.longitude!;
+    //     });
+    //   }
+    // }
   }
 
   Widget _buildSubmit(BuildContext context, currentUserState) {
@@ -309,47 +320,6 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     return SizedBox.shrink();
   }
 
-  // Widget _buildUserLngLat(BuildContext context, currentUserState) {
-  //   //if (currentUserState.currentUser.location.coordinates.length < 1) {
-  //   if (true) {
-  //     return Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Row(
-  //           children: [
-  //             Expanded(
-  //               flex: 1,
-  //               child: _inputFields.inputNumber(_formValsUser, 'longitude', label: 'Longitude', required: true, onChange: (double? val) {
-  //                 if (val != null) {
-  //                   setState(() { _formValsUser['longitude'] = val!; });
-  //                 }
-  //               }),
-  //             ),
-  //             SizedBox(width: 10),
-  //             Expanded(
-  //               flex: 1,
-  //               child: _inputFields.inputNumber(_formValsUser, 'latitude', label: 'Latitude', required: true, onChange: (double? val) {
-  //                 if (val != null) {
-  //                   setState(() { _formValsUser['latitude'] = val!; });
-  //                 }
-  //               }),
-  //             ),
-  //             SizedBox(width: 10),
-  //             ElevatedButton(
-  //               onPressed: () {
-  //                 saveUser(currentUserState);
-  //               },
-  //               child: Text('Save'),
-  //             ),
-  //           ]
-  //         ),
-  //         SizedBox(height: 10),
-  //       ]
-  //     );
-  //   }
-  //   return SizedBox.shrink();
-  // }
-
   void setFormVals(SharedItemClass sharedItem) {
     _formVals = sharedItem.toJson();
     // _formVals['_id'] = sharedItem.id;
@@ -359,8 +329,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     // //_formVals['tags'] = sharedItem.tags;
     // _formVals['tags'] = [];
     if (sharedItem.location.coordinates.length > 0) {
-      _formValsLngLat['longitude'] = sharedItem.location.coordinates[0];
-      _formValsLngLat['latitude'] = sharedItem.location.coordinates[1];
+      _formValsLngLat['lngLat'] = sharedItem.location.coordinates;
     }
     ValidateSharedItem();
   }
@@ -371,7 +340,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     } else {
       _formVals['location'] = {
         'type': 'Point',
-        'coordinates': [_formValsLngLat['longitude']!, _formValsLngLat['latitude']!],
+        'coordinates': _formValsLngLat['lngLat'],
       };
     }
     _formVals['currentOwnerUserId'] = currentUserState.currentUser.id;
@@ -428,21 +397,5 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     };
     _socketService.emit('saveSharedItem', data);
   }
-
-  // void saveUser(currentUserState) {
-  //   if (_formValsUser['latitude'] != null && _formValsUser['longitude'] != null) {
-  //     var user = {
-  //       '_id': currentUserState.currentUser.id,
-  //       'location': {
-  //         'type': 'Point',
-  //         'coordinates': [_formValsUser['longitude']!, _formValsUser['latitude']!],
-  //       },
-  //     };
-  //     _socketService.emit('saveUser', { 'user': user });
-  //     var user1 = currentUserState.currentUser;
-  //     user1.location = LocationClass.fromJson(user['location']);
-  //     Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user1);
-  //   }
-  // }
 
 }

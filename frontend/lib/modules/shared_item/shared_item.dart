@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
@@ -12,6 +11,7 @@ import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/form_input/input_location.dart';
 import '../../common/layout_service.dart';
+import '../../common/location_service.dart';
 import './shared_item_class.dart';
 import './shared_item_state.dart';
 import './shared_item_service.dart';
@@ -24,7 +24,7 @@ class SharedItem extends StatefulWidget {
   final double lng;
   final double maxMeters;
 
-  SharedItem({ this.lat = -999, this.lng = -999, this.maxMeters = 8000, });
+  SharedItem({ this.lat = -999, this.lng = -999, this.maxMeters = 1500, });
 
   @override
   _SharedItemState createState() => _SharedItemState();
@@ -35,7 +35,7 @@ class _SharedItemState extends State<SharedItem> {
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
-  Location _location = Location();
+  LocationService _locationService = LocationService();
   CurrencyService _currency = CurrencyService();
   SharedItemService _sharedItemService = SharedItemService();
 
@@ -43,9 +43,7 @@ class _SharedItemState extends State<SharedItem> {
   Map<String, dynamic?> _filters = {
     'title': '',
     //'tags': '',
-    // 'lng': -79.574983,
-    // 'lat': 8.993036,
-    'maxMeters': '8000',
+    'maxMeters': 1500,
     'fundingRequired_min': '',
     'fundingRequired_max': '',
     // 'lngLat': [-79.574983, 8.993036],
@@ -123,7 +121,7 @@ class _SharedItemState extends State<SharedItem> {
       }
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _init();
     });
   }
@@ -215,33 +213,31 @@ class _SharedItemState extends State<SharedItem> {
   }
 
   void _init() async {
-    // if (!_skipCurrentLocation) {
-    //   List<dynamic> _userLngLat = await Provider.of<CurrentUserState>(context, listen: false).getUserLocation();
-    //   // _filters['lat'] =  _userLngLat.elementAt(1);
-    //   // _filters['lng'] =  _userLngLat.elementAt(0);
-    //   _filters['lngLat'] = [_userLngLat.elementAt(0), _userLngLat.elementAt(1)];
-    //   _locationLoaded = true;
-    //   checkFirstLoad();
-    // }
-
-    var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-    if (currentUser.location.coordinates.length > 0) {
+    if (!_skipCurrentLocation) {
+      List<double> lngLat = await _locationService.GetLocation(context);
       setState(() {
-        _filters['lngLat'] = [currentUser.location.coordinates[0], currentUser.location.coordinates[1]];
-        // _formValsLngLat['longitude'] = currentUser.location.coordinates[0];
-        // _formValsLngLat['latitude'] = currentUser.location.coordinates[1];
+        _filters['lngLat'] = lngLat;
       });
     }
-    else if (!_skipCurrentLocation) {
-      var coordinates = await _location.getLocation();
-      if (coordinates.latitude != null) {
-        setState(() {
-          // _formValsLngLat['latitude'] = coordinates.latitude!;
-          // _formValsLngLat['longitude'] = coordinates.longitude!;
-          _filters['lngLat'] = [coordinates.longitude!, coordinates.latitude!];
-        });
-      }
-    }
+    // var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+    // if (currentUser.location.coordinates.length > 0) {
+    //   setState(() {
+    //     _filters['lngLat'] = [currentUser.location.coordinates[0], currentUser.location.coordinates[1]];
+    //     // _formValsLngLat['longitude'] = currentUser.location.coordinates[0];
+    //     // _formValsLngLat['latitude'] = currentUser.location.coordinates[1];
+    //   });
+    // }
+    // else if (!_skipCurrentLocation) {
+    //   var coordinates = await _location.getLocation();
+    //   if (coordinates.latitude != null) {
+    //     setState(() {
+    //       // _formValsLngLat['latitude'] = coordinates.latitude!;
+    //       // _formValsLngLat['longitude'] = coordinates.longitude!;
+    //       _filters['lngLat'] = [coordinates.longitude!, coordinates.latitude!];
+    //     });
+    //   }
+    // }
+
     _locationLoaded = true;
     checkFirstLoad();
   }

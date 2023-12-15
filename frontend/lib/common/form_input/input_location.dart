@@ -65,14 +65,19 @@ class _InputLocationState extends State<InputLocation> {
           List<String> lngLatString = val.split(',');
           double lng = _parseService.toDoubleNoNull(lngLatString[0]);
           double lat = _parseService.toDoubleNoNull(lngLatString[1]);
-          widget.formVals[widget.formValsKey] = [_parseService.Precision(lng, 6),
-            _parseService.Precision(lat, 6)];
-          if (widget.onChange != null) {
-            widget.onChange!(widget.formVals[widget.formValsKey]);
-          }
+          UpdateLngLat(lng, lat);
         }),
       ),
     );
+  }
+
+  List<double> UpdateLngLat(double lng, double lat) {
+    widget.formVals[widget.formValsKey] = [_parseService.Precision(lng, 6),
+      _parseService.Precision(lat, 6)];
+    if (widget.onChange != null) {
+      widget.onChange!(widget.formVals[widget.formValsKey]);
+    }
+    return widget.formVals[widget.formValsKey];
   }
 
   void onTap() {
@@ -113,13 +118,9 @@ class _InputLocationState extends State<InputLocation> {
   }
 
   void _onChangeMap(var data) {
-    double lng = _parseService.Precision(data['longitude'], 6);
-    double lat = _parseService.Precision(data['latitude'], 6);
-    widget.formVals[widget.formValsKey] = [lng, lat];
-    _formVals['lngLatString'] = '${lng}, ${lat}';
-    setState(() {_formVals = _formVals;});
-    if (widget.onChange != null) {
-      widget.onChange!(widget.formVals[widget.formValsKey]);
-    }
+    List<double> lngLat = UpdateLngLat(data['longitude'], data['latitude']);
+    setState(() {
+      _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
+    });
   }
 }
