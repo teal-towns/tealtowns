@@ -99,6 +99,17 @@ class ParseService {
     return items;
   }
 
+  // double StringToDouble(String val) {
+  //   if (val[0] == '-') {
+  //     return -1 * val.substring(1, val.length).toDouble();
+  //   }
+  //   return val.toDouble();
+  // }
+
+  double Precision(double val, int precision) {
+    return  toDoubleNoNull(val.toStringAsFixed(precision));
+  }
+
   //dynamic toDoubleEmpty(var val) {
   //  if (val.runtimeType == String) {
   //    if (val.isEmpty || val == '') {

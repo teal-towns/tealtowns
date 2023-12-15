@@ -34,7 +34,7 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
         sharedItemIds.append(item['_id'])
         sharedItemIndexMap[item['_id']] = index
 
-    if len(withOwnerUserId) > 0:
+    if len(sharedItemIds) > 0 and len(withOwnerUserId) > 0:
         listKeyVals = {'sharedItemId': sharedItemIds }
         stringKeyVals = {'userId': withOwnerUserId}
         sharedItemOwners = _mongo_db_crud.Search('sharedItemOwner', listKeyVals = listKeyVals, stringKeyVals = stringKeyVals)['sharedItemOwners']

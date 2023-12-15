@@ -5,7 +5,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_gl/mapbox_gl.dart';
 
-import '../../common/lodash_service.dart';
+import '../lodash_service.dart';
+import '../parse_service.dart';
 import './mapbox_draw_service.dart';
 
 class Mapbox extends StatefulWidget {
@@ -19,7 +20,7 @@ class Mapbox extends StatefulWidget {
   double zoom = 13.0;
   var coordinatesDraw = [];
 
-  Mapbox({ @required this.polygons = const [], this.mapHeight = 300, this.mapWidth = 300,
+  Mapbox({ this.polygons = const [], this.mapHeight = 300, this.mapWidth = 300,
     this.onChange = null, this.debounceChange = 1000, this.latitude = 8.993036,
     this.longitude = -79.574983, this.zoom = 13.0, this.coordinatesDraw = const [], });
 
@@ -30,6 +31,7 @@ class Mapbox extends StatefulWidget {
 class _MapboxState extends State<Mapbox> {
   LodashService _lodashService = LodashService();
   MapboxDrawService _mapboxDrawService = MapboxDrawService();
+  ParseService _parseService = ParseService();
 
   MapboxMap? _map;
   bool _mapReady = false;
@@ -113,8 +115,8 @@ class _MapboxState extends State<Mapbox> {
   }
 
   void _onMapChanged() {
-    if (_latitude != _mapController.cameraPosition!.target.latitude ||
-      _longitude != _mapController.cameraPosition!.target.longitude) {
+    if (_parseService.Precision(_latitude, 6) != _parseService.Precision(_mapController.cameraPosition!.target.latitude, 6) ||
+      _parseService.Precision(_longitude, 6) != _parseService.Precision(_mapController.cameraPosition!.target.longitude, 6)) {
       _latitude = _mapController.cameraPosition!.target.latitude;
       _longitude = _mapController.cameraPosition!.target.longitude;
       if (widget.onChange != null && _mapController.cameraPosition != null) {
