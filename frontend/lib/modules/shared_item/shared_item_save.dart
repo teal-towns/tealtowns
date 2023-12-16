@@ -335,7 +335,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   }
 
   bool formValid(currentUserState) {
-    if (_formValsLngLat['longitude'] == null || _formValsLngLat['latitude'] == null) {
+    if (_formValsLngLat['lngLat'] == null) {
       return false;
     } else {
       _formVals['location'] = {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import './image_class.dart';
+import '../image_service.dart';
 import '../socket_service.dart';
 import '../file_upload_service.dart';
 import './input_fields.dart';
@@ -31,6 +32,7 @@ class ImageSaveComponent extends StatefulWidget {
 
 class _ImageSaveState extends State<ImageSaveComponent> {
   List<String> _routeIds = [];
+  ImageService _imageService = ImageService();
   FileUploadService _fileUploadService = FileUploadService();
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
@@ -261,7 +263,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
             Container(
               height: 100,
               width: 100,
-              child: Image.network(image.url),
+              child: Image.network(_imageService.GetUrl(image.url)),
             ),
             SizedBox(height: 5),
             Text(image.title),
@@ -387,7 +389,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
       height: 100,
       width: 110,
       padding: EdgeInsets.only(right: 10),
-      child: Image.network(imageUrl),
+      child: Image.network(_imageService.GetUrl(imageUrl)),
     );
   }
 
@@ -470,7 +472,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
     Widget image = SizedBox.shrink();
     if (formValsImageSave.containsKey('image_urls') && formValsImageSave['image_urls'] != null &&
       formValsImageSave['image_urls'].length > 0) {
-      image = Image.network(formValsImageSave['image_urls'][0]);
+      image = Image.network(_imageService.GetUrl(formValsImageSave['image_urls'][0]));
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
