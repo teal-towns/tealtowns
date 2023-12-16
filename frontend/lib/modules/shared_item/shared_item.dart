@@ -7,6 +7,7 @@ import 'package:universal_html/html.dart' as html;
 
 import '../../app_scaffold.dart';
 import '../../common/currency_service.dart';
+import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/form_input/input_location.dart';
@@ -35,6 +36,7 @@ class _SharedItemState extends State<SharedItem> {
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
+  LinkService _linkService = LinkService();
   LocationService _locationService = LocationService();
   CurrencyService _currency = CurrencyService();
   SharedItemService _sharedItemService = SharedItemService();
@@ -47,7 +49,7 @@ class _SharedItemState extends State<SharedItem> {
     'fundingRequired_min': '',
     'fundingRequired_max': '',
     // 'lngLat': [-79.574983, 8.993036],
-    'lngLat': [-999, -999],
+    'lngLat': [0, 0],
   };
   bool _loading = false;
   String _message = '';
@@ -110,6 +112,7 @@ class _SharedItemState extends State<SharedItem> {
       });
     }));
 
+    _filters['lngLat'] = _locationService.GetLngLat();
     if (widget.lat != -999 && widget.lng != -999) {
       _filters['lngLat'] = [widget.lng, widget.lat];
       _skipCurrentLocation = true;
@@ -138,19 +141,22 @@ class _SharedItemState extends State<SharedItem> {
 
     var currentUserState = context.watch<CurrentUserState>();
 
-    var columnsCreate = [
-      Align(
-        alignment: Alignment.topRight,
-        child: ElevatedButton(
-          onPressed: () {
-            Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
-            context.go('/shared-item-save');
-          },
-          child: Text('Post New Item'),
+    var columnsCreate = [];
+    if (currentUserState.isLoggedIn) {
+      columnsCreate = [
+        Align(
+          alignment: Alignment.topRight,
+          child: ElevatedButton(
+            onPressed: () {
+              Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
+              context.go('/shared-item-save');
+            },
+            child: Text('Post New Item'),
+          ),
         ),
-      ),
-      SizedBox(height: 10),
-    ];
+        SizedBox(height: 10),
+      ];
+    }
 
     return AppScaffoldComponent(
       width: 1500,
@@ -214,29 +220,16 @@ class _SharedItemState extends State<SharedItem> {
 
   void _init() async {
     if (!_skipCurrentLocation) {
+      if (_locationService.LocationValid(_filters['lngLat'])) {
+        _searchSharedItems();
+      }
       List<double> lngLat = await _locationService.GetLocation(context);
-      setState(() {
-        _filters['lngLat'] = lngLat;
-      });
+      if (_locationService.IsDifferent(lngLat, _filters['lngLat'])) {
+        setState(() {
+          _filters['lngLat'] = lngLat;
+        });
+      }
     }
-    // var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-    // if (currentUser.location.coordinates.length > 0) {
-    //   setState(() {
-    //     _filters['lngLat'] = [currentUser.location.coordinates[0], currentUser.location.coordinates[1]];
-    //     // _formValsLngLat['longitude'] = currentUser.location.coordinates[0];
-    //     // _formValsLngLat['latitude'] = currentUser.location.coordinates[1];
-    //   });
-    // }
-    // else if (!_skipCurrentLocation) {
-    //   var coordinates = await _location.getLocation();
-    //   if (coordinates.latitude != null) {
-    //     setState(() {
-    //       // _formValsLngLat['latitude'] = coordinates.latitude!;
-    //       // _formValsLngLat['longitude'] = coordinates.longitude!;
-    //       _filters['lngLat'] = [coordinates.longitude!, coordinates.latitude!];
-    //     });
-    //   }
-    // }
 
     _locationLoaded = true;
     checkFirstLoad();
@@ -259,7 +252,8 @@ class _SharedItemState extends State<SharedItem> {
         ElevatedButton(
           onPressed: () {
             Provider.of<SharedItemState>(context, listen: false).setSharedItem(sharedItem);
-            context.go('/shared-item-save');
+            _linkService.Go('/shared-item-save', context, currentUserState);
+            // context.go('/shared-item-save');
           },
           child: Text('Edit'),
         ),
@@ -336,7 +330,7 @@ class _SharedItemState extends State<SharedItem> {
         ElevatedButton(
           onPressed: () {
             String id = sharedItem.sharedItemOwner_current.id;
-            context.go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}');
+            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
           },
           child: Text('Invest'),
         ),
@@ -369,7 +363,7 @@ class _SharedItemState extends State<SharedItem> {
           ElevatedButton(
             onPressed: () {
               String id = sharedItem.sharedItemOwner_current.id;
-              context.go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}');
+              _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
             },
             child: Text('Co-Buy'),
           ),
@@ -435,7 +429,7 @@ class _SharedItemState extends State<SharedItem> {
       // 'lngLat': [_filters['lng'], _filters['lat']],
       'lngLat': _filters['lngLat'],
       'maxMeters': _filters['maxMeters'],
-      'withOwnerUserId': currentUser.id,
+      'withOwnerUserId': currentUser != null ? currentUser.id : '',
     };
     List<String> keys = ['title', 'fundingRequired_min', 'fundingRequired_max'];
     for (var key in keys) {
