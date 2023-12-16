@@ -7,6 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/image_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
 import './blog_class.dart';
@@ -21,6 +22,7 @@ class BlogList extends StatefulWidget {
 class _BlogListState extends State<BlogList> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
+  ImageService _imageService = ImageService();
   InputFields _inputFields = InputFields();
 
   final _formKey = GlobalKey<FormState>();
@@ -120,7 +122,7 @@ class _BlogListState extends State<BlogList> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Image.network(blog.imageUrl!, height: 300, width: double.infinity, fit: BoxFit.cover),
+          Image.network(_imageService.GetUrl(blog.imageUrl!), height: 300, width: double.infinity, fit: BoxFit.cover),
           SizedBox(height: 5),
           Text(blog.title!,
             style: Theme.of(context).textTheme.headline2,

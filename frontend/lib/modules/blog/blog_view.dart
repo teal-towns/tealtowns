@@ -5,6 +5,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/image_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
 import './blog_class.dart';
@@ -22,6 +23,7 @@ class BlogView extends StatefulWidget {
 
 class _BlogViewState extends State<BlogView> {
   List<String> _routeIds = [];
+  ImageService _imageService = ImageService();
   SocketService _socketService = SocketService();
 
   bool _loading = false;
@@ -89,7 +91,7 @@ class _BlogViewState extends State<BlogView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Image.network(_blog.imageUrl!, height: 300, width: double.infinity, fit: BoxFit.cover),
+        Image.network(_imageService.GetUrl(_blog.imageUrl!), height: 300, width: double.infinity, fit: BoxFit.cover),
         imageCredit,
         SizedBox(height: 10),
         Container(
