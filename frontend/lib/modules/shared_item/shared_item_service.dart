@@ -91,6 +91,10 @@ class SharedItemService {
     String months = monthsToPayBack == 1 ? 'month' : 'months';
     String perPersonText = "${down} down, ${monthly} / month for ${monthsToPayBack.toString()} ${months}";
     String perPersonTextDownLast = "${monthly} / month for ${monthsToPayBack.toString()} ${months}, ${down} down";
+    if (monthsToPayBack == 0) {
+      perPersonText = "${down}";
+      perPersonTextDownLast = "${down}";
+    }
     return {
       'perPerson': perPersonText,
       'perPersonDownLast': perPersonTextDownLast,
