@@ -38,7 +38,7 @@ def GetDefaultFromCollectionName(collectionName: str):
         return _nameDefaultsMap[collectionName]
     return {}
 
-def CreateBulk(objs: list[dict] = [], default: dict = {}, base: dict = {}, collectionName = '', count = 1,
+def CreateBulk(objs: list = [], default: dict = {}, base: dict = {}, collectionName = '', count = 1,
     saveInDatabase = 1):
     if len(objs) < 1:
         objs = []
