@@ -7,8 +7,9 @@ Python (with sockets) + MongoDB + Flutter
 
 - Replace all instances of `seed_app`, `com.example.seed-app` and `seedApp` with the name / path of your app.
 
-- Install pyenv: https://github.com/pyenv/pyenv
-  - Use `pyenv install 3.9.x` to install, then add a .python-version file with 3.9.x in the directory to use it; `python -V` should show this version.
+- Install python
+  - E.g. Install pyenv: https://github.com/pyenv/pyenv
+    - Use `pyenv install 3.10.x` to install, then add a .python-version file with 3.10.x in the directory to use it; `python -V` should show this version.
 
 For (Ubuntu) script, see `server-setup.sh`
 

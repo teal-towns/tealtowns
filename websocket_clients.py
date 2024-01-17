@@ -1,3 +1,5 @@
+import json
+
 # One per user (assume each websocket client connection is from one user).
 # If the same user is connected multiple times (e.g. from multiple devices or
 # browsers) then there will be multiple websockets per that user.
@@ -126,8 +128,16 @@ async def SendToUsers(sendBytes, userIds, skipUserIds=[]):
                     RemoveClient(socketId)
     return {}
 
+async def SendToUsersJson(jsonData, userIds, skipUserIds = []):
+    utf8Bytes = json.dumps(jsonData).encode(encoding='utf-8')
+    return await SendToUsers(utf8Bytes, userIds, skipUserIds)
+
 async def SendToGroups(sendBytes, groupNames, skipUserIds=[]):
     for groupName in groupNames:
         if groupName in _wsGroups:
             await SendToUsers(sendBytes, _wsGroups[groupName]['userIds'], skipUserIds)
     return {}
+
+async def SendToGroupsJson(jsonData, groupNames, skipUserIds = []):
+    utf8Bytes = json.dumps(jsonData).encode(encoding='utf-8')
+    return await SendToGroups(utf8Bytes, groupNames, skipUserIds)

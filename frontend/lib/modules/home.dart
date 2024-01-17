@@ -41,6 +41,7 @@ class _HomeComponentState extends State<HomeComponent> {
         children: [
           SizedBox(height: 30),
           MarkdownBody(
+            selectable: true,
             data: text!,
             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               h1: Theme.of(context).textTheme.headline1,

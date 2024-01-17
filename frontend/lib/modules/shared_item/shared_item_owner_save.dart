@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/currency_service.dart';
+import '../../common/link_service.dart';
 import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
@@ -29,6 +30,7 @@ class SharedItemOwnerSave extends StatefulWidget {
 class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
   List<String> _routeIds = [];
   CurrencyService _currency = CurrencyService();
+  LinkService _linkService = LinkService();
   ParseService _parseService = ParseService();
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
@@ -49,13 +51,18 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
   ];
   Map<String, dynamic> _formValsInfo = {
     'numOwners': 0,
+    'downPaymentUSDWithFee': 0,
+    'downPaymentUSD': 0,
+    'investTotalPaid': 0,
   };
   List<Map<String, String>> _selectOptsNumOwners = [];
+  List<Map<String, dynamic>> _selectOptsInvest = [];
   String _paymentDetails = '';
   String _investmentDetails = '';
   bool _firstLoadDone = false;
   bool _loading = false;
   String _message = '';
+  bool _paymentMade = false;
 
   @override
   void initState() {
@@ -78,10 +85,18 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
           _formValsInfo['numOwners'] = _sharedItemService.GetMinOwnersFromMaxMonthlyPayment(
             _sharedItemOwner.monthlyPayment, _sharedItem.minOwners, _sharedItem.maxOwners, _sharedItem.currentPrice,
             _sharedItem.monthsToPayBack, _sharedItem.maintenancePerYear);
+          _selectOptsInvest = [
+            {'value': 0, 'label': 'No'},
+            {'value': _sharedItem.currentPrice, 'label': 'Yes, I will purchase for \$${_sharedItem.currentPrice}'},
+          ];
+          if (_formVals['totalPaid'] == _sharedItem.currentPrice) {
+            _formValsInfo['investTotalPaid'] = _formVals['totalPaid'];
+          }
           setState(() {
             _sharedItemOwner = _sharedItemOwner;
             _sharedItem = _sharedItem;
             _selectOptsNumOwners = _selectOptsNumOwners;
+            _selectOptsInvest = _selectOptsInvest;
             _formValsInfo = _formValsInfo;
           });
           setFormVals(_sharedItemOwner);
@@ -103,6 +118,58 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
         setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Error, please try again.'; });
       }
       setState(() { _loading = false; });
+    }));
+
+    _routeIds.add(_socketService.onRoute('GetSharedItemDownPaymentLink', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        if (data.containsKey('haveBalance') && data['haveBalance'] > 0) {
+          _formVals['totalPaid'] = data['totalPaid'];
+          _formVals['investorOnly'] = 0;
+          _paymentMade = true;
+          save();
+        } else {
+          _linkService.LaunchURL(data['url']);
+        }
+      } else {
+        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Error, please try again.'; });
+      }
+      setState(() { _loading = false; });
+    }));
+
+    _routeIds.add(_socketService.onRoute('GetSharedItemMonthlyPaymentLink', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _linkService.LaunchURL(data['url']);
+      } else {
+        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Error, please try again.'; });
+      }
+      setState(() { _loading = false; });
+    }));
+
+    _routeIds.add(_socketService.onRoute('StripePaymentComplete', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['sharedItemId'] == _sharedItem.id) {
+        if (data['type'] == 'sharedItemDownPayment') {
+          _formVals['totalPaid'] = data['totalPaid'];
+          _formVals['investorOnly'] = 0;
+          _paymentMade = true;
+          save();
+        } else if (data['type'] == 'sharedItemMonthlyPayment') {
+          var dataSend = {
+            'sharedItemOwner': {
+              '_id': _sharedItemOwner.id,
+              'monthlyPayment': data['monthlyPayment'],
+              'status': 'paying',
+              'stripeMonthlyPriceId': data['stripeMonthlyPriceId'],
+            },
+          };
+          saveData(dataSend);
+        }
+      }
     }));
   }
 
@@ -137,10 +204,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
                   children: [
                     SharedItemInfo(_sharedItem),
                     SizedBox(height: 10),
-                    SharedItemOwnerForm(),
-                    SizedBox(height: 10),
-                    _buildSubmit(context, currentUserState),
-                    _buildMessage(context),
+                    SharedItemOwnerContent(currentUserState),
                     SizedBox(height: 50),
                   ]
                 )
@@ -174,6 +238,10 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
         child: LinearProgressIndicator(),
       );
     }
+    // Do not allow submitting if payment has not been made.
+    if (!_paymentMade && _parseService.toIntNoNull(_formVals['investorOnly']) == 0) {
+      return SizedBox.shrink();
+    }
     return Padding(
       padding: EdgeInsets.only(top: 15, bottom: 5),
       child: ElevatedButton(
@@ -201,6 +269,35 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     return SizedBox.shrink();
   }
 
+  Widget SharedItemOwnerContent(currentUserState) {
+    if (_sharedItemOwner.status == 'pendingMonthlyPayment') {
+      return Column(
+        children: [
+          Text('Set up your monthly payment to start using your shared item!'),
+          ElevatedButton(
+            onPressed: () {
+              _message = '';
+              _loading = true;
+              GetMonthlyPaymentLink(currentUserState);
+              setState(() { _message = _message; _loading = _loading; });
+            },
+            child: Text('Set Up Monthly Payment'),
+          ),
+          SizedBox(height: 10),
+        ]
+      );
+    } else {
+      return Column(
+        children: [
+          SharedItemOwnerForm(currentUserState),
+          SizedBox(height: 10),
+          _buildSubmit(context, currentUserState),
+          _buildMessage(context),
+        ]
+      );
+    }
+  }
+
   void SetPaymentDetails() {
     Map<String, dynamic> paymentInfo = _sharedItemService.GetPayments(_sharedItem.currentPrice!,
       _sharedItem.monthsToPayBack!, _parseService.toIntNoNull(_formValsInfo['numOwners']), _sharedItem.maintenancePerYear!);
@@ -208,7 +305,9 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
       paymentInfo['monthlyPaymentWithFee']!, paymentInfo['monthsToPayBack']!, _sharedItem.currency);
     _paymentDetails = "${texts['perPersonDownLast']} (${_formValsInfo['numOwners']} owners)";
     _formVals['monthlyPayment'] = paymentInfo['monthlyPayment'];
-    setState(() { _paymentDetails = _paymentDetails; _formVals = _formVals; });
+    _formValsInfo['downPaymentUSDWithFee'] = paymentInfo['downPerPersonWithFee'];
+    _formValsInfo['downPaymentUSD'] = paymentInfo['downPerPerson'];
+    setState(() { _paymentDetails = _paymentDetails; _formVals = _formVals; _formValsInfo = _formValsInfo; });
   }
 
   void SetInvestmentDetails() {
@@ -216,7 +315,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     Map<String, dynamic> paymentInfo = _sharedItemService.GetPayments(_sharedItem.currentPrice!,
       _sharedItem.monthsToPayBack!, _sharedItem.maxOwners, _sharedItem.maintenancePerYear!);
     double profitPartial = min(paymentInfo['investorProfit'],
-      paymentInfo['investorProfit'] * (_formVals['totalPaid'] / _sharedItem.currentPrice!));
+      paymentInfo['investorProfit'] * (_formValsInfo['investTotalPaid'] / _sharedItem.currentPrice!));
     String profit = _currency.Format(profitPartial, _sharedItem.currency);
     _investmentDetails = "${profit} total profit";
     setState(() { _investmentDetails = _investmentDetails; });
@@ -234,25 +333,36 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     );
   }
 
-  Widget SharedItemOwnerForm() {
+  Widget SharedItemOwnerForm(currentUserState) {
     List<Widget> colsInvest = [];
     if (_sharedItem.bought <= 0) {
       colsInvest += [
-        SizedBox(height: 30),
         Text('Investor'),
         SizedBox(height: 10),
-        _inputFields.inputNumber(_formVals, 'totalPaid', label: 'Investment amount', onChange: (double? val) {
+        _inputFields.inputSelect(_selectOptsInvest, _formValsInfo, 'investTotalPaid', label: 'Will you purchase this item?', onChanged: (String newVal) {
+          _formValsInfo['investTotalPaid'] = _parseService.toDoubleNoNull(newVal);
+          setState(() {
+            _formValsInfo = _formValsInfo;
+          });
           SetInvestmentDetails();
         }),
         SizedBox(height: 10),
         Text(_investmentDetails),
         SizedBox(height: 10),
-        _inputFields.inputSelect(_selectOptsInvestorOnly, _formVals, 'investorOnly', label: 'Will you co-own (also)?'),
+        _inputFields.inputSelect(_selectOptsInvestorOnly, _formVals, 'investorOnly', label: 'Will you co-own (also)?', onChanged: (String newVal) {
+          _formVals['investorOnly'] = _parseService.toIntNoNull(newVal);
+          setState(() {
+            _formVals = _formVals;
+          });
+        }),
+        SizedBox(height: 30),
       ];
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+
+    List<Widget> colsCoOwn = [];
+    List<Widget> colsPay =[];
+    if (_parseService.toIntNoNull(_formVals['investorOnly']) == 0) {
+      colsCoOwn += [
         Text('Co-Owner'),
         SizedBox(height: 10),
         _inputFields.inputSelect(_selectOptsNumOwners, _formValsInfo, 'numOwners', label: 'Minimum owners (max price you will pay)', onChanged: (String newVal) {
@@ -260,7 +370,42 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
         }),
         SizedBox(height: 10),
         Text(_paymentDetails),
+        SizedBox(height: 10),
+      ];
+
+      // if (_paymentMade) {
+      //   colsPay += [
+      //     Text('Payment received'),
+      //     SizedBox(height: 10),
+      //   ];
+      // } else {
+        colsPay += [
+          ElevatedButton(
+            onPressed: () {
+              _message = '';
+              _loading = false;
+              if (formValid(currentUserState)) {
+                _loading = true;
+                _formKey.currentState?.save();
+                GetDownPaymentLink(currentUserState);
+              } else {
+                _message = 'Please fill out all fields and try again.';
+              }
+              setState(() { _message = _message; });
+            },
+            child: Text('Reserve Your Spot'),
+          ),
+          SizedBox(height: 10),
+        ];
+      // }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         ...colsInvest,
+        ...colsCoOwn,
+        ...colsPay,
         SizedBox(height: 10),
       ],
     );
@@ -277,6 +422,10 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     if (_formVals['sharedItemId'].length < 1) {
       _formVals['sharedItemId'] = _sharedItem.id!;
     }
+    // Only increase (if want to be an investor), do not reduce (if already paid, e.g. down payment as shared owner).
+    if (_formValsInfo['investTotalPaid'] > _formVals['totalPaid']) {
+      _formVals['totalPaid'] = _formValsInfo['investTotalPaid'];
+    }
     // Can only update for pledges (future generation).
     _formVals['generation'] = _sharedItem.generation + 1;
     if (!_formKey.currentState!.validate()) {
@@ -289,6 +438,28 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     var data = {
       'sharedItemOwner': _formVals,
     };
+    saveData(data);
+  }
+
+  void saveData(var data) {
     _socketService.emit('saveSharedItemOwner', data);
+  }
+
+  void GetDownPaymentLink(currentUserState) {
+    var data = {
+      'amountUSD': _formValsInfo['downPaymentUSDWithFee'],
+      'sharedItemTitle': _sharedItem.title,
+      'sharedItemId': _sharedItem.id!,
+      'userId': currentUserState.currentUser.id,
+      'checkAndUseBalance': 1,
+    };
+    _socketService.emit('GetSharedItemDownPaymentLink', data);
+  }
+
+  void GetMonthlyPaymentLink(currentUserState) {
+    var data = {
+      'sharedItemOwnerId': _sharedItemOwner.id,
+    };
+    _socketService.emit('GetSharedItemMonthlyPaymentLink', data);
   }
 }

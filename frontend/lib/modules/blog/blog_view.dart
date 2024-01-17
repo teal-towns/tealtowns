@@ -74,6 +74,7 @@ class _BlogViewState extends State<BlogView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               MarkdownBody(
+                selectable: true,
                 data: _blog.imageCredit!,
                 onTapLink: (text, href, title) {
                   launch(href!);
@@ -107,6 +108,7 @@ class _BlogViewState extends State<BlogView> {
               //Text('Tags: ${_blog.tags.join(', ')}'),
               //SizedBox(height: 5),
               MarkdownBody(
+                selectable: true,
                 data: _blog.text!,
                 onTapLink: (text, href, title) {
                   launch(href!);

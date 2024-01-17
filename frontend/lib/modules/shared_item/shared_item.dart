@@ -50,6 +50,7 @@ class _SharedItemState extends State<SharedItem> {
     'fundingRequired_max': '',
     // 'lngLat': [-79.574983, 8.993036],
     'lngLat': [0, 0],
+    'myType': '',
   };
   bool _loading = false;
   String _message = '';
@@ -70,6 +71,15 @@ class _SharedItemState extends State<SharedItem> {
     {'value': 1500, 'label': '15 min walk'},
     {'value': 3500, 'label': '15 min bike'},
     {'value': 8000, 'label': '15 min car'},
+  ];
+  List<Map<String, dynamic>> _selectOptsMyType = [
+    {'value': '', 'label': 'Any'},
+    {'value': 'owner', 'label': 'My Owned Items'},
+    {'value': 'purchaser', 'label': 'My Purchased Items'},
+  ];
+  List<Map<String, dynamic>> _selectOptsInvestor = [
+    {'value': '', 'label': 'Any'},
+    {'value': 1, 'label': 'Needs Investment'},
   ];
 
   @override
@@ -176,6 +186,10 @@ class _SharedItemState extends State<SharedItem> {
                       key: _formKey,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       child: _layoutService.WrapWidth([
+                        _inputFields.inputSelect(_selectOptsMyType, _filters, 'myType',
+                            label: 'Type', onChanged: (String val) {
+                            _searchSharedItems();
+                          }),
                         InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', onChange: (List<double?> val) {
                           _searchSharedItems();
                           }),
@@ -187,14 +201,18 @@ class _SharedItemState extends State<SharedItem> {
                             label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
                             _searchSharedItems();
                           }),
-                        _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
-                            label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                        _inputFields.inputSelect(_selectOptsInvestor, _filters, 'fundingRequired_min',
+                            label: 'Needs Investment', onChanged: (String val) {
                             _searchSharedItems();
                           }),
-                        _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
-                            label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
-                            _searchSharedItems();
-                          }),
+                        // _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
+                        //     label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                        //     _searchSharedItems();
+                        //   }),
+                        // _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
+                        //     label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                        //     _searchSharedItems();
+                        //   }),
                       ], width: 225),
                     ),
                   ),
@@ -271,24 +289,24 @@ class _SharedItemState extends State<SharedItem> {
         // SizedBox(width: 10),
       ];
     }
-    if (currentUserState.isLoggedIn && sharedItem.currentOwnerUserId != currentUserState.currentUser.id) {
-      buttons += [
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _selectedSharedItem = {
-                'id': sharedItem.id!,
-              };
-            });
-          },
-          child: Text('Borrow'),
-          //style: ElevatedButton.styleFrom(
-          //  primary: Theme.of(context).successColor,
-          //),
-        ),
-        SizedBox(width: 10),
-      ];
-    }
+    // if (currentUserState.isLoggedIn && sharedItem.currentOwnerUserId != currentUserState.currentUser.id) {
+    //   buttons += [
+    //     ElevatedButton(
+    //       onPressed: () {
+    //         setState(() {
+    //           _selectedSharedItem = {
+    //             'id': sharedItem.id!,
+    //           };
+    //         });
+    //       },
+    //       child: Text('Borrow'),
+    //       //style: ElevatedButton.styleFrom(
+    //       //  primary: Theme.of(context).successColor,
+    //       //),
+    //     ),
+    //     SizedBox(width: 10),
+    //   ];
+    // }
 
     var columnsDistance = [];
     if (sharedItem.xDistanceKm >= 0) {
@@ -338,6 +356,43 @@ class _SharedItemState extends State<SharedItem> {
       ];
     }
 
+    List<Widget> colsCoBuy = [];
+    if (sharedItem.sharedItemOwner_current.sharedItemId == sharedItem.id) {
+      if (sharedItem.sharedItemOwner_current.investorOnly > 0) {
+        colsCoBuy = [
+          Text('You invested ${_currency.Format(sharedItem.sharedItemOwner_current.totalPaid, sharedItem.currency)}. Once there are enough co-owners you can purchase this and will start being paid back.'),
+        ];
+      } else {
+        colsCoBuy = [
+          Text('You paid ${_currency.Format(sharedItem.sharedItemOwner_current.totalPaid, sharedItem.currency)}. Once there are enough co-owners you will own this!'),
+        ];
+      }
+    } else {
+      colsCoBuy += [
+        ElevatedButton(
+          onPressed: () {
+            String id = sharedItem.sharedItemOwner_current.id;
+            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
+          },
+          child: Text('Co-Buy'),
+        ),
+      ];
+    }
+
+    List<Widget> colsStatus = [];
+    if (sharedItem.sharedItemOwner_current.status == 'pendingMonthlyPayment') {
+      colsStatus = [
+        ElevatedButton(
+          onPressed: () {
+            String id = sharedItem.sharedItemOwner_current.id;
+            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
+          },
+          child: Text('Set Up Monthly Payments'),
+        ),
+        SizedBox(height: 10),
+      ];
+    }
+
     return SizedBox(
       width: 300,
       child: Column(
@@ -360,17 +415,12 @@ class _SharedItemState extends State<SharedItem> {
           // SizedBox(height: 10),
           Text("${perPersonMaxOwners}"),
           SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              String id = sharedItem.sharedItemOwner_current.id;
-              _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
-            },
-            child: Text('Co-Buy'),
-          ),
+          ...colsCoBuy,
           SizedBox(height: 10),
           ...colsInvest,
           Text('${sharedItem.description}'),
           SizedBox(height: 10),
+          ...colsStatus,
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -431,7 +481,7 @@ class _SharedItemState extends State<SharedItem> {
       'maxMeters': _filters['maxMeters'],
       'withOwnerUserId': currentUser != null ? currentUser.id : '',
     };
-    List<String> keys = ['title', 'fundingRequired_min', 'fundingRequired_max'];
+    List<String> keys = ['title', 'fundingRequired_min', 'fundingRequired_max', 'myType'];
     for (var key in keys) {
       if (_filters[key] != null && _filters[key] != '') {
         data[key] = _filters[key]!;

@@ -19,6 +19,8 @@ import './modules/shared_item/shared_item.dart';
 import './modules/shared_item/shared_item_save.dart';
 import './modules/shared_item/shared_item_owner_save.dart';
 
+import './modules/user_payment/user_money.dart';
+
 class Routes {
   static const home = '/home';
   static const notFound = '/route-not-found';
@@ -37,6 +39,8 @@ class Routes {
   static const sharedItem = '/own';
   static const sharedItemSave = '/shared-item-save';
   static const sharedItemOwnerSave = '/shared-item-owner-save';
+
+  static const userMoney = '/user-money';
 }
 
 class AppGoRouter {
@@ -128,6 +132,11 @@ class AppGoRouter {
           generation: state.uri.queryParameters['generation'] != null ?
             int.parse(state.uri.queryParameters['generation']!) : 0,
         ),
+      ),
+
+      GoRoute(
+        path: Routes.userMoney,
+        builder: (BuildContext context, GoRouterState state) => UserMoney(),
       ),
 
       GoRoute(

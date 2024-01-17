@@ -1,6 +1,6 @@
 import mongo_mock as _mongo_mock
 from user_auth import user_auth as _user_auth
-import stubs_user as _stubs_user
+from stubs import stubs_user as _stubs_user
 
 def test_signup():
     _mongo_mock.InitAllCollections()

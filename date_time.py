@@ -121,16 +121,21 @@ def floor_time_interval(datetime1, interval, unit = 'minutes'):
         return datetime1.replace(year = years, month = 0, day = 0, hour = 0, minute = 0, second = 0, microsecond = 0)
     return None
 
-def nextMonth(datetime1, hour=0, minute=0):
+def nextMonth(datetime1, hour=0, minute=0, months = 1, day = None):
+    day = datetime1.day if day is None else 1
+    hour = datetime1.hour if hour is None else 0
+    minute = datetime1.minute if minute is None else 0
+
     currentMonth = datetime1.month
     currentYear = datetime1.year
-    if currentMonth == 12:
-        nextMonth = 1
-        nextYear = currentYear + 1
+    nextMonth = int(currentMonth + months)
+    if nextMonth > 12:
+        nextYear = int(currentYear + int(nextMonth) / 12)
+        nextMonth = int(nextMonth) % 12
     else:
-        nextMonth = currentMonth + 1
+        nextMonth = currentMonth + months
         nextYear = currentYear
-    nextDatetime = datetime.datetime(nextYear, nextMonth, 1, hour, minute, 0, \
+    nextDatetime = datetime.datetime(nextYear, nextMonth, day, hour, minute, 0, \
         tzinfo=pytz.timezone('UTC'))
     return nextDatetime
 

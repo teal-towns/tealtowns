@@ -38,12 +38,16 @@ notifications.set_config(config_notifications)
 _migrations.RunAll()
 
 # Import routes; this will auto add themselves
+httpRoutesFunc = []
 from blog import blog_routes as _blog_routes
 from common import common_routes as _common_routes
 from image import image_routes as _image_routes
 from shared_item import shared_item_routes as _shared_item_routes
 from shared_item import shared_item_owner_routes as _shared_item_owner_routes
+from pay_stripe import stripe_routes as _stripe_routes
+httpRoutesFunc.append(_stripe_routes.Routes)
 from user_auth import user_auth_routes as _user_auth_routes
+from user_payment import user_payment_routes as _user_payment_routes
 from vector_tiles import vector_tiles_routes as _vector_tiles_routes
 
 paths_index = config['web_server']['index'] if 'index' in config['web_server'] else None
@@ -71,6 +75,8 @@ async def websocket_handler(request):
             try:
                 dataRaw = json.loads(dataString)
                 auth = dataRaw["auth"] if "auth" in dataRaw else {}
+                if 'userId' in auth:
+                    _websocket_clients.AddClient(auth['userId'], websocket)
                 msgId = dataRaw['data']['_msgId'] if '_msgId' in dataRaw['data'] else ''
                 retData = _route_permissions.Allowed(dataRaw["route"], auth, dataRaw["data"])
                 if retData['valid']:
@@ -192,6 +198,8 @@ async def start_async_app():
         # that route to the CORS configuration object and specify its
         # CORS options.
         routes_http.Routes(app, cors)
+        for httpRouteFunc in httpRoutesFunc:
+            httpRouteFunc(app, cors)
 
         if paths_index is not None and paths_static is not None:
             # app.router.add_static(paths_static['route'], paths_static['files'])

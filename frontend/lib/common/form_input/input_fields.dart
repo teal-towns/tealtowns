@@ -341,6 +341,10 @@ class InputFields {
     } else {
       value = (formVals.containsKey(formValsKey)) ? formVals[formValsKey].toString() : null;
     }
+    if (options.length < 1) {
+      // print ('No options for inputSelect ${formValsKey} ${value}');
+      return SizedBox.shrink();
+    }
     return Container(
       child: DropdownButtonFormField(
         isExpanded: true,

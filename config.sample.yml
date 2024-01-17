@@ -48,3 +48,6 @@ log_tracker:
   max_per_hour: 150
 mapbox:
   access_token: YOUR-TOKEN-HERE
+stripe:
+  api_key: KEY-HERE
+  secret: SECRET-HERE
