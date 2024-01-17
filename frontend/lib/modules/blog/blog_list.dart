@@ -138,6 +138,7 @@ class _BlogListState extends State<BlogList> {
               child: Wrap(
                 children: [
                   MarkdownBody(
+                    selectable: true,
                     data: blog.text!,
                     onTapLink: (text, href, title) {
                       launch(href!);

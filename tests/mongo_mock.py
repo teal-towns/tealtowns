@@ -4,17 +4,22 @@ import log
 import ml_config
 import mongo_db
 
+from stubs import stubs_shared_item as _stubs_shared_item
+from stubs import stubs_shared_item_owner as _stubs_shared_item_owner
+from stubs import stubs_user as _stubs_user
+
 from vector_tiles import vector_tiles_databases as _vector_tiles_databases
 _databasesLandTiles = {}
 
 _db = {}
 _inited = 0
+_collectionNames = ['user', 'image', 'blog', 'sharedItem', 'sharedItemOwner', 'userMoney', 'userPayment']
 
 def InitAllCollections():
     global _inited
     global _db
     if not _inited:
-        collectionNames = ['user', 'image']
+        collectionNames = _collectionNames
         for collectionName in collectionNames:
             _db[collectionName] = mongomock.MongoClient().db.collection
         mongo_db.SetDB(_db)
@@ -24,6 +29,10 @@ def InitAllCollections():
         # Init other core things too.
         config = ml_config.get_config()
         log.init_logger(config)
+
+        _stubs_shared_item.AddDefault()
+        _stubs_shared_item_owner.AddDefault()
+        _stubs_user.AddDefault()
 
         _inited = 1
 
@@ -40,7 +49,7 @@ def CleanUp():
 
 def DeleteAll(collectionKeys = None):
     if collectionKeys is None:
-        collectionKeys = ['user', 'image']
+        collectionKeys = _collectionNames
     for key in collectionKeys:
         mongo_db.delete_many(key, {})
     

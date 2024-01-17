@@ -1,18 +1,19 @@
-# import random
+import random
 
 import mongo_db
+from stubs import stubs_data as _stubs_data
 from user_auth import user_auth as _user_auth
 
 _users = [
     {
-        'email': 'bob@earthshot.eco',
+        'email': 'bob@email.com',
         'password': 'pass12',
         'firstName': 'Bob',
         'lastName': 'Johnson',
         'roles': ['']
     },
     {
-        'email': 'alice@earthshot.eco',
+        'email': 'alice@email.com',
         'password': 'pass23',
         'firstName': 'Alice',
         'lastName': 'Souza',
@@ -20,26 +21,19 @@ _users = [
     }
 ]
 
+_default = {
+  'email': _stubs_data.RandomString() + '@email.com',
+  'password': _stubs_data.RandomString(),
+  'firstName': _stubs_data.RandomWord(),
+  'lastName': _stubs_data.RandomWord(),
+  'roles': [''],
+}
 
-def GetInvestorUser():
-  return {
-    'email': 'sarah@vc.eco',
-    'password': 'pass23',
-    'firstName': 'Sarah',
-    'lastName': 'Investor',
-    'roles': ['investor']
-  }
+def AddDefault():
+    _stubs_data.AddToNameMap('user', _default)
 
-
-# TODO treating a proponent as a user without role is not great. We should improve this
-def GetProponentUser():
-  return {
-    'email': 'andrew@proponent.ngo',
-    'password': 'pass23',
-    'firstName': 'Andrew',
-    'lastName': 'Proponent',
-    'roles': ['']
-  }
+# def GetDefault():
+#     return _default
 
 def GetAll():
     global _users

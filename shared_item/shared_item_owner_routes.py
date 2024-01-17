@@ -16,7 +16,8 @@ def addRoutes():
 
     def Save(data, auth, websocket):
         data['sharedItemOwner'] = lodash.pick(data['sharedItemOwner'], ['_id', 'createdAt', 'updatedAt',
-            'sharedItemId', 'userId', 'monthlyPayment', 'totalPaid', 'totalOwed', 'generation', 'investorOnly'])
+            'sharedItemId', 'userId', 'monthlyPayment', 'totalPaid', 'totalOwed', 'generation', 'investorOnly',
+            'status', 'stripeMonthlyPriceId'])
         return _shared_item_owner.Save(data['sharedItemOwner'])
     _socket.add_route('saveSharedItemOwner', Save)
 

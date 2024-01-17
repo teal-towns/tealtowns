@@ -78,7 +78,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
 
   Widget _buildLogoutButton(context, currentUserState) {
     if (currentUserState.isLoggedIn) {
-      return _buildLinkButton(context, '/logout', 'Logout');
+      return _buildLinkButton(context, '/logout', 'Logout (${currentUserState.currentUser.firstName} ${currentUserState.currentUser.lastName})');
     }
     return SizedBox.shrink();
   }
@@ -145,6 +145,11 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
 
   Widget _buildDrawer(BuildContext context, var currentUserState) {
     List<Widget> columns = [];
+    if (currentUserState.isLoggedIn) {
+      columns += [
+        _buildLinkButton(context, '/user-money', 'Money Balance'),
+      ];
+    }
     if (currentUserState.hasRole('admin')) {
     }
 
@@ -166,8 +171,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
               ),
             ],
           ),
-          _buildLogoutButton(context, currentUserState),
           ...columns,
+          _buildLogoutButton(context, currentUserState),
+          SizedBox(height: 30),
+          Text('Powered by Collobartive.Earth', style: TextStyle(color: Colors.white)),
         ],
       ),
     );
@@ -262,28 +269,32 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildSmall(BuildContext context, var currentUserState) {
-    return Scaffold(
-      endDrawer: _buildDrawer(context, currentUserState),
-      body: _buildBody(context, currentUserState, header: true),
+    return SelectionArea(
+      child: Scaffold(
+        endDrawer: _buildDrawer(context, currentUserState),
+        body: _buildBody(context, currentUserState, header: true),
+      ),
     );
   }
 
   Widget _buildMedium(BuildContext context, var currentUserState) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        title: Image.asset('assets/images/logo.png', width: 100, height: 50),
-        actions: <Widget>[
-          _buildNavButton('/home', 'Home', Icons.home, context),
-          _buildNavButton('/blog', 'Blog', Icons.article, context),
-          _buildNavButton('/own', 'Own', Icons.build, context),
-          _buildUserButton(context, currentUserState),
-          _buildDrawerButton(context),
-        ],
+    return SelectionArea(
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.white,
+          title: Image.asset('assets/images/logo.png', width: 100, height: 50),
+          actions: <Widget>[
+            _buildNavButton('/home', 'Home', Icons.home, context),
+            _buildNavButton('/blog', 'Blog', Icons.article, context),
+            _buildNavButton('/own', 'Own', Icons.build, context),
+            _buildUserButton(context, currentUserState),
+            _buildDrawerButton(context),
+          ],
+        ),
+        endDrawer: _buildDrawer(context, currentUserState),
+        body: _buildBody(context, currentUserState),
       ),
-      endDrawer: _buildDrawer(context, currentUserState),
-      body: _buildBody(context, currentUserState),
     );
   }
 

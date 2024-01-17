@@ -3,11 +3,11 @@ import '../../common/parse_service.dart';
 class SharedItemOwnerClass {
   ParseService _parseService = ParseService();
 
-  String id = '', sharedItemId = '', userId = '';
+  String id = '', sharedItemId = '', userId = '', status = '';
   double monthlyPayment = 0, totalPaid = 0, totalOwed = 0;
   int generation = 0, investorOnly = 0;
   SharedItemOwnerClass(this.id, this.sharedItemId, this.userId, this.monthlyPayment, this.totalPaid,
-    this.totalOwed, this.generation, this.investorOnly);
+    this.totalOwed, this.generation, this.investorOnly, this.status);
 
   SharedItemOwnerClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
@@ -18,6 +18,7 @@ class SharedItemOwnerClass {
     this.totalOwed = json['totalOwed'] != null ? _parseService.toDoubleNoNull(json['totalOwed']) : 0;
     this.generation = json['generation'] != null ? _parseService.toIntNoNull(json['generation']) : 0;
     this.investorOnly = json['investorOnly'] != null ? _parseService.toIntNoNull(json['investorOnly']) : 0;
+    this.status = json['status'] ?? '';
   }
 
   Map<String, dynamic> toJson() =>
@@ -31,5 +32,6 @@ class SharedItemOwnerClass {
       'totalOwed': totalOwed,
       'generation': generation,
       'investorOnly': investorOnly,
+      'status': status
     };
 }

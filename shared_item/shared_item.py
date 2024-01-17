@@ -1,47 +1,106 @@
+# from pydantic import BaseModel
+
+import date_time
 from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
 from shared_item import shared_item_owner as _shared_item_owner
+from shared_item import shared_item_payment as _shared_item_payment
+from shared_item import shared_item_payment_math as _shared_item_payment_math
+
+# TODO - type check all fields; add defaults for insert but NOT for update.
+# class SharedItemClass(BaseModel):
+#     _id: str = ''
+#     createdAt: str = ''
+#     updatedAt: str = ''
+#     title: str = ''
+#     description: str = ''
+#     imageUrls: list = []
+#     currentOwnerUserId: str = ''
+#     currentPurchaserUserId: str = ''
+#     tags: list = []
+#     location: dict = {}
+#     bought: int = 0
+#     originalPrice: float = 0
+#     currentPrice: float = 0
+#     currency: str = ''
+#     generation: int = 0
+#     currentGenerationStart: str = ''
+#     monthsToPayBack: int = 0
+#     maintenancePerYear: float = 0
+#     maintenanceAvailable: float = 0
+#     minOwners: int = 0
+#     maxOwners: int = 0
+#     maxMeters: float = 0
+#     status: str = ''
+#     pledgedOwners: int = 0
+#     fundingRequired: float = 0
 
 def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [], fundingRequired_min: float = -1,
-    fundingRequired_max: float = -1, limit: int = 25, skip: int = 0, withOwnerUserId: str = ''):
-    query = {
-        'location': {
-            '$nearSphere': {
-                '$geometry': {
-                    'type': 'Point',
-                    'coordinates': lngLat,
-                },
-                '$maxDistance': maxMeters,
+    fundingRequired_max: float = -1, limit: int = 25, skip: int = 0, withOwnerUserId: str = '',
+    myType: str = ''):
+    query = {}
+    listKeyVals = {}
+    useDistance = 0
+    if len(myType) > 0 and len(withOwnerUserId) > 0:
+        if myType == 'purchaser':
+            query = {
+                'currentPurchaserUserId': withOwnerUserId,
             }
-        },
-        'status': 'available',
-    }
+        elif myType == 'owner':
+            queryTemp = {
+                'userId': withOwnerUserId,
+            }
+            retTemp = _mongo_db_crud.Search('sharedItemOwner', query = queryTemp)
+            sharedItemIds = []
+            for item in retTemp['sharedItemOwners']:
+                sharedItemIds.append(item['sharedItemId'])
+            listKeyVals['_id'] = sharedItemIds
+
+    else:
+        useDistance = 1
+        query = {
+            'location': {
+                '$nearSphere': {
+                    '$geometry': {
+                        'type': 'Point',
+                        'coordinates': lngLat,
+                    },
+                    '$maxDistance': maxMeters,
+                }
+            },
+            'status': 'available',
+        }
     minKeyVals = {}
     if fundingRequired_min > 0:
         minKeyVals['fundingRequired'] = fundingRequired_min
     maxKeyVals = {}
     if fundingRequired_max > 0:
         maxKeyVals['fundingRequired'] = fundingRequired_max
-    ret = _mongo_db_crud.Search('sharedItem', {'title': title}, {'tags': tags},
+    listKeyVals['tags'] = tags
+    ret = _mongo_db_crud.Search('sharedItem', {'title': title}, listKeyVals = listKeyVals,
         minKeyVals = minKeyVals, maxKeyVals = maxKeyVals, limit = limit, skip = skip, query = query)
     sharedItemIds = []
     sharedItemIndexMap = {}
     # Calculate distance
     # May also be able to use geoNear https://stackoverflow.com/questions/33864461/mongodb-print-distance-between-two-points
     for index, item in reversed(list(enumerate(ret['sharedItems']))):
-        ret['sharedItems'][index]['xDistanceKm'] = _math_polygon.Haversine(item['location']['coordinates'],
-            lngLat, units = 'kilometers')
-        # Remove if too far away (based on sharedItem.maxMeters)
-        if ret['sharedItems'][index]['xDistanceKm'] * 1000 > float(ret['sharedItems'][index]['maxMeters']):
-            del ret['sharedItems'][index]
-        else:
+        addIt = 1
+        if useDistance:
+            ret['sharedItems'][index]['xDistanceKm'] = _math_polygon.Haversine(item['location']['coordinates'],
+                lngLat, units = 'kilometers')
+            # Remove if too far away (based on sharedItem.maxMeters)
+            if ret['sharedItems'][index]['xDistanceKm'] * 1000 > float(ret['sharedItems'][index]['maxMeters']):
+                del ret['sharedItems'][index]
+                addIt = 0
+        if addIt:
             sharedItemIds.append(item['_id'])
             sharedItemIndexMap[item['_id']] = index
 
     if len(sharedItemIds) > 0 and len(withOwnerUserId) > 0:
         listKeyVals = {'sharedItemId': sharedItemIds }
         stringKeyVals = {'userId': withOwnerUserId}
-        sharedItemOwners = _mongo_db_crud.Search('sharedItemOwner', listKeyVals = listKeyVals, stringKeyVals = stringKeyVals)['sharedItemOwners']
+        sharedItemOwners = _mongo_db_crud.Search('sharedItemOwner', listKeyVals = listKeyVals,
+            stringKeyVals = stringKeyVals)['sharedItemOwners']
         for owner in sharedItemOwners:
             index = sharedItemIndexMap[owner['sharedItemId']]
             # Check generation (ensure 1 above current)
@@ -50,7 +109,8 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
 
     return ret
 
-def Save(sharedItem: dict):
+def Save(sharedItem: dict, now = None):
+    # sharedItem = SharedItemClass(**sharedItem).dict()
     ret = { 'valid': 1, 'message': '', 'sharedItem': {}, 'sharedItemOwner': {} }
     if 'pledgedOwners' not in sharedItem:
         sharedItem['pledgedOwners'] = 0
@@ -58,42 +118,67 @@ def Save(sharedItem: dict):
         sharedItem['fundingRequired'] = sharedItem['currentPrice']
     if 'currency' not in sharedItem:
         sharedItem['currency'] = 'USD'
+    if 'status' not in sharedItem:
+        sharedItem['status'] = 'available'
+    sharedItem['bought'] = int(sharedItem['bought'])
     ret = _mongo_db_crud.Save('sharedItem', sharedItem)
     # Add current user as owner if new item.
     if ret['insert']:
-        totalPaid = ret['sharedItem']['currentPrice'] if int(ret['sharedItem']['bought']) > 0 else 0
+        # If not bought, set payments to minimum owners amount.
+        totalPaid = ret['sharedItem']['currentPrice']
+        monthlyPayment = 0
+        totalOwed = 0
+        if not ret['sharedItem']['bought']:
+            paymentInfo = _shared_item_payment_math.GetPayments(sharedItem['currentPrice'], sharedItem['monthsToPayBack'],
+                sharedItem['minOwners'], sharedItem['maintenancePerYear'])
+            totalPaid = paymentInfo['downPerPerson']
+            monthlyPayment = paymentInfo['monthlyPayment']
+            totalOwed = paymentInfo['totalPerPerson']
         sharedItemOwner = {
             'sharedItemId': ret['sharedItem']['_id'],
             'userId': ret['sharedItem']['currentOwnerUserId'],
-            'monthlyPayment': 0,
+            'monthlyPayment': monthlyPayment,
             'totalPaid': totalPaid,
-            'totalOwed': 0,
+            'totalOwed': totalOwed,
             'generation': int(ret['sharedItem']['generation']) + 1,
             'investorOnly': 0,
         }
-        retOwner = _shared_item_owner.Save(sharedItemOwner)
+        skipPayment = 1 if sharedItem['bought'] else 0
+        retOwner = _shared_item_owner.Save(sharedItemOwner, skipPayment = skipPayment)
         ret['sharedItemOwner'] = retOwner['sharedItemOwner']
+    
+    retUpdate = UpdateCachedOwners(ret['sharedItem']['_id'], now = now)
+    ret['sharedItem'] = retUpdate['sharedItem']
 
     return ret
 
-def UpdateCachedOwners(sharedItemId: str):
+def UpdateCachedOwners(sharedItemId: str, now = None):
+    ret = { 'valid': 1, 'message': '', 'sharedItem': {}, }
     sharedItem = _mongo_db_crud.GetById('sharedItem', sharedItemId)['sharedItem']
-    query = {
-        'sharedItemId': sharedItemId,
-        'generation': sharedItem['generation'] + 1,
-    }
-    sharedItemOwners = _mongo_db_crud.Search('sharedItemOwner', query = query)['sharedItemOwners']
-    sharedItemNew = {
-        '_id': sharedItem['_id'],
-        'pledgedOwners': 0,
-        'fundingRequired': 0 if int(sharedItem['bought']) > 0 else float(sharedItem['currentPrice']),
-    }
-    for owner in sharedItemOwners:
-        if not int(owner['investorOnly']):
-            sharedItemNew['pledgedOwners'] += 1
-        if int(sharedItem['bought']) < 1:
-            sharedItemNew['fundingRequired'] -= owner['totalPaid']
-    if sharedItemNew['fundingRequired'] < 0:
-        sharedItemNew['fundingRequired'] = 0
-    ret = _mongo_db_crud.Save('sharedItem', sharedItemNew)
+    ret['sharedItem'] = sharedItem
+    if sharedItem['status'] == 'available':
+        retOwners = _shared_item_owner.GetNextGenerationOwners(sharedItem)
+        sharedItemOwners = retOwners['sharedItemOwners']
+        sharedItemNew = {
+            '_id': sharedItem['_id'],
+            'pledgedOwners': 0,
+            'fundingRequired': 0 if int(sharedItem['bought']) > 0 else float(sharedItem['currentPrice']),
+        }
+        for owner in sharedItemOwners:
+            if not int(owner['investorOnly']):
+                sharedItemNew['pledgedOwners'] += 1
+            if int(sharedItem['bought']) < 1:
+                sharedItemNew['fundingRequired'] -= owner['totalPaid']
+        if sharedItemNew['fundingRequired'] < 0:
+            sharedItemNew['fundingRequired'] = 0
+        retSave = _mongo_db_crud.Save('sharedItem', sharedItemNew)
+        ret['sharedItem'] = retSave['sharedItem']
+
+        # Check if can purchase.
+        sharedItem['pledgedOwners'] = sharedItemNew['pledgedOwners']
+        sharedItem['fundingRequired'] = sharedItemNew['fundingRequired']
+        retPurchase = _shared_item_payment.CanStartPurchase(sharedItem)
+        if retPurchase['canStartPurchase']:
+            _shared_item_payment.StartPurchase(sharedItem, now = now)
+
     return ret

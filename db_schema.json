@@ -16,11 +16,11 @@
             "{String} [one of '', 'admin']"
         ],
         "emailVerificationKey": "{String}",
-        "emailVerified": "{Number} 1 or 0",
+        "emailVerified": "{Int} 1 or 0",
         "username": "{String}",
         "location": {
             "type": "Point [https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb]",
-            "coordinates": ["{Number} [lng]", "{Number} [lat]"]
+            "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         }
     },
     "image": {
@@ -53,28 +53,29 @@
         "description": "{String}",
         "imageUrls": [ "{String}" ],
         "currentOwnerUserId": "{String}",
+        "currentPurchaserUserId": "{String}",
         "tags": [
             "{String}"
         ],
         "location": {
             "type": "Point [https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb]",
-            "coordinates": ["{Number} [lng]", "{Number} [lat]"]
+            "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         },
-        "bought": "{Number} 1|0 [1 if already owned, and thus no funding required]",
-        "originalPrice": "{Number}",
-        "currentPrice": "{Number}",
+        "bought": "{Int} 1|0 [1 if already owned, and thus no funding required]",
+        "originalPrice": "{Float}",
+        "currentPrice": "{Float}",
         "currency": "{String}",
-        "generation": "{Number} [0 before first ownership / purchase, 1+ after]",
-        "monthsStarted": "{Number} [number of months started since current generation start, e.g. day 1 of month 3 means 2 months]",
-        "monthsToPayBack": "{Number}",
-        "maintenancePerYear": "{Number}",
-        "maintenanceAvailable": "{Number} [unspent maintenance savings that can be used]",
-        "minOwners": "{Number}",
-        "maxOwners": "{Number}",
-        "maxMeters": "{Number} [how far away other owners can be]",
+        "generation": "{Int} [0 before first ownership / purchase, 1+ after]",
+        "currentGenerationStart": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "monthsToPayBack": "{Int}",
+        "maintenancePerYear": "{Float}",
+        "maintenanceAvailable": "{Float} [unspent maintenance savings that can be used]",
+        "minOwners": "{Int}",
+        "maxOwners": "{Int}",
+        "maxMeters": "{Float} [how far away other owners can be]",
         "status": "{String} available|purchasing|owned [Only available items show up to add new owners to a future generation (be co-purchased and co-owned)]",
-        "pledgedOwners": "{Number} [cached for search: number of owners who have pledged from sharedItemOwner (in future generation)]",
-        "fundingRequired": "{Number} [cached for search: currentPrice - (totalPaid of all pledged owners (in future generation))]"
+        "pledgedOwners": "{Int} [cached for search: number of owners who have pledged from sharedItemOwner (in future generation)]",
+        "fundingRequired": "{Float} [cached for search: currentPrice - (totalPaid of all pledged owners (in future generation))]"
     },
     "sharedItemOwner": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -82,11 +83,14 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "sharedItemId": "{String}",
         "userId": "{String}",
-        "generation": "{Number} [If above sharedItem.generation, numbers are pledges to start the next generation of owners]",
-        "monthlyPayment": "{Number} [Negative if this user is owed each month. Pledge if future generation.]",
-        "totalPaid": "{Number} [Investor pledge if future generation]",
-        "totalOwed": "{Number} [amount this user owes; negative if this user is owed money]",
-        "investorOnly": "{Number} [1 if this owner pays only (is NOT a shared owner), 0 otherwise]"
+        "generation": "{Int} [If above sharedItem.generation, numbers are pledges to start the next generation of owners]",
+        "monthlyPayment": "{Float} [Negative if this user is owed each month. Pledge if future generation.]",
+        "totalPaid": "{Float} [Investor pledge or down payment if future generation. This will be incremented when the user pays until it equals totalOwed]",
+        "totalOwed": "{Float} [amount this user owes; negative if this user is owed money]",
+        "totalPaidBack": "{Float} [amount this user has been paid back; this will be incremented until it equals -1 * totalOwed]",
+        "investorOnly": "{Int} [1 if this owner pays only (is NOT a shared owner), 0 otherwise]",
+        "status": "{String} pendingMonthlyPayment|paying|paid",
+        "stripeMonthlyPriceId": "{String} [used for stopping recurring monthly payment when done]"
     },
     "TODOsharedItemMaintenance": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -94,24 +98,29 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "sharedItemId": "{String}",
         "userId": "{String}",
-        "requestedAmount": "{Number}",
-        "paidAmount": "{Number}",
+        "requestedAmount": "{Float}",
+        "paidAmount": "{Float}",
         "approvalUserIds": [ "{String}" ],
         "rejectionUserIds": [ "{String}" ],
         "status": "{String} open|approved|rejected"
     },
-    "TODOuserMoney": {
+    "userMoney": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
-        "balance": "{Number}"
+        "balanceUSD": "{Float}"
     },
-    "TODOuserPaymentMethod": {
+    "userPayment": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
-        "TODO": "depends on (3rd party) payment processing system"
+        "amountUSD": "{Float} [positive if increases this user's balance (e.g. deposit or payment TO this user), negative if reduces this user's balance (e.g. withdrawal or payment FROM this user)]",
+        "forType": "{String} [user|sharedItemOwner]",
+        "forId": "{String} [userId|sharedItemOwnerId]",
+        "status": "{String} pending|complete",
+        "notes": "{String}"
     }
+
 }
