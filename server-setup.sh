@@ -20,7 +20,7 @@ git clone https://$GITHUB_TOKEN@github.com/teal-towns/tealtowns.git && \
 apt-get -y install libssl-dev && \
     pip3 install -r ./requirements.txt && \
     snap install flutter --classic && \
-    flutter channel beta && flutter upgrade && flutter config --enable-web && \
+    flutter channel stable && flutter upgrade && flutter config --enable-web && \
     cd frontend && flutter build web && cd ../ && \
     cp systemd_web_server_tealtowns.service /etc/systemd/system/systemd_web_server_tealtowns.service && \
     systemctl daemon-reload && \
