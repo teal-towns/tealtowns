@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 import os
-from land_vision import evaluate 
+from land_vision.evaluate import predict
 from land_vision.models import SFANet as SFANet
-from land_vision import preprocess 
+from land_vision.preprocess import preprocess_RGB
 # import json
 
 # from mapbox import mapbox_polygon as _mapbox_polygon
@@ -37,7 +37,7 @@ def test_urban_tree_detection_inference():
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  
     images = img_rgb[None,:,:,:]
     
-    preprocess = eval(f'preprocess.preprocess_RGB')
+    preprocess = eval(f'preprocess_RGB')
     training_model, model = SFANet.build_model(
         images.shape[1:],
         preprocess_fn=preprocess)
@@ -46,7 +46,7 @@ def test_urban_tree_detection_inference():
     training_model.load_weights(weights_path)
 
     preds = model.predict(images,verbose=True,batch_size=1)[...,0]
-    results = evaluate.predict(preds=preds,
+    results = predict(preds=preds,
         min_distance=min_distance,
         threshold_rel=threshold_rel,
         threshold_abs=threshold_abs,
