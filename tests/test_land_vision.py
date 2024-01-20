@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 import os
-from land_vision.evaluate import predict
-from land_vision.models import SFANet as SFANet
-from land_vision.preprocess import preprocess_RGB
+from land_vision.urban_tree_detection.evaluate import predict
+from land_vision.urban_tree_detection.models import SFANet as SFANet
+from land_vision.urban_tree_detection.preprocess import preprocess_RGB
 # import json
 
 # from mapbox import mapbox_polygon as _mapbox_polygon
@@ -27,7 +27,7 @@ from land_vision.preprocess import preprocess_RGB
 
 def test_urban_tree_detection_inference():
     img_path = "./uploads/images/naip_image.png"
-    log_dir = "./land_vision/pretrained"
+    log_dir = "./land_vision/urban_tree_detection/pretrained"
     min_distance = 1
     threshold_abs = None
     threshold_rel = 0.2
