@@ -29,6 +29,6 @@ sendgrid~=6.10.0
 shapely~=2.0.1
 simplejson~=3.19.1
 stripe~=7.10.0
-tensorflow~=2.15.0.post1
+tensorflow~=2.15.0
 # uvicorn[standard]~=0.23.2
 # websockets~=12.0
