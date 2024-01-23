@@ -2,9 +2,6 @@
 import cv2
 import numpy as np
 import os
-
-os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
-
 from land_vision.urban_tree_detection.evaluate import predict
 from land_vision.urban_tree_detection.models import SFANet as SFANet
 from land_vision.urban_tree_detection.preprocess import preprocess_RGB
