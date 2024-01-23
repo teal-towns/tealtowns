@@ -1,6 +1,10 @@
+
 import cv2
 import numpy as np
 import os
+
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+
 from land_vision.urban_tree_detection.evaluate import predict
 from land_vision.urban_tree_detection.models import SFANet as SFANet
 from land_vision.urban_tree_detection.preprocess import preprocess_RGB
@@ -27,7 +31,7 @@ from land_vision.urban_tree_detection.preprocess import preprocess_RGB
 
 def test_urban_tree_detection_inference():
     img_path = "./uploads/images/naip_image.png"
-    log_dir = "./land_vision/urban_tree_detection/pretrained"
+    weights_dir = "./land_vision/urban_tree_detection/pretrained"
     min_distance = 1
     threshold_abs = None
     threshold_rel = 0.2
@@ -42,7 +46,7 @@ def test_urban_tree_detection_inference():
         images.shape[1:],
         preprocess_fn=preprocess)
 
-    weights_path = os.path.join(log_dir,'weights.best.h5')
+    weights_path = os.path.join(weights_dir,'weights.best.h5')
     training_model.load_weights(weights_path)
 
     preds = model.predict(images,verbose=True,batch_size=1)[...,0]
