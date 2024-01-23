@@ -1,3 +1,7 @@
+import os
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+
+
 import numpy as np 
 from tensorflow.keras import Model, layers, initializers, losses
 from .VGG import VGG, BaseConv
