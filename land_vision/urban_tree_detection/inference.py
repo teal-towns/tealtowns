@@ -22,7 +22,7 @@ def main():
 
     args = parser.parse_args()
 
-    params_path = os.path.join(args.weights,'params.yaml')
+    params_path = os.path.join(args.log,'params.yaml')
     if os.path.exists(params_path):
         with open(params_path,'r') as f:
             params = yaml.safe_load(f)
