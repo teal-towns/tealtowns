@@ -120,6 +120,15 @@ def LngLatsToPixels(polygonLngLats, lngLatOrigin, metersPerPixel):
         polygonPixels.append([pixelX, pixelY])
     return polygonPixels
 
+def PixelsToLngLats(pixelOffsets, lngLatOrigin, metersPerPixel):
+    pointLngLats = []
+    for pixelX, pixelY in pixelOffsets:
+        xMeter = pixelX * metersPerPixel
+        yMeter = pixelY * metersPerPixel
+        retLngLat = _math_polygon.TranslateMetersToLngLat(xMeter, yMeter, lngLatOrigin[0], lngLatOrigin[1])
+        pointLngLats.append([retLngLat['lng'], retLngLat['lat'] ])
+    return pointLngLats
+
 def ImageColorsToPolygons(imageUrl, blurKernal = 10, histogramThreshold = 2000):
     ret = { 'valid': 1, 'polygonsLngLats': [] }
     img = cv2.imread(imageUrl)
