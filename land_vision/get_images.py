@@ -40,14 +40,12 @@ def get_mapbox_naip_image(lngLat, zoom, tileType = 'satellite', pixelsPerTile = 
 
 
 if __name__ == "__main__":
-    latitude = 37.7749  # Replace with the desired latitude
-    longitude = -122.4194  # Replace with the desired longitude
+    # latitude = 37.7749  # Replace with the desired latitude
+    # longitude = -122.4194  # Replace with the desired longitude
     lngLat = [-122.033802, 37.977362]
     zoom = 15
     image_data = get_mapbox_naip_image(lngLat, zoom, tileType = 'naip', pixelsPerTile = 1024)
     if image_data:
-        np.save('./uploads/images/naip_image_z17',image_data['img'])
-        #with open('./uploads/images/naip_image.jpg', 'wb') as f:
-            #f.write(image_data['img'])
-        print('Image saved successfully!', image_data['img'].shape)
-        #print(image_data)
+        #np.save('./uploads/images/naip_image',image_data['img'])
+        img_rgb = cv2.cvtColor(image_data['img'], cv2.COLOR_BGR2RGB)  
+        cv2.imwrite("./uploads/images/TodosSantosPlaza.png", cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)) # cv2 default is BGR
