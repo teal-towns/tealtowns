@@ -32,7 +32,7 @@ class _UserLogoutState extends State<UserLogoutComponent> {
         Provider.of<CurrentUserState>(context, listen: false).clearUser();
         context.go(Routes.home);
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Logout error'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Logout error'; });
       }
       //setState(() { _loading = false; });
     }));

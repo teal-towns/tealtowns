@@ -25,3 +25,6 @@ def create_all_indices(db):
     db['userMoney'].create_index([('userId', 1)], unique=True)
 
     db['userPayment'].create_index([('userId', 1), ('forType', 1), ('forId', 1), ('status', 1)], unique=False)
+
+    db['weeklyEvent'].create_index([('title', 1)], unique=False)
+    db['weeklyEvent'].create_index([('location', '2dsphere')])

@@ -60,7 +60,7 @@ class _BlogListState extends State<BlogList> {
           _message = 'Error.';
         }
       } else {
-        _message = data['msg'].length > 0 ? data['msg'] : 'Error.';
+        _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
       setState(() {
         _loading = false;
@@ -75,7 +75,7 @@ class _BlogListState extends State<BlogList> {
       if (data['valid'] == 1) {
         _getBlogs();
       } else {
-        _message = data['msg'].length > 0 ? data['msg'] : 'Error.';
+        _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
       setState(() {
         _loading = false;

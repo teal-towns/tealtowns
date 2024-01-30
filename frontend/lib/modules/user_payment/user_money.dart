@@ -42,7 +42,7 @@ class _UserMoneyState extends State<UserMoney> {
         }
         _availableUSD = _parseService.toDoubleNoNull(data['availableUSD']);
       } else {
-        _message = data['msg'].length > 0 ? data['msg'] : 'Error.';
+        _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
       setState(() {
         _loading = false;

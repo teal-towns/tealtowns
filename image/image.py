@@ -1,7 +1,7 @@
 import mongo_db
 
 def Get(title = '', url = '', userIdCreator = '', limit = 25, skip = 0):
-    ret = { 'valid': 1, 'msg': '', 'images': [] }
+    ret = { 'valid': 1, 'message': '', 'images': [] }
     query = {}
     if len(url) > 0:
         query['url'] = url
@@ -14,7 +14,7 @@ def Get(title = '', url = '', userIdCreator = '', limit = 25, skip = 0):
     return ret
 
 def Save(image):
-    ret = { 'valid': 1, 'msg': '', 'image': {} }
+    ret = { 'valid': 1, 'message': '', 'image': {} }
     query = {
         'url': image['url'],
     }

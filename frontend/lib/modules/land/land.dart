@@ -90,7 +90,7 @@ class _LandState extends State<Land> {
           _coordinatesDraw = _coordinatesDraw;
         });
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Invalid, please try again'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid, please try again'; });
       }
       setState(() { _loading = false; });
     }));

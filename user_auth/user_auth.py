@@ -31,7 +31,7 @@ def getUserFields():
     }
 
 def checkEmail(email, fields=None):
-    ret = { 'user': {}, 'msg': '' }
+    ret = { 'user': {}, 'message': '' }
     fields = fields if fields is not None else {
         'email': True
     }
@@ -70,7 +70,7 @@ def getByUsername(username, fields=None):
     return user
 
 def getByIds(userIds, fields=None):
-    ret = { 'users': [], 'msg': '' }
+    ret = { 'users': [], 'message': '' }
     fields = fields if fields is not None else getUserFields()
     objectIds = []
     for userId in userIds:
@@ -86,7 +86,7 @@ def getByIds(userIds, fields=None):
 def signup(email, password, firstName, lastName, roles=[''], autoMember=1):
     global _config
 
-    ret = { 'valid': 0, 'msg': '' }
+    ret = { 'valid': 0, 'message': '' }
     email = email.lower()
     user = checkEmail(email)['user']
     if not user:
@@ -133,22 +133,22 @@ def signup(email, password, firstName, lastName, roles=[''], autoMember=1):
                     ret['user'] = user
                     ret['valid'] = 1
     else:
-        ret['msg'] = "Email already in use."
+        ret['message'] = "Email already in use."
     return ret
 
 def login(emailOrUsername, password):
-    ret = { 'valid': 0, 'msg': '', 'user': {} }
+    ret = { 'valid': 0, 'message': '', 'user': {} }
     # Want to get user in case valid password (avoid another database look up).
     # But also need password to check.
     fields = getUserFields()
     fields['password'] = True
     user = getByEmail(emailOrUsername, fields=fields)
     if user and user['status'] != 'member':
-        ret['msg'] = "Email verification required to log in"
+        ret['message'] = "Email verification required to log in"
     if user is None:
         user = getByUsername(emailOrUsername, fields=fields)
         if user and user['status'] != 'member':
-            ret['msg'] = "Email verification required to log in"
+            ret['message'] = "Email verification required to log in"
     if user and user['status'] == 'member':
         if check_encrypted_password(password, user['password']):
             retSess = updateSession(user['_id'])
@@ -158,15 +158,15 @@ def login(emailOrUsername, password):
                 ret['user'] = user
                 ret['valid'] = 1
             else:
-                ret['msg'] = "Session error, please contact support"
+                ret['message'] = "Session error, please contact support"
         else:
-            ret['msg'] = "Invalid password"
+            ret['message'] = "Invalid password"
     elif not user:
-        ret['msg'] = "No user with that email or username"
+        ret['message'] = "No user with that email or username"
     return ret
 
 def logout(userId, sessionId=""):
-    ret = { 'valid': 0, 'msg': '' }
+    ret = { 'valid': 0, 'message': '' }
 
     # Handle permissions in routing - need to check on almost all calls, not just
     # logout.
@@ -191,7 +191,7 @@ def logout(userId, sessionId=""):
     return ret
 
 def updateSession(userId):
-    ret = { 'valid': 0, 'msg': '' }
+    ret = { 'valid': 0, 'message': '' }
     sessionId = lodash.random_string(24)
     query = {
         '_id': mongo_db.to_object_id(userId)
@@ -209,7 +209,7 @@ def updateSession(userId):
 
 # Check if already logged in.
 def getSession(userId, sessionId):
-    ret = { 'valid': 0, 'msg': '', 'user': {} }
+    ret = { 'valid': 0, 'message': '', 'user': {} }
     query = {
         '_id': mongo_db.to_object_id(userId),
         'sessionIds': {
@@ -229,7 +229,7 @@ def getSession(userId, sessionId):
 def forgotPassword(email):
     global _config
 
-    ret = { 'valid': 0, 'msg': '' }
+    ret = { 'valid': 0, 'message': '' }
     user = getByEmail(email)
     if user:
         resetKey = lodash.random_string(6)
@@ -252,7 +252,7 @@ def forgotPassword(email):
     return ret
 
 def passwordReset(email, passwordResetKey, newPassword):
-    ret = { 'valid': 0, 'user': {}, 'msg': '' }
+    ret = { 'valid': 0, 'user': {}, 'message': '' }
     email = email.lower()
     query = {
         'email': email,
@@ -279,12 +279,12 @@ def passwordReset(email, passwordResetKey, newPassword):
                 ret['user'] = user
                 ret['valid'] = 1
     else:
-        ret['msg'] = 'Email or password reset key not found.'
+        ret['message'] = 'Email or password reset key not found.'
 
     return ret
 
 def emailVerify(email, verifyKey):
-    ret = { 'valid': 0, 'msg': '', 'user': {} }
+    ret = { 'valid': 0, 'message': '', 'user': {} }
     email = email.lower()
     query = {
         'email': email,
@@ -316,7 +316,7 @@ def emailVerify(email, verifyKey):
     return ret
 
 def createUsername(firstName, lastName, maxNameChars=6):
-    ret = { 'username': '', 'msg': '' }
+    ret = { 'username': '', 'message': '' }
     # Remove all non letters, go to lowercase, and combine first and last name
     # then cut at max length to make a username.
     username = (firstName + lastName).lower()
@@ -353,7 +353,7 @@ def createUsername(firstName, lastName, maxNameChars=6):
     return ret
 
 def updateFirstLastName(user, firstName, lastName):
-    ret = { 'valid': 0, 'msg': '' } 
+    ret = { 'valid': 0, 'message': '' } 
     query = {
             '_id': mongo_db.to_object_id(user['_id'])
         }
@@ -372,5 +372,5 @@ def updateFirstLastName(user, firstName, lastName):
             ret['user'] = mongo_db.find_one('user', query, fields = getUserFields())['item']
             ret['valid'] = 1
     else:
-        ret['msg'] = 'updateFirstLastName error'
+        ret['message'] = 'updateFirstLastName error'
     return ret

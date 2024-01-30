@@ -45,7 +45,7 @@ class _UserEmailVerifyState extends State<UserEmailVerifyComponent> {
           setState(() { _message = 'Error, please try again.'; });
         }
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Invalid key, please check your email and try again.'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid key, please check your email and try again.'; });
       }
       setState(() { _loading = false; });
     }));

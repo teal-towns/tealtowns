@@ -21,7 +21,7 @@
 #     if route in _routes:
 #         return _routes[route](data, auth)
 #     else:
-#         return {'valid': '0', 'msg': 'Invalid route'}
+#         return {'valid': '0', 'message': 'Invalid route'}
 
 # def AddRoute(route: str, func):
 #     _routes[route] = func
@@ -33,8 +33,8 @@
 # from vector_tiles import vector_tiles_routes
 
 # def routeIt(route, data, auth):
-#     msgId = data['_msgId'] if '_msgId' in data else ''
-#     ret = { 'valid': '0', 'msg': '', '_msgId': msgId }
+#     messageId = data['_messageId'] if '_messageId' in data else ''
+#     ret = { 'valid': '0', 'message': '', '_messageId': messageId }
 
 #     # Check permissions.
 #     perms = [
@@ -57,27 +57,27 @@
 #     ]
 #     if route in perms or route in userIdRequired or route in admin:
 #         if len(auth['userId']) == 0:
-#             ret['msg'] = "Empty user id."
+#             ret['message'] = "Empty user id."
 #             return ret
 
 #     if route in perms or route in admin:
 #         allowed = 0
 #         if "_" in auth['userId']:
-#             ret['msg'] = "Invalid user id"
+#             ret['message'] = "Invalid user id"
 #             return ret
 
 #         if permission_user.LoggedIn(auth['userId'], auth['sessionId']):
 #             allowed = 1
 
 #         if not allowed:
-#             ret['msg'] = "Permission denied"
+#             ret['message'] = "Permission denied"
 #             return ret
 
 #     if route in admin:
 #         if permission_user.IsAdmin(auth['userId']):
 #             allowed = 1
 #         else:
-#             ret['msg'] = "Admin privileges required"
+#             ret['message'] = "Admin privileges required"
 #             return ret
 
 #     # We must support at least 2 versions since frontend (mobile apps) will
@@ -91,9 +91,9 @@
 #     #     ret = { 'hello': 'route 2' }
 
 #     if route == 'getAllowedVersions':
-#         ret = { 'valid': '1', 'msg': '', 'versions': allowedVersions }
+#         ret = { 'valid': '1', 'message': '', 'versions': allowedVersions }
 #     elif route == 'ping':
-#         ret = { 'valid': '1', 'msg': '' }
+#         ret = { 'valid': '1', 'message': '' }
 
 #     elif route == 'signup':
 #         roles = data['roles'] if 'roles' in data else ['student']
@@ -153,7 +153,7 @@
 #             'route': 'onLogout',
 #             'data': {
 #                 'valid': '1',
-#                 'msg': ''
+#                 'message': ''
 #             }
 #         })
 
@@ -170,7 +170,7 @@
 #         ret = formatRet(data, ret)
 #     elif route == "getImageData":
 #         imageDataString = _file_upload.GetImageData(data['image_url'])
-#         ret = { 'valid': '1', 'msg': '', 'image_url': data['image_url'],
+#         ret = { 'valid': '1', 'message': '', 'image_url': data['image_url'],
 #             'image_data': imageDataString }
 
 #     elif route == "saveFileData":
@@ -232,7 +232,7 @@
 #         requiredFields = ['timeframe', 'year', 'zoom', 'tile']
 #         for field in requiredFields:
 #             if field not in data:
-#                 ret = { 'valid': 0, 'msg': 'Missing required fields' }
+#                 ret = { 'valid': 0, 'message': 'Missing required fields' }
 #                 valid = 0
 #                 break
 #         if valid:
@@ -242,7 +242,7 @@
 #     else:
 #         ret = SocketRouter(route, data, auth)
 
-#     ret['_msgId'] = msgId
+#     ret['_messageId'] = messageId
 #     return ret
 
 # # def route1(data):

@@ -26,7 +26,7 @@ def GetResizeDimensions(img, maxSize = 900):
     return { 'width': width, 'height': height }
 
 def HandleImage(filePath, baseUrl, filename = '', maxSize = 900, removeOriginalFile = 0):
-    ret = { 'valid': 0, 'msg': '', 'url': '' }
+    ret = { 'valid': 0, 'message': '', 'url': '' }
 
     with Image.open(filePath) as img:
         if img.width > maxSize or img.height > maxSize:
@@ -55,13 +55,13 @@ def HandleImage(filePath, baseUrl, filename = '', maxSize = 900, removeOriginalF
     return ret
 
 def SaveImageData(fileData, baseUrl, filename = '', maxSize = 900, dataFormat = 'uint8', removeOriginalFile = 0):
-    # ret = { 'valid': 1, 'msg': '', 'url': '' }
+    # ret = { 'valid': 1, 'message': '', 'url': '' }
     retFile = SaveFileData(fileData, baseUrl, filename, dataFormat = dataFormat)
     return HandleImage(retFile['filePath'], baseUrl, filename, maxSize, removeOriginalFile)
     # return ret
 
 def SaveFileData(fileData, baseUrl, filename = '', dataFormat = 'uint8'):
-    ret = { 'valid': 1, 'msg': '', 'filePath': '', 'url': '' }
+    ret = { 'valid': 1, 'message': '', 'filePath': '', 'url': '' }
 
     extension = ''
     indexPos = filename.rfind('.');

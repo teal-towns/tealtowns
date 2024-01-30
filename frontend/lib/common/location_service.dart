@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
+import './localstorage_service.dart';
 import './parse_service.dart';
 import '../modules/user_auth/current_user_state.dart';
 
@@ -13,13 +15,36 @@ class LocationService {
   }
 
   Location _location = Location();
+  LocalstorageService _localstorageService = LocalstorageService();
   ParseService _parseService = ParseService();
 
+  LocalStorage? _localstorage = null;
   // Cached version.
   List<double> _lngLat = [0, 0];
 
   List<double> GetLngLat() {
+    if (!LocationValid(_lngLat)) {
+      getLocalstorage();
+      LocalStorage _localStorage = _localstorageService.localstorage;
+      List<dynamic>? lngLatLocalStored = _localStorage.getItem('locationLngLat');
+      if (lngLatLocalStored != null) {
+        List<double> lngLat = [lngLatLocalStored[0], lngLatLocalStored[1]];
+        return lngLat;
+      }
+    }
     return _lngLat;
+  }
+
+  void getLocalstorage() {
+    if (_localstorage == null) {
+      _localstorage = _localstorageService.localstorage;
+    }
+  }
+
+  void SetLngLat(List<double> lngLat) {
+    _lngLat = lngLat;
+    getLocalstorage();
+    _localstorage?.setItem('locationLngLat', [lngLat[0], lngLat[1]]);
   }
 
   bool LocationValid(List<double> lngLat) {
@@ -30,7 +55,7 @@ class LocationService {
   }
 
   List<double> ToPrecision(List<double> lngLat) {
-    return [_parseService.Precision(lngLat[0], 6), _parseService.Precision(lngLat[1], 6)];
+    return [_parseService.Precision(lngLat[0], 5), _parseService.Precision(lngLat[1], 5)];
   }
 
   bool IsDifferent(List<double> lngLat1, List<double> lngLat2) {
@@ -40,17 +65,20 @@ class LocationService {
     return true;
   }
 
-  Future<List<double>> GetLocation(BuildContext context) async {
+  Future<List<double>> GetLocation(BuildContext context, {bool useUser = true}) async {
     var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-    if (currentUser != null && currentUser.location.coordinates.length > 0) {
-      _lngLat = [_parseService.Precision(currentUser.location.coordinates[0], 6),
-        _parseService.Precision(currentUser.location.coordinates[1], 6)];
+    List<double> lngLat = [0, 0];
+    if (useUser && currentUser != null && currentUser.location.coordinates.length > 0) {
+      lngLat = [_parseService.Precision(currentUser.location.coordinates[0], 5),
+        _parseService.Precision(currentUser.location.coordinates[1], 5)];
+      SetLngLat(lngLat);
     }
     else {
       var coordinates = await _location.getLocation();
       if (coordinates.latitude != null) {
-        _lngLat = [_parseService.Precision(coordinates.longitude!, 6),
-          _parseService.Precision(coordinates.latitude!, 6)];
+        lngLat = [_parseService.Precision(coordinates.longitude!, 5),
+          _parseService.Precision(coordinates.latitude!, 5)];
+        SetLngLat(lngLat);
       }
     }
     return _lngLat;

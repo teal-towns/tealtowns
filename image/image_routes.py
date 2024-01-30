@@ -13,7 +13,7 @@ config = ml_config.get_config()
 def addRoutes():
     def GetImageData(data, auth, websocket):
         imageDataString = _file_upload.GetImageData(data['image_url'])
-        ret = { 'valid': '1', 'msg': '', 'image_url': data['image_url'],
+        ret = { 'valid': '1', 'message': '', 'image_url': data['image_url'],
             'image_data': imageDataString }
         return ret
     _socket.add_route('getImageData', GetImageData)

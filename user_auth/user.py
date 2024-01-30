@@ -2,7 +2,7 @@ import lodash
 import mongo_db
 
 def SaveUser(user):
-    ret = { 'valid': 0, 'msg': '' } 
+    ret = { 'valid': 0, 'message': '' } 
     query = {
         '_id': mongo_db.to_object_id(user['_id'])
     }

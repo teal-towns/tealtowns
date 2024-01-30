@@ -104,9 +104,12 @@ class InputFields {
   Widget inputText(var formVals, String? formValsKey, { String label = '', String hint = '',
     int minLen = -1, int maxLen = -1, var fieldKey = null, int maxLines = 1, int minLines = 1,
     int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
-    Function()? onTap = null,}) {
+    Function()? onTap = null, RegExp? pattern = null}) {
     Timer? debounce = null;
     String initialVal = '';
+    if (maxLines < minLines) {
+      maxLines = minLines;
+    }
     if (formValsKey == null) {
       initialVal = formVals;
     } else {
@@ -156,6 +159,9 @@ class InputFields {
         if (required && value?.isEmpty == true) {
           return 'Required';
         } else {
+          if (pattern != null && !validatePattern(value, pattern!)) {
+            return 'Invalid pattern';
+          }
           return validateMinMaxLen(value, minLen, maxLen);
         }
       },
@@ -228,6 +234,15 @@ class InputFields {
         }
       },
     );
+  }
+
+  Widget inputTime(var formVals, String? formValsKey, { String label = '', String hint = '',
+    var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
+    Function()? onTap = null}) {
+    RegExp pattern = new RegExp(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
+    return inputText(formVals, formValsKey, label: label, hint: hint, fieldKey: fieldKey,
+      debounceChange: debounceChange, onChange: onChange, required: required, onTap: onTap,
+      pattern: pattern);
   }
 
   Widget inputDateTime(var formVals, String? formValsKey, { String label = '', String hint = '',
@@ -570,16 +585,24 @@ class InputFields {
 }
 
 String? validateEmail(String? value) {
+  RegExp pattern = new RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+  if (!validatePattern(value, pattern)) {
+    return 'Invalid email';
+  }
+  return null;
+}
+
+
+bool validatePattern(String? value, RegExp regex) {
   if (value == null) {
     value = '';
   }
-  String pattern =
-    r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-  RegExp regex = new RegExp(pattern);
-  if (!regex.hasMatch(value))
-    return 'Invalid email';
-  else
-    return null;
+  // pattern = r'${pattern}';
+  // RegExp regex = new RegExp(pattern);
+  if (!regex.hasMatch(value)) {
+    return false;
+  }
+  return true;
 }
 
 String? validateMinMaxLen(String? value, int? minLen, int? maxLen) {

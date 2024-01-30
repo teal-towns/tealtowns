@@ -32,4 +32,14 @@ class UserClass {
     'createdAt': createdAt,
     'location': location.toJson(),
   };
+
+  static List<UserClass> parseUsers(List<dynamic> itemsRaw) {
+    List<UserClass> items = [];
+    if (itemsRaw != null) {
+      for (var item in itemsRaw) {
+        items.add(UserClass.fromJson(item));
+      }
+    }
+    return items;
+  }
 }

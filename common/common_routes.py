@@ -10,12 +10,12 @@ def addRoutes():
         # not instant update in sync with breaking changes on backend. BUT to keep
         # code clean, force update for earlier versions.
         allowedVersions = ['0.0.0', '0.0.1']
-        ret = { 'valid': 1, 'msg': '', 'versions': allowedVersions }
+        ret = { 'valid': 1, 'message': '', 'versions': allowedVersions }
         return ret
     _socket.add_route('getAllowedVersions', GetAllowedVersions)
 
     def Ping(data, auth, websocket):
-        ret = { 'valid': '1', 'msg': '' }
+        ret = { 'valid': '1', 'message': '' }
         return ret 
     _socket.add_route('ping', Ping)
 

@@ -25,7 +25,7 @@ def addRoutes():
 
     def GetUserById(data, auth, websocket):
         user = _user_auth.getById(data['userId'])
-        ret = { 'valid': 1, 'msg': '', 'user': user }
+        ret = { 'valid': 1, 'message': '', 'user': user }
         ret = _route_parse.formatRet(data, ret)
         return ret
     _socket.add_route('getUserById', GetUserById)

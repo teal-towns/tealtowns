@@ -71,7 +71,7 @@ def test_validSHPs():
     # ret = uploadFile('Shipibo.zip', 'zip')
     # assert ret['valid'] == 1
     # assert len(ret['parcels']) == 184
-    # assert(ret['msg'] == '184 parcels. 1 skipped. 1 invalid. polygon area is smaller than 0.001 ha')
+    # assert(ret['message'] == '184 parcels. 1 skipped. 1 invalid. polygon area is smaller than 0.001 ha')
     # assert (ret['end'] - ret['start']).total_seconds() < 0.3
 
     # Check shapefile folder & files are deleted
@@ -95,7 +95,7 @@ def test_validGeojsons():
 # def test_emptyPolygon():
 #     ret = uploadFile('EmptyPolygon.kml', 'kml')
 #     assert ret['valid'] == 0
-#     assert ret['msg'] == 'This file contains no geo features.'
+#     assert ret['message'] == 'This file contains no geo features.'
 #     assert len(ret['parcels']) == 0
 #     assert (ret['end'] - ret['start']).total_seconds() < 0.1
 

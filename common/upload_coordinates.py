@@ -26,7 +26,7 @@ _config = ml_config.get_config()
 #     fileName = fileName if (fileName is not None and len(fileName) > 0) else lodash.random_string() + '.' + fileType
 #     title = title if (title is not None and len(title) > 0) else lodash.random_string()
 
-#     ret = { 'valid': 1, 'msg': '', 'fileUrl': '', 'blobName': '', 'title': '', }
+#     ret = { 'valid': 1, 'message': '', 'fileUrl': '', 'blobName': '', 'title': '', }
 
 #     filePath = 'uploads/temp_' + fileName
 #     with open(filePath, 'wb') as file:
@@ -47,7 +47,7 @@ _config = ml_config.get_config()
 #     return ret
 
 def FileToGeojson(filePath, fileType = 'geojson'):
-    ret = { 'valid': 0, 'msg': '' }
+    ret = { 'valid': 0, 'message': '' }
     geojson = None
     if fileType == 'kml':
         try:
@@ -58,7 +58,7 @@ def FileToGeojson(filePath, fileType = 'geojson'):
             log.log('warn', 'upload_coordinates.FileToGeojson KML parse error')
             print(err)
             ret['valid'] = 0
-            ret['msg'] = 'KML parse error'
+            ret['message'] = 'KML parse error'
     elif fileType == 'kmz':
         try:
             geojson = KMZToGeojson(filePath)
@@ -66,7 +66,7 @@ def FileToGeojson(filePath, fileType = 'geojson'):
             log.log('warn', 'upload_coordinates.FileToGeojson KMZ parse error')
             print(err)
             ret['valid'] = 0
-            ret['msg'] = 'KMZ parse error'
+            ret['message'] = 'KMZ parse error'
     elif fileType == 'zip':
         try:
             geojson = SHPZipToGeojson(filePath)
@@ -74,7 +74,7 @@ def FileToGeojson(filePath, fileType = 'geojson'):
             log.log('warn', 'upload_coordinates.FileToGeojson shp zip parse error')
             print(err)
             ret['valid'] = 0
-            ret['msg'] = 'shp zip parse error'
+            ret['message'] = 'shp zip parse error'
     else:
         try:
             geoDataFrame = geopandas.read_file(filePath)
@@ -83,12 +83,12 @@ def FileToGeojson(filePath, fileType = 'geojson'):
             log.log('warn', 'upload_coordinates.FileToGeojson geojson parse error')
             print(err)
             ret['valid'] = 0
-            ret['msg'] = 'geojson parse error'
+            ret['message'] = 'geojson parse error'
     return geojson
 
 def UploadData(filePath, fileType = 'geojson', dataFormat = 'uint8', maxCoordinatesCount = None,
     logCountCoordinates = 0):
-    ret = { 'valid': 1, 'msg': '', 'parcels': [] }
+    ret = { 'valid': 1, 'message': '', 'parcels': [] }
     geojson = FileToGeojson(filePath, fileType)
     ret = GeojsonToParcels(geojson, maxCoordinatesCount = maxCoordinatesCount,
         logCountCoordinates = logCountCoordinates)      
@@ -106,12 +106,12 @@ def CommonPolygonFilesToParcel(filePath, maxCoordinatesCount = None, logCountCoo
 def GeojsonToParcels(fileData, maxCoordinatesCount = None, minCoordinatesPerParcel = 3, maxCoordinatesPerParcel = 20000, logCountCoordinates = 0):
     if maxCoordinatesCount is None:
         maxCoordinatesCount = 50000
-    ret = { 'parcels': [], 'skippedCount': 0, 'valid': 1, 'msg': '', 'skippedCountMinCoordinatesPerParcel': 0, 
+    ret = { 'parcels': [], 'skippedCount': 0, 'valid': 1, 'message': '', 'skippedCountMinCoordinatesPerParcel': 0, 
     'skippedCountMaxCoordinatesPerParcel':0, 'skippedCountInvalidCoordinates': 0, 'totalCoordinates': 0 }
     data = json.loads(fileData)
     if 'features' not in data or len(data['features']) < 1:
         ret['valid'] = 0
-        ret['msg'] = 'This file contains no geo features.'
+        ret['message'] = 'This file contains no geo features.'
     else:
         parcels = []
         skippedCount = 0
@@ -152,7 +152,7 @@ def GeojsonToParcels(fileData, maxCoordinatesCount = None, minCoordinatesPerParc
                                 skippedCountMaxCoordinatesPerParcel += 1
                         elif not retCoordinatesValid['valid']:
                                 skippedCountInvalidCoordinates += 1
-                                ret['invalidCoordinatesMsg'] = retCoordinatesValid['msg']
+                                ret['invalidCoordinatesMsg'] = retCoordinatesValid['message']
                         
 
         ret['parcels'] = parcels
@@ -160,7 +160,7 @@ def GeojsonToParcels(fileData, maxCoordinatesCount = None, minCoordinatesPerParc
         ret['skippedCountMinCoordinatesPerParcel'] = skippedCountMinCoordinatesPerParcel
         ret['skippedCountMaxCoordinatesPerParcel'] = skippedCountMaxCoordinatesPerParcel
         ret['skippedCountInvalidCoordinates'] = skippedCountInvalidCoordinates
-        ret['msg'] = FormMessage(ret, minCoordinatesPerParcel, maxCoordinatesPerParcel)
+        ret['message'] = FormMessage(ret, minCoordinatesPerParcel, maxCoordinatesPerParcel)
     return ret
 
 def KMLToParcels(filePath, maxCoordinatesCount = None, logCountCoordinates = 0):
@@ -216,39 +216,39 @@ def SHPZipToParcels(filePath,  maxCoordinatesCount = None, logCountCoordinates =
     logCountCoordinates = logCountCoordinates)
 
 def FormMessage(ret, minCoordinatesPerParcel, maxCoordinatesPerParcel):
-    ret['msg'] = str(len(ret['parcels'])) + ' parcels.'
+    ret['message'] = str(len(ret['parcels'])) + ' parcels.'
     if ret['skippedCount'] > 0:
-        ret['msg'] += ' ' + str(ret['skippedCount']) + ' skipped.'
+        ret['message'] += ' ' + str(ret['skippedCount']) + ' skipped.'
         if ret['skippedCountMinCoordinatesPerParcel'] > 0:
-            ret['msg'] += ' ' + str(ret['skippedCountMinCoordinatesPerParcel']) + \
+            ret['message'] += ' ' + str(ret['skippedCountMinCoordinatesPerParcel']) + \
                 ' too few coordinates; ' + str(minCoordinatesPerParcel) + \
                 ' is the min number of coordinates.'
         if ret['skippedCountMaxCoordinatesPerParcel'] > 0:
-            ret['msg'] += ' ' + str(ret['skippedCountMaxCoordinatesPerParcel']) + \
+            ret['message'] += ' ' + str(ret['skippedCountMaxCoordinatesPerParcel']) + \
                 ' too many coordinates; ' + str(maxCoordinatesPerParcel) + \
                 ' is the max number of coordinates.'
         if ret['skippedCountInvalidCoordinates'] > 0:
-            ret['msg'] += ' ' + str(ret['skippedCountInvalidCoordinates']) + \
+            ret['message'] += ' ' + str(ret['skippedCountInvalidCoordinates']) + \
                 ' invalid.'
             if 'invalidCoordinatesMsg' in ret:
-                ret['msg'] += ' ' + ret['invalidCoordinatesMsg']
-    return ret['msg']
+                ret['message'] += ' ' + ret['invalidCoordinatesMsg']
+    return ret['message']
 
 def ValidateCoordinates(coordinates):
-    ret = { 'coordinates': coordinates, 'valid': 1, 'msg': '' }
+    ret = { 'coordinates': coordinates, 'valid': 1, 'message': '' }
     # Ensure start is the same as the end.
     lastIndex = len(coordinates) - 1
     if coordinates[0] != coordinates[lastIndex]:
         ret['valid'] = 0
         coordinates.append(coordinates[0])
         ret['coordinates'] = coordinates
-        ret['msg'] = 'coordinates do not form enclosed polygon'
+        ret['message'] = 'coordinates do not form enclosed polygon'
     
     # Ensure polygon area is bigger than 0.001 ha (10 m^2)
     area = _math_polygon.PolygonAreaLngLat(coordinates)
     if area < 10:
         ret['valid'] = 0
-        ret['msg'] = 'polygon area is smaller than 0.001 ha'
+        ret['message'] = 'polygon area is smaller than 0.001 ha'
     return ret
 
 def ParcelsToGeojson(parcels):

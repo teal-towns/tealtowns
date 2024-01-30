@@ -68,7 +68,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
           _images.add(ImageClass.fromJson(image));
         }
       } else {
-         _messageImages = data['msg'].length > 0 ? data['msg'] : 'No images found';
+         _messageImages = data['message'].length > 0 ? data['message'] : 'No images found';
       }
       setState(() {
         _loadingImages = false;

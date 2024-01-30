@@ -46,7 +46,7 @@ class _UserSignupState extends State<UserSignupComponent> {
           setState(() { _message = 'Check your email to verify and get started! Check your SPAM folder if you do not see the email within a few minutes.'; });
         }
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Invalid fields, please try again'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid fields, please try again'; });
       }
       setState(() { _loading = false; });
     }));

@@ -1,8 +1,8 @@
 from permission import permission_user
 
 def Allowed(route, auth, data):
-    msgId = data['_msgId'] if '_msgId' in data else ''
-    ret = { 'valid': 1, 'msg': '', '_msgId': msgId }
+    messageId = data['_messageId'] if '_messageId' in data else ''
+    ret = { 'valid': 1, 'message': '', '_messageId': messageId }
 
     # Check permissions.
     perms = [
@@ -29,14 +29,14 @@ def Allowed(route, auth, data):
     if route in perms or route in userIdRequired or route in admin:
         if len(auth['userId']) == 0:
             ret['valid'] = 0
-            ret['msg'] = "Empty user id."
+            ret['message'] = "Empty user id."
             return ret
 
     if route in perms or route in admin:
         allowed = 0
         if "_" in auth['userId']:
             ret['valid'] = 0
-            ret['msg'] = "Invalid user id"
+            ret['message'] = "Invalid user id"
             return ret
 
         if permission_user.LoggedIn(auth['userId'], auth['sessionId']):
@@ -44,7 +44,7 @@ def Allowed(route, auth, data):
 
         if not allowed:
             ret['valid'] = 0
-            ret['msg'] = "Permission denied"
+            ret['message'] = "Permission denied"
             return ret
 
     if route in admin:
@@ -52,7 +52,7 @@ def Allowed(route, auth, data):
             allowed = 1
         else:
             ret['valid'] = 0
-            ret['msg'] = "Admin privileges required"
+            ret['message'] = "Admin privileges required"
             return ret
 
     return ret

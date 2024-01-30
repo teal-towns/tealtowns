@@ -18,6 +18,8 @@ def Routes(app, cors):
 # https://stripe.com/docs/testing
 # https://stripe.com/docs/webhooks
 # https://stripe.com/docs/api/checkout/sessions/object
+# https://stripe.com/docs/payments/checkout/fulfill-orders
+# https://stripe.com/docs/webhooks#register-webhook
 async def StripeWebhook(request):
     stripe.api_key = _config['stripe']['secret']
     data = await request.json()

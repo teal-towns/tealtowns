@@ -18,8 +18,10 @@ _launchURL(url) async {
 class AppScaffoldComponent extends StatefulWidget {
   Widget? body;
   double width;
+  bool listWrapper;
+  double innerWidth;
 
-  AppScaffoldComponent({this.body, this.width = 1200});
+  AppScaffoldComponent({this.body, this.width = 1200, this.listWrapper = false, this.innerWidth = double.infinity});
 
   @override
   _AppScaffoldState createState() => _AppScaffoldState();
@@ -152,6 +154,9 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     }
     if (currentUserState.hasRole('admin')) {
     }
+    columns += [
+      _buildLinkButton(context, '/about', 'About'),
+    ];
 
     return Drawer(
       child: Column(
@@ -173,8 +178,8 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           ),
           ...columns,
           _buildLogoutButton(context, currentUserState),
-          SizedBox(height: 30),
-          Text('Powered by Collobartive.Earth', style: TextStyle(color: Colors.white)),
+          // SizedBox(height: 30),
+          // Text('Powered by Collobartive.Earth', style: TextStyle(color: Colors.white)),
         ],
       ),
     );
@@ -182,10 +187,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
 
   Widget _buildHeader(BuildContext context, var currentUserState) {
     List<Widget> rows = [
-      Expanded(
-        flex: 1,
-        child: _buildNavButton('/home', 'Home', Icons.home, context, width: double.infinity, fontSize: 10),
-      ),
+      // Expanded(
+      //   flex: 1,
+      //   child: _buildNavButton('/home', 'Home', Icons.home, context, width: double.infinity, fontSize: 10),
+      // ),
       Expanded(
         flex: 1,
         child: _buildNavButton('/blog', 'Blog', Icons.article, context, width: double.infinity, fontSize: 10),
@@ -193,6 +198,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       Expanded(
         flex: 1,
         child: _buildNavButton('/own', 'Own', Icons.build, context, width: double.infinity, fontSize: 10),
+      ),
+      Expanded(
+        flex: 1,
+        child: _buildNavButton('/weekly-events', 'Events', Icons.event, context, width: double.infinity, fontSize: 10),
       ),
     ];
     if (!currentUserState.isLoggedIn) {
@@ -232,6 +241,22 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildBody(BuildContext context, var currentUserState, { bool header = false }) {
+    Widget bodyContent = widget.body!;
+    if (widget.listWrapper) {
+      bodyContent = ListView(
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: widget.innerWidth,
+              padding: EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
+              child: widget.body!,
+            )
+          )
+        ]
+      );
+    }
+
     if (header) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,7 +271,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
                 alignment: Alignment.center,
                 child: Container(
                   width: widget.width,
-                  child: widget.body,
+                  child: bodyContent,
                   color: Colors.white,
                 )
               )
@@ -261,7 +286,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
         alignment: Alignment.center,
         child: Container(
           width: widget.width,
-          child: widget.body,
+          child: bodyContent,
           color: Colors.white,
         )
       )
@@ -285,9 +310,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           backgroundColor: Colors.white,
           title: Image.asset('assets/images/logo.png', width: 100, height: 50),
           actions: <Widget>[
-            _buildNavButton('/home', 'Home', Icons.home, context),
+            // _buildNavButton('/home', 'Home', Icons.home, context),
             _buildNavButton('/blog', 'Blog', Icons.article, context),
             _buildNavButton('/own', 'Own', Icons.build, context),
+            _buildNavButton('/weekly-events', 'Events', Icons.event, context),
             _buildUserButton(context, currentUserState),
             _buildDrawerButton(context),
           ],
