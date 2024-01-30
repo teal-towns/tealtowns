@@ -66,7 +66,7 @@ def RemoveById(collection: str, id1: str):
 
 # e.g. search('twin_model', { 'name': 'mod' }, { 'disease_names': ['alzheimer'] }, sortKeys = 'name,-created_at')
 def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
-    skip=0, notInListKeyVals={}, minKeyVals = {}, maxKeyVals = {}, query = {},):
+    skip=0, notInListKeyVals={}, minKeyVals = {}, maxKeyVals = {}, query = {}, fields = None):
     ret = {"valid": 1, "message": ""}
     objKey = collection + "s"
     ret[objKey] = []
@@ -83,7 +83,7 @@ def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
                 sortKey = sortKey[(slice(1, len(sortKey)))]
             sort[sortKey] = sortVal
 
-    ret[objKey] = mongo_db.find(collection, query, limit=limit, skip=skip, sort_obj=sort)["items"]
+    ret[objKey] = mongo_db.find(collection, query, limit=limit, skip=skip, sort_obj=sort, fields = fields)["items"]
     return ret
 
 def FormSearchQuery(stringKeyVals={}, listKeyVals={}, notInListKeyVals={}, minKeyVals = {},

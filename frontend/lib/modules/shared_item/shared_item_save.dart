@@ -103,7 +103,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
           context.go('/shared-item-owner-save?sharedItemId=${sharedItemId}&id=${sharedItemOwnerId}');
         }
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Error, please try again.'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; });
       }
       setState(() { _loading = false; });
     }));

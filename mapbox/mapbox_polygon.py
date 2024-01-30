@@ -185,7 +185,7 @@ async def GetVectorTilesAsync(boundsLngLat, zoom = None, maxTiles = None,
 
 def GetTerrainWithHeightMap(lngLatCenter, xMeters, yMeters, zoom = 14, pixelsPerTile = 512,
     xVertices = None, yVertices = None, doHeightmap = 1, maxTiles = None):
-    ret = { 'valid': 1, 'msg': '', 'imgTerrain': None, 'imgHeightMap': None,
+    ret = { 'valid': 1, 'message': '', 'imgTerrain': None, 'imgHeightMap': None,
         'minElevationMeters': None, 'maxElevationMeters': None, 'metersPerPixel': None,
         'metersPerPixelOriginal': None, 'valuesListHeightMap': [] }
 
@@ -406,7 +406,7 @@ def GetElevation(R, G, B):
 def ElevationToHeightmap(image, minMeters = -1000, maxMeters = 9000, bits = 8):
     if bits not in [8,16]:
         bits = 8
-    ret = { 'valid': 1, 'msg': '', 'img': None, 'minElevationMeters': None, 'maxElevationMeters': None,
+    ret = { 'valid': 1, 'message': '', 'img': None, 'minElevationMeters': None, 'maxElevationMeters': None,
         'elevationMetersPixelMin': minMeters, 'elevationMetersPixelMax': maxMeters,
         'valuesList': [] }
     maxPixelValue = 2**bits - 1

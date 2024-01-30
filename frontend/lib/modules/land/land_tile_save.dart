@@ -53,7 +53,7 @@ class _LandTileSaveState extends State<LandTileSave> {
           widget.onChange!({});
         }
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Invalid, please try again'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid, please try again'; });
       }
       setState(() { _loading = false; });
     }));

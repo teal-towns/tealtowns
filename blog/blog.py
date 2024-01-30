@@ -3,7 +3,7 @@ import re
 
 def Get(title = '', tags = [], userIdCreator = '', slug = '', limit = 25, skip = 0,
     sortKey = ''):
-    ret = { 'valid': 1, 'msg': '', 'blogs': [] }
+    ret = { 'valid': 1, 'message': '', 'blogs': [] }
     query = {}
     if len(tags) > 0:
         query['tags'] = { '$in': tags }
@@ -25,7 +25,7 @@ def Get(title = '', tags = [], userIdCreator = '', slug = '', limit = 25, skip =
     return ret
 
 def Save(blog, userIdCreator = ''):
-    ret = { 'valid': 1, 'msg': '', 'blog': {} }
+    ret = { 'valid': 1, 'message': '', 'blog': {} }
 
     if '_id' not in blog or not blog['_id']:
         newData = blog
@@ -51,7 +51,7 @@ def Save(blog, userIdCreator = ''):
     return ret
 
 def Remove(id):
-    ret = { 'valid': 1, 'msg': '' }
+    ret = { 'valid': 1, 'message': '' }
     query = {
         '_id': mongo_db.to_object_id(id),
     }

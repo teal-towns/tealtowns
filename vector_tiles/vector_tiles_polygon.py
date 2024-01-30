@@ -10,7 +10,7 @@ from common import upload_coordinates
 
 
 def GetPolygonFileTilesInfo(filePath):
-    ret = {'valid': 1, 'msg': '', 'bounds': {},
+    ret = {'valid': 1, 'message': '', 'bounds': {},
            'areaHa': -1, 'tileNumbersZoom16': [], }
     geoDataFrame = geopandas.read_file(filePath)
     geoDataFrame = geoDataFrame

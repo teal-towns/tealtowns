@@ -39,10 +39,10 @@ class _UserLoginState extends State<UserLoginComponent> {
           Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
           context.go(Routes.home);
         } else {
-          setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Invalid login, please try again'; });
+          setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid login, please try again'; });
         }
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Invalid login, please try again'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid login, please try again'; });
       }
       setState(() { _loading = false; });
     }));

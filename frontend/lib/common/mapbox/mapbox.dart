@@ -14,15 +14,18 @@ class Mapbox extends StatefulWidget {
   double mapWidth;
   double mapHeight;
   Function(Map<String, dynamic>)? onChange;
-  int debounceChange = 1000;
-  double latitude = 8.993036;
-  double longitude = -79.574983;
-  double zoom = 13.0;
-  var coordinatesDraw = [];
+  int debounceChange;
+  double latitude;
+  double longitude;
+  double zoom;
+  var coordinatesDraw;
+  List<double> markerLngLat;
+  String markerImage;
 
   Mapbox({ this.polygons = const [], this.mapHeight = 300, this.mapWidth = 300,
-    this.onChange = null, this.debounceChange = 1000, this.latitude = 8.993036,
-    this.longitude = -79.574983, this.zoom = 13.0, this.coordinatesDraw = const [], });
+    this.onChange = null, this.debounceChange = 1000, this.latitude = 0,
+    this.longitude = 0, this.zoom = 13.0, this.coordinatesDraw = const [], this.markerLngLat = const [],
+    this.markerImage = 'assets/images/map-marker.png' });
 
   @override
   _MapboxState createState() => _MapboxState();
@@ -33,13 +36,14 @@ class _MapboxState extends State<Mapbox> {
   MapboxDrawService _mapboxDrawService = MapboxDrawService();
   ParseService _parseService = ParseService();
 
+  bool _zoomInited = false;
   MapboxMap? _map;
   bool _mapReady = false;
   late MapboxMapController _mapController;
-  static CameraPosition _initialPosition = CameraPosition(
-    target: LatLng(8.993036, -79.574983),
-    zoom: 13.0,
-  );
+  // static CameraPosition _initialPosition = CameraPosition(
+  //   target: LatLng(0, 0),
+  //   zoom: 13.0,
+  // );
   //CameraPosition _position = _initialPosition;
 
   int _polygonsCount = 0;
@@ -85,13 +89,18 @@ class _MapboxState extends State<Mapbox> {
       _checkUpdateLocation();
     }
 
+    CameraPosition initialPosition = CameraPosition(
+      target: LatLng(widget.latitude, widget.longitude),
+      zoom: widget.zoom,
+    );
+
     double height = widget.mapHeight;
     _map = MapboxMap(
       accessToken: dotenv.env['MAPBOX_ACCESS_TOKEN'],
       styleString: MapboxStyles.SATELLITE,
       onMapCreated: onMapCreated,
       onStyleLoadedCallback: () => onStyleLoaded(),
-      initialCameraPosition: _initialPosition,
+      initialCameraPosition: initialPosition,
       onMapClick: (point, latLng) async {
         //print ('onMapClick ${latLng}');
       },
@@ -174,6 +183,10 @@ class _MapboxState extends State<Mapbox> {
       double latitude = widget.latitude;
       double longitude = widget.longitude;
       double zoom = _mapController.cameraPosition!.zoom;
+      if (!_zoomInited) {
+        zoom = widget.zoom;
+        _zoomInited = true;
+      }
       _mapController.moveCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -182,6 +195,15 @@ class _MapboxState extends State<Mapbox> {
           ),
         )
       );
+
+      if (widget.markerLngLat.length > 0 && widget.markerLngLat[0] != 0 && widget.markerLngLat[1] != 0) {
+        _mapController.addSymbol(
+          SymbolOptions(
+            geometry: LatLng(widget.markerLngLat[1], widget.markerLngLat[0]),
+            iconImage: widget.markerImage,
+          ),
+        );
+      }
     } else {
       Timer(Duration(milliseconds: 500), () {
         _checkUpdateLocation();

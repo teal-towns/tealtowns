@@ -52,7 +52,7 @@ class _SharedItemState extends State<SharedItem> {
     'lngLat': [0, 0],
     'myType': '',
   };
-  bool _loading = false;
+  bool _loading = true;
   String _message = '';
   bool _canLoadMore = false;
   int _lastPageNumber = 1;
@@ -102,7 +102,7 @@ class _SharedItemState extends State<SharedItem> {
           _message = 'Error.';
         }
       } else {
-        _message = data['msg'].length > 0 ? data['msg'] : 'Error.';
+        _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
       setState(() {
         _loading = false;
@@ -115,7 +115,7 @@ class _SharedItemState extends State<SharedItem> {
       if (data['valid'] == 1) {
         _searchSharedItems();
       } else {
-        _message = data['msg'].length > 0 ? data['msg'] : 'Error.';
+        _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
       setState(() {
         _loading = false;
@@ -151,7 +151,7 @@ class _SharedItemState extends State<SharedItem> {
 
     var currentUserState = context.watch<CurrentUserState>();
 
-    var columnsCreate = [];
+    List<Widget> columnsCreate = [];
     if (currentUserState.isLoggedIn) {
       columnsCreate = [
         Align(

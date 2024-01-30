@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 
 import './input_fields.dart';
+import '../location_service.dart';
 import '../mapbox/mapbox.dart';
 import '../parse_service.dart';
 
 class InputLocation extends StatefulWidget {
   var formVals;
   String formValsKey;
-  // double width;
   String label;
   Function(List<double?>)? onChange;
+  bool nestedCoordinates;
+  bool guessLocation;
+  bool useUserLocation;
+  bool updateCachedLocation;
 
   InputLocation({Key? key, this.formVals = null, this.formValsKey = '',
-    this.label = '', this.onChange = null}) : super(key: key);
+    this.label = '', this.onChange = null, this.nestedCoordinates = false,
+    this.guessLocation = true, this.useUserLocation = false,
+    this.updateCachedLocation = true}) : super(key: key);
 
   @override
   _InputLocationState createState() => _InputLocationState();
@@ -20,6 +26,7 @@ class InputLocation extends StatefulWidget {
 
 class _InputLocationState extends State<InputLocation> {
   InputFields _inputFields = InputFields();
+  LocationService _locationService = LocationService();
   ParseService _parseService = ParseService();
 
   final OverlayPortalController _tooltipController = OverlayPortalController();
@@ -30,18 +37,24 @@ class _InputLocationState extends State<InputLocation> {
   };
   String _formValsKey = 'lngLatString';
 
-  /// width of the button after the widget rendered
-  // double? _buttonWidth;
   double? _dropdownWidth;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey][0]}, ${widget.formVals[widget.formValsKey][1]}';
+    if (widget.nestedCoordinates) {
+      _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey]['coordinates'][0]}, ${widget.formVals[widget.formValsKey]['coordinates'][1]}';
+    } else {
+      _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey][0]}, ${widget.formVals[widget.formValsKey][1]}';
+    }
     return CompositedTransformTarget(
       link: _link,
       child: OverlayPortal(
@@ -52,15 +65,10 @@ class _InputLocationState extends State<InputLocation> {
             targetAnchor: Alignment.bottomLeft,
             child: Align(
               alignment: AlignmentDirectional.topStart,
-              // child: MenuWidget(width: widget.width),
               child: DropdownWidget(width: _dropdownWidth),
             ),
           );
         },
-        // child: ElevatedButton(
-        //   onPressed: () { onTap(); },
-        //   child: Text('Button'),
-        // ),
         child: _inputFields.inputText(_formVals, _formValsKey, label: widget.label, onTap: onTap, onChange: (String val) {
           List<String> lngLatString = val.split(',');
           double lng = _parseService.toDoubleNoNull(lngLatString[0]);
@@ -71,48 +79,54 @@ class _InputLocationState extends State<InputLocation> {
     );
   }
 
+  void _init() async {
+    if (widget.guessLocation) {
+      List<double> lngLat = await _locationService.GetLocation(context, useUser: widget.useUserLocation);
+      _formVals[_formValsKey] = '${lngLat[0]}, ${lngLat[1]}';
+      setState(() {
+        _formVals = _formVals;
+      });
+      UpdateLngLat(lngLat[0], lngLat[1]);
+    }
+  }
+
   List<double> UpdateLngLat(double lng, double lat) {
-    widget.formVals[widget.formValsKey] = [_parseService.Precision(lng, 6),
-      _parseService.Precision(lat, 6)];
+    List<double> lngLat = [_parseService.Precision(lng, 5), _parseService.Precision(lat, 5)];
+    if (widget.updateCachedLocation) {
+      _locationService.SetLngLat(lngLat);
+    }
+    if (widget.nestedCoordinates) {
+      widget.formVals[widget.formValsKey]['coordinates'] = lngLat;
+    } else {
+      widget.formVals[widget.formValsKey] = lngLat;
+    }
     if (widget.onChange != null) {
       widget.onChange!(widget.formVals[widget.formValsKey]);
     }
-    return widget.formVals[widget.formValsKey];
+    return lngLat;
   }
 
   void onTap() {
-    // _buttonWidth = context.size?.width;
     _dropdownWidth = context.size?.width;
     _tooltipController.toggle();
   }
 
   Widget DropdownWidget({double? width = 300, double height = 300}) {
+    double lng;
+    double lat;
+    if (widget.nestedCoordinates) {
+      lng = widget.formVals[widget.formValsKey]['coordinates'][0];
+      lat = widget.formVals[widget.formValsKey]['coordinates'][1];
+    } else {
+      lng = widget.formVals[widget.formValsKey][0];
+      lat = widget.formVals[widget.formValsKey][1];
+    }
     return Container(
       width: width,
       height: height,
-      // decoration: ShapeDecoration(
-      //   color: Colors.black26,
-      //   shape: RoundedRectangleBorder(
-      //     side: const BorderSide(
-      //       width: 1.5,
-      //       color: Colors.black,
-      //     ),
-      //     borderRadius: BorderRadius.circular(12),
-      //   ),
-      //   shadows: const [
-      //     BoxShadow(
-      //       color: Color(0x11000000),
-      //       blurRadius: 32,
-      //       offset: Offset(0, 20),
-      //       spreadRadius: -8,
-      //     ),
-      //   ],
-      // ),
       color: Colors.white,
-      // child: Text('test'),
       child: Mapbox(mapWidth: width!, mapHeight: height, onChange: _onChangeMap,
-        longitude: widget.formVals[widget.formValsKey][0], latitude: widget.formVals[widget.formValsKey][1],
-        zoom: 15,
+        longitude: lng, latitude: lat, zoom: 15,
       ),
     );
   }

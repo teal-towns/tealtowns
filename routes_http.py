@@ -23,12 +23,12 @@ def Routes(app, cors):
 def CIWebhookTesting(request):
     data = request.query
     ci_webhook.Restart(0)
-    return web.json_response({'valid': 1, 'msg': 'CIWebhookTesting 2'})
+    return web.json_response({'valid': 1, 'message': 'CIWebhookTesting 2'})
 
 async def CIWebhook(request):
     data = await request.json()
     ci_webhook.Restart(1)
-    return web.json_response({'valid': 1, 'msg': 'CIWebhook'})
+    return web.json_response({'valid': 1, 'message': 'CIWebhook'})
 
 async def GetUserSession(request):
     data = await request.json()

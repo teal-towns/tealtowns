@@ -9,9 +9,15 @@ import './modules/user_auth/user_logout.dart';
 import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
 
+import './modules/about/about.dart';
+
 import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
 import './modules/blog/blog_view.dart';
+
+import './modules/event/weekly_events.dart';
+import './modules/event/weekly_event_save.dart';
+import './modules/event/weekly_event_view.dart';
 
 import './modules/land/land_page.dart';
 
@@ -30,9 +36,15 @@ class Routes {
   static const passwordReset = '/password-reset';
   static const signup = '/signup';
 
+  static const about = '/about';
+
   static const blogList = '/blog';
   static const blogSave = '/blog-save';
   static const blogView = '/b/:slug';
+
+  static const weeklyEvents = '/weekly-events';
+  static const weeklyEventSave = '/weekly-event-save';
+  static const weeklyEventView = '/weekly-event';
 
   static const land = '/land';
 
@@ -75,6 +87,11 @@ class AppGoRouter {
         path: Routes.passwordReset,
         builder: (context, state) => UserPasswordResetComponent(),
       ),
+
+      GoRoute(
+        path: Routes.about,
+        builder: (BuildContext context, GoRouterState state) => About(),
+      ),
       
       GoRoute(
         path: Routes.blogList,
@@ -113,8 +130,8 @@ class AppGoRouter {
       GoRoute(
         path: Routes.sharedItem,
         builder: (BuildContext context, GoRouterState state) => SharedItem(
-          lat: double.parse(state.uri.queryParameters['lat'] ?? '-999'),
-          lng: double.parse(state.uri.queryParameters['lng'] ?? '-999'),
+          lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
+          lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
           maxMeters: double.parse(state.uri.queryParameters['range'] ?? '1500'),
         ),
       ),
@@ -137,6 +154,27 @@ class AppGoRouter {
       GoRoute(
         path: Routes.userMoney,
         builder: (BuildContext context, GoRouterState state) => UserMoney(),
+      ),
+
+      GoRoute(
+        path: Routes.weeklyEvents,
+        builder: (BuildContext context, GoRouterState state) => WeeklyEvents(
+          lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
+          lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
+          maxMeters: double.parse(state.uri.queryParameters['range'] ?? '1500'),
+        ),
+      ),
+      GoRoute(
+        path: Routes.weeklyEventSave,
+        builder: (BuildContext context, GoRouterState state) => WeeklyEventSave(
+          id: state.uri.queryParameters['id'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: Routes.weeklyEventView,
+        builder: (BuildContext context, GoRouterState state) => WeeklyEventView(
+          id: state.uri.queryParameters['id'] ?? '',
+        ),
       ),
 
       GoRoute(

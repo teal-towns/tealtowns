@@ -39,13 +39,13 @@ class _UserPasswordResetState extends State<UserPasswordResetComponent> {
             Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
             context.go(Routes.home);
           } else {
-            setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Please try again.'; });
+            setState(() { _message = data['message'].length > 0 ? data['message'] : 'Please try again.'; });
           }
         } else {
-          setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Please try again.'; });
+          setState(() { _message = data['message'].length > 0 ? data['message'] : 'Please try again.'; });
         }
       } else {
-        setState(() { _message = data['msg'].length > 0 ? data['msg'] : 'Please try again.'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Please try again.'; });
       }
       setState(() { _loading = false; });
     }));

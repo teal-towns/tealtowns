@@ -27,7 +27,7 @@ def AddRoutes():
         requiredFields = ['timeframe', 'year', 'zoom', 'tile']
         for field in requiredFields:
             if field not in data:
-                ret = { 'valid': 0, 'msg': 'Missing required fields' }
+                ret = { 'valid': 0, 'message': 'Missing required fields' }
                 valid = 0
                 break
         if valid:

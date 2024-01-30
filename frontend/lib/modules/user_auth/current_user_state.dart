@@ -96,10 +96,10 @@ class CurrentUserState extends ChangeNotifier {
     List<dynamic> _lngLat = [];
     LocalStorage _localStorage = _localstorageService.localstorage;
     List<dynamic>? _lngLatLocalStored = _localStorage.getItem('lngLat');
-    if (_lngLatLocalStored != null){
+    if (_lngLatLocalStored != null) {
       _lngLat = _lngLatLocalStored;
     }
-    else if (_currentUser != null && _currentUser?.location.coordinates != []){
+    else if (_currentUser != null && _currentUser?.location.coordinates != []) {
       _lngLat = _currentUser!.location.coordinates;
     } else {
       LocationData coordinates = await Location().getLocation();

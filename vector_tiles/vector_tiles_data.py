@@ -38,7 +38,7 @@ def GetTiles(timeframe, year, latCenter, lngCenter, xCount=None, yCount=None, zo
         xCount = 32
     if yCount > 32:
         yCount = 32
-    ret = {'valid': 1, 'msg': '', 'tileRows': []}
+    ret = {'valid': 1, 'message': '', 'tileRows': []}
     tileNumberCenterY = _mapbox_polygon.LatitudeToTile(latCenter, zoom)
     tileNumberCenterX = _mapbox_polygon.LongitudeToTile(lngCenter, zoom)
     tileNumberTop = tileNumberCenterY - math.floor(yCount / 2)
@@ -129,13 +129,13 @@ def TileXYToNumber(tileX, tileY, zoom, tilesPerRow=None):
 
 
 def SaveTile(timeframe, year, zoom, tile):
-    ret = {'valid': 1, 'msg': '', 'tile': {}}
+    ret = {'valid': 1, 'message': '', 'tile': {}}
 
     database = _vector_tiles_databases.GetDatabase(timeframe, year, zoom)
     if '_id' not in tile:
         if 'tileX' not in tile or 'tileY' not in tile:
             ret['valid'] = 0
-            ret['msg'] = 'vector_tiles_data.SaveTile either _id or (tileX and tileY) are required'
+            ret['message'] = 'vector_tiles_data.SaveTile either _id or (tileX and tileY) are required'
             return ret
 
         # Look up just in case
@@ -186,7 +186,7 @@ def SaveTile(timeframe, year, zoom, tile):
 
 
 def GetTileById(timeframe, year, zoom, tileId):
-    ret = {'valid': 1, 'msg': '', 'tile': {}}
+    ret = {'valid': 1, 'message': '', 'tile': {}}
     database = _vector_tiles_databases.GetDatabase(timeframe, year, zoom)
     query = {
         '_id': mongo_db.to_object_id(tileId),
