@@ -241,8 +241,22 @@ class InputFields {
     Function()? onTap = null}) {
     RegExp pattern = new RegExp(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
     return inputText(formVals, formValsKey, label: label, hint: hint, fieldKey: fieldKey,
-      debounceChange: debounceChange, onChange: onChange, required: required, onTap: onTap,
-      pattern: pattern);
+      debounceChange: debounceChange, required: required, onTap: onTap,
+      pattern: pattern, onChange: (value) {
+        // Ensure leading zero for hour for sorting.
+        int posColon = value.indexOf(':');
+        if (posColon == 1) {
+          value = "0" + value;
+          if (formValsKey == null) {
+            formVals = value;
+          } else {
+            formVals[formValsKey] = value;
+          }
+        }
+        if (onChange != null) {
+          onChange(value);
+        }
+      });
   }
 
   Widget inputDateTime(var formVals, String? formValsKey, { String label = '', String hint = '',

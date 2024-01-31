@@ -12,6 +12,7 @@ def addRoutes():
     _socket.add_route('getWeeklyEventById', GetById)
 
     def Save(data, auth, websocket):
+        data['weeklyEvent']['dayOfWeek'] = int(data['weeklyEvent']['dayOfWeek'])
         return _mongo_db_crud.Save('weeklyEvent', data['weeklyEvent'])
     _socket.add_route('saveWeeklyEvent', Save)
 

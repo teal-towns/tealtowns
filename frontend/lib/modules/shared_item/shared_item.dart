@@ -123,7 +123,7 @@ class _SharedItemState extends State<SharedItem> {
     }));
 
     _filters['lngLat'] = _locationService.GetLngLat();
-    if (widget.lat != -999 && widget.lng != -999) {
+    if (widget.lat != 0 && widget.lng != 0) {
       _filters['lngLat'] = [widget.lng, widget.lat];
       _skipCurrentLocation = true;
     }
@@ -152,21 +152,21 @@ class _SharedItemState extends State<SharedItem> {
     var currentUserState = context.watch<CurrentUserState>();
 
     List<Widget> columnsCreate = [];
-    if (currentUserState.isLoggedIn) {
+    // if (currentUserState.isLoggedIn) {
       columnsCreate = [
         Align(
           alignment: Alignment.topRight,
           child: ElevatedButton(
             onPressed: () {
               Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
-              context.go('/shared-item-save');
+              _linkService.Go('/shared-item-save', context, currentUserState);
             },
             child: Text('Post New Item'),
           ),
         ),
         SizedBox(height: 10),
       ];
-    }
+    // }
 
     return AppScaffoldComponent(
       width: 1500,
@@ -190,7 +190,7 @@ class _SharedItemState extends State<SharedItem> {
                             label: 'Type', onChanged: (String val) {
                             _searchSharedItems();
                           }),
-                        InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', onChange: (List<double?> val) {
+                        InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
                           _searchSharedItems();
                           }),
                         _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
@@ -452,7 +452,19 @@ class _SharedItemState extends State<SharedItem> {
         ]
       );
     }
-    return _buildMessage(context);
+    return Column(
+      children: [
+        _buildMessage(context),
+        SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () {
+            Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
+            _linkService.Go('/shared-item-save', context, currentUserState);
+          },
+          child: Text('Post the first Shared Item!'),
+        ),
+      ]
+    );
   }
 
   void _searchSharedItems({int lastPageNumber = 0}) {
