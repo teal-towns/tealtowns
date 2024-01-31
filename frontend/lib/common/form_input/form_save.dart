@@ -196,7 +196,21 @@ class _FormSaveState extends State<FormSave> {
     return true;
   }
 
+  // formKey save is removing leading zero on time?
+  void FixFormatting() {
+    widget.formFields!.forEach((key, value) {
+      if (value['type'] == 'time') {
+        // Ensure leading zero for hour for sorting.
+        int posColon = _formVals[key].indexOf(':');
+        if (posColon == 1) {
+          _formVals[key] = "0" + _formVals[key];
+        }
+      }
+    });
+  }
+
   void save() {
+    FixFormatting();
     var data = {};
     data[widget.dataName] = _formVals;
     if (widget.preSave != null) {

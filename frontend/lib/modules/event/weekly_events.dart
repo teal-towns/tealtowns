@@ -99,10 +99,14 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       });
     }));
 
-    _filters['lngLat'] = _locationService.GetLngLat();
     if (widget.lat != 0 && widget.lng != 0) {
       _filters['lngLat'] = [widget.lng, widget.lat];
       _skipCurrentLocation = true;
+    } else {
+      _filters['lngLat'] = _locationService.GetLngLat();
+      // if (_locationService.LocationValid(_filters['lngLat'])) {
+      //   _skipCurrentLocation = true;
+      // }
     }
     for (int ii = 0; ii < _selectOptsMaxMeters.length; ii++) {
       if (_selectOptsMaxMeters[ii]['value'] == widget.maxMeters) {
@@ -129,20 +133,20 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     var currentUserState = context.watch<CurrentUserState>();
 
     List<Widget> columnsCreate = [];
-    if (currentUserState.isLoggedIn) {
-      columnsCreate = [
-        Align(
-          alignment: Alignment.topRight,
-          child: ElevatedButton(
-            onPressed: () {
-              context.go('/weekly-event-save');
-            },
-            child: Text('Create New Event'),
-          ),
+    // if (currentUserState.isLoggedIn) {
+    columnsCreate = [
+      Align(
+        alignment: Alignment.topRight,
+        child: ElevatedButton(
+          onPressed: () {
+            _linkService.Go('/weekly-event-save', context, currentUserState);
+          },
+          child: Text('Create New Event'),
         ),
-        SizedBox(height: 10),
-      ];
-    }
+      ),
+      SizedBox(height: 10),
+    ];
+    // }
 
     return AppScaffoldComponent(
       listWrapper: true,
@@ -157,7 +161,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               child: _layoutService.WrapWidth([
-                InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', onChange: (List<double?> val) {
+                InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
                   _search();
                   }),
                 _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
@@ -269,7 +273,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buttons.Link(context, '${weeklyEvent.startTime} ${weeklyEvent.title}', '/weekly-event?id=${weeklyEvent.id}'),
+          _buttons.Link(context, '${weeklyEvent.startTime} ${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)', '/weekly-event?id=${weeklyEvent.id}'),
           ...buttons,
         ]
       )
@@ -310,7 +314,18 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         ]
       );
     }
-    return _buildMessage(context);
+    return Column(
+      children: [
+        _buildMessage(context),
+        SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () {
+            _linkService.Go('/weekly-event-save', context, currentUserState);
+          },
+          child: Text('Add the first event!'),
+        ),
+      ]
+    );
   }
 
   void _search({int lastPageNumber = 0}) {

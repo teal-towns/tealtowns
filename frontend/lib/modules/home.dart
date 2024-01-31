@@ -15,7 +15,7 @@ class _HomeComponentState extends State<HomeComponent> {
   void initState() {
     super.initState();
     Timer(Duration(milliseconds: 500), () {
-      context.go('/weekly-events');
+      context.go('/about');
     });
   }
 
