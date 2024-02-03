@@ -2,10 +2,11 @@
 import cv2
 import numpy as np
 import os
-from land_vision.urban_tree_detection.evaluate import predict
+from pathlib import Path
+from land_vision.urban_tree_detection.evaluate import get_pred_locs
 from land_vision.urban_tree_detection.models import SFANet as SFANet
 from land_vision.urban_tree_detection.preprocess import preprocess_RGB
-# import json
+
 
 # from mapbox import mapbox_polygon as _mapbox_polygon
 # from land_vision import land_vision as _land_vision
@@ -27,16 +28,21 @@ from land_vision.urban_tree_detection.preprocess import preprocess_RGB
 #     # _land_vision.seeLand(imageUrl)
 
 def test_urban_tree_detection_inference():
-    img_path = "./uploads/images/naip_image.png"
+    img_dir = "./uploads/images/"
     weights_dir = "./land_vision/urban_tree_detection/pretrained"
     min_distance = 1
     threshold_abs = None
     threshold_rel = 0.2
     max_distance = 10
 
-    img = cv2.imread(img_path)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  
-    images = img_rgb[None,:,:,:]
+    img_list = []
+    for img_path in Path(img_dir).iterdir():
+        if img_path.is_file() and img_path.suffix ==".png":
+            img = cv2.imread(str(img_path))
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  
+            img_list.append(img_rgb)
+    
+    images = np.array(img_list)
     
     preprocess = eval(f'preprocess_RGB')
     training_model, model = SFANet.build_model(
@@ -47,7 +53,7 @@ def test_urban_tree_detection_inference():
     training_model.load_weights(weights_path)
 
     preds = model.predict(images,verbose=True,batch_size=1)[...,0]
-    results = predict(preds=preds,
+    results = get_pred_locs(preds=preds,
         min_distance=min_distance,
         threshold_rel=threshold_rel,
         threshold_abs=threshold_abs,

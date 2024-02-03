@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import os
 import yaml
-from land_vision.urban_tree_detection.evaluate import predict, make_figure_with_pred
+from land_vision.urban_tree_detection.evaluate import get_pred_locs, make_figure_with_pred
 import land_vision.urban_tree_detection.models.SFANet as SFANet
 from land_vision.urban_tree_detection.preprocess import preprocess_RGB
 from pathlib import Path
@@ -13,9 +13,15 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def main():
+    """
+    runs the inference and store the predicted tree locations and plots them
+    To run it: 
+    python -m land_vision.urban_tree_detection.inference uploads/images/  \
+           land_vision/urban_tree_detection/pretrained/ land_vision/urban_tree_detection/log/ 
+    """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('data', help='path to png naip image direcotry')
+    parser.add_argument('data', help='path to png naip image directory')
     parser.add_argument('weights', help='path to pretrained weghts directory')
     parser.add_argument('log', help='path to log directory')
     parser.add_argument('--max_distance', type=float, default=10, help='max distance from gt to pred tree (in pixels)')
@@ -58,7 +64,7 @@ def main():
     print('----- getting predictions from trained model -----')
     preds = model.predict(images,verbose=True,batch_size=1)[...,0]
     print('----- getting predicted locations -----')
-    results = predict(preds=preds,
+    results = get_pred_locs(preds=preds,
         min_distance=min_distance,
         threshold_rel=threshold_rel,
         threshold_abs=threshold_abs,
@@ -66,7 +72,7 @@ def main():
     
     print("len of results", len(results['pred_locs']))
 
-    with open(os.path.join(args.log,'loc_results.txt'),'w') as f:
+    with open(os.path.join(args.log,'loc_results2.txt'),'w') as f:
         f.write('predicted locations: '+str(results['pred_locs'])+'\n')
 
     print('------- results for: ' + args.log + ' ---------')

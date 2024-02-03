@@ -1,13 +1,9 @@
 import numpy as np
-
 from skimage.feature import peak_local_max
 from matplotlib import pyplot as plt
-
 import tqdm
 
-
-
-def predict(preds, min_distance, threshold_rel, threshold_abs, max_distance):
+def get_pred_locs(preds, min_distance, threshold_rel, threshold_abs, max_distance):
     """ predict x,y locations of predicted points.
         Arguments:
             preds: predicted confidence maps [N,H,W]
