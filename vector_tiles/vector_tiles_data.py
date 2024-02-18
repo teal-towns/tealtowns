@@ -20,6 +20,7 @@ import json
 
 from mapbox import mapbox_polygon as _mapbox_polygon
 from common import math_polygon as _math_polygon
+from common import image_subdivide as _image_subdivide
 import lodash
 import mongo_db
 import number
@@ -193,3 +194,24 @@ def GetTileById(timeframe, year, zoom, tileId):
     }
     ret['tile'] = mongo_db.find_one('landTile', query, db1=database)['item']
     return ret
+
+
+def InsertTreeLocsInTiles(timeframe, year, lngLatOrigin,  pixelOffsets, zoom, metersPerPixel):
+    pointLngLats = _image_subdivide.PixelsToLngLats(pixelOffsets, lngLatOrigin, metersPerPixel):
+    _id = 1
+    uName = 'mapbox_' + 'tree' + '_' + str(_id)
+    polygon = {
+        '_id': uName,
+        'uName': uName,
+        'vertices': pointLngLats,
+        'posCenter': '',
+        'type': 'tree',
+        'shape': 'point',
+        'pairsString': '',
+        'source': 'mapbox'
+     }
+    ret = GetTiles(timeframe, year, lngLatOrigin[1], lngLatOrigin[0], xCount=1, yCount=1, zoom=zoom,
+             autoInsert=0)
+    ret['polygon'] = polygon
+    return ret
+   
