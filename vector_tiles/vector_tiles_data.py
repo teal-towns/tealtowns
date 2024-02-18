@@ -197,7 +197,7 @@ def GetTileById(timeframe, year, zoom, tileId):
 
 
 def InsertTreeLocsInTiles(timeframe, year, lngLatOrigin,  pixelOffsets, zoom, metersPerPixel):
-    pointLngLats = _image_subdivide.PixelsToLngLats(pixelOffsets, lngLatOrigin, metersPerPixel):
+    pointLngLats = _image_subdivide.PixelsToLngLats(pixelOffsets, lngLatOrigin, metersPerPixel)
     _id = 1
     uName = 'mapbox_' + 'tree' + '_' + str(_id)
     polygon = {
