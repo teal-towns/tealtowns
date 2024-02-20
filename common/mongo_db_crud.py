@@ -10,7 +10,7 @@ def ValidateRequired(obj, keys):
             return ret
     return ret
 
-def Get(collection: str, stringKeyVals = {}):
+def Get(collection: str, stringKeyVals = {}, db1 = None):
     ret = {"valid": 1, "message": ""}
     ret[collection] = {}
     query = {}
@@ -23,17 +23,17 @@ def Get(collection: str, stringKeyVals = {}):
         ret['valid'] = 0
         ret['message'] = 'At least one key value pair is required.'
         return ret
-    item = mongo_db.find_one(collection, query)["item"]
+    item = mongo_db.find_one(collection, query, db1 = db1)["item"]
     if item is not None:
         ret[collection] = item
     return ret
 
-def GetById(collection: str, id1: str):
+def GetById(collection: str, id1: str, db1 = None):
     ret = {"valid": 1, "message": ""}
     ret[collection] = {}
     try:
         query = {"_id": mongo_db.to_object_id(id1)}
-        item = mongo_db.find_one(collection, query)["item"]
+        item = mongo_db.find_one(collection, query, db1 = db1)["item"]
         if item is not None:
             ret[collection] = item
     except Exception:
@@ -41,7 +41,7 @@ def GetById(collection: str, id1: str):
         ret["message"] = "Invalid id."
     return ret
 
-def Save(collection: str, obj):
+def Save(collection: str, obj, db1 = None):
     ret = {"valid": 1, "message": "", "insert": 0}
     ret[collection] = obj
 
@@ -49,24 +49,24 @@ def Save(collection: str, obj):
         del obj['_id']
     if "_id" not in obj:
         ret["insert"] = 1
-        result = mongo_db.insert_one(collection, obj)
+        result = mongo_db.insert_one(collection, obj, db1 = db1)
         ret[collection]["_id"] = mongo_db.from_object_id(result["item"]["_id"])
     else:
         ret["insert"] = 0
         query = {"_id": mongo_db.to_object_id(obj["_id"])}
         mutation = {"$set": lodash.omit(obj, ["_id", "created_at", "updated_at"])}
-        result = mongo_db.update_one(collection, query, mutation)
+        result = mongo_db.update_one(collection, query, mutation, db1 = db1)
     return ret
 
-def RemoveById(collection: str, id1: str):
+def RemoveById(collection: str, id1: str, db1 = None):
     ret = {"valid": 1, "message": ""}
     query = {"_id": mongo_db.to_object_id(id1)}
-    mongo_db.delete_one(collection, query)
+    mongo_db.delete_one(collection, query, db1 = db1)
     return ret
 
 # e.g. search('twin_model', { 'name': 'mod' }, { 'disease_names': ['alzheimer'] }, sortKeys = 'name,-created_at')
 def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
-    skip=0, notInListKeyVals={}, minKeyVals = {}, maxKeyVals = {}, query = {}, fields = None):
+    skip=0, notInListKeyVals={}, minKeyVals = {}, maxKeyVals = {}, query = {}, fields = None, db1 = None):
     ret = {"valid": 1, "message": ""}
     objKey = collection + "s"
     ret[objKey] = []
@@ -83,7 +83,7 @@ def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
                 sortKey = sortKey[(slice(1, len(sortKey)))]
             sort[sortKey] = sortVal
 
-    ret[objKey] = mongo_db.find(collection, query, limit=limit, skip=skip, sort_obj=sort, fields = fields)["items"]
+    ret[objKey] = mongo_db.find(collection, query, limit=limit, skip=skip, sort_obj=sort, fields = fields, db1 = db1)["items"]
     return ret
 
 def FormSearchQuery(stringKeyVals={}, listKeyVals={}, notInListKeyVals={}, minKeyVals = {},

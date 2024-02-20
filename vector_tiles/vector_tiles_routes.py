@@ -11,8 +11,10 @@ def AddRoutes():
         xCount = data['xCount'] if 'xCount' in data else None
         yCount = data['yCount'] if 'yCount' in data else None
         zoom = data['zoom'] if 'zoom' in data else None
-        ret = _vector_tiles_data.GetTiles(data['timeframe'], data['year'], data['latCenter'],
-            data['lngCenter'], xCount = xCount, yCount = yCount, zoom = zoom)
+        timeframe = data['timeframe'] if 'timeframe' in data else ''
+        year = data['year'] if 'year' in data else ''
+        ret = _vector_tiles_data.GetTiles(data['latCenter'],
+            data['lngCenter'], timeframe = timeframe, year = year, xCount = xCount, yCount = yCount, zoom = zoom)
         return ret
     _socket.add_route('getLandTiles', GetLandTiles)
 
@@ -24,15 +26,16 @@ def AddRoutes():
 
     def SaveLandTile(data, auth, websocket):
         valid = 1
-        requiredFields = ['timeframe', 'year', 'zoom', 'tile']
+        requiredFields = ['zoom', 'tile']
         for field in requiredFields:
             if field not in data:
                 ret = { 'valid': 0, 'message': 'Missing required fields' }
                 valid = 0
                 break
         if valid:
-            ret = _vector_tiles_data.SaveTile(data['timeframe'], data['year'], data['zoom'],
-                data['tile'])
+            timeframe = data['timeframe'] if 'timeframe' in data else ''
+            year = data['year'] if 'year' in data else ''
+            ret = _vector_tiles_data.SaveTile(data['zoom'], data['tile'], timeframe, year)
         return ret
     _socket.add_route('saveLandTile', SaveLandTile)
 

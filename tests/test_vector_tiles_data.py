@@ -9,12 +9,14 @@ _mongo_mock.InitAllCollections()
 
 def test_GetTiles():
     count = 2
-    timeframe = 'actual'
-    year = 2023
+    # timeframe = 'actual'
+    # year = 2023
+    timeframe = ''
+    year = ''
     lat = 37.7498
     lng = -122.4546
     zoom = 16
-    ret = _vector_tiles_data.GetTiles(timeframe, year, lat, lng, yCount = count, xCount = count,
+    ret = _vector_tiles_data.GetTiles(lat, lng, timeframe=timeframe, year=year, yCount = count, xCount = count,
         zoom = zoom)
     assert len(ret['tileRows']) == count
     for index, tileRow in enumerate(ret['tileRows']):
@@ -32,18 +34,18 @@ def test_GetTiles():
             'confidencePercent': 10,
         },
     }
-    ret = _vector_tiles_data.SaveTile(timeframe, year, zoom, tileSave)
+    ret = _vector_tiles_data.SaveTile(zoom, tileSave, timeframe, year)
     assert ret['valid'] == 1
     tileSaved = ret['tile']
 
     # Get tile
-    ret = _vector_tiles_data.GetTileById(timeframe, year, zoom, tileSaved['_id'])
+    ret = _vector_tiles_data.GetTileById(zoom, tileSaved['_id'], timeframe, year)
     assert ret['tile']['_id'] == tileSaved['_id']
     assert ret['tile']['latTopLeft'] == latTopLeft
     assert ret['tile']['lngTopLeft'] == lngTopLeft
 
     # Re-get same tiles and confirm we got the update.
-    ret = _vector_tiles_data.GetTiles(timeframe, year, lat, lng, yCount = count, xCount = count,
+    ret = _vector_tiles_data.GetTiles(lat, lng, timeframe=timeframe, year=year, yCount = count, xCount = count,
         zoom = zoom)
     assert len(ret['tileRows']) == count
     for index, tileRow in enumerate(ret['tileRows']):
@@ -55,13 +57,13 @@ def test_GetTiles():
     # Save existing tile (with _id)
     tile = tileSaved
     tile['temperatureCelsiusAnnual']['value'] = 10
-    ret = _vector_tiles_data.SaveTile(timeframe, year, zoom, tile)
+    ret = _vector_tiles_data.SaveTile(zoom, tile, timeframe, year)
     assert ret['valid'] == 1
     assert ret['tile']['latTopLeft'] == latTopLeft
     assert ret['tile']['lngTopLeft'] == lngTopLeft
 
     # Re-get same tiles and confirm we got the update.
-    ret = _vector_tiles_data.GetTiles(timeframe, year, lat, lng, yCount = count, xCount = count,
+    ret = _vector_tiles_data.GetTiles(lat, lng, timeframe = timeframe, year = year, yCount = count, xCount = count,
         zoom = zoom)
     assert len(ret['tileRows']) == count
     for index, tileRow in enumerate(ret['tileRows']):
@@ -81,9 +83,9 @@ def test_GetTiles():
                     'confidencePercent': random.randint(0, 100),
                 },
             }
-            ret = _vector_tiles_data.SaveTile(timeframe, year, zoom, tileSave)
+            ret = _vector_tiles_data.SaveTile(zoom, tileSave, timeframe, year)
 
-    ret = _vector_tiles_data.GetTiles(timeframe, year, lat, lng, yCount = count, xCount = count,
+    ret = _vector_tiles_data.GetTiles(lat, lng, timeframe=timeframe, year=year, yCount = count, xCount = count,
         zoom = zoom)
     assert len(ret['tileRows']) == count
     for index, tileRow in enumerate(ret['tileRows']):

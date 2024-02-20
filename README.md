@@ -14,6 +14,7 @@ Python (with sockets) + MongoDB + Flutter
 For (Ubuntu) script, see `server-setup.sh`
 
 - `pip install -r ./requirements.txt`
+  - For Mac: `pip install tensorflow-macos tensorflow-metal`
 - set up configs (these vary per environment and contains access keys so are NOT checked into version control)
   - `cp config.sample.yml config.yml` then edit `config.yml` as necessary.
   - `cp configloggly.sample.conf config-loggly.conf` and edit `config-loggly.conf` as needed.

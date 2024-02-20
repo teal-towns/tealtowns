@@ -1,9 +1,40 @@
+import cv2
 import numpy as np
+import os
 from skimage.feature import peak_local_max
 from matplotlib import pyplot as plt
 import tqdm
 
-def get_pred_locs(preds, min_distance, threshold_rel, threshold_abs, max_distance):
+from land_vision.urban_tree_detection.models import SFANet as SFANet
+from land_vision.urban_tree_detection.preprocess import preprocess_RGB
+
+def GetTrees(imagePaths: list = [], images = [], weightsDir = "./land_vision/urban_tree_detection/pretrained"):
+    ret = { 'pixels': [] }
+    if len(images) == 0:
+        images = []
+        for imagePath in imagePaths:
+            image = cv2.imread(imagePath)
+            imageRgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            images.append(imageRgb)
+    else:
+        for index, image in enumerate(images):
+            images[index] = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    images = np.array(images)
+
+    preprocess = eval(f'preprocess_RGB')
+    trainingModel, model = SFANet.build_model(images.shape[1:], preprocess_fn=preprocess)
+    weightsPath = os.path.join(weightsDir,'weights.best.h5')
+    trainingModel.load_weights(weightsPath)
+
+    preds = model.predict(images,verbose=True,batch_size=1)[...,0]
+    results = get_pred_locs(preds=preds)
+    # print ('results', results['pred_locs'][0])
+    ret['pixels'] = results['pred_locs'][0]
+
+    return ret
+
+def get_pred_locs(preds, min_distance = 1, threshold_rel = 0.2, threshold_abs = None, max_distance = 10):
     """ predict x,y locations of predicted points.
         Arguments:
             preds: predicted confidence maps [N,H,W]

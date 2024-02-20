@@ -57,22 +57,33 @@ def DeleteAll(collectionKeys = None):
 
 def InitAllLandTiles(mode = 'init'):
     global _databasesLandTiles
-    collectionNames = ['landTile']
+    collectionNames = ['landTile', 'landTilePolygon']
 
     zoom = 16
 
-    timeframe = 'actual'
-    for year in range(2023, 2023 + 1):
-        databaseName = 'vectorTiles_' + str(zoom) + '_' + timeframe + '_' + str(year)
-        if mode == 'init':
-            _databasesLandTiles[databaseName] = {}
-        for collectionName in collectionNames:
-            if mode == 'delete':
-                mongo_db.delete_many(collectionName, {}, db1 = _databasesLandTiles[databaseName])
-            else:
-                _databasesLandTiles[databaseName][collectionName] = mongomock.MongoClient().db.collection
-        if mode == 'init':
-            _vector_tiles_databases.SetDatabase(databaseName, _databasesLandTiles[databaseName])
+    databaseName = 'vectorTiles_' + str(zoom)
+    if mode == 'init':
+        _databasesLandTiles[databaseName] = {}
+    for collectionName in collectionNames:
+        if mode == 'delete':
+            mongo_db.delete_many(collectionName, {}, db1 = _databasesLandTiles[databaseName])
+        else:
+            _databasesLandTiles[databaseName][collectionName] = mongomock.MongoClient().db.collection
+    if mode == 'init':
+        _vector_tiles_databases.SetDatabase(databaseName, _databasesLandTiles[databaseName])
+
+    # timeframe = 'actual'
+    # for year in range(2023, 2023 + 1):
+    #     databaseName = 'vectorTiles_' + str(zoom) + '_' + timeframe + '_' + str(year)
+    #     if mode == 'init':
+    #         _databasesLandTiles[databaseName] = {}
+    #     for collectionName in collectionNames:
+    #         if mode == 'delete':
+    #             mongo_db.delete_many(collectionName, {}, db1 = _databasesLandTiles[databaseName])
+    #         else:
+    #             _databasesLandTiles[databaseName][collectionName] = mongomock.MongoClient().db.collection
+    #     if mode == 'init':
+    #         _vector_tiles_databases.SetDatabase(databaseName, _databasesLandTiles[databaseName])
 
     # timeframe = 'past'
     # for year in range(2012, 2022 + 1):
