@@ -112,7 +112,7 @@ class _BlogListState extends State<BlogList> {
           },
           child: Text('Delete'),
           style: ElevatedButton.styleFrom(
-            primary: Theme.of(context).errorColor,
+            foregroundColor: Theme.of(context).errorColor,
           ),
         ),
       ];

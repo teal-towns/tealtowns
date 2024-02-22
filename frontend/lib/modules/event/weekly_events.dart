@@ -251,7 +251,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
               },
               child: Text('Delete'),
               style: ElevatedButton.styleFrom(
-                primary: Theme.of(context).errorColor,
+                foregroundColor: Theme.of(context).errorColor,
               ),
             ),
             SizedBox(width: 10),

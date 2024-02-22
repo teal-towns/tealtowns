@@ -10,14 +10,16 @@ parameters:
     default: v1
     type: string
   flutter-docker-image:
-    default: ghcr.io/cirruslabs/flutter:3.17.0-0.0.pre
+    default: ghcr.io/cirruslabs/flutter:3.19.1
     type: string
 orbs:
-  python: circleci/python@2.0.3
+  python: circleci/python@2.1.1
   flutter: circleci/flutter@2.0.2
 jobs:
   test_python:
-    executor: python/default
+    executor:
+      name: python/default
+      tag: '3.12'
     steps:
       - checkout
       - python/install-packages:
@@ -42,7 +44,9 @@ jobs:
           paths:
               - <<pipeline.parameters.flutter-dir>>/.dart_tool
   deploy_prod:
-    executor: python/default
+    executor:
+      name: python/default
+      tag: '3.12'
     steps:
       - checkout
       - run:
