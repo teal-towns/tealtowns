@@ -17,8 +17,9 @@ orbs:
   flutter: circleci/flutter@2.0.2
 jobs:
   test_python:
-    executor: python/default
-    tag: '3.12'
+    executor:
+      name: python/default
+      tag: '3.12'
     steps:
       - checkout
       - python/install-packages:
@@ -43,8 +44,9 @@ jobs:
           paths:
               - <<pipeline.parameters.flutter-dir>>/.dart_tool
   deploy_prod:
-    executor: python/default
-    tag: '3.12'
+    executor:
+      name: python/default
+      tag: '3.12'
     steps:
       - checkout
       - run:
