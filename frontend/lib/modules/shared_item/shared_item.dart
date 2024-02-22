@@ -283,7 +283,7 @@ class _SharedItemState extends State<SharedItem> {
         //   },
         //   child: Text('Delete'),
         //   style: ElevatedButton.styleFrom(
-        //     primary: Theme.of(context).errorColor,
+        //     foregroundColor: Theme.of(context).errorColor,
         //   ),
         // ),
         // SizedBox(width: 10),
@@ -301,7 +301,7 @@ class _SharedItemState extends State<SharedItem> {
     //       },
     //       child: Text('Borrow'),
     //       //style: ElevatedButton.styleFrom(
-    //       //  primary: Theme.of(context).successColor,
+    //       //  foregroundColor: Theme.of(context).successColor,
     //       //),
     //     ),
     //     SizedBox(width: 10),
