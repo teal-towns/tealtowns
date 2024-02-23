@@ -76,6 +76,14 @@ def SlippyTileToLngLat(zoom, tileX, tileY):
     latitude = math.atan(math.sinh(math.pi * (1 - 2 * tileY / n))) * 180 / math.pi
     return [ longitude, latitude ]
 
+def GetTileInfo(lngLat, zoom, pixelsPerTile = 256):
+    tileX = LongitudeToTile(lngLat[0], zoom)
+    tileY = LatitudeToTile(lngLat[1], zoom)
+    lngLatTopLeft = SlippyTileToLngLat(zoom, tileX, tileY)
+    metersPerPixel = MetersPerPixel(lngLatTopLeft, zoom, pixelsPerTile = pixelsPerTile)
+    return { 'lngLatTopLeft': lngLatTopLeft, 'tileX': tileX, 'tileY': tileY, 'metersPerPixel': metersPerPixel,
+        'zoom': zoom }
+
 def PointToRectangleBounds(lngLat, xMeters, yMeters):
     boundsLngLat = []
     # North west (top left) = -east, -south
@@ -279,8 +287,8 @@ def GetTileBounds(boundsLngLat, zoom = None, maxMetersPerPixel = None, maxTiles 
 
     return ret
 
-def GetImageTileByLngLat(lngLat, zoom, tileType = 'satellite', pixelsPerTile = 512):
-    ret = { 'valid': 1, 'img': None }
+def GetImageTileByLngLat(lngLat, zoom = 16, tileType = 'satellite', pixelsPerTile = 512):
+    ret = { 'valid': 1, 'img': None, 'tileInfo': {} }
     row = LatitudeToTile(lngLat[1], zoom)
     column = LongitudeToTile(lngLat[0], zoom)
     suffix = '@2x' if pixelsPerTile == 512 else ''
@@ -290,6 +298,7 @@ def GetImageTileByLngLat(lngLat, zoom, tileType = 'satellite', pixelsPerTile = 5
     retTile = Request('get', url, {}, responseType = '')
     bytesArray = numpy.frombuffer(retTile['data'].content, dtype = numpy.uint8)
     ret['img'] = cv2.imdecode(bytesArray, 1)
+    ret['tileInfo'] = GetTileInfo(lngLat, zoom, pixelsPerTile = pixelsPerTile)
     return ret
 
 def GetVectorTileByLngLat(lngLat, zoom, tileType = 'street'):

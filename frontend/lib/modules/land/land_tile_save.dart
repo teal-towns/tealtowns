@@ -6,12 +6,12 @@ import '../../common/form_input/input_fields.dart';
 
 class LandTileSave extends StatefulWidget {
   final landTile;
-  final year;
-  final String timeframe;
+  // final year;
+  // final String timeframe;
   final String dataType;
   final Function(Map<String, dynamic>)? onChange;
 
-  LandTileSave({ this.landTile = const {}, this.year = 2023, this.timeframe = '',
+  LandTileSave({ this.landTile = const {},
     this.dataType = 'basics', this.onChange = null });
 
   @override
@@ -214,8 +214,8 @@ class _LandTileSaveState extends State<LandTileSave> {
 
   _saveLandTile() {
     var data = {
-      'timeframe': widget.timeframe,
-      'year': widget.year,
+      // 'timeframe': widget.timeframe,
+      // 'year': widget.year,
       'zoom': widget.landTile['tileZoom'],
       'tile': {
         'tileX': widget.landTile['tileX'],

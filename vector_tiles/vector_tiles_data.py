@@ -20,16 +20,27 @@ import json
 
 from mapbox import mapbox_polygon as _mapbox_polygon
 from common import math_polygon as _math_polygon
+from common import mongo_db_crud as _mongo_db_crud
+from common import image_subdivide as _image_subdivide
 import lodash
 import mongo_db
 import number
 from vector_tiles import vector_tiles_databases as _vector_tiles_databases
 
+# def GetTileByNumber(tileNumber, zoom = None, timeframe = '', year = '', fields = None, autoInsert = 1):
+#     zoom = int(zoom) if zoom is not None else 16
+#     database = _vector_tiles_databases.GetDatabase(zoom, timeframe, year)
+#     query = {
+#         'tileNumber': tileNumber,
+#     }
+#     tile = mongo_db.find_one('landTile', query, fields = fields, db1=database)['item']
+#     if tile is None and autoInsert:
+#         tile = NewTile(zoom, currentX, currentY)
+#     return { 'valid': 1, 'message': '', 'tile': tile }
+
 # Returns tiles as 2D list of rows and columns.
-
-
-def GetTiles(timeframe, year, latCenter, lngCenter, xCount=None, yCount=None, zoom=None,
-             autoInsert=0):
+def GetTiles(latCenter, lngCenter, timeframe = '', year = '', xCount=None, yCount=None, zoom=None,
+    autoInsert=0):
     zoom = int(zoom) if zoom is not None else 16
     xCount = int(xCount) if xCount is not None else 32
     yCount = int(yCount) if yCount is not None else 32
@@ -45,7 +56,7 @@ def GetTiles(timeframe, year, latCenter, lngCenter, xCount=None, yCount=None, zo
     tileNumberLeft = tileNumberCenterX - math.floor(xCount / 2)
     tileNumberBottom = tileNumberTop + yCount - 1
     tileNumberRight = tileNumberLeft + xCount - 1
-    database = _vector_tiles_databases.GetDatabase(timeframe, year, zoom)
+    database = _vector_tiles_databases.GetDatabase(zoom, timeframe, year)
     query = {
         'tileX': {'$gte': tileNumberLeft, '$lte': tileNumberRight},
         'tileY': {'$gte': tileNumberTop, '$lte': tileNumberBottom},
@@ -103,9 +114,12 @@ def GetTiles(timeframe, year, latCenter, lngCenter, xCount=None, yCount=None, zo
 
     return ret
 
+def GetTileNumber(zoom, tileX, tileY):
+    tilesPerRow = math.pow(2, zoom)
+    return int((tileY - 1) * tilesPerRow + tileX)
 
 def NewTile(zoom, tileX, tileY):
-    tilesPerRow = math.pow(2, zoom)
+    # tilesPerRow = math.pow(2, zoom)
     lngLat = _mapbox_polygon.SlippyTileToLngLat(zoom, tileX, tileY)
     lngLatNext = _mapbox_polygon.SlippyTileToLngLat(zoom, tileX + 1, tileY + 1)
     offsetObj = _math_polygon.LngLatOffsetMeters(lngLatNext, lngLat)
@@ -113,7 +127,7 @@ def NewTile(zoom, tileX, tileY):
         'tileX': tileX,
         'tileY': tileY,
         'tileZoom': int(zoom),
-        'tileNumber': int((tileY - 1) * tilesPerRow + tileX),
+        'tileNumber': GetTileNumber(zoom, tileX, tileY),
         'xMeters': number.precision(offsetObj['offsetEastMeters']),
         'yMeters': number.precision(offsetObj['offsetSouthMeters']),
         'latTopLeft': number.precision(lngLat[1], '.000001'),
@@ -128,10 +142,10 @@ def TileXYToNumber(tileX, tileY, zoom, tilesPerRow=None):
     return int((tileY - 1) * tilesPerRow + tileX)
 
 
-def SaveTile(timeframe, year, zoom, tile):
+def SaveTile(zoom, tile, timeframe = '', year = ''):
     ret = {'valid': 1, 'message': '', 'tile': {}}
 
-    database = _vector_tiles_databases.GetDatabase(timeframe, year, zoom)
+    database = _vector_tiles_databases.GetDatabase(zoom, timeframe, year)
     if '_id' not in tile:
         if 'tileX' not in tile or 'tileY' not in tile:
             ret['valid'] = 0
@@ -185,9 +199,9 @@ def SaveTile(timeframe, year, zoom, tile):
     return ret
 
 
-def GetTileById(timeframe, year, zoom, tileId):
+def GetTileById(zoom, tileId, timeframe = '', year = ''):
     ret = {'valid': 1, 'message': '', 'tile': {}}
-    database = _vector_tiles_databases.GetDatabase(timeframe, year, zoom)
+    database = _vector_tiles_databases.GetDatabase(zoom, timeframe, year)
     query = {
         '_id': mongo_db.to_object_id(tileId),
     }

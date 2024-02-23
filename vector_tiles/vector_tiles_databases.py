@@ -25,12 +25,17 @@ _config = ml_config.get_config()
 
 _databases = {}
 
-def GetDatabase(timeframe, year, zoom):
+def GetDatabase(zoom, timeframe = '', year = ''):
     global _databases
-    databaseName = 'vectorTiles_' + str(zoom) + '_' + timeframe + '_' + str(year)
-    print ('databaseName', databaseName)
+    databaseName = 'vectorTiles_' + str(zoom)
+    if len(timeframe) > 0:
+        databaseName += '_' + timeframe
+    if len(str(year)) > 0:
+        databaseName += '_' + str(year)
+    # print ('databaseName', databaseName)
     if databaseName not in _databases:
         if 'mongodb' in _config and 'url' in _config['mongodb']:
+            timeframeKey = timeframe if len(timeframe) > 0 else 'actual'
             key = 'url_vector_tiles_' + timeframe
             if key in _config['mongodb']:
                 mdb_client = mongo_db.get_client(_config['mongodb'][key])

@@ -9,11 +9,12 @@ Python (with sockets) + MongoDB + Flutter
 
 - Install python
   - E.g. Install pyenv: https://github.com/pyenv/pyenv
-    - Use `pyenv install 3.12.x` to install, then add a .python-version file with 3.12.x in the directory to use it; `python -V` should show this version.
+    - Use `pyenv install 3.11.x` to install, then add a .python-version file with 3.11.x in the directory to use it; `python -V` should show this version.
 
 For (Ubuntu) script, see `server-setup.sh`
 
 - `pip install -r ./requirements.txt`
+  - For Mac: `pip install tensorflow-macos tensorflow-metal`
 - set up configs (these vary per environment and contains access keys so are NOT checked into version control)
   - `cp config.sample.yml config.yml` then edit `config.yml` as necessary.
   - `cp configloggly.sample.conf config-loggly.conf` and edit `config-loggly.conf` as needed.

@@ -18,8 +18,8 @@ import './polygon_select.dart';
 class Land extends StatefulWidget {
   final double lat;
   final double lng;
-  final String timeframe;
-  final int year;
+  // final String timeframe;
+  // final int year;
   final String underlay;
   final String underlayOpacity;
   final String tileSize;
@@ -27,8 +27,7 @@ class Land extends StatefulWidget {
   final String polygonUName;
   final GoRouterState goRouterState;
 
-  Land({ this.lat = -999, this.lng = -999, this.timeframe = '',
-    this.year = -999, this.underlay = '', this.underlayOpacity = '0.7', this.tileSize = '', this.dataType = '',
+  Land({ this.lat = -999, this.lng = -999, this.underlay = '', this.underlayOpacity = '0.7', this.tileSize = '', this.dataType = '',
     this.polygonUName = '', required this.goRouterState });
 
   @override
@@ -63,7 +62,7 @@ class _LandState extends State<Land> {
   double _sideWidth = 300;
   bool _loading = false;
   String _message = '';
-  var _optsYear = [];
+  // var _optsYear = [];
   var _tileRows = [];
   var _selectedTile = null;
   int _selectedTileRowIndex = -1;
@@ -114,8 +113,8 @@ class _LandState extends State<Land> {
     }));
 
     _formVals = {
-      'timeframe': widget.timeframe != '' ? widget.timeframe : 'actual',
-      'year': widget.year != -999 ? widget.year.toString() : new DateTime.now().year.toString(),
+      // 'timeframe': widget.timeframe != '' ? widget.timeframe : 'actual',
+      // 'year': widget.year != -999 ? widget.year.toString() : new DateTime.now().year.toString(),
       'latCenter': 37.7498,
       'lngCenter': -122.4546,
       'xCount': 10,
@@ -160,7 +159,7 @@ class _LandState extends State<Land> {
       colsTileSave += [
         Container(
           padding: EdgeInsets.only(left: 10, right: 10,),
-          child: LandTileSave(landTile: _selectedTile, year: _formVals['year'], timeframe: _formVals['timeframe'].toString(),
+          child: LandTileSave(landTile: _selectedTile,
             dataType: _vals['dataType'].toString(), onChange: (var data) {
               _getTiles();
             }),
@@ -292,46 +291,46 @@ class _LandState extends State<Land> {
   String _UpdateUrl(formVals, vals){
     String? lat = formVals['latCenter']?.toString();
     String? lng = formVals['lngCenter']?.toString();
-    String? year = formVals['year']?.toString();
-    String? tf = formVals['timeframe'];
+    // String? year = formVals['year']?.toString();
+    // String? tf = formVals['timeframe'];
     String? dt = vals['dataType'];
     String? size = vals['tileSize'];
-    html.window.history.pushState({}, '', '/land?lat=${lat}&&lng=${lng}&&year=${year}&&tf=${tf}&&dt=${dt}&&size=${size}');
+    html.window.history.pushState({}, '', '/land?lat=${lat}&&lng=${lng}&&dt=${dt}&&size=${size}');
     final url =  html.window.history.state.toString();
     return url;
   }
 
-  void _setYears() {
-    DateTime now = new DateTime.now();
-    int yearMin = now.year - 10;
-    int yearMax = now.year + 31;
-    // TODO - add backend call to get these year ranges based on the data we have.
-    if (_formVals['timeframe'] == 'actual') {
-      yearMin = 2023;
-      yearMax = 2023;
-    } else if (_formVals['timeframe'] == 'past') {
-      yearMin = 2013;
-      yearMax = 2022;
-    } else if (_formVals['timeframe'] == 'future' || _formVals['timeframe'] == 'futureBest') {
-      yearMin = 2024;
-      yearMax = 2054;
-    }
-    _optsYear = [];
-    bool selectedYearFound = false;
-    for (int ii = yearMin; ii <= yearMax; ii++) {
-      _optsYear.add({ 'value': ii.toString(), 'label': ii.toString() });
-      if (ii.toString() == _formVals['year']) {
-        selectedYearFound = true;
-      }
-    }
-    if (!selectedYearFound) {
-      _formVals['year'] = yearMin.toString();
-    }
-    setState(() {
-      _optsYear = _optsYear;
-      _formVals = _formVals;
-    });
-  }
+  // void _setYears() {
+  //   DateTime now = new DateTime.now();
+  //   int yearMin = now.year - 10;
+  //   int yearMax = now.year + 31;
+  //   // TODO - add backend call to get these year ranges based on the data we have.
+  //   if (_formVals['timeframe'] == 'actual') {
+  //     yearMin = 2023;
+  //     yearMax = 2023;
+  //   } else if (_formVals['timeframe'] == 'past') {
+  //     yearMin = 2013;
+  //     yearMax = 2022;
+  //   } else if (_formVals['timeframe'] == 'future' || _formVals['timeframe'] == 'futureBest') {
+  //     yearMin = 2024;
+  //     yearMax = 2054;
+  //   }
+  //   _optsYear = [];
+  //   bool selectedYearFound = false;
+  //   for (int ii = yearMin; ii <= yearMax; ii++) {
+  //     _optsYear.add({ 'value': ii.toString(), 'label': ii.toString() });
+  //     if (ii.toString() == _formVals['year']) {
+  //       selectedYearFound = true;
+  //     }
+  //   }
+  //   if (!selectedYearFound) {
+  //     _formVals['year'] = yearMin.toString();
+  //   }
+  //   setState(() {
+  //     _optsYear = _optsYear;
+  //     _formVals = _formVals;
+  //   });
+  // }
 
   void _getTiles() {
     if (_viewWidth > 0) {
@@ -343,13 +342,13 @@ class _LandState extends State<Land> {
   }
 
   Widget _buildFilters(context) {
-    var optsTimeframe = [
-      //{ 'value': 'past', 'label': 'Past' },
-      { 'value': 'actual', 'label': 'Actual' },
-      //{ 'value': 'future', 'label': 'Future' },
-      //{ 'value': 'futureBest', 'label': 'Future Best' },
-    ];
-    _setYears();
+    // var optsTimeframe = [
+    //   //{ 'value': 'past', 'label': 'Past' },
+    //   { 'value': 'actual', 'label': 'Actual' },
+    //   //{ 'value': 'future', 'label': 'Future' },
+    //   //{ 'value': 'futureBest', 'label': 'Future Best' },
+    // ];
+    // _setYears();
     //var optsZoom = [
     //  //{ 'value': '5', 'label': '5' },
     //  { 'value': '7', 'label': 'Zoom 7' },
@@ -410,30 +409,30 @@ class _LandState extends State<Land> {
         //  ),
         //),
         //SizedBox(width: 10),
-        Container(
-          width: width,
-          child: _inputFields.inputSelect(optsTimeframe, _formVals, 'timeframe', onChanged: (String newVal) {
-              //setState(() { _formVals = _formVals; });
-              _setYears();
-              _getTiles();
-              if(kIsWeb){
-                _UpdateUrl(_formVals, _vals);
-              }
-            }
-          ),
-        ),
-        //SizedBox(width: 10),
-        Container(
-          width: width,
-          child: _inputFields.inputSelect(_optsYear, _formVals, 'year', onChanged: (String newVal) {
-              setState(() { _formVals = _formVals; });
-              _getTiles();
-              if(kIsWeb){
-                _UpdateUrl(_formVals, _vals);
-              }
-            }
-          ),
-        ),
+        // Container(
+        //   width: width,
+        //   child: _inputFields.inputSelect(optsTimeframe, _formVals, 'timeframe', onChanged: (String newVal) {
+        //       //setState(() { _formVals = _formVals; });
+        //       _setYears();
+        //       _getTiles();
+        //       if(kIsWeb){
+        //         _UpdateUrl(_formVals, _vals);
+        //       }
+        //     }
+        //   ),
+        // ),
+        // //SizedBox(width: 10),
+        // Container(
+        //   width: width,
+        //   child: _inputFields.inputSelect(_optsYear, _formVals, 'year', onChanged: (String newVal) {
+        //       setState(() { _formVals = _formVals; });
+        //       _getTiles();
+        //       if(kIsWeb){
+        //         _UpdateUrl(_formVals, _vals);
+        //       }
+        //     }
+        //   ),
+        // ),
         //SizedBox(width: 10),
         //Container(
         //  width: width,
