@@ -10,6 +10,7 @@ import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
 
 import './modules/about/about.dart';
+import './modules/about/team.dart';
 
 import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
@@ -37,6 +38,7 @@ class Routes {
   static const signup = '/signup';
 
   static const about = '/about';
+  static const team = '/team'; 
 
   static const blogList = '/blog';
   static const blogSave = '/blog-save';
@@ -91,6 +93,11 @@ class AppGoRouter {
       GoRoute(
         path: Routes.about,
         builder: (BuildContext context, GoRouterState state) => About(),
+      ),
+
+      GoRoute(
+        path: Routes.team,
+        builder: (BuildContext context, GoRouterState state) => Team(),
       ),
       
       GoRoute(
