@@ -9,4 +9,4 @@ def test_GetVectorTiles():
     xMeters = 125
     yMeters = 125
     ret = _vector_tiles.GetVectorTiles(lngLatCenter, xMeters, yMeters)
-    print ('ret polygons', len(ret['polygons']),ret['polygons'])
+    # print ('ret polygons', len(ret['polygons']), ret['polygons'])

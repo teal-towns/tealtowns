@@ -63,10 +63,10 @@ class _LandTileRasterState extends State<LandTileRaster> {
                 return Container(
                   height: widget.tileWidth,
                   width: widget.tileWidth,
-                  //child: Expanded(
-                  //  child: Image.network(imageUrl, fit: BoxFit.contain),
-                  //),
-                  child: Image.network(imageUrl),
+                  child: Expanded(
+                   child: Image.network(imageUrl, fit: BoxFit.contain),
+                  ),
+                  // child: Image.network(imageUrl),
                 );
               })
             ]

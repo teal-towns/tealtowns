@@ -157,7 +157,7 @@ def GetElevationTiles(boundsLngLat, zoom = None, maxMetersPerPixel = None, maxTi
 
 def GetVectorTiles(boundsLngLat, zoom = None, maxTiles = None,
     lngLatCenter = None, latExtents = None, lngExtents = None,
-    layerTypes = None, tileType = 'street'):
+    layerTypes = [], tileType = 'street'):
     ret = { 'valid': 1, 'zoom': zoom, 'metersPerPixel': -1, 'lngLatTopLeft': [], 'jsonTiles': None }
     retNumbers = GetTileNumbers(boundsLngLat, zoom = zoom,
         maxTiles = maxTiles, lngLatCenter = lngLatCenter, latExtents = latExtents, lngExtents = lngExtents)
@@ -175,7 +175,7 @@ def GetVectorTiles(boundsLngLat, zoom = None, maxTiles = None,
 
 async def GetVectorTilesAsync(boundsLngLat, zoom = None, maxTiles = None,
     lngLatCenter = None, latExtents = None, lngExtents = None,
-    layerTypes = None, tileType = 'street', onUpdate = None):
+    layerTypes = [], tileType = 'street', onUpdate = None):
     ret = { 'valid': 1, 'zoom': zoom, 'metersPerPixel': -1, 'lngLatTopLeft': [], 'polygons': [] }
     retNumbers = GetTileNumbers(boundsLngLat, zoom = zoom,
         maxTiles = maxTiles, lngLatCenter = lngLatCenter, latExtents = latExtents, lngExtents = lngExtents)
@@ -287,11 +287,12 @@ def GetTileBounds(boundsLngLat, zoom = None, maxMetersPerPixel = None, maxTiles 
 
     return ret
 
-def GetImageTileByLngLat(lngLat, zoom = 16, tileType = 'satellite', pixelsPerTile = 512):
+def GetImageTileByLngLat(zoom = 16, lngLat = [], row: int = -1, column: int = -1, tileType = 'satellite', pixelsPerTile = 512):
     ret = { 'valid': 1, 'img': None, 'tileInfo': {} }
-    row = LatitudeToTile(lngLat[1], zoom)
-    column = LongitudeToTile(lngLat[0], zoom)
+    row = row if row >= 0 else LatitudeToTile(lngLat[1], zoom)
+    column = column if column >= 0 else LongitudeToTile(lngLat[0], zoom)
     suffix = '@2x' if pixelsPerTile == 512 else ''
+    # url = '/v4/mapbox.satellite/' + str(zoom) + '/' + str(column) + '/' + str(row) + '.png'
     url = '/v4/mapbox.satellite/' + str(zoom) + '/' + str(column) + '/' + str(row) + suffix + '.jpg'
     if tileType == 'elevation':
         url = '/v4/mapbox.terrain-rgb/' + str(zoom) + '/' + str(column) + '/' + str(row) + suffix + '.pngraw'
@@ -301,16 +302,21 @@ def GetImageTileByLngLat(lngLat, zoom = 16, tileType = 'satellite', pixelsPerTil
     ret['tileInfo'] = GetTileInfo(lngLat, zoom, pixelsPerTile = pixelsPerTile)
     return ret
 
-def GetVectorTileByLngLat(lngLat, zoom, tileType = 'street'):
+def GetVectorTileByLngLat(zoom = 16, lngLat = [], row: int = -1, column: int = -1, tileType = 'street'):
     ret = { 'valid': 1, 'tile': {} }
-    row = LatitudeToTile(lngLat[1], zoom)
-    column = LongitudeToTile(lngLat[0], zoom)
+    row = row if row >= 0 else LatitudeToTile(lngLat[1], zoom)
+    column = column if column >= 0 else LongitudeToTile(lngLat[0], zoom)
     url = '/v4/mapbox.mapbox-streets-v8/' + str(zoom) + '/' + str(column) + '/' + str(row) + '.mvt'
     retTile = Request('get', url, {}, responseType = '')
     ret['tile'] = mapbox_vector_tile.decode(retTile['data'].content)
     # Saving lngLat bounds of each tile for reversing coordinates encodding
-    ret['tile']['xLngLatTopRight'] = SlippyTileToLngLat(zoom, column + 1, row)
-    ret['tile']['xLngLatBottomLeft'] = SlippyTileToLngLat(zoom, column, row + 1)
+    ret['tile']['lngLatTopRight'] = SlippyTileToLngLat(zoom, column + 1, row)
+    ret['tile']['lngLatBottomLeft'] = SlippyTileToLngLat(zoom, column, row + 1)
+    lngLat = [ret['tile']['lngLatBottomLeft'][0], ret['tile']['lngLatTopRight'][1]]
+    lngLatNext = [ret['tile']['lngLatTopRight'][0], ret['tile']['lngLatBottomLeft'][1]]
+    offsetObj = _math_polygon.LngLatOffsetMeters(lngLatNext, lngLat)
+    ret['tile']['xMeters'] = number.precision(offsetObj['offsetEastMeters'])
+    ret['tile']['yMeters'] = number.precision(offsetObj['offsetSouthMeters'])
     return ret
 
 def GetTilesByNumbers(tileNumberBounds, zoom, tileType = 'satellite', pixelsPerTile = 256):
@@ -322,14 +328,7 @@ def GetTilesByNumbers(tileNumberBounds, zoom, tileType = 'satellite', pixelsPerT
         imgRow = None
         column = tileNumberBounds['left']
         while column <= tileNumberBounds['right']:
-            # url = '/v4/mapbox.satellite/' + str(zoom) + '/' + str(column) + '/' + str(row) + '.png'
-            url = '/v4/mapbox.satellite/' + str(zoom) + '/' + str(column) + '/' + str(row) + suffix + '.jpg'
-            if tileType == 'elevation':
-                url = '/v4/mapbox.terrain-rgb/' + str(zoom) + '/' + str(column) + '/' + str(row) + suffix + '.pngraw'
-            print ('url', url)
-            retTile = Request('get', url, {}, responseType = '')
-            bytesArray = numpy.frombuffer(retTile['data'].content, dtype = numpy.uint8)
-            imgTemp = cv2.imdecode(bytesArray, 1)
+            imgTemp = GetImageTileByLngLat(zoom = zoom, row = row, column = column, tileType = tileType, pixelsPerTile = pixelsPerTile)['img']
             # cv2.imwrite(path, imgTemp)
             if imgRow is None:
                 imgRow = imgTemp
@@ -348,23 +347,19 @@ def GetTilesByNumbers(tileNumberBounds, zoom, tileType = 'satellite', pixelsPerT
 
     return ret
 
+def GetVectorTilePolygons(lngLat, zoom, landTileId, layerTypes = [], lngLatCenter = None):
+    mapboxTile = GetVectorTileByLngLat(zoom = zoom, lngLat = lngLat)['tile']
+    return _mapbox_vector_tile.GetPolygons(mapboxTile, landTileId, layerTypes = layerTypes)
+
 def GetVectorTilesByNumbers(tileNumberBounds, zoom, tileType = 'street',
-    layerTypes = None, lngLatCenter = None):
-    layerTypes = layerTypes if layerTypes is not None else ['building', 'road', 'water']
+    layerTypes = [], lngLatCenter = None, landTileId: str = ''):
     ret = { 'valid': 1, 'polygons': [], 'jsonTiles': [] }
     row = tileNumberBounds['top']
     while row <= tileNumberBounds['bottom']:
         column = tileNumberBounds['left']
         while column <= tileNumberBounds['right']:
-            url = '/v4/mapbox.mapbox-streets-v8/' + str(zoom) + '/' + str(column) + '/' + str(row) + '.mvt'
-            retTile = Request('get', url, {}, responseType = '')
-            decodedData = mapbox_vector_tile.decode(retTile['data'].content)
-            # Saving lngLat bounds of each tile for reversing coordinates encodding
-            lngLatTopRight = SlippyTileToLngLat(zoom, column + 1, row)
-            lngLatBottomLeft = SlippyTileToLngLat(zoom, column, row + 1)
-            decodedData['lngLatTopRight'] = lngLatTopRight
-            decodedData['lngLatBottomLeft'] = lngLatBottomLeft
-            ret['polygons'] += _mapbox_vector_tile.GetPolygons(decodedData, lngLatCenter = lngLatCenter)['polygons']
+            decodedData = GetVectorTileByLngLat(zoom = zoom, row = row, column = column)['tile']
+            ret['polygons'] += _mapbox_vector_tile.GetPolygons(decodedData, landTileId, layerTypes = layerTypes)['polygons']
             # TODO - only should use polygons, so remove this?
             ret['jsonTiles'].append(decodedData)
             column += 1
@@ -373,8 +368,7 @@ def GetVectorTilesByNumbers(tileNumberBounds, zoom, tileType = 'street',
     return ret
 
 async def GetVectorTilesByNumbersAsync(tileNumberBounds, zoom, tileType = 'street',
-    layerTypes = None, lngLatCenter = None, onUpdate = None):
-    layerTypes = layerTypes if layerTypes is not None else ['building', 'road', 'water']
+    layerTypes = [], lngLatCenter = None, onUpdate = None, landTileId: str = ''):
     ret = { 'valid': 1, 'polygons': [], 'currentTile': 0  }
     ret['totalTiles'] = (tileNumberBounds['right'] - tileNumberBounds['left'] + 1) * \
         (tileNumberBounds['bottom'] - tileNumberBounds['top'] + 1)
@@ -382,15 +376,8 @@ async def GetVectorTilesByNumbersAsync(tileNumberBounds, zoom, tileType = 'stree
     while row <= tileNumberBounds['bottom']:
         column = tileNumberBounds['left']
         while column <= tileNumberBounds['right']:
-            url = '/v4/mapbox.mapbox-streets-v8/' + str(zoom) + '/' + str(column) + '/' + str(row) + '.mvt'
-            retTile = Request('get', url, {}, responseType = '')
-            decodedData = mapbox_vector_tile.decode(retTile['data'].content)
-            # Saving lngLat bounds of each tile for reversing coordinates encodding
-            lngLatTopRight = SlippyTileToLngLat(zoom, column + 1, row)
-            lngLatBottomLeft = SlippyTileToLngLat(zoom, column, row + 1)
-            decodedData['lngLatTopRight'] = lngLatTopRight
-            decodedData['lngLatBottomLeft'] = lngLatBottomLeft
-            ret['polygons'] = _mapbox_vector_tile.GetPolygons(decodedData, lngLatCenter = lngLatCenter)['polygons']
+            decodedData = GetVectorTileByLngLat(zoom = zoom, row = row, column = column)['tile']
+            ret['polygons'] = _mapbox_vector_tile.GetPolygons(decodedData, landTileId, layerTypes = layerTypes)['polygons']
             ret['currentTile'] += 1
             if onUpdate is not None:
                 await onUpdate(ret)

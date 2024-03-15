@@ -22,18 +22,18 @@ _mongo_mock.InitAllCollections()
 #     lngLat = [-122.033802, 37.977362]
 #     zoom = 16
 #     # zoom = 17
-#     # ret = _mapbox_polygon.GetImageTileByLngLat(lngLat, zoom = zoom, pixelsPerTile = 512)
+#     # ret = _mapbox_polygon.GetImageTileByLngLat(lngLat = lngLat, zoom = zoom, pixelsPerTile = 512)
 #     # imageUrl = './uploads/land-vision-orig.jpg'
 #     # cv2.imwrite(imageUrl, ret['img'])
 
-#     ret = _mapbox_polygon.GetVectorTileByLngLat(lngLat, zoom = zoom, tileType = 'street')
+#     ret = _mapbox_polygon.GetVectorTileByLngLat(zoom = zoom, lngLat = lngLat, tileType = 'street')
 #     print ('ret', json.dumps(ret['tile'], indent = 2))
 
 #     # _land_vision.seeLand(imageUrl)
 
 def test_urban_tree_detection_inference():
     lngLat = [-122.033802, 37.977362]
-    # ret = _mapbox_polygon.GetImageTileByLngLat(lngLat)
+    # ret = _mapbox_polygon.GetImageTileByLngLat(lngLat = lngLat)
     # imageUrl = './uploads/tree-detect1.png'
     # cv2.imwrite(imageUrl, ret['img'])
     # ret = _urban_trees_evaluate.GetTrees(images = [ret['img']])
@@ -41,7 +41,11 @@ def test_urban_tree_detection_inference():
     ret = _urban_trees.GetTreesPolygons(lngLat)
     # print ('ret', len(ret['landTilePolygons']), ret)
     assert len(ret['landTilePolygons']) > 0
-
+    for polygon in ret['landTilePolygons']:
+        assert len(polygon['vertices']) == 1
+        assert isinstance(polygon['posCenter'], str)
+        lngLat = polygon['posCenter'].split(',')
+        assert float(lngLat[0]) >= 0 and float(lngLat[1]) >= 0
 
     # img_dir = "./uploads/images/"
     # weights_dir = "./land_vision/urban_tree_detection/pretrained"

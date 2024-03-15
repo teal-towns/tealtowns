@@ -126,7 +126,7 @@ def PixelsToLngLats(pixelOffsets, lngLatOrigin, metersPerPixel, precision = 5):
         xMeter = pixelX * metersPerPixel
         yMeter = pixelY * metersPerPixel
         retLngLat = _math_polygon.TranslateMetersToLngLat(xMeter, yMeter, lngLatOrigin[0], lngLatOrigin[1])
-        pointLngLats.append([ round(retLngLat['lng'], precision), round(retLngLat['lat'], precision) ])
+        pointLngLats.append([ round(retLngLat['lng'], precision), round(retLngLat['lat'], precision), 0 ])
     return pointLngLats
 
 def ImageColorsToPolygons(imageUrl, blurKernal = 10, histogramThreshold = 2000):

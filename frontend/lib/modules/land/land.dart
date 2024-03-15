@@ -11,6 +11,7 @@ import '../../common/mapbox/mapbox.dart';
 import '../../common/math_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
+import './land_tile_polygon.dart';
 import './land_tile_raster.dart';
 import './land_tile_save.dart';
 import './polygon_select.dart';
@@ -27,7 +28,7 @@ class Land extends StatefulWidget {
   final String polygonUName;
   final GoRouterState goRouterState;
 
-  Land({ this.lat = -999, this.lng = -999, this.underlay = '', this.underlayOpacity = '0.7', this.tileSize = '', this.dataType = '',
+  Land({ this.lat = -999, this.lng = -999, this.underlay = '', this.underlayOpacity = '0.5', this.tileSize = '', this.dataType = '',
     this.polygonUName = '', required this.goRouterState });
 
   @override
@@ -51,6 +52,7 @@ class _LandState extends State<Land> {
     //'xCount': 10,
     //'yCount': 10,
     //'zoom': '16',
+    // 'autoInsert': 1,
   };
   var _vals = {
     ////'tileWidth': '500',
@@ -58,7 +60,7 @@ class _LandState extends State<Land> {
     //'dataType': 'basics',
     //'tileSize': 'xLarge',
   };
-  double _tileWidth = 500;
+  double _tileWidth = 1000;
   double _sideWidth = 300;
   bool _loading = false;
   String _message = '';
@@ -120,11 +122,12 @@ class _LandState extends State<Land> {
       'xCount': 10,
       'yCount': 10,
       'zoom': '16',
+      'autoInsert': 1,
     };
     _vals = {
       //'tileWidth': '500',
       'underlaySource': widget.underlay != '' ? widget.underlay : 'mapbox',
-      'underlayOpacity': widget.underlayOpacity != '' ? widget.underlayOpacity : '0.7',
+      'underlayOpacity': widget.underlayOpacity != '' ? widget.underlayOpacity : '0.5',
       'dataType': widget.dataType != '' ? widget.dataType : 'basics',
       'tileSize': widget.tileSize != '' ? widget.tileSize : 'xLarge',
     };
@@ -612,21 +615,12 @@ class _LandState extends State<Land> {
         color = HSLColor.fromAHSL(opacity, 300, 1.0, lightness).toColor();
       }
     }
-    // TESTING
-    //content = [
-    //  Column(
-    //    children: [
-    //      //Text('${tile['tileX']} ${tile['tileY']} ${tile['tileNumber']}'),
-    //      //Text('${tile['latTopLeft']} ${tile['lngTopLeft']}'),
-    //      Text('${tile['tileNumber']}'),
-    //      Text('${tile['tileX']} | ${tile['tileY']}'),
-    //      Text('${tile['xMeters']} | ${tile['yMeters']}'),
-    //    ]
-    //  )
-    //];
 
-    return InkWell(
-      onTap: () {
+    return GestureDetector(
+      onTapUp: (details) {
+        // print ("details ${details.localPosition}");
+        // TODO - handle position for editing polygons.
+
         if (_selectedTileRowIndex > -1 && _selectedTileColumnIndex > -1) {
           _tileRows[_selectedTileRowIndex][_selectedTileColumnIndex]['xSelected'] = false;
         }
@@ -651,23 +645,31 @@ class _LandState extends State<Land> {
         ),
         child: Wrap(
           children: [
-            ...content,
-          ],
+            Stack(
+              children: [
+                ...content,
+                LandTilePolygon(landTileId: tile['_id'], tileXMeters: tile['xMeters'], tileYMeters: tile['yMeters'],
+                  tileXPixels: _tileWidth, tileYPixels: _tileWidth),
+              ]
+            )
+          ]
         ),
       )
     );
   }
 
   void _getTilesCount() {
-    double mapHeight = (_viewWidth < 250) ? _viewWidth : 250;
+    double defaultHeight = 500;
+    double maxTileSize = 2000;
+    double mapHeight = (_viewWidth < defaultHeight) ? _viewWidth : defaultHeight;
     int tilesXCount = 1;
     int tilesYCount = 1;
     double tilesContentWidth = _viewWidth;
     Map<String, int> tileSizeCount = {
-      'xSmall': 32,
-      'small': 16,
-      'medium': 8,
-      'large': 4,
+      'xSmall': 8,
+      'small': 4,
+      'medium': 3,
+      'large': 2,
       'xLarge': 1,
     };
     tilesXCount = tileSizeCount[_vals['tileSize']] ?? 4;
@@ -678,8 +680,8 @@ class _LandState extends State<Land> {
         tilesXCount = (tilesContentWidth / _tileWidth).ceil();
         _tileWidth = tilesContentWidth / tilesXCount;
       }
-      if (_tileWidth > 500) {
-        _tileWidth = 500;
+      if (_tileWidth > maxTileSize) {
+        _tileWidth = maxTileSize;
         tilesXCount = (tilesContentWidth / _tileWidth).ceil();
         _tileWidth = tilesContentWidth / tilesXCount;
       }
@@ -705,8 +707,9 @@ class _LandState extends State<Land> {
         tilesXCount = (tilesContentWidth / _tileWidth).ceil();
         _tileWidth = tilesContentWidth / tilesXCount;
       }
-      if (_tileWidth > 500) {
-        _tileWidth = 500;
+      double maxSize = maxTileSize < tilesContentWidth ? maxTileSize : tilesContentWidth;
+      if (_tileWidth > maxSize) {
+        _tileWidth = maxSize;
         tilesXCount = (tilesContentWidth / _tileWidth).ceil();
         _tileWidth = tilesContentWidth / tilesXCount;
       }

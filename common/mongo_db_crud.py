@@ -1,3 +1,5 @@
+import copy
+
 import lodash
 import mongo_db
 
@@ -28,12 +30,12 @@ def Get(collection: str, stringKeyVals = {}, db1 = None):
         ret[collection] = item
     return ret
 
-def GetById(collection: str, id1: str, db1 = None):
+def GetById(collection: str, id1: str, db1 = None, fields = None):
     ret = {"valid": 1, "message": ""}
     ret[collection] = {}
     try:
         query = {"_id": mongo_db.to_object_id(id1)}
-        item = mongo_db.find_one(collection, query, db1 = db1)["item"]
+        item = mongo_db.find_one(collection, query, db1 = db1, fields = fields)["item"]
         if item is not None:
             ret[collection] = item
     except Exception:
@@ -71,7 +73,7 @@ def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
     objKey = collection + "s"
     ret[objKey] = []
 
-    query = FormSearchQuery(stringKeyVals, listKeyVals, notInListKeyVals, minKeyVals, maxKeyVals, query = query)
+    query1 = FormSearchQuery(stringKeyVals, listKeyVals, notInListKeyVals, minKeyVals, maxKeyVals, query = query)
 
     sort = None
     if len(sortKeys) > 0:
@@ -83,27 +85,28 @@ def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
                 sortKey = sortKey[(slice(1, len(sortKey)))]
             sort[sortKey] = sortVal
 
-    ret[objKey] = mongo_db.find(collection, query, limit=limit, skip=skip, sort_obj=sort, fields = fields, db1 = db1)["items"]
+    ret[objKey] = mongo_db.find(collection, query1, limit=limit, skip=skip, sort_obj=sort, fields = fields, db1 = db1)["items"]
     return ret
 
 def FormSearchQuery(stringKeyVals={}, listKeyVals={}, notInListKeyVals={}, minKeyVals = {},
     maxKeyVals = {}, query = {}):
+    queryCopy = copy.deepcopy(query)
     for key in stringKeyVals:
         if len(stringKeyVals[key]) > 0:
-            query[key] = {"$regex": stringKeyVals[key], "$options": "i"}
+            queryCopy[key] = {"$regex": stringKeyVals[key], "$options": "i"}
     for key in listKeyVals:
         if len(listKeyVals[key]) > 0:
             if key == "_id":
                 for index, val in enumerate(listKeyVals[key]):
                     listKeyVals[key][index] = mongo_db.to_object_id(val)
-            query[key] = {"$in": listKeyVals[key]}
+            queryCopy[key] = {"$in": listKeyVals[key]}
     for key in notInListKeyVals:
         if len(notInListKeyVals[key]) > 0:
-            query[key] = {"$nin": notInListKeyVals[key]}
+            queryCopy[key] = {"$nin": notInListKeyVals[key]}
     for key in minKeyVals:
         # if len(minKeyVals[key]) > 0:
-        query[key] = {"$gte": minKeyVals[key]}
+        queryCopy[key] = {"$gte": minKeyVals[key]}
     for key in maxKeyVals:
         # if len(maxKeyVals[key]) > 0:
-        query[key] = {"$lte": maxKeyVals[key]}
-    return query
+        queryCopy[key] = {"$lte": maxKeyVals[key]}
+    return queryCopy
