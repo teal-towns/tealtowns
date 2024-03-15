@@ -33,6 +33,7 @@ class _LandPageState extends State<LandPage> {
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
       width: double.infinity,
+      // selectableText: false,
       body: ListView(
         children: [
           Land(lat: widget.lat, lng: widget.lng,

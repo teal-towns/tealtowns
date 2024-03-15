@@ -36,12 +36,20 @@ def GetDatabase(zoom, timeframe = '', year = ''):
     if databaseName not in _databases:
         if 'mongodb' in _config and 'url' in _config['mongodb']:
             timeframeKey = timeframe if len(timeframe) > 0 else 'actual'
-            key = 'url_vector_tiles_' + timeframe
+            key = 'url_vector_tiles_' + timeframeKey
             if key in _config['mongodb']:
                 mdb_client = mongo_db.get_client(_config['mongodb'][key])
                 _databases[databaseName] = mdb_client[databaseName]
+                # _databases[databaseName]['landTile'].drop()
                 _databases[databaseName]['landTile'].create_index([('tileX', pymongo.ASCENDING), \
                     ('tileY', pymongo.ASCENDING), ('tileZoom', pymongo.ASCENDING)], unique = True)
+                _databases[databaseName]['landTile'].create_index([('tileNumber', 1)], unique = False)
+
+                # _databases[databaseName]['landTilePolygon'].drop_indexes()
+                # _databases[databaseName]['landTilePolygon'].drop()
+                _databases[databaseName]['landTilePolygon'].create_index([('uName', 1)], unique = True)
+                _databases[databaseName]['landTilePolygon'].create_index([('landTileId', 1),
+                    ('type', 1), ('shape', 1), ('source', 1)], unique = False)
             else:
                 log.log('warn', 'vector_tiles_databases.GetDatabaseName missing config for key', key, databaseName)
                 return None

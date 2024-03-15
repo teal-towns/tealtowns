@@ -29,7 +29,6 @@ def GetTrees(imagePaths: list = [], images = [], weightsDir = "./land_vision/urb
 
     preds = model.predict(images,verbose=True,batch_size=1)[...,0]
     results = get_pred_locs(preds=preds)
-    # print ('results', results['pred_locs'][0])
     ret['pixels'] = results['pred_locs'][0]
 
     return ret

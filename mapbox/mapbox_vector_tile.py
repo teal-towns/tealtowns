@@ -5,8 +5,8 @@ from common import math_polygon as _math_polygon
 # classesByType = {
 #     'road': ['primary', 'secondary', 'tertiary']
 # }
-def GetPolygons(tile, layerTypes = ['building', 'road', 'water'], classesByType = {},
-    lngLatCenter = None):
+def GetPolygons(mapboxTile, landTileId, layerTypes = [], classesByType = {}):
+    layerTypes = layerTypes if layerTypes is not [] else ['building', 'road', 'water']
     ret = { 'valid': 1, 'polygons': [] }
     shapeMap = {
         'Point': 'point',
@@ -16,25 +16,28 @@ def GetPolygons(tile, layerTypes = ['building', 'road', 'water'], classesByType 
         'Polygon': 'polygon',
         'MultiPolygon': 'polygon',
     }
-    lngLatTopRight = tile['lngLatTopRight']
-    lngLatBottomLeft = tile['lngLatBottomLeft']
+    lngLatTopRight = mapboxTile['lngLatTopRight']
+    lngLatBottomLeft = mapboxTile['lngLatBottomLeft']
+    lngLatTopLeft = [ lngLatBottomLeft[0], lngLatTopRight[1] ]
     for layerType in layerTypes:
-        if layerType in tile.keys():
-            extent = tile[layerType]['extent']
-            for feature in tile[layerType]['features']:
+        if layerType in mapboxTile.keys():
+            extent = mapboxTile[layerType]['extent']
+            for feature in mapboxTile[layerType]['features']:
                 # roadClasses.add(feature['properties']['class'])
                 if layerType not in classesByType or len(classesByType[layerType]) == 0 or \
                     feature['properties']['class'] in classesByType[layerType]:
                     uName = 'mapbox_' + layerType + '_' + str(feature['id'])
+                    source = 'mapbox' + '_' + layerType
                     polygon = {
-                        '_id': uName,
+                        # '_id': uName,
                         'uName': uName,
+                        'landTileId': landTileId,
                         'vertices': [],
                         'posCenter': '',
                         'type': layerType,
                         'shape': shapeMap[feature['geometry']['type']],
                         'pairsString': '',
-                        'source': 'mapbox',
+                        'source': source,
                     }
                     # TODO - add pairsString (varies by layerType, etc.)
                     # TODO - handle points?
@@ -48,17 +51,21 @@ def GetPolygons(tile, layerTypes = ['building', 'road', 'water'], classesByType 
                                     # print ('coord', coord, coord[0], coord[1])
                                     lngLat = MapboxTileBaseCoordToLngLat(coord[0], coord[1],
                                         lngLatTopRight, lngLatBottomLeft, extent)
-                                    retOffset = _math_polygon.LngLatOffsetMeters(lngLat, lngLatCenter)
+                                    retOffset = _math_polygon.LngLatOffsetMeters(lngLat, lngLatTopLeft)
                                     polygon['vertices'].append([retOffset['offsetEastMeters'], retOffset['offsetSouthMeters'], 0])
                             elif feature['geometry']['type'] in ['LineString']:
                                 # need to debug the converted lng lats are off, roads are bigger than actual
                                 lngLat = MapboxTileBaseCoordToLngLat(coordinates[0], coordinates[1],
                                     lngLatTopRight, lngLatBottomLeft, extent)
-                                retOffset = _math_polygon.LngLatOffsetMeters(lngLat, lngLatCenter)
+                                retOffset = _math_polygon.LngLatOffsetMeters(lngLat, lngLatTopLeft)
                                 polygon['vertices'].append([retOffset['offsetEastMeters'], retOffset['offsetSouthMeters'], 0])
-                        polygon['posCenter'] = _data_convert.VertexToString(_math_polygon.PolygonCenter(polygon['vertices']))
-                        polygon['vertices'] = _data_convert.VerticesToStrings(polygon['vertices'])
-                        ret['polygons'].append(polygon)
+                        posCenter = _math_polygon.PolygonCenter(polygon['vertices'])
+                        # Ensure in this tile.
+                        if posCenter[0] >= 0 and posCenter[0] <= mapboxTile['xMeters'] and \
+                            posCenter[1] >= 0 and posCenter[1] <= mapboxTile['yMeters']:
+                            polygon['posCenter'] = _data_convert.VertexToString(posCenter)
+                            polygon['vertices'] = _data_convert.VerticesToStrings(polygon['vertices'])
+                            ret['polygons'].append(polygon)
     return ret
 
 # Reverse of mapbox tile base coordinate encoding: https://github.com/tilezen/mapbox-vector-tile#coordinate-transformations-for-encoding

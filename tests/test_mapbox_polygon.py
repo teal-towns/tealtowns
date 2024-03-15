@@ -144,4 +144,4 @@ def test_GetVectorTiles():
     boundsLngLat = _math_polygon.MinMaxBounds(polygonLngLats)['bounds']
     retTiles = _mapbox_polygon.GetVectorTiles(boundsLngLat, zoom = zoom,
         lngLatCenter = lngLatCenter)
-    print ('ret polygons', len(retTiles['polygons']),retTiles['polygons'])
+    # print ('ret polygons', len(retTiles['polygons']),retTiles['polygons'])

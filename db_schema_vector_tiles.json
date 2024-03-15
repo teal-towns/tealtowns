@@ -51,6 +51,9 @@
             "confidencePercent": "{Number}",
             "notes": "{String}",
             "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700"
+        },
+        "cachedSources": {
+            "name": "{String} [per each source, the last updated datetime for that source. timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700"
         }
     },
     "landTilePolygon": {

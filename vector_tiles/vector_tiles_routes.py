@@ -3,6 +3,7 @@
 from common import socket as _socket
 from vector_tiles import vector_tiles as _vector_tiles
 from vector_tiles import vector_tiles_data as _vector_tiles_data
+from vector_tiles import land_tile_polygon as _land_tile_polygon
 
 # router = APIRouter()
 
@@ -13,8 +14,10 @@ def AddRoutes():
         zoom = data['zoom'] if 'zoom' in data else None
         timeframe = data['timeframe'] if 'timeframe' in data else ''
         year = data['year'] if 'year' in data else ''
+        autoInsert = data['autoInsert'] if 'autoInsert' in data else 0
         ret = _vector_tiles_data.GetTiles(data['latCenter'],
-            data['lngCenter'], timeframe = timeframe, year = year, xCount = xCount, yCount = yCount, zoom = zoom)
+            data['lngCenter'], timeframe = timeframe, year = year, xCount = xCount, yCount = yCount,
+            zoom = zoom, autoInsert = autoInsert)
         return ret
     _socket.add_route('getLandTiles', GetLandTiles)
 
@@ -39,6 +42,13 @@ def AddRoutes():
         return ret
     _socket.add_route('saveLandTile', SaveLandTile)
 
+    def GetLandTilePolygon(data, auth, websocket):
+        types = data['typesString'].split(',') if 'typesString' in data and len(data['typesString']) > 0 else []
+        shapes = data['shapesString'].split(',') if 'shapesString' in data and len(data['shapesString']) > 0 else []
+        clearCache = data['clearCache'] if 'clearCache' in data else 0
+        return _land_tile_polygon.GetLandTilePolygon(data['landTileId'], types, shapes, clearCache = clearCache)
+    _socket.add_route('GetLandTilePolygon', GetLandTilePolygon)
+
 def AddRoutesAsync():
     async def GetVectorTilesAsync(data, auth, websocket):
         async def OnUpdate(data):
@@ -48,6 +58,7 @@ def AddRoutesAsync():
         return await _vector_tiles.GetVectorTilesAsync(lngLat, float(data['xMeters']),
             float(data['yMeters']), onUpdate = OnUpdate)
     _socket.add_route('get-vector-tiles', GetVectorTilesAsync, 'async')
+
 
 AddRoutes()
 AddRoutesAsync()

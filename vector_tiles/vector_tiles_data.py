@@ -133,6 +133,7 @@ def NewTile(zoom, tileX, tileY):
         'latTopLeft': number.precision(lngLat[1], '.000001'),
         'lngTopLeft': number.precision(lngLat[0], '.000001'),
         'elevations': [],
+        'cachedSources': {},
     }
     return tile
 
@@ -141,6 +142,10 @@ def TileXYToNumber(tileX, tileY, zoom, tilesPerRow=None):
     tilesPerRow = tilesPerRow if tilesPerRow is not None else math.pow(2, zoom)
     return int((tileY - 1) * tilesPerRow + tileX)
 
+def GetTileCenter(tile: dict):
+    lngLatCenter = _math_polygon.TranslateMetersToLngLat(tile['xMeters'] / 2, tile['yMeters'] / 2,
+        tile['lngTopLeft'], tile['latTopLeft'])
+    return [lngLatCenter['lng'], lngLatCenter['lat']]
 
 def SaveTile(zoom, tile, timeframe = '', year = ''):
     ret = {'valid': 1, 'message': '', 'tile': {}}
@@ -190,7 +195,7 @@ def SaveTile(zoom, tile, timeframe = '', year = ''):
             tile[key] = tileDefault[key]
         result = mongo_db.insert_one('landTile', tile, db1=database)['item']
         tile['_id'] = mongo_db.from_object_id(result['_id'])
-    print('result', result, database, tile)
+    # print('result', result, database, tile)
     if result:
         ret['tile'] = tile
     else:

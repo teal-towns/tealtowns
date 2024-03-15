@@ -20,8 +20,10 @@ class AppScaffoldComponent extends StatefulWidget {
   double width;
   bool listWrapper;
   double innerWidth;
+  bool selectableText;
 
-  AppScaffoldComponent({this.body, this.width = 1200, this.listWrapper = false, this.innerWidth = double.infinity});
+  AppScaffoldComponent({this.body, this.width = 1200, this.listWrapper = false, this.innerWidth = double.infinity,
+    this.selectableText = true,});
 
   @override
   _AppScaffoldState createState() => _AppScaffoldState();
@@ -294,34 +296,42 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildSmall(BuildContext context, var currentUserState) {
-    return SelectionArea(
-      child: Scaffold(
-        endDrawer: _buildDrawer(context, currentUserState),
-        body: _buildBody(context, currentUserState, header: true),
-      ),
+    Widget content = Scaffold(
+      endDrawer: _buildDrawer(context, currentUserState),
+      body: _buildBody(context, currentUserState, header: true),
     );
+    if (widget.selectableText) {
+      return SelectionArea(
+        child: content
+      );
+    }
+    return content;
   }
 
   Widget _buildMedium(BuildContext context, var currentUserState) {
-    return SelectionArea(
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.white,
-          title: Image.asset('assets/images/logo.png', width: 100, height: 50),
-          actions: <Widget>[
-            // _buildNavButton('/home', 'Home', Icons.home, context),
-            _buildNavButton('/blog', 'Blog', Icons.article, context),
-            _buildNavButton('/own', 'Own', Icons.build, context),
-            _buildNavButton('/weekly-events', 'Events', Icons.event, context),
-            _buildUserButton(context, currentUserState),
-            _buildDrawerButton(context),
-          ],
-        ),
-        endDrawer: _buildDrawer(context, currentUserState),
-        body: _buildBody(context, currentUserState),
+    Widget content = Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        title: Image.asset('assets/images/logo.png', width: 100, height: 50),
+        actions: <Widget>[
+          // _buildNavButton('/home', 'Home', Icons.home, context),
+          _buildNavButton('/blog', 'Blog', Icons.article, context),
+          _buildNavButton('/own', 'Own', Icons.build, context),
+          _buildNavButton('/weekly-events', 'Events', Icons.event, context),
+          _buildUserButton(context, currentUserState),
+          _buildDrawerButton(context),
+        ],
       ),
+      endDrawer: _buildDrawer(context, currentUserState),
+      body: _buildBody(context, currentUserState),
     );
+    if (widget.selectableText) {
+      return SelectionArea(
+        child: content,
+      );
+    }
+    return content;
   }
 
   @override
