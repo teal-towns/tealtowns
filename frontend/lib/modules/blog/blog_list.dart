@@ -35,7 +35,7 @@ class _BlogListState extends State<BlogList> {
   String _message = '';
   bool _canLoadMore = false;
   int _lastPageNumber = 1;
-  int _itemsPerPage = 25;
+  int _itemsPerPage = 100;
 
   List<BlogClass> _blogs = [];
   bool _firstLoadDone = false;
