@@ -24,6 +24,7 @@ jobs:
       - checkout
       - restore_cache:
           # key: &deps1-cache deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          # test
           key: &deps1-cache deps1-{{ checksum "requirements.txt" }}
       - python/install-packages:
           pkg-manager: pip
