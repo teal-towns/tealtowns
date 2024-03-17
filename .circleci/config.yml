@@ -33,7 +33,8 @@ jobs:
       - save_cache:
           key: *deps1-cache
           paths:
-              - .
+              - /tmp/cci_pycache
+              - "~/.cache/pip"
   test_flutter:
     docker:
       - image: <<pipeline.parameters.flutter-docker-image>>
