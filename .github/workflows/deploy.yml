@@ -1,9 +1,9 @@
 name: Deploy
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   # TODO - python test fails when run this way - MAPBOX_TOKEN repository variable issue..
