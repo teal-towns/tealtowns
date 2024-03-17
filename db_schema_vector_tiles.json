@@ -14,17 +14,6 @@
         "elevationTopLeftMeters": "{Number}",
         "country": "{String}",
         "state": "{String}",
-        "landCovers": [
-            {
-                "name": "{String}",
-                "squareMeters": "{Number}",
-                "source": "{String}",
-                "sourceType": "{String}",
-                "confidencePercent": "{Number}",
-                "notes": "{String}",
-                "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2013-06-13 15:30:00 -0700"
-            }
-        ],
         "elevations": [
             {
                 "xOffset": "{Number}",
