@@ -8,6 +8,8 @@ on:
 jobs:
   test:
     name: Test
+    env:
+      MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
     uses: teal-towns/tealtowns/.github/workflows/test.yml@main
 
   deploy:
