@@ -17,7 +17,7 @@ class _AboutState extends State<About> {
 
   @override
   Widget build(BuildContext context) {
-    String text = "# TealTowns \n\n" +
+    String text = "# TealTowns1 \n\n" +
       "We believe the **loneliness and climate crises** can be solved by connecting people together to work on local green (nature based) projects. Specifically, to build TealTowns: **connected X-minute cities** where humans and nature thrive.\n\n" +
       "Our mission, charge and decision making framework is: **green your town with neighbors**. All team members are empowered to make any decision by asking: **Will this connect neighbors to reduce their carbon footprint?** If yes, do / support it. Otherwise, do not.\n\n" +
       "## How? \n\n" +
