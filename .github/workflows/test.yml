@@ -1,7 +1,6 @@
 name: Test
 on:
   push:
-  pull_request:
 
 jobs:
   test-flutter:
@@ -13,8 +12,13 @@ jobs:
       # Note: This workflow uses the latest stable version of the Dart SDK.
       # You can specify other versions if desired, see documentation here:
       # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      - uses: dart-lang/setup-dart@v1
+      # - uses: dart-lang/setup-dart@v1
       # - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # flutter-version: '3.19.3'
+          channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
@@ -50,4 +54,4 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with pytest
       run: |
-        cp config.sample.yml config.yml && MAPBOX_TOKEN=$MAPBOX_TOKEN python -m pytest
+        cp config.sample.yml config.yml && MAPBOX_TOKEN="$MAPBOX_TOKEN" python -m pytest
