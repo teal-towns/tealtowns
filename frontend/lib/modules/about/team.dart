@@ -7,6 +7,15 @@ class Team extends StatefulWidget {
   _TeamState createState() => _TeamState();
 }
 
+// Represent image data
+class ImageData {
+  final String imagePath;
+  final String name;
+  final String role;
+
+  ImageData({required this.imagePath, required this.name, required this.role});
+}
+
 class _TeamState extends State<Team> {
   
   // List of headshots, names, and roles
@@ -32,53 +41,6 @@ class _TeamState extends State<Team> {
       role: 'Web Developer',
     ),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-  } 
-
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffoldComponent(
-      
-      body: Column(
-        children: [
-
-          // Title widget
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              'Team',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          // ListView 
-          Expanded(
-            child: Center( // Align center
-              child: ListView(
-                children: [
-                  // For each pair of images a Row is created with 2 Columns of images
-                  for (int i = 0; i < imagesData.length; i += 2)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        buildImageColumn(imagesData[i]),
-                        SizedBox(width: 20),
-                        // Prevent "index out of bounds" error when number of images is not even
-                        if (i + 1 < imagesData.length)
-                          buildImageColumn(imagesData[i + 1]),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // Function to dynamically create columns with images and text
   Widget buildImageColumn(ImageData imageData) {
@@ -111,19 +73,34 @@ class _TeamState extends State<Team> {
             ],
           ),
         ),
-
-        SizedBox(height: 20),
-
       ],
     );
   }
-}
 
-// Represent data
-class ImageData {
-  final String imagePath;
-  final String name;
-  final String role;
+  @override
+  void initState() {
+    super.initState();
+  } 
 
-  ImageData({required this.imagePath, required this.name, required this.role});
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffoldComponent(
+      
+      body: Column(
+        children: [
+          
+          SizedBox(height: 20),
+          // Wrap widget deals with varying number of images on different screen sizes
+          Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.center,
+            children: <Widget> [
+              ...imagesData.map((imageData) => buildImageColumn(imageData) ).toList(),
+            ]
+          ),
+        ],
+      ),
+    );
+  }
 }
