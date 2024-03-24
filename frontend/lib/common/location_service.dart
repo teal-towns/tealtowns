@@ -68,7 +68,8 @@ class LocationService {
   Future<List<double>> GetLocation(BuildContext context, {bool useUser = true}) async {
     var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
     List<double> lngLat = [0, 0];
-    if (useUser && currentUser != null && currentUser.location.coordinates.length > 0) {
+    if (useUser && currentUser != null && currentUser.location.coordinates.length > 0 &&
+      LocationValid(currentUser.location.coordinates)) {
       lngLat = [_parseService.Precision(currentUser.location.coordinates[0], 5),
         _parseService.Precision(currentUser.location.coordinates[1], 5)];
       SetLngLat(lngLat);

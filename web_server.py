@@ -56,6 +56,10 @@ paths_static = config['web_server']['static'] if 'static' in config['web_server'
 
 log.log('warn', 'web_server starting')
 
+from event import weekly_event as _weekly_event
+thread = threading.Thread(target = _weekly_event.CheckRSVPDeadlineLoop, args=())
+thread.start()
+
 # Regular websocket
 async def websocket_handler(request):
 

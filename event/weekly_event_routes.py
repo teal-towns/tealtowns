@@ -13,7 +13,7 @@ def addRoutes():
 
     def Save(data, auth, websocket):
         data['weeklyEvent']['dayOfWeek'] = int(data['weeklyEvent']['dayOfWeek'])
-        return _mongo_db_crud.Save('weeklyEvent', data['weeklyEvent'])
+        return _weekly_event.Save(data['weeklyEvent'])
     _socket.add_route('saveWeeklyEvent', Save)
 
     def RemoveById(data, auth, websocket):
@@ -26,10 +26,11 @@ def addRoutes():
             'limit': 250,
             'skip': 0,
             'withHosts': 1,
+            'type': '',
         }, data)
         lngLat = data['lngLat']
         return _weekly_event.SearchNear(lngLat, float(data['maxMeters']), data['title'], data['limit'], data['skip'],
-            data['withHosts'])
+            data['withHosts'], data['type'])
     _socket.add_route('searchWeeklyEvents', SearchNear)
 
 addRoutes()

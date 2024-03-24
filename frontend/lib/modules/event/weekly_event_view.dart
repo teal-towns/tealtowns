@@ -65,7 +65,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
     var data = {
       'id': widget.id,
-      'withHosts': 1,
+      'withAdmins': 1,
     };
     _socketService.emit('getWeeklyEventById', data);
   }
@@ -80,7 +80,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   Widget build(BuildContext context) {
     var currentUserState = context.watch<CurrentUserState>();
     List<Widget> buttons = [];
-    if (currentUserState.isLoggedIn && _weeklyEvent.hostUserIds.contains(currentUserState.currentUser.id)) {
+    if (currentUserState.isLoggedIn && _weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
       buttons = [
         ElevatedButton(
           onPressed: () {
@@ -102,15 +102,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
-    List<Widget> hosts = [];
-    if (_weeklyEvent.hostUsers.length > 0) {
-      hosts.add(Text('Hosts'));
-      for (var host in _weeklyEvent.hostUsers) {
-        hosts.add(
-          Text('${host.firstName} ${host.lastName} (${host.email})'),
+    List<Widget> admins = [];
+    if (_weeklyEvent.adminUsers.length > 0) {
+      admins.add(Text('Admins'));
+      for (var admin in _weeklyEvent.adminUsers) {
+        admins.add(
+          Text('${admin.firstName} ${admin.lastName} (${admin.email})'),
         );
       }
-      hosts.add(SizedBox(height: 10));
+      admins.add(SizedBox(height: 10));
     }
 
     double width = 1200;
@@ -131,7 +131,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           SizedBox(height: 10),
           Text(_weeklyEvent.description),
           SizedBox(height: 10),
-          ...hosts,
+          ...admins,
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

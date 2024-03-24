@@ -3,6 +3,7 @@ import dateutil.parser
 import dateparser
 import math
 import pytz
+from timezonefinder import TimezoneFinder
 
 def now(tz = 'UTC', microseconds = False):
     # return pytz.utc.localize(datetime.datetime.utcnow())
@@ -177,3 +178,10 @@ def toUTCString(datetimeString):
     datetime1 = from_string(datetimeString)
     datetimeUTC = toUTC(datetime1)
     return string(datetimeUTC)
+
+def ToTimezone(datetime1, timezone):
+    return datetime1.astimezone(pytz.timezone(timezone))
+
+def GetTimezoneFromLngLat(lngLat):
+    timezone = TimezoneFinder().timezone_at(lng=lngLat[0], lat=lngLat[1])
+    return timezone

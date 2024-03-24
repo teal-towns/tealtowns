@@ -47,6 +47,7 @@ class Routes {
   static const weeklyEvents = '/weekly-events';
   static const weeklyEventSave = '/weekly-event-save';
   static const weeklyEventView = '/weekly-event';
+  static const eat = '/eat';
 
   static const land = '/land';
 
@@ -175,12 +176,24 @@ class AppGoRouter {
         path: Routes.weeklyEventSave,
         builder: (BuildContext context, GoRouterState state) => WeeklyEventSave(
           id: state.uri.queryParameters['id'] ?? '',
+          type: state.uri.queryParameters['type'] ?? '',
         ),
       ),
       GoRoute(
         path: Routes.weeklyEventView,
         builder: (BuildContext context, GoRouterState state) => WeeklyEventView(
           id: state.uri.queryParameters['id'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: Routes.eat,
+        builder: (BuildContext context, GoRouterState state) => WeeklyEvents(
+          lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
+          lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
+          maxMeters: double.parse(state.uri.queryParameters['range'] ?? '500'),
+          type: 'sharedMeal',
+          routePath: 'eat',
+          showFilters: 0,
         ),
       ),
 

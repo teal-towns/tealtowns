@@ -7,13 +7,19 @@ import mongo_db
 from stubs import stubs_shared_item as _stubs_shared_item
 from stubs import stubs_shared_item_owner as _stubs_shared_item_owner
 from stubs import stubs_user as _stubs_user
+from stubs import stubs_user_event as _stubs_user_event
+from stubs import stubs_weekly_event as _stubs_weekly_event
 
 from vector_tiles import vector_tiles_databases as _vector_tiles_databases
 _databasesLandTiles = {}
 
 _db = {}
 _inited = 0
-_collectionNames = ['user', 'image', 'blog', 'sharedItem', 'sharedItemOwner', 'userMoney', 'userPayment']
+_collectionNames = ['user', 'image', 'blog',
+    'weeklyEvent', 'event', 'userWeeklyEvent', 'userEvent',
+    'sharedItem', 'sharedItemOwner',
+    'userMoney', 'userPayment', 'userPaymentSubscription',
+]
 
 def InitAllCollections():
     global _inited
@@ -33,6 +39,8 @@ def InitAllCollections():
         _stubs_shared_item.AddDefault()
         _stubs_shared_item_owner.AddDefault()
         _stubs_user.AddDefault()
+        _stubs_user_event.AddDefault()
+        _stubs_weekly_event.AddDefault()
 
         _inited = 1
 
