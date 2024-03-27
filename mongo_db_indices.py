@@ -8,8 +8,8 @@ def create_all_indices(db):
 
     db['blog'].create_index([('title', 1), ('tags', 1)], unique=True)
 
-    db['weeklyEvent'].drop_indexes()
-    db['weeklyEvent'].drop()
+    # db['weeklyEvent'].drop_indexes()
+    # db['weeklyEvent'].drop()
     db['weeklyEvent'].create_index([('title', 1), ('type', 1), ('priceUSD', 1)], unique=False)
     db['weeklyEvent'].create_index([('location', '2dsphere')])
 
@@ -21,8 +21,6 @@ def create_all_indices(db):
     db['userEvent'].create_index([('userId', 1), ('eventId', 1)], unique=True)
     db['userEvent'].create_index([('creditsPriceUSD', 1), ('hostStatus', 1), ('attendeeStatus', 1)], unique=False)
 
-    # db['sharedItem'].drop_indexes()
-    # db['sharedItem'].drop()
     db['sharedItem'].create_index([('title', 1), ('currentOwnerUserId', 1), ('currentPurchaserUserId', 1), \
         ('tags', 1), \
         ('currentPrice', 1), ('minOwners', 1), ('maxOwners', 1), ('maxMeters', 1), ('bought', 1), \
@@ -31,8 +29,6 @@ def create_all_indices(db):
     db['sharedItem'].create_index([('location', '2dsphere')])
     # print ('sharedItem index', db['sharedItem'].index_information())
 
-    # db['sharedItemOwner'].drop()
-    # db['sharedItemOwner'].drop_indexes()
     db['sharedItemOwner'].create_index([('sharedItemId', 1), ('userId', 1), ('generation', 1)], unique=True)
 
     db['userMoney'].create_index([('userId', 1)], unique=True)
