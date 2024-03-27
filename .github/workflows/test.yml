@@ -61,4 +61,4 @@ jobs:
         env:
           MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
         run: |
-          cp config.sample.yml config.yml && MAPBOX_TOKEN=$MAPBOX_TOKEN python -m pytest
+          cp config.sample.yml config.yml && MAPBOX_TOKEN=$MAPBOX_TOKEN python -m pytest -s

@@ -23,9 +23,12 @@ class FormSave extends StatefulWidget {
   String? id;
   Map<String, Map<String, dynamic>>? formFields;
   double fieldWidth;
+  String mode;
+  List<String> stepKeys;
 
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
-    this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.id = '', this.formFields = null});
+    this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.id = '', this.formFields = null,
+    this.mode = '', this.stepKeys = const [] });
 
   @override
   _FormSaveState createState() => _FormSaveState();
@@ -44,6 +47,8 @@ class _FormSaveState extends State<FormSave> {
   bool _firstLoadDone = false;
   bool _loading = false;
   String _message = '';
+
+  int _step = 0;
 
   @override
   void initState() {
@@ -106,8 +111,7 @@ class _FormSaveState extends State<FormSave> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FormFields(),
-          _buildSubmit(context),
+          BuildForm(context),
           _buildMessage(context),
           SizedBox(height: 50),
         ]
@@ -162,31 +166,132 @@ class _FormSaveState extends State<FormSave> {
     return SizedBox.shrink();
   }
 
+  int GetNextStep() {
+    int step = 0;
+    for (var keyVal in widget.formFields!.entries) {
+      String key = keyVal.key;
+      if (step > _step && (widget.stepKeys.length == 0 || widget.stepKeys.contains(key))) {
+        return step;
+      }
+      step += 1;
+    }
+    return widget.formFields!.entries.length;
+  }
+
+  int GetPreviousStep() {
+    int step = widget.formFields!.entries.length - 1;
+    for (int step = widget.formFields!.entries.length - 1; step >= 0; step -= 1) {
+      String key = widget.formFields!.entries.elementAt(step).key;
+      if (step < _step && (widget.stepKeys.length == 0 || widget.stepKeys.contains(key))) {
+        return step;
+      }
+    }
+    return widget.formFields!.entries.length;
+  }
+
+  Widget BuildForm(BuildContext context) {
+    if (widget.mode == 'step' && _step < widget.formFields!.length) {
+      int step = 0;
+      for (var keyVal in widget.formFields!.entries) {
+        String key = keyVal.key;
+        var value = keyVal.value;
+        if (step == _step && (widget.stepKeys.length == 0 || widget.stepKeys.contains(key))) {
+          Widget prev = SizedBox.shrink();
+          Widget next = SizedBox.shrink();
+          if (_step > 0) {
+            prev = Padding(
+              padding: EdgeInsets.only(top: 15, bottom: 5),
+              child: ElevatedButton(
+                onPressed: () {
+                  _message = '';
+                  _loading = false;
+                  _step = GetPreviousStep();
+                  setState(() { _message = _message; _loading = _loading; _step = _step; });
+                },
+                child: Text('Previous'),
+              ),
+            );
+          }
+          // if (_step < widget.formFields!.length - 1) {
+          if (true) {
+            next = Padding(
+              padding: EdgeInsets.only(top: 15, bottom: 5),
+              child: ElevatedButton(
+                onPressed: () {
+                  _message = '';
+                  _loading = false;
+                  _step = GetNextStep();
+                  setState(() { _message = _message; _loading = _loading; _step = _step; });
+                },
+                child: Text('Next'),
+              ),
+            );
+          } else {
+            next = _buildSubmit(context);
+          }
+          return Column(
+            children: [
+              FormField(key, value),
+              Row(
+                children: [
+                  prev,
+                  SizedBox(width: 10),
+                  next,
+                ]
+              )
+            ]
+          );
+        }
+        step += 1;
+      }
+    }
+
+    return Column(
+      children: [
+        FormFields(),
+        _buildSubmit(context),
+      ]
+    );
+  }
+
   Widget FormFields() {
     List<Widget> inputs = [];
     widget.formFields!.forEach((key, value) {
-      String label = '';
-      if (value.containsKey('label')) {
-        label = value['label'];
-      } else {
-        label = key.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match[0]}');
-        label = label[0].toUpperCase() + label.substring(1);
-      }
-      bool required = value.containsKey('required') ? value['required'] : true;
-      if (value['type'] == 'location') {
-        bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
-        inputs.add(InputLocation(formVals: _formVals, formValsKey: key, label: label,
-          nestedCoordinates: nestedCoordinates));
-      } else if (value['type'] == 'select') {
-        inputs.add(_inputFields.inputSelect(value['options'], _formVals, key, label: label, ));
-      } else if (value['type'] == 'time') {
-        inputs.add(_inputFields.inputTime(_formVals, key, label: label, required: required));
-      } else {
-        int minLines = value.containsKey('minLines') ? value['minLines'] : 1;
-        inputs.add(_inputFields.inputText(_formVals, key, label: label, required: required, minLines: minLines));
-      }
+      inputs.add(FormField(key, value));
     });
     return _layoutService.WrapWidth(inputs, width: widget.fieldWidth);
+  }
+
+  Widget FormField(key, value) {
+    Widget input = SizedBox.shrink();
+    String label = '';
+    String helpText = value.containsKey('helpText') ? value['helpText'] : '';
+    if (value.containsKey('label')) {
+      label = value['label'];
+    } else {
+      label = key.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match[0]}');
+      label = label[0].toUpperCase() + label.substring(1);
+    }
+    bool required = value.containsKey('required') ? value['required'] : true;
+    if (value['type'] == 'location') {
+      bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
+      input = InputLocation(formVals: _formVals, formValsKey: key, label: label, helpText: helpText,
+        nestedCoordinates: nestedCoordinates);
+    } else if (value['type'] == 'select') {
+      input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText,);
+    } else if (value['type'] == 'time') {
+      input = _inputFields.inputTime(_formVals, key, label: label, required: required, helpText: helpText,);
+    } else if (value['type'] == 'number') {
+      double? min = value.containsKey('min') ? value['min'] : null;
+      double? max = value.containsKey('max') ? value['max'] : null;
+      input = _inputFields.inputNumber(_formVals, key, label: label, required: required, min: min, max: max,
+        helpText: helpText,);
+    } else {
+      int minLines = value.containsKey('minLines') ? value['minLines'] : 1;
+      input = _inputFields.inputText(_formVals, key, label: label, required: required, minLines: minLines,
+        helpText: helpText,);
+    }
+    return input;
   }
 
   bool formValid() {

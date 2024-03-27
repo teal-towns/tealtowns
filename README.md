@@ -43,6 +43,7 @@ Create accounts and add api keys in configs for each:
   - (Create and) add SSH key to circleci.com project settings (and ensure added to server)
 - email: free tier on mailchimp or sendgrid
 - logging: free tier on loggly
+- Stripe
 
 
 ## Local development
@@ -51,6 +52,8 @@ Create accounts and add api keys in configs for each:
 - frontend (browser):
   - `cd frontend && flutter run -d chrome --web-port=PORT`
   - OR for non chrome (will have to manually open browser, type in URL & reload page for updates), `flutter run -d web-server --web-port=PORT`
+- Stripe testing: `stripe listen --forward-to localhost:8081/web/stripe-webhooks`
+  - https://docs.stripe.com/payments/checkout/fulfill-orders
 
 ## Tests
 

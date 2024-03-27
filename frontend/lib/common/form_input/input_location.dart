@@ -14,11 +14,12 @@ class InputLocation extends StatefulWidget {
   bool guessLocation;
   bool useUserLocation;
   bool updateCachedLocation;
+  String helpText;
 
   InputLocation({Key? key, this.formVals = null, this.formValsKey = '',
     this.label = '', this.onChange = null, this.nestedCoordinates = false,
     this.guessLocation = true, this.useUserLocation = false,
-    this.updateCachedLocation = true}) : super(key: key);
+    this.updateCachedLocation = true, this.helpText = '',}) : super(key: key);
 
   @override
   _InputLocationState createState() => _InputLocationState();
@@ -69,7 +70,8 @@ class _InputLocationState extends State<InputLocation> {
             ),
           );
         },
-        child: _inputFields.inputText(_formVals, _formValsKey, label: widget.label, onTap: onTap, onChange: (String val) {
+        child: _inputFields.inputText(_formVals, _formValsKey, label: widget.label, helpText: widget.helpText,
+          onTap: onTap, onChange: (String val) {
           List<String> lngLatString = val.split(',');
           double lng = _parseService.toDoubleNoNull(lngLatString[0]);
           double lat = _parseService.toDoubleNoNull(lngLatString[1]);

@@ -49,16 +49,53 @@
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
-        "hostUserIds": [ "{String}" ],
+        "type": "{String} ''|sharedMeal",
         "title": "{String}",
         "description": "{String}",
         "dayOfWeek": "{Int} [0-6, 0 = mon, 1 = tue, 2 = wed, 3 = thu, 4 = fri, 5 = sat, 6 = sun]",
         "startTime": "{String} [HH:mm]",
         "endTime": "{String} [HH:mm]",
+        "timezone": "{String} America/Los_Angeles",
         "location": {
             "type": "Point",
             "coordinates": ["{Float} [lng]", "{Float} [lat]"]
-        }
+        },
+        "adminUserIds": [ "{String}" ],
+        "hostGroupSizeDefault": "{Int} [(minimum) People per each host. This will also be used to calculate credits per event type.]",
+        "hostMoneyPerPersonUSD": "{Float}",
+        "priceUSD": "{Float} [0 if free. This is the single event price, which will be discounted for monthly and yearly subscriptions.]",
+        "rsvpDeadlineHours": "{Float} [How many hours before event to allow rsvp, otherwise the sign up is for NEXT week]"
+    },
+    "event": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "weeklyEventId": "{String} [A new event is generated each week and sign ups for the weeklyEvent are stored here]",
+        "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
+    },
+    "userWeeklyEvent": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "weeklyEventId": "{String}",
+        "userId": "{String}",
+        "attendeeCountAsk": "{Int} [1 for self or 2+ bringing guests as a subscription]"
+    },
+    "userEvent": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "eventId": "{String}",
+        "userId": "{String}",
+        "hostGroupSizeMax": "{Int} [0 if NOT hosting, 1+ if willing to host]",
+        "hostGroupSize": "{Int} [The final host group size]",
+        "hostStatus": "{String} pending|complete",
+        "attendeeCountAsk": "{Int} [1 or 2+ if bringing guests]",
+        "attendeeCount": "{Int} [The final attendee count (1 for self), in case not enough hosts for all]",
+        "attendeeStatus": "{String} pending|complete",
+        "creditsEarned": "{Float} [if host, which could be fractional credits; if get 1 credit for every 10 people and hosted 5 would be 0.5 credits]",
+        "creditsRedeemed": "{Float}",
+        "creditsPriceUSD": "{Float} [the price copied from the weeklyEvent.priceUSD to compute remaining credits per event type (price)]"
     },
     "sharedItem": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -132,11 +169,23 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
         "amountUSD": "{Float} [positive if increases this user's balance (e.g. deposit or payment TO this user), negative if reduces this user's balance (e.g. withdrawal or payment FROM this user)]",
-        "feeUSD": "{Float}",
-        "forType": "{String} [user|sharedItemOwner]",
-        "forId": "{String} [userId|sharedItemOwnerId]",
+        "forType": "{String} [user|sharedItemOwner|event]",
+        "forId": "{String} [userId|sharedItemOwnerId|eventId]",
         "status": "{String} pending|complete",
         "notes": "{String}"
+    },
+    "userPaymentSubscription": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "userId": "{String}",
+        "amountUSD": "{Float}",
+        "recurringInterval": "{String} [day|week|month|year]",
+        "recurringIntervalCount": "{Int} 1+", 
+        "forType": "{String} [weeklyEvent]",
+        "forId": "{String} [weeklyEventId]",
+        "status": "{String} pending|complete|inactive",
+        "stripeId": "{String}"
     }
 
 }

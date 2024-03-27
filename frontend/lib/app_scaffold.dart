@@ -203,7 +203,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       ),
       Expanded(
         flex: 1,
-        child: _buildNavButton('/weekly-events', 'Events', Icons.event, context, width: double.infinity, fontSize: 10),
+        child: _buildNavButton('/eat', 'Events', Icons.event, context, width: double.infinity, fontSize: 10),
       ),
     ];
     if (!currentUserState.isLoggedIn) {
@@ -318,7 +318,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           // _buildNavButton('/home', 'Home', Icons.home, context),
           _buildNavButton('/blog', 'Blog', Icons.article, context),
           _buildNavButton('/own', 'Own', Icons.build, context),
-          _buildNavButton('/weekly-events', 'Events', Icons.event, context),
+          _buildNavButton('/eat', 'Events', Icons.event, context),
           _buildUserButton(context, currentUserState),
           _buildDrawerButton(context),
         ],

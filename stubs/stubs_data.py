@@ -18,6 +18,9 @@ def RandomWords(count = 5, wordMin = 2, wordMax = 10):
         words += RandomWord(wordMin, wordMax) + ' '
     return words
 
+def RandomTime():
+    return str(random.randint(0, 23)).zfill(2) + ':' + str(random.randint(0, 59)).zfill(2)
+
 def RandomImageUrl():
     return RandomString() + '.jpg'
 
@@ -38,8 +41,8 @@ def GetDefaultFromCollectionName(collectionName: str):
         return _nameDefaultsMap[collectionName]
     return {}
 
-def CreateBulk(objs: list = [], default: dict = {}, base: dict = {}, collectionName = '', count = 1,
-    saveInDatabase = 1):
+def CreateBulk(objs: list = [], default: dict = {}, base: dict = {}, collectionName: str = '', count: int = 1,
+    saveInDatabase: int = 1):
     if len(objs) < 1:
         objs = []
         for i in range(0, count):

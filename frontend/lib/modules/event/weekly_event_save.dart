@@ -9,7 +9,8 @@ import '../user_auth/current_user_state.dart';
 
 class WeeklyEventSave extends StatefulWidget {
   String id;
-  WeeklyEventSave({this.id = ''});
+  String type;
+  WeeklyEventSave({this.id = '', this.type = ''});
 
   @override
   _WeeklyEventSaveState createState() => _WeeklyEventSaveState();
@@ -26,18 +27,46 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     {'value': 6, 'label': 'Sunday'},
   ];
   Map<String, Map<String, dynamic>> _formFields = {
+    'location': { 'type': 'location', 'nestedCoordinates': true },
     'title': {},
-    'description': {'type': 'text', 'minLines': 4, 'required': false},
-    'dayOfWeek': {'type': 'select'},
-    'startTime': {'type': 'time'},
-    'endTime': {'type': 'time'},
-    'location': {'type': 'location', 'nestedCoordinates': true},
+    'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
+    'dayOfWeek': { 'type': 'select' },
+    'startTime': { 'type': 'time' },
+    'endTime': { 'type': 'time' },
+    'hostGroupSizeDefault': { 'type': 'number', 'min': 0, 'required': true },
+    'priceUSD': { 'type': 'number', 'min': 5, 'required': true },
+    'rsvpDeadlineHours': { 'type': 'number', 'min': 0, 'required': true },
   };
+  Map<String, dynamic> _formValsDefault = {
+    'hostGroupSizeDefault': 0,
+    'priceUSD': 0,
+    'rsvpDeadlineHours': 0,
+    'type': '',
+  };
+  String _formMode = '';
+  List<String> _formStepKeys = [];
 
   @override
   void initState() {
     super.initState();
 
+    _formValsDefault['type'] = widget.type;
+    if (widget.type == 'sharedMeal') {
+      _formValsDefault['hostGroupSizeDefault'] = 10;
+      _formValsDefault['priceUSD'] = 10;
+      _formValsDefault['rsvpDeadlineHours'] = 72;
+      _formValsDefault['title'] = 'Shared Meal';
+      _formValsDefault['dayOfWeek'] = 6;
+      _formValsDefault['startTime'] = '17:00';
+      _formValsDefault['endTime'] = '18:30';
+
+      _formMode = 'step';
+
+      _formFields['location']!['helpText'] = 'Where will people meet to eat?';
+      _formFields['description']!['helpText'] = 'Any special instructions for where people should meet?';
+      _formFields['dayOfWeek']!['helpText'] = 'We suggest Sundays at 5pm, but if you would like to do a different day or time, set it here.';
+      _formStepKeys = ['location', 'description', 'dayOfWeek', 'startTime'];
+    }
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
   }
 
@@ -47,23 +76,24 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     return AppScaffoldComponent(
       listWrapper: true,
       innerWidth: fieldWidth,
-      body: FormSave(formVals: WeeklyEventClass.fromJson({}).toJson(), dataName: 'weeklyEvent',
+      body: FormSave(formVals: WeeklyEventClass.fromJson(_formValsDefault).toJson(), dataName: 'weeklyEvent',
         routeGet: 'getWeeklyEventById', routeSave: 'saveWeeklyEvent', id: widget.id, fieldWidth: fieldWidth,
-        formFields: _formFields, parseData: (dynamic data) => WeeklyEventClass.fromJson(data).toJson(),
+        formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, parseData: (dynamic data) => WeeklyEventClass.fromJson(data).toJson(),
         preSave: (dynamic data) {
           data = WeeklyEventClass.fromJson(data).toJson();
-          if (data['hostUserIds'] == null) {
-            data['hostUserIds'] = [];
+          if (data['adminUserIds'] == null) {
+            data['adminUserIds'] = [];
           }
-          if (data['hostUserIds'].length == 0) {
+          if (data['adminUserIds'].length == 0) {
             var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
             if (currentUser != null) {
-              data['hostUserIds'].add(currentUser.id);
+              data['adminUserIds'].add(currentUser.id);
             }
           }
           return data;
         }, onSave: (dynamic data) {
-          context.go('/weekly-events');
+          String id = data['weeklyEvent']['_id'];
+          context.go('/weekly-event?id=${id}');
         }
       )
     );

@@ -20,8 +20,12 @@ class WeeklyEvents extends StatefulWidget {
   final double lat;
   final double lng;
   final double maxMeters;
+  final String type;
+  final String routePath;
+  final int showFilters;
 
-  WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, });
+  WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
+    this.routePath = 'weekly-events', this.showFilters = 1 });
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -139,7 +143,11 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         alignment: Alignment.topRight,
         child: ElevatedButton(
           onPressed: () {
-            _linkService.Go('/weekly-event-save', context, currentUserState);
+            String url = '/weekly-event-save';
+            if (widget.type.length > 0) {
+              url += '?type=${widget.type}';
+            }
+            _linkService.Go(url, context, currentUserState);
           },
           child: Text('Create New Event'),
         ),
@@ -147,6 +155,19 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       SizedBox(height: 10),
     ];
     // }
+
+    Widget widgetFilters = SizedBox.shrink();
+    if (widget.showFilters > 0) {
+      widgetFilters = _layoutService.WrapWidth([
+        InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
+          _search();
+          }),
+        _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
+            label: 'Range', onChanged: (String val) {
+            _search();
+          }),
+      ], width: 225);
+    }
 
     return AppScaffoldComponent(
       listWrapper: true,
@@ -160,15 +181,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
             child: Form(
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: _layoutService.WrapWidth([
-                InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
-                  _search();
-                  }),
-                _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
-                    label: 'Range', onChanged: (String val) {
-                    _search();
-                  }),
-              ], width: 225),
+              child: widgetFilters,
             ),
           ),
           Align(
@@ -188,7 +201,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
 
   void _init() async {
-    if (!_skipCurrentLocation) {
+    if (!_skipCurrentLocation || widget.showFilters <= 0) {
       if (_locationService.LocationValid(_filters['lngLat'])) {
         _search();
       }
@@ -197,6 +210,9 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         setState(() {
           _filters['lngLat'] = lngLat;
         });
+        if (widget.showFilters <= 0) {
+          _search();
+        }
       }
     }
 
@@ -232,7 +248,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
 
   _buildWeeklyEvent(WeeklyEventClass weeklyEvent, BuildContext context, var currentUserState) {
     List<Widget> buttons = [];
-    if (currentUserState.isLoggedIn && weeklyEvent.hostUserIds.contains(currentUserState.currentUser.id)) {
+    if (currentUserState.isLoggedIn && weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
       List<Widget> buttons = [
         SizedBox(height: 10),
         Row(
@@ -320,7 +336,11 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
-            _linkService.Go('/weekly-event-save', context, currentUserState);
+            String url = '/weekly-event-save';
+            if (widget.type.length > 0) {
+              url += '?type=${widget.type}';
+            }
+            _linkService.Go(url, context, currentUserState);
           },
           child: Text('Add the first event!'),
         ),
@@ -329,28 +349,31 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
 
   void _search({int lastPageNumber = 0}) {
-    if(mounted) {
-      setState(() {
-        _loading = true;
-        _message = '';
-        _canLoadMore = false;
-      });
+    if (_locationService.LocationValid(_filters['lngLat'])) {
+      if(mounted) {
+        setState(() {
+          _loading = true;
+          _message = '';
+          _canLoadMore = false;
+        });
+      }
+      var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+      if (lastPageNumber != 0) {
+        _lastPageNumber = lastPageNumber;
+      } else {
+        _lastPageNumber = 1;
+      }
+      var data = {
+        'skip': (_lastPageNumber - 1) * _itemsPerPage,
+        'limit': _itemsPerPage,
+        'lngLat': _filters['lngLat'],
+        'maxMeters': _filters['maxMeters'],
+        'withAdmins': 0,
+        'type': widget.type,
+      };
+      _socketService.emit('searchWeeklyEvents', data);
+      _UpdateUrl();
     }
-    var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-    if (lastPageNumber != 0) {
-      _lastPageNumber = lastPageNumber;
-    } else {
-      _lastPageNumber = 1;
-    }
-    var data = {
-      'skip': (_lastPageNumber - 1) * _itemsPerPage,
-      'limit': _itemsPerPage,
-      'lngLat': _filters['lngLat'],
-      'maxMeters': _filters['maxMeters'],
-      'withHosts': 0,
-    };
-    _socketService.emit('searchWeeklyEvents', data);
-    _UpdateUrl();
   }
   
   void _UpdateUrl() {
@@ -358,7 +381,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       String? lng = _filters['lngLat'][0]?.toString();
       String? lat = _filters['lngLat'][1]?.toString();
       String? maxMeters = _filters['maxMeters']?.toString();
-      html.window.history.pushState({}, '', '/weekly-events?lng=${lng}&lat=${lat}&range=${maxMeters}');
+      html.window.history.pushState({}, '', '/${widget.routePath}?lng=${lng}&lat=${lat}&range=${maxMeters}');
     }
   }
 }

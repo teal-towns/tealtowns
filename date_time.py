@@ -3,6 +3,8 @@ import dateutil.parser
 import dateparser
 import math
 import pytz
+from timezonefinder import TimezoneFinder
+from zoneinfo import ZoneInfo
 
 def now(tz = 'UTC', microseconds = False):
     # return pytz.utc.localize(datetime.datetime.utcnow())
@@ -31,6 +33,9 @@ def dictStringFields(object1, fields=[], format = '%Y-%m-%d %H:%M:%S %z'):
         else:
             newObject[key] = object1[key]
     return newObject
+
+def create(year, month, day, hour, minute, second = 0, microsecond = 0, tz = 'UTC'):
+    return datetime.datetime(year, month, day, hour, minute, second, microsecond, tzinfo = ZoneInfo(tz))
 
 def string(datetime1, format = '%Y-%m-%d %H:%M:%S %z'):
     # return datetime1.strftime('%Y-%m-%d %H:%M:%S %z')
@@ -177,3 +182,10 @@ def toUTCString(datetimeString):
     datetime1 = from_string(datetimeString)
     datetimeUTC = toUTC(datetime1)
     return string(datetimeUTC)
+
+def ToTimezone(datetime1, timezone: str):
+    return datetime1.astimezone(pytz.timezone(timezone))
+
+def GetTimezoneFromLngLat(lngLat):
+    timezone = TimezoneFinder().timezone_at(lng=lngLat[0], lat=lngLat[1])
+    return timezone

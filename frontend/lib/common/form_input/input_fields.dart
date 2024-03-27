@@ -18,7 +18,8 @@ class InputFields {
   ParseService _parseService = ParseService();
 
   Widget inputEmail(var formVals, String? formValsKey, { String label = 'Email',
-    String hint = 'your@email.com', var fieldKey = null, bool required = false }) {
+    String hint = 'your@email.com', var fieldKey = null, bool required = false,
+    String helpText = '', }) {
     String initialVal = '';
     if (formValsKey == null) {
       initialVal = formVals;
@@ -26,7 +27,7 @@ class InputFields {
       initialVal = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : '';
     }
     TextEditingController controller = new TextEditingController(text: initialVal);
-    return TextFormField(
+    return InputWrapper(TextFormField(
       key: fieldKey,
       //initialValue: initialVal,
       controller: controller,
@@ -56,11 +57,12 @@ class InputFields {
           return validateEmail(value);
         }
       }
-    );
+    ), helpText: helpText);
   }
 
   Widget inputPassword(var formVals, String? formValsKey, { String label = 'Password',
-    int minLen = -1, int maxLen = -1, var fieldKey = null, bool required = false }) {
+    int minLen = -1, int maxLen = -1, var fieldKey = null, bool required = false,
+    String helpText = '', }) {
     String initialVal = '';
     if (formValsKey == null) {
       initialVal = formVals;
@@ -68,7 +70,7 @@ class InputFields {
       initialVal = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : '';
     }
     TextEditingController controller = new TextEditingController(text: initialVal);
-    return TextFormField(
+    return InputWrapper(TextFormField(
       key: fieldKey,
       //initialValue: initialVal,
       controller: controller,
@@ -98,13 +100,13 @@ class InputFields {
           return validateMinMaxLen(value, minLen, maxLen);
         }
       },
-    );
+    ), helpText: helpText);
   }
 
   Widget inputText(var formVals, String? formValsKey, { String label = '', String hint = '',
     int minLen = -1, int maxLen = -1, var fieldKey = null, int maxLines = 1, int minLines = 1,
     int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
-    Function()? onTap = null, RegExp? pattern = null}) {
+    Function()? onTap = null, RegExp? pattern = null, String helpText = '', }) {
     Timer? debounce = null;
     String initialVal = '';
     if (maxLines < minLines) {
@@ -116,7 +118,7 @@ class InputFields {
       initialVal = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : '';
     }
     TextEditingController controller = new TextEditingController(text: initialVal);
-    return TextFormField(
+    return InputWrapper(TextFormField(
       key: fieldKey,
       // initialValue sometimes does not work.. so need to use controller instead..
       //initialValue: initialVal,
@@ -168,12 +170,13 @@ class InputFields {
       maxLines: maxLines,
       minLines: minLines,
       onTap: onTap,
-    );
+    ), helpText: helpText);
   }
 
   Widget inputNumber(var formVals, String? formValsKey, { String label = '', String hint = '',
     double? min = null, double? max = null, var fieldKey = null,
-    int debounceChange = 1000, Function(double?)? onChange = null, bool required = false }) {
+    int debounceChange = 1000, Function(double?)? onChange = null, bool required = false,
+    String helpText = '', }) {
     Timer? debounce = null;
     String initialVal = '';
     if (formValsKey == null) {
@@ -185,7 +188,7 @@ class InputFields {
       initialVal = '';
     }
     TextEditingController controller = new TextEditingController(text: initialVal);
-    return TextFormField(
+    return InputWrapper(TextFormField(
       keyboardType: TextInputType.number,
       key: fieldKey,
       // initialValue sometimes does not work.. so need to use controller instead..
@@ -233,15 +236,15 @@ class InputFields {
           return null;
         }
       },
-    );
+    ), helpText: helpText);
   }
 
   Widget inputTime(var formVals, String? formValsKey, { String label = '', String hint = '',
     var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
-    Function()? onTap = null}) {
+    Function()? onTap = null, String helpText = '',}) {
     RegExp pattern = new RegExp(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
     return inputText(formVals, formValsKey, label: label, hint: hint, fieldKey: fieldKey,
-      debounceChange: debounceChange, required: required, onTap: onTap,
+      debounceChange: debounceChange, required: required, onTap: onTap, helpText: helpText,
       pattern: pattern, onChange: (value) {
         // Ensure leading zero for hour for sorting.
         int posColon = value.indexOf(':');
@@ -261,7 +264,8 @@ class InputFields {
 
   Widget inputDateTime(var formVals, String? formValsKey, { String label = '', String hint = '',
     String dateTimeMin = '', String dateTimeMax = '', String datetimeFormat = 'yyyy-MM-ddTHH:mm:ss',
-    var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null, bool required = false }) {
+    var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null,
+    bool required = false, String helpText = '', }) {
 
     DateTime now = new DateTime.now();
     DateTime firstDate = now.subtract(new Duration(days: 365 * 5));
@@ -283,7 +287,7 @@ class InputFields {
     }
     TextEditingController controller = new TextEditingController(text: initialVal);
 
-    return TextFormField(
+    return InputWrapper(TextFormField(
       key: fieldKey,
       //initialValue: initialVal,
       controller: controller,
@@ -327,18 +331,18 @@ class InputFields {
         }
         return null;
       },
-    );
+    ), helpText: helpText);
   }
 
   Widget inputCheckbox(var formVals, String formValsKey, { String label = '',
-    var fieldKey = null }) {
+    var fieldKey = null, String helpText = '', }) {
     bool initialVal = false;
     if (formValsKey == null) {
       initialVal = formVals;
     } else {
       initialVal = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : false;
     }
-    return CheckboxFormField(
+    return InputWrapper(CheckboxFormField(
       title: Text(label),
       initialValue: initialVal,
       //key: fieldKey,
@@ -359,11 +363,11 @@ class InputFields {
       validator: (value) {
         return null;
       },
-    );
+    ), helpText: helpText);
   }
 
   Widget inputSelect(var options, var formVals, String? formValsKey, { String label = '',
-    String hint = '', var fieldKey = null, bool required = false, onChanged = null }) {
+    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '', }) {
     String? value = null;
     if (formValsKey == null) {
       value = formVals;
@@ -374,7 +378,7 @@ class InputFields {
       // print ('No options for inputSelect ${formValsKey} ${value}');
       return SizedBox.shrink();
     }
-    return Container(
+    return InputWrapper(Container(
       child: DropdownButtonFormField(
         isExpanded: true,
         key: fieldKey,
@@ -414,12 +418,12 @@ class InputFields {
           );
         }).toList(),
       )
-    );
+    ), helpText: helpText);
   }
 
   Widget inputSelectSearch(var options, var context, var formVals, String? formValsKey, { String label = '',
     String hint = '', var fieldKey = null, bool required = false, onChanged = null, onKeyUp = null,
-    int debounceChange = 1000 }) {
+    int debounceChange = 1000, String helpText = '', }) {
     Timer? debounce = null;
     String initialVal = '';
     if (formValsKey == null) {
@@ -438,7 +442,7 @@ class InputFields {
     for (int ii = 0; ii < options.length; ii++) {
       items.add(PopupMenuItem( value: options[ii]['value'], child: Text(options[ii]['label']) ) );
     }
-    return Row(
+    return InputWrapper(Row(
       children: [
         //DropdownButtonFormField(
         //  key: fieldKey,
@@ -530,7 +534,7 @@ class InputFields {
           ),
         ),
       ]
-    );
+    ), helpText: helpText);
   }
 
   // TODO - fix lint errors
@@ -596,6 +600,20 @@ class InputFields {
   //  );
   //}
 
+}
+
+Widget InputWrapper(Widget child, { String helpText = '', }) {
+  if (helpText != '') {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(helpText),
+        SizedBox(height: 5),
+        child,
+      ]
+    );
+  }
+  return child;
 }
 
 String? validateEmail(String? value) {

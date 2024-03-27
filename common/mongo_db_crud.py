@@ -43,6 +43,11 @@ def GetById(collection: str, id1: str, db1 = None, fields = None):
         ret["message"] = "Invalid id."
     return ret
 
+def CleanId(obj: dict):
+    if '_id' in obj and (not obj['_id'] or len(obj['_id']) == 0):
+        del obj['_id']
+    return obj
+
 def Save(collection: str, obj, db1 = None):
     ret = {"valid": 1, "message": "", "insert": 0}
     ret[collection] = obj
