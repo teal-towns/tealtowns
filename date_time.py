@@ -179,7 +179,7 @@ def toUTCString(datetimeString):
     datetimeUTC = toUTC(datetime1)
     return string(datetimeUTC)
 
-def ToTimezone(datetime1, timezone):
+def ToTimezone(datetime1, timezone: str):
     return datetime1.astimezone(pytz.timezone(timezone))
 
 def GetTimezoneFromLngLat(lngLat):

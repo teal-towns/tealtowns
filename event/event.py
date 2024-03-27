@@ -5,7 +5,7 @@ import date_time
 import mongo_db
 
 def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 24, now = None, autoCreate: int = 1):
-    now = now if now else date_time.now()
+    now = now if now is not None else date_time.now()
     ret = { 'valid': 0, 'message': '', 'event': {} }
     weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
     ret['weeklyEvent'] = weeklyEvent
@@ -49,8 +49,10 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
 
 def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, now = None):
     ret = { 'valid': 1, 'message': '', 'nextStart': '', 'rsvpDeadlinePassed': 0, 'thisWeekStart': '', }
-    now = now if now else date_time.now()
+    now = now if now is not None else date_time.now()
+    print ('now1', now)
     now = date_time.ToTimezone(now, weeklyEvent['timezone'])
+    print ('now2', now)
 
     hour = int(weeklyEvent['startTime'][0:2])
     minute = int(weeklyEvent['startTime'][3:5])
