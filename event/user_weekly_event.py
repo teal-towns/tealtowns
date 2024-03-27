@@ -5,6 +5,7 @@ from event import event_payment as _event_payment
 from event import user_event as _user_event
 
 def Save(userWeeklyEvent: dict, now = None):
+    userWeeklyEvent = _mongo_db_crud.CleanId(userWeeklyEvent)
     ret = { 'valid': 0, 'message': '', 'userWeeklyEvent': {} }
 
     # Confirm user has paid.
@@ -13,7 +14,7 @@ def Save(userWeeklyEvent: dict, now = None):
     query = { 'userId': userWeeklyEvent['userId'], 'forType': 'weeklyEvent', 'forId': weeklyEvent['_id'] }
     userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
     if userPaymentSubscription is not None and userPaymentSubscription['status'] == 'complete':
-        pricePerSpot = retPay['yearlyPrice'] if userPaymentSubscription['subscriptionInterval'] == 'year' else retPay['monthlyPrice']
+        pricePerSpot = retPay['yearlyPrice'] if userPaymentSubscription['recurringInterval'] == 'year' else retPay['monthlyPrice']
         amountOwed = pricePerSpot * userWeeklyEvent['attendeeCountAsk']
         if abs(userPaymentSubscription['amountUSD']) < amountOwed:
             ret['valid'] = 0
@@ -51,4 +52,16 @@ def AddWeeklyUsersToEvent(weeklyEventId: str, now = None):
             retUserEvent = _user_event.Save(userEvent, 'paidSubscription')
             if retUserEvent['valid']:
                 ret['newUserEvents'].append(retUserEvent['userEvent'])
+    return ret
+
+def Get(weeklyEventId: str, userId: str, withWeeklyEvent: int = 0, withEvent: int = 0):
+    query = { 'weeklyEventId': weeklyEventId, 'userId': userId, }
+    ret = _mongo_db_crud.Get('userWeeklyEvent', query)
+    if withWeeklyEvent:
+        ret['weeklyEvent'] = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
+    if withEvent:
+        retEvents = _event.GetNextEvents(weeklyEventId, minHoursBeforeRsvpDeadline = 0)
+        ret['event'] = retEvents['thisWeekEvent']
+        ret['rsvpDeadlinePassed'] = retEvents['rsvpDeadlinePassed']
+        ret['nextEvent'] = retEvents['nextWeekEvent']
     return ret

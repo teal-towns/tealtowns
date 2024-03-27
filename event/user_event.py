@@ -7,6 +7,7 @@ from common import mongo_db_crud as _mongo_db_crud
 from user_payment import user_payment as _user_payment
 
 def Save(userEvent: dict, payType: str):
+    userEvent = _mongo_db_crud.CleanId(userEvent)
     ret = { 'valid': 1, 'message': '', 'userEvent': {}, 'spotsPaidFor': 0, 'availableUSD': 0, 'availableCredits': 0, }
 
     userEventExisting = None
@@ -58,9 +59,10 @@ def Save(userEvent: dict, payType: str):
 
 def CheckAndTakePayment(userId: str, eventId: str, attendeeCountAsk: int, payType: str = ''):
     ret = { 'valid': 0, 'message': '', 'spotsPaidFor': 0, 'spotsToPayFor': 0, 'amountToPay': 0,
-        'availableUSD': 0, 'availableCredits': 0, 'creditsRedeemed': 0, }
+        'availableUSD': 0, 'availableCredits': 0, 'creditsRedeemed': 0, 'weeklyEvent': {} }
     event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(eventId)})['item']
     weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+    ret['weeklyEvent'] = weeklyEvent
 
     # Get how many spots user has paid for already, if any (e.g. from subscription).
     spotsPaidFor = 0
@@ -339,4 +341,25 @@ def GiveUnusedCredits(eventId: str):
         mongo_db.update_one('userEvent', {'eventId': eventId, 'userId': userEvent['userId']}, mutation)
         ret['userIdsUpdated'].append(userEvent['userId'])
     return ret
-    
+
+def GetStats(eventId: str, withUserId: str = ''):
+    ret = { 'valid': 1, 'message': '', 'attendeesCount': 0, 'attendeesWaitingCount': 0,
+        'nonHostAttendeesWaitingCount': 0, 'userEvent': {}, }
+    userEvents = mongo_db.find('userEvent', { 'eventId': eventId })['items']
+    for userEvent in userEvents:
+        if userEvent['userId'] == withUserId:
+            ret['userEvent'] = userEvent
+        ret['attendeesCount'] += userEvent['attendeeCount']
+        ret['attendeesWaitingCount'] += userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
+        if userEvent['hostGroupSizeMax'] == 0 or userEvent['hostStatus'] == 'complete':
+            ret['nonHostAttendeesWaitingCount'] += userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
+    return ret
+
+def Get(eventId: str, userId: str, withEvent: int = 0, withUserCheckPayment: int = 0):
+    query = { 'eventId': eventId, 'userId': userId, }
+    ret = _mongo_db_crud.Get('userEvent', query)
+    if withEvent:
+        ret['event'] = mongo_db.find_one('event', { '_id': mongo_db.to_object_id(eventId) })['item']
+    if withUserCheckPayment:
+        ret['userCheckPayment'] = CheckAndTakePayment(userId, eventId, 1)
+    return ret

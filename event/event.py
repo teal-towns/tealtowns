@@ -21,6 +21,32 @@ def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int =
         ret['event'] = _mongo_db_crud.Save('event', event)['event']
     return ret
 
+def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now = None, autoCreate: int = 1):
+    ret = { 'valid': 1, 'message': '', 'thisWeekEvent': {}, 'nextWeekEvent': {}, 'rsvpDeadlinePassed': 0, }
+    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
+    retNext = GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline, now)
+    ret['rsvpDeadlinePassed'] = retNext['rsvpDeadlinePassed']
+    event = {
+        'weeklyEventId': weeklyEventId,
+        'start': retNext['thisWeekStart'],
+    }
+    eventFind = mongo_db.find_one('event', event)['item']
+    if not eventFind and autoCreate:
+        eventFind = _mongo_db_crud.Save('event', event)['event']
+    if eventFind:
+        ret['thisWeekEvent'] = eventFind
+    if retNext['nextStart']:
+        eventNext = {
+            'weeklyEventId': weeklyEventId,
+            'start': retNext['nextStart'],
+        }
+        eventNextFind = mongo_db.find_one('event', eventNext)['item']
+        if not eventNextFind and autoCreate:
+            eventNextFind = _mongo_db_crud.Save('event', eventNext)['event']
+        if eventNextFind:
+            ret['nextWeekEvent'] = eventNextFind
+    return ret
+
 def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, now = None):
     ret = { 'valid': 1, 'message': '', 'nextStart': '', 'rsvpDeadlinePassed': 0, 'thisWeekStart': '', }
     now = now if now else date_time.now()

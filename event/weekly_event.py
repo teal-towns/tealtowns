@@ -5,6 +5,7 @@ from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
 from event import event as _event
+from event import event_payment as _event_payment
 from event import user_event as _user_event
 from event import user_weekly_event as _user_weekly_event
 import log
@@ -53,8 +54,11 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', limit: int = 250
 
     return ret
 
-def GetById(weeklyEventId: str, withAdmins: int = 1):
+def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUserEvents: int = 0,
+    withUserId: str = ''):
     ret = _mongo_db_crud.GetById('weeklyEvent', weeklyEventId)
+    if not ret['valid'] or '_id' not in ret['weeklyEvent']:
+        return ret
     if withAdmins:
         userIds = []
         for userId in ret['weeklyEvent']['adminUserIds']:
@@ -70,11 +74,27 @@ def GetById(weeklyEventId: str, withAdmins: int = 1):
         for userId in ret['weeklyEvent']['adminUserIds']:
             user = usersIdMap[userId] if userId in usersIdMap else {}
             ret['weeklyEvent']['adminUsers'].append(user)
+
+    if withEvent:
+        retEvents = _event.GetNextEvents(weeklyEventId, minHoursBeforeRsvpDeadline = 0)
+        ret['event'] = retEvents['thisWeekEvent']
+        ret['rsvpDeadlinePassed'] = retEvents['rsvpDeadlinePassed']
+        ret['nextEvent'] = retEvents['nextWeekEvent']
+        if withUserEvents:
+            retStats = _user_event.GetStats(ret['event']['_id'], withUserId = withUserId)
+            ret['attendeesCount'] = retStats['attendeesCount']
+            ret['attendeesWaitingCount'] = retStats['attendeesWaitingCount']
+            ret['nonHostAttendeesWaitingCount'] = retStats['nonHostAttendeesWaitingCount']
+            ret['userEvent'] = retStats['userEvent']
+
     return ret
 
 def Save(weeklyEvent: dict):
+    weeklyEvent = _mongo_db_crud.CleanId(weeklyEvent)
     if 'timezone' not in weeklyEvent or weeklyEvent['timezone'] == '':
         weeklyEvent['timezone'] = date_time.GetTimezoneFromLngLat(weeklyEvent['location']['coordinates'])
+    payInfo = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
+    weeklyEvent['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
     return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)
 
 def Remove(weeklyEventId: str):
@@ -98,10 +118,12 @@ def CheckRSVPDeadline(weeklyEventId: str, now = None):
     if retCheck['rsvpDeadlinePassed']:
         # See if this is the first time passed (most recent event is still this week's event).
         sortObj = { 'start': -1 }
-        currentEvent = mongo_db.find('event', {'weeklyEventId': weeklyEvent['_id']}, sort_obj = sortObj)['items'][0]
-        if currentEvent['start'] == retCheck['thisWeekStart']:
-            _user_event.CheckAddHostsAndAttendees(currentEvent['_id'], fillAll = 1)
-            _user_weekly_event.AddWeeklyUsersToEvent(weeklyEvent['_id'], now = now)
+        events = mongo_db.find('event', {'weeklyEventId': weeklyEvent['_id']}, sort_obj = sortObj)['items']
+        if len(events) > 0:
+            currentEvent = events[0]
+            if currentEvent['start'] == retCheck['thisWeekStart']:
+                _user_event.CheckAddHostsAndAttendees(currentEvent['_id'], fillAll = 1)
+                _user_weekly_event.AddWeeklyUsersToEvent(weeklyEvent['_id'], now = now)
     return ret
 
 def CheckAllRSVPDeadlines(now = None):

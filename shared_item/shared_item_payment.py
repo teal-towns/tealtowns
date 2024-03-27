@@ -284,6 +284,8 @@ def StripePaymentLinkMonthly(sharedItemOwnerId: str):
     priceId = res['id']
     ret['priceId'] = priceId
 
+    retOwner = _shared_item_owner.Get(sharedItemOwnerId)
+    sharedItemOwner = retOwner['sharedItemOwner']
     metadata = {
         'sharedItemOwnerId': sharedItemOwnerId,
         'sharedItemId': sharedItemOwner['sharedItemId'],

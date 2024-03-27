@@ -41,6 +41,8 @@ _migrations.RunAll()
 httpRoutesFunc = []
 from blog import blog_routes as _blog_routes
 from common import common_routes as _common_routes
+from event import user_event_routes as _user_event_routes
+from event import user_weekly_event_routes as _user_weekly_event_routes
 from event import weekly_event_routes as _weekly_event_routes
 from image import image_routes as _image_routes
 from shared_item import shared_item_routes as _shared_item_routes

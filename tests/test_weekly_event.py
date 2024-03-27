@@ -100,8 +100,8 @@ def test_WeeklyEventFlow():
     user2PaymentSubscription = {
         'userId': users[2]['_id'],
         'amountUSD': subscriptionPrices['monthlyPrice'],
-        'subscriptionInterval': 'month',
-        'subscriptionIntervalCount': 1,
+        'recurringInterval': 'month',
+        'recurringIntervalCount': 1,
         'forType': 'weeklyEvent',
         'forId': weeklyEvent['_id'],
         'status': 'complete',
@@ -146,8 +146,8 @@ def test_WeeklyEventFlow():
     user4PaymentSubscription = {
         'userId': users[4]['_id'],
         'amountUSD': subscriptionPrices['yearlyPrice'] * attendeeCountAsk,
-        'subscriptionInterval': 'year',
-        'subscriptionIntervalCount': 1,
+        'recurringInterval': 'year',
+        'recurringIntervalCount': 1,
         'forType': 'weeklyEvent',
         'forId': weeklyEvent['_id'],
         'status': 'complete',
@@ -282,8 +282,8 @@ def test_WeeklyEventFlow():
     user6PaymentSubscription = {
         'userId': users[6]['_id'],
         'amountUSD': subscriptionPrices['monthlyPrice'],
-        'subscriptionInterval': 'month',
-        'subscriptionIntervalCount': 1,
+        'recurringInterval': 'month',
+        'recurringIntervalCount': 1,
         'forType': 'weeklyEvent',
         'forId': weeklyEvent['_id'],
         'status': 'complete',

@@ -5,8 +5,10 @@ import stripe
 import ml_config
 _config = ml_config.get_config()
 
+from common import mongo_db_crud as _mongo_db_crud
 from common import socket as _socket
 import websocket_clients as _websocket_clients
+from pay_stripe import pay_stripe as _pay_stripe
 from shared_item import shared_item_payment as _shared_item_payment
 from shared_item import shared_item_payment_math as _shared_item_payment_math
 from user_payment import user_payment as _user_payment
@@ -35,20 +37,37 @@ async def StripeWebhook(request):
         data = event.data.object
         if data['status'] == 'complete' or data['status'] == 'open':
             if 'userId' in data['metadata']:
-                # Add deposit
-                withoutPayFee = _shared_item_payment_math.RemoveFee(data['amount_total'] / 100, withCut = False)
-                withoutFees = _shared_item_payment_math.RemoveFee(data['amount_total'] / 100)
-                _user_payment.AddPayment(data['metadata']['userId'], withoutPayFee, 'sharedItem',
-                    data['metadata']['sharedItemId'], 'complete', notes = 'Stripe down payment')
-
                 # Need to extract from stripe object json format..
                 data1 = {}
                 for key in data['metadata']:
                     data1[key] = data['metadata'][key]
-                data1['totalPaid'] = withoutFees
+
+                if 'forId' in data1 and 'forType' in data1:
+                    amount = data['amount_total'] / 100
+                    if 'recurringInterval' in data1:
+                        userPaymentSubscription = {
+                            'userId': data1['userId'],
+                            'amountUSD': amount,
+                            'recurringInterval': data1['recurringInterval'],
+                            'recurringIntervalCount': data1['recurringIntervalCount'],
+                            'forType': data1['forType'],
+                            'forId': data1['forId'],
+                            'status': 'complete',
+                            'stripeId': data['id'],
+                        }
+                        _mongo_db_crud.Save('userPaymentSubscription', userPaymentSubscription)
+                    else:
+                        _user_payment.AddPayment(data1['userId'], amount, data1['forType'],
+                            data1['forId'], 'complete')
+                else:
+                    withoutPayFee = _shared_item_payment_math.RemoveFee(data['amount_total'] / 100, withCut = False)
+                    withoutFees = _shared_item_payment_math.RemoveFee(data['amount_total'] / 100)
+                    _user_payment.AddPayment(data['metadata']['userId'], withoutPayFee, 'sharedItem',
+                        data['metadata']['sharedItemId'], 'complete', notes = 'Stripe down payment')
+                    data1['totalPaid'] = withoutFees
+
                 jsonData = {
                     'route': 'StripePaymentComplete',
-                    # 'data': data['metadata'],
                     'data': data1,
                 }
                 await _websocket_clients.SendToUsersJson(jsonData, [data['metadata']['userId']])
@@ -73,3 +92,16 @@ async def StripeWebhook(request):
         pass
 
     return web.Response(status=200)
+
+
+def addRoutes():
+    def GetPaymentLink(data, auth, websocket):
+        recurringInterval = data['recurringInterval'] if 'recurringInterval' in data else ''
+        recurringIntervalCount = data['recurringIntervalCount'] if 'recurringIntervalCount' in data else 1
+        return _pay_stripe.StripePaymentLink(data['amountUSD'], data['userId'], data['title'],
+            data['forId'], data['forType'], recurringInterval=recurringInterval,
+            recurringIntervalCount=recurringIntervalCount)
+    _socket.add_route('StripeGetPaymentLink', GetPaymentLink)
+
+addRoutes()
+

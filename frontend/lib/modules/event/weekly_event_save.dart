@@ -92,7 +92,8 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
           }
           return data;
         }, onSave: (dynamic data) {
-          context.go('/weekly-events');
+          String id = data['weeklyEvent']['_id'];
+          context.go('/weekly-event?id=${id}');
         }
       )
     );
