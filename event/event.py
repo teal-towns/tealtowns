@@ -51,16 +51,13 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
 def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, now = None):
     ret = { 'valid': 1, 'message': '', 'nextStart': '', 'rsvpDeadlinePassed': 0, 'thisWeekStart': '', }
     now = now if now is not None else date_time.now()
-    print ('now1', now)
     now = date_time.ToTimezone(now, weeklyEvent['timezone'])
-    print ('now2', now)
 
     hour = int(weeklyEvent['startTime'][0:2])
     minute = int(weeklyEvent['startTime'][3:5])
     thisWeek = date_time.create(now.year, now.month, now.day, hour, minute, tz = weeklyEvent['timezone'])
     # Add difference between weekdays.
     thisWeek += datetime.timedelta(days=(weeklyEvent['dayOfWeek'] - now.weekday()))
-    print ('thisWeek3', thisWeek)
     ret['thisWeekStart'] = date_time.string(thisWeek)
 
     hoursBuffer = minHoursBeforeRsvpDeadline + weeklyEvent['rsvpDeadlineHours']
