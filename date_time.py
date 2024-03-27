@@ -4,6 +4,7 @@ import dateparser
 import math
 import pytz
 from timezonefinder import TimezoneFinder
+from zoneinfo import ZoneInfo
 
 def now(tz = 'UTC', microseconds = False):
     # return pytz.utc.localize(datetime.datetime.utcnow())
@@ -32,6 +33,18 @@ def dictStringFields(object1, fields=[], format = '%Y-%m-%d %H:%M:%S %z'):
         else:
             newObject[key] = object1[key]
     return newObject
+
+def create(year, month, day, hour, minute, second = 0, microsecond = 0, tz = 'UTC'):
+    val = datetime.datetime(year, month, day, hour, minute, second, microsecond, tzinfo = ZoneInfo(tz))
+    # timezone = pytz.timezone(tz)
+    # print ('timezone', timezone, timezone.utcoffset)
+    # thisWeek = datetime.datetime(now.year, now.month, now.day, hour, minute)
+    # timezone.localize(val)
+    # thisWeek = datetime.datetime(now.year, now.month, now.day, hour, minute, 0, tzinfo=pytz.timezone(weeklyEvent['timezone']))
+    print ('val', hour, minute, val, tz)
+    # val1 = ToTimezone(val, tz)
+    # print ('val1', val1)
+    return val
 
 def string(datetime1, format = '%Y-%m-%d %H:%M:%S %z'):
     # return datetime1.strftime('%Y-%m-%d %H:%M:%S %z')

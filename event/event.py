@@ -57,14 +57,7 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
 
     hour = int(weeklyEvent['startTime'][0:2])
     minute = int(weeklyEvent['startTime'][3:5])
-    timezone = pytz.timezone(weeklyEvent['timezone'])
-    print ('timezone', timezone, timezone.utcoffset)
-    thisWeek = datetime.datetime(now.year, now.month, now.day, hour, minute)
-    timezone.localize(thisWeek)
-    # thisWeek = datetime.datetime(now.year, now.month, now.day, hour, minute, 0, tzinfo=pytz.timezone(weeklyEvent['timezone']))
-    print ('thisWeek', hour, minute, thisWeek, weeklyEvent['timezone'])
-    thisWeek = date_time.ToTimezone(thisWeek, weeklyEvent['timezone'])
-    print ('thisWeek2', thisWeek)
+    thisWeek = date_time.create(now.year, now.month, now.day, hour, minute, tz = weeklyEvent['timezone'])
     # Add difference between weekdays.
     thisWeek += datetime.timedelta(days=(weeklyEvent['dayOfWeek'] - now.weekday()))
     print ('thisWeek3', thisWeek)
