@@ -5,7 +5,7 @@ import '../user_auth/user_class.dart';
 class WeeklyEventClass {
   ParseService _parseService = ParseService();
 
-  String id = '', title = '', description = '', startTime = '', endTime = '', type = '';
+  String id = '', uName = '', title = '', description = '', startTime = '', endTime = '', type = '';
   List<String> adminUserIds = [];
   LocationClass location = LocationClass.fromJson({});
   int dayOfWeek = 0, hostGroupSizeDefault = 0;
@@ -13,13 +13,14 @@ class WeeklyEventClass {
   List<UserClass> adminUsers = [];
   String xDay = '';
 
-  WeeklyEventClass(this.id, this.title, this.description, this.startTime, this.endTime, this.type, this.adminUserIds,
+  WeeklyEventClass(this.id, this.uName, this.title, this.description, this.startTime, this.endTime, this.type, this.adminUserIds,
     this.location, this.dayOfWeek, this.hostGroupSizeDefault, this.rsvpDeadlineHours, this.priceUSD,
     this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay);
 
   WeeklyEventClass.fromJson(Map<String, dynamic> json) {
     List<String> days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
+    this.uName = json['uName'] ?? '';
     this.title = json['title'] ?? '';
     this.description = json['description'] ?? '';
     this.startTime = json['startTime'] ?? '';
@@ -41,6 +42,7 @@ class WeeklyEventClass {
     {
       '_id': id,
     //   'id': id,
+      'uName': uName,
       'title': title,
       'description': description,
       'startTime': startTime,

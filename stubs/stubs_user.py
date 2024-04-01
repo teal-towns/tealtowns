@@ -27,6 +27,8 @@ _default = {
   'firstName': _stubs_data.RandomWord(),
   'lastName': _stubs_data.RandomWord(),
   'roles': [''],
+  'phoneNumber': _stubs_data.RandomPhone(),
+  'phoneNumberVerified': random.randint(0, 1),
 }
 
 def AddDefault():

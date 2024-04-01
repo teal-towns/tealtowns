@@ -4,11 +4,15 @@ import math
 import lodash
 import mongo_db
 from common import mongo_db_crud as _mongo_db_crud
+from event import weekly_event as _weekly_event
+from notifications_all import sms_twilio as _sms_twilio
+from user_auth import user as _user
 from user_payment import user_payment as _user_payment
 
 def Save(userEvent: dict, payType: str):
     userEvent = _mongo_db_crud.CleanId(userEvent)
-    ret = { 'valid': 1, 'message': '', 'userEvent': {}, 'spotsPaidFor': 0, 'availableUSD': 0, 'availableCredits': 0, }
+    ret = { 'valid': 1, 'message': '', 'userEvent': {}, 'spotsPaidFor': 0, 'availableUSD': 0, 'availableCredits': 0,
+        'notifyUserIdsHosts': {}, 'notifyUserIdsAttendees': {}, }
 
     userEventExisting = None
     if '_id' in userEvent:
@@ -51,6 +55,8 @@ def Save(userEvent: dict, payType: str):
     ret['availableCredits'] = retPay['availableCredits']
 
     retCheck = CheckAddHostsAndAttendees(userEvent['eventId'])
+    ret['notifyUserIdsHosts'] = retCheck['notifyUserIdsHosts']
+    ret['notifyUserIdsAttendees'] = retCheck['notifyUserIdsAttendees']
     # If updated, re-get event to return.
     if userEvent['userId'] in retCheck['userIdsUpdated']:
         ret['userEvent'] = mongo_db.find_one('userEvent', {'_id': mongo_db.to_object_id(ret['userEvent']['_id'])})['item']
@@ -142,7 +148,8 @@ def GetUserEventCredits(userId: str, weeklyEventId: str = '', eventId: str = '')
     return credits
 
 def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
-    ret = { 'valid': 1, 'message': '', 'userIdsUpdated': [] }
+    ret = { 'valid': 1, 'message': '', 'userIdsUpdated': [],
+        'notifyUserIdsHosts': { 'sms': [], }, 'notifyUserIdsAttendees': { 'sms': [], }, 'notifyUserIdsUnused': {}, }
     # Order with first sign up first (first come first serve).
     sortObj = {
         'createdAt': 1,
@@ -293,6 +300,16 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
             # Add money to host for event.
             amount = hostGroupSize * weeklyEvent['hostMoneyPerPersonUSD']
             _user_payment.AddPayment(hostId, amount, 'event', eventId)
+            # Notify
+            retPhone = _user.GetPhone(hostId)
+            if retPhone['valid']:
+                body = "You have $" + str(amount) + " to host " + str(hostGroupSize) + " people for this week's event."
+                if newAttendeeInfos[hostId]['attendeeCount'] > 1:
+                    body += " " + str(newAttendeeInfos[hostId]['attendeeCount'] - 1) + " of your guests are in."
+                body += " " + _weekly_event.GetUrl(weeklyEvent)
+                retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+                if retSms['valid']:
+                    ret['notifyUserIdsHosts']['sms'].append(hostId)
 
             # Update all attendees too.
             for attendeeId in newAttendeeInfos:
@@ -310,6 +327,18 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
                     mongo_db.update_one('userEvent', {'eventId': eventId, 'userId': attendeeId}, mutation)
                     if attendeeId not in ret['userIdsUpdated']:
                         ret['userIdsUpdated'].append(attendeeId)
+                    # Notify
+                    retPhone = _user.GetPhone(attendeeId)
+                    if retPhone['valid']:
+                        body = ""
+                        if newAttendeeInfos[attendeeId]['attendeeCount'] > 1:
+                            body += "You and " + str(newAttendeeInfos[attendeeId]['attendeeCount'] - 1) + " of your guests are in for this week's event."
+                        else:
+                            body += "You are in for this week's event."
+                        body += " " + _weekly_event.GetUrl(weeklyEvent)
+                        retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+                        if retSms['valid']:
+                            ret['notifyUserIdsAttendees']['sms'].append(attendeeId)
         
         if not haveMoreAttendees and (not fillAll or hostIndexAttendees <= hostIndex):
             break
@@ -318,12 +347,17 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
 
     # If more attendees who could not join, give them event credits.
     if fillAll:
-        GiveUnusedCredits(eventId)
+        retUnused = GiveUnusedCredits(eventId, event = event, weeklyEvent = weeklyEvent)
+        ret['notifyUserIdsUnused'] = retUnused['notifyUserIds']
     
     return ret
 
-def GiveUnusedCredits(eventId: str):
-    ret = { 'valid': 1, 'message': '', 'userIdsUpdated': [] }
+def GiveUnusedCredits(eventId: str, event: dict, weeklyEvent: dict):
+    ret = { 'valid': 1, 'message': '', 'userIdsUpdated': [], 'notifyUserIds': { 'sms': [], }, }
+    if '_id' not in event or '_id' not in weeklyEvent:
+        event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(eventId)})['item']
+        weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+
     query = {
         'eventId': eventId,
         'attendeeStatus': { '$ne': 'complete' },
@@ -331,6 +365,7 @@ def GiveUnusedCredits(eventId: str):
     userEvents = mongo_db.find('userEvent', query)['items']
     for userEvent in userEvents:
         credits = userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
+        userId = userEvent['userId']
         mutation = {
             '$set': {
                 'creditsEarned': credits,
@@ -340,6 +375,12 @@ def GiveUnusedCredits(eventId: str):
         }
         mongo_db.update_one('userEvent', {'eventId': eventId, 'userId': userEvent['userId']}, mutation)
         ret['userIdsUpdated'].append(userEvent['userId'])
+        retPhone = _user.GetPhone(userId)
+        if retPhone['valid']:
+            body = "Not enough hosts for this week's event; use your new " + str(credits) + " credits to sign up for next week: " + _weekly_event.GetUrl(weeklyEvent)
+            retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+            if retSms['valid']:
+                ret['notifyUserIds']['sms'].append(userId)
     return ret
 
 def GetStats(eventId: str, withUserId: str = ''):

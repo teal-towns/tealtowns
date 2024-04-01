@@ -152,6 +152,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     if (currentUserState.isLoggedIn) {
       columns += [
         _buildLinkButton(context, '/user-money', 'Money Balance'),
+        _buildLinkButton(context, '/user', 'User Profile'),
       ];
     }
     if (currentUserState.hasRole('admin')) {

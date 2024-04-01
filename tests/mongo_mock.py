@@ -4,6 +4,8 @@ import log
 import ml_config
 import mongo_db
 
+from notifications_all import sms_twilio as _sms_twilio
+
 from stubs import stubs_shared_item as _stubs_shared_item
 from stubs import stubs_shared_item_owner as _stubs_shared_item_owner
 from stubs import stubs_user as _stubs_user
@@ -41,6 +43,8 @@ def InitAllCollections():
         _stubs_user.AddDefault()
         _stubs_user_event.AddDefault()
         _stubs_weekly_event.AddDefault()
+
+        _sms_twilio.SetTestMode(1)
 
         _inited = 1
 

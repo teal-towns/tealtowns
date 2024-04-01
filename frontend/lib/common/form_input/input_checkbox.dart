@@ -11,9 +11,12 @@ class CheckboxFormField extends FormField<bool> {
         return CheckboxListTile(
           dense: state.hasError,
           title: title,
-          value: state.value,
+          // value: state.value,
+          value: initialValue,
           // onChanged: state.didChange,
-          onChanged: onChanged,
+          onChanged: (bool? value1) {
+            onChanged?.call(value1);
+          },
           subtitle: state.hasError ? Builder(
               builder: (BuildContext context) =>  Text(
                 state.errorText ?? '',

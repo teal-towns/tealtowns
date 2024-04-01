@@ -8,8 +8,12 @@ from event import event as _event
 from event import event_payment as _event_payment
 from event import user_event as _user_event
 from event import user_weekly_event as _user_weekly_event
+import lodash
 import log
 import mongo_db
+import ml_config
+
+_config = ml_config.get_config()
 
 def SearchNear(lngLat: list, maxMeters: float, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
     type: str = ''):
@@ -55,10 +59,12 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', limit: int = 250
     return ret
 
 def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUserEvents: int = 0,
-    withUserId: str = ''):
-    ret = _mongo_db_crud.GetById('weeklyEvent', weeklyEventId)
+    withUserId: str = '', weeklyEventUName: str = ''):
+    ret = _mongo_db_crud.GetById('weeklyEvent', weeklyEventId, uName = weeklyEventUName)
     if not ret['valid'] or '_id' not in ret['weeklyEvent']:
         return ret
+    if len(weeklyEventId) < 1:
+        weeklyEventId = ret['weeklyEvent']['_id']
     if withAdmins:
         userIds = []
         for userId in ret['weeklyEvent']['adminUserIds']:
@@ -91,6 +97,9 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
 
 def Save(weeklyEvent: dict):
     weeklyEvent = _mongo_db_crud.CleanId(weeklyEvent)
+    if '_id' not in weeklyEvent:
+        # Many weekly events will have the same title, so just use blank string to keep them shorter.
+        weeklyEvent['uName'] = lodash.CreateUName('')
     if 'timezone' not in weeklyEvent or weeklyEvent['timezone'] == '':
         weeklyEvent['timezone'] = date_time.GetTimezoneFromLngLat(weeklyEvent['location']['coordinates'])
     payInfo = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
@@ -111,7 +120,8 @@ def Remove(weeklyEventId: str):
     return _mongo_db_crud.RemoveById('weeklyEvent', weeklyEventId)
 
 def CheckRSVPDeadline(weeklyEventId: str, now = None):
-    ret = { 'valid': 1, 'message': '' }
+    ret = { 'valid': 1, 'message': '', 'newUserEvents': [], 'notifyUserIdsSubscribers': {},
+        'notifyUserIdsHosts': {}, 'notifyUserIdsAttendees': {}, 'notifyUserIdsUnused': {}, }
     weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
     retCheck = _event.GetNextEventStart(weeklyEvent, now = now)
     # See if deadline passed.
@@ -122,8 +132,13 @@ def CheckRSVPDeadline(weeklyEventId: str, now = None):
         if len(events) > 0:
             currentEvent = events[0]
             if currentEvent['start'] == retCheck['thisWeekStart']:
-                _user_event.CheckAddHostsAndAttendees(currentEvent['_id'], fillAll = 1)
-                _user_weekly_event.AddWeeklyUsersToEvent(weeklyEvent['_id'], now = now)
+                retAdd = _user_event.CheckAddHostsAndAttendees(currentEvent['_id'], fillAll = 1)
+                ret['notifyUserIdsUnused'] = retAdd['notifyUserIdsUnused']
+                ret['notifyUserIdsAttendees'] = retAdd['notifyUserIdsAttendees']
+                ret['notifyUserIdsHosts'] = retAdd['notifyUserIdsHosts']
+                retUsers = _user_weekly_event.AddWeeklyUsersToEvent(weeklyEvent['_id'], now = now)
+                ret['newUserEvents'] = retUsers['newUserEvents']
+                ret['notifyUserIdsSubscribers'] = retUsers['notifyUserIds']
     return ret
 
 def CheckAllRSVPDeadlines(now = None):
@@ -143,3 +158,6 @@ def CheckRSVPDeadlineLoop(timeoutMinutes = 15):
             thread.start()
         time.sleep(timeoutMinutes * 60)
     return None
+
+def GetUrl(weeklyEvent: dict):
+    return _config['web_server']['urls']['base'] + '/we/' + str(weeklyEvent['uName'])

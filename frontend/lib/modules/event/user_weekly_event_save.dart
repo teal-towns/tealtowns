@@ -15,6 +15,7 @@ import './user_event_class.dart';
 import './user_weekly_event_class.dart';
 import './weekly_event_class.dart';
 import '../user_auth/current_user_state.dart';
+import '../user_auth/user_phone.dart';
 
 class UserWeeklyEventSave extends StatefulWidget {
   String weeklyEventId;
@@ -129,6 +130,18 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
         child: Text('Join Event'),
       );
     }
+
+    if (currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
+          SizedBox(height: 10),
+          UserPhone(),
+        ]
+      );
+    }
+
     if (!_inited && widget.weeklyEventId.length > 0) {
       _inited = true;
       var data = {

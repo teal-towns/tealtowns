@@ -32,5 +32,6 @@ simplejson~=3.19.1
 stripe~=7.10.0
 tensorflow~=2.15.0
 timezonefinder~=6.5.0
+twilio~=9.0.2
 # uvicorn[standard]~=0.23.2
 # websockets~=12.0

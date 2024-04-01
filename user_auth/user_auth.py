@@ -28,6 +28,9 @@ def getUserFields():
         'username': True,
         'createdAt': True,
         'updatedAt': True,
+        'phoneNumber': True,
+        'phoneNumberVerified': True,
+        'emailVerified': True,
     }
 
 def checkEmail(email, fields=None):

@@ -289,7 +289,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buttons.Link(context, '${weeklyEvent.startTime} ${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)', '/weekly-event?id=${weeklyEvent.id}'),
+          _buttons.Link(context, '${weeklyEvent.startTime} ${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)', '/we/${weeklyEvent.uName}'),
           ...buttons,
         ]
       )

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/config_service.dart';
 import '../../common/link_service.dart';
 import '../../common/mapbox/mapbox.dart';
 import '../../common/socket_service.dart';
@@ -14,9 +15,9 @@ import './weekly_event_class.dart';
 import '../user_auth/current_user_state.dart';
 
 class WeeklyEventView extends StatefulWidget {
-  String id;
+  String uName;
 
-  WeeklyEventView({ this.id = '', });
+  WeeklyEventView({ this.uName = '', });
 
   @override
   _WeeklyEventViewState createState() => _WeeklyEventViewState();
@@ -24,6 +25,7 @@ class WeeklyEventView extends StatefulWidget {
 
 class _WeeklyEventViewState extends State<WeeklyEventView> {
   List<String> _routeIds = [];
+  ConfigService _configService = ConfigService();
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
 
@@ -112,7 +114,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     if (!_inited) {
       _inited = true;
       var data = {
-        'id': widget.id,
+        // 'id': widget.id,
+        'uName': widget.uName,
         'withAdmins': 1,
         'withEvent': 1,
         'withUserEvents': 1,
@@ -230,6 +233,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
+    Map<String, dynamic> config = _configService.GetConfig();
     double width = 1200;
     return AppScaffoldComponent(
       listWrapper: true,
@@ -250,6 +254,9 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           Text(_weeklyEvent.description),
           SizedBox(height: 10),
           ...admins,
+          SizedBox(height: 10),
+          Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+          SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -80,4 +80,12 @@ def addRoutes():
         return _user.SaveUser(data['user'])
     _socket.add_route('saveUser', Save)
 
+    def SendPhoneVerificationCode(data, auth, websocket):
+        return _user.SendPhoneVerificationCode(data['userId'], data['phoneNumber'])
+    _socket.add_route('SendPhoneVerificationCode', SendPhoneVerificationCode)
+
+    def VerifyPhone(data, auth, websocket):
+        return _user.VerifyPhone(data['userId'], data['phoneNumberVerificationKey'])
+    _socket.add_route('VerifyPhone', VerifyPhone)
+
 addRoutes()

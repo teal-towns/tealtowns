@@ -30,17 +30,21 @@ def Get(collection: str, stringKeyVals = {}, db1 = None):
         ret[collection] = item
     return ret
 
-def GetById(collection: str, id1: str, db1 = None, fields = None):
+def GetById(collection: str, id1: str, db1 = None, fields = None, uName: str = ''):
     ret = {"valid": 1, "message": ""}
     ret[collection] = {}
     try:
-        query = {"_id": mongo_db.to_object_id(id1)}
+        query = {}
+        if len(uName) > 0:
+            query = { "uName": uName }
+        else:
+            query = {"_id": mongo_db.to_object_id(id1)}
         item = mongo_db.find_one(collection, query, db1 = db1, fields = fields)["item"]
         if item is not None:
             ret[collection] = item
     except Exception:
         ret["valid"] = 0
-        ret["message"] = "Invalid id."
+        ret["message"] = "Invalid id (or uName). id: " + id1 + " uName: " + uName 
     return ret
 
 def CleanId(obj: dict):
