@@ -3,6 +3,7 @@ import random
 from stubs import stubs_data as _stubs_data
 
 _default = {
+    'uName': _stubs_data.RandomString(6),
     'type': random.choice(['', 'sharedMeal']),
     'title': _stubs_data.RandomWords(2),
     'description': _stubs_data.RandomWords(10),
