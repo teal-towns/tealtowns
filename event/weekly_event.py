@@ -100,6 +100,12 @@ def Save(weeklyEvent: dict):
     if '_id' not in weeklyEvent:
         # Many weekly events will have the same title, so just use blank string to keep them shorter.
         weeklyEvent['uName'] = lodash.CreateUName('')
+    else:
+        # Do not allow changing some fields.
+        weeklyEventExisting = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEvent['_id'])})['item']
+        if weeklyEventExisting:
+            weeklyEvent['hostGroupSizeDefault'] = weeklyEventExisting['hostGroupSizeDefault']
+            weeklyEvent['priceUSD'] = weeklyEventExisting['priceUSD']
     if 'timezone' not in weeklyEvent or weeklyEvent['timezone'] == '':
         weeklyEvent['timezone'] = date_time.GetTimezoneFromLngLat(weeklyEvent['location']['coordinates'])
     payInfo = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])

@@ -151,7 +151,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     List<Widget> columns = [];
     if (currentUserState.isLoggedIn) {
       columns += [
-        _buildLinkButton(context, '/user-money', 'Money Balance'),
+        _buildLinkButton(context, '/user-money', 'Funds and Payments'),
         _buildLinkButton(context, '/user', 'User Profile'),
       ];
     }

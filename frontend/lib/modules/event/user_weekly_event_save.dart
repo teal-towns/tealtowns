@@ -57,6 +57,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     _routeIds.add(_socketService.onRoute('GetUserWeeklyEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
+      print ('data ${data}');
       if (data['valid'] == 1) {
         _formVals = UserWeeklyEventClass.fromJson(data['userWeeklyEvent']).toJson();
         if (_formVals['_id'].length < 1) {
@@ -158,6 +159,10 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
         padding: EdgeInsets.symmetric(vertical: 10.0),
         child: LinearProgressIndicator(),
       );
+    }
+
+    if (_formVals['_id'].length > 1) {
+      return Text('You are already subscribed to this weekly event!');
     }
 
     Widget widgetForm = SizedBox.shrink();

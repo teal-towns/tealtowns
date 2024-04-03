@@ -107,7 +107,7 @@ class _UserLoginState extends State<UserLoginComponent> {
     if (_message.length > 0) {
       return Text(_message);
     }
-    return Container();
+    return SizedBox.shrink();
   }
 
   @override

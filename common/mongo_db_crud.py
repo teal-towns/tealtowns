@@ -58,6 +58,8 @@ def Save(collection: str, obj, db1 = None):
 
     if '_id' in obj and (not obj['_id'] or len(obj['_id']) == 0):
         del obj['_id']
+    if 'createdAt' in obj:
+        del obj['createdAt']
     if "_id" not in obj:
         ret["insert"] = 1
         result = mongo_db.insert_one(collection, obj, db1 = db1)

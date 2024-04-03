@@ -173,8 +173,8 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
         "amountUSD": "{Float} [positive if increases this user's balance (e.g. deposit or payment TO this user), negative if reduces this user's balance (e.g. withdrawal or payment FROM this user)]",
-        "forType": "{String} [user|sharedItemOwner|event]",
-        "forId": "{String} [userId|sharedItemOwnerId|eventId]",
+        "forType": "{String} [user|sharedItemOwner|event|withdrawToBank]",
+        "forId": "{String} [userId|sharedItemOwnerId|eventId|stripeTransferId]",
         "status": "{String} pending|complete",
         "notes": "{String}"
     },
@@ -190,6 +190,14 @@
         "forId": "{String} [weeklyEventId]",
         "status": "{String} pending|complete|inactive",
         "stripeId": "{String}"
+    },
+    "userStripeAccount": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "userId": "{String}",
+        "stripeConnectedAccountId": "{String}",
+        "status": "{String} pending|complete",
+        "stripeUrl": "{String}"
     }
-
 }

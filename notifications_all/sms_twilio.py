@@ -26,10 +26,9 @@ def Send(body: str, toNumber: str, fromNumber: str = ''):
         return ret
     try:
         client = Client(accountSid, authToken)
-        print ('from', fromNumber)
         message = client.messages.create(body = body, to = toNumber, from_ = fromNumber)
         ret['sid'] = str(message.sid)
-        log.log('info', 'sms_twilio.Send', 'sent', str(message.sid), toNumber, body, fromNumber)
+        # log.log('info', 'sms_twilio.Send', 'sent', str(message.sid), toNumber, body, fromNumber)
     except Exception as e:
         print ('sms_twilio.Send error:', e)
         ret['valid'] = 0

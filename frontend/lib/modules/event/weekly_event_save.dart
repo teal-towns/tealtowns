@@ -68,6 +68,12 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _formStepKeys = ['location', 'description', 'dayOfWeek', 'startTime'];
     }
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
+
+    // Do not allow changing some fields.
+    if (widget.id != null && widget.id!.length > 0) {
+      _formFields.remove('hostGroupSizeDefault');
+      _formFields.remove('priceUSD');
+    }
   }
 
   @override

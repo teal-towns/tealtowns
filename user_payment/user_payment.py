@@ -57,16 +57,16 @@ def UpdateBalance(userId: str, amountUSD: float, removeCutFromBalance: int = 0):
         ret = mongo_db.update_one('userMoney', query, mutation)
     return ret
 
-def GetUserMoney(userId: str):
-    ret = { 'valid': 1, 'message': '', 'userMoney': {}, 'availableUSD': 0 }
-    query = {
-        'userId': userId,
-    }
-    item = mongo_db.find_one('userMoney', query)['item']
-    if item is not None:
-        ret['userMoney'] = item
-        ret['availableUSD'] = ret['userMoney']['balanceUSD']
-    return ret
+# def GetUserMoney(userId: str):
+#     ret = { 'valid': 1, 'message': '', 'userMoney': {}, 'availableUSD': 0 }
+#     query = {
+#         'userId': userId,
+#     }
+#     item = mongo_db.find_one('userMoney', query)['item']
+#     if item is not None:
+#         ret['userMoney'] = item
+#         ret['availableUSD'] = ret['userMoney']['balanceUSD']
+#     return ret
 
 def GetUserMoneyAndPending(userId: str):
     ret = { 'valid': 1, 'message': '', 'userMoney': {}, 'userPayments': [], 'availableUSD': 0 }

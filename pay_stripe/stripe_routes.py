@@ -91,6 +91,28 @@ async def StripeWebhook(request):
         # TODO
         pass
 
+    # metadata is not allowed so have to manually get the account to check instead.
+    # elif event.type == 'account.updated':
+    #     data = event.data.object
+    #     if 'id' in data:
+    #         # Need to extract from stripe object json format..
+    #         metadata = {}
+    #         for key in data['metadata']:
+    #             metadata[key] = data['metadata'][key]
+    #         if 'userId' in metadata:
+    #             retUserStripeAccount = _mongo_db_crud.Save('userStripeAccount', {
+    #                 'userId': metadata['userId'],
+    #                 'stripeAccountId': data['id'],
+    #             })
+    #             jsonData = {
+    #                 'route': 'StripeAccountUpdated',
+    #                 'data': {
+    #                     'userId': metadata['userId'],
+    #                     'userStripeAccount': retUserStripeAccount['userStripeAccount'],
+    #                 },
+    #             }
+    #             await _websocket_clients.SendToUsersJson(jsonData, [data['metadata']['userId']])
+
     return web.Response(status=200)
 
 
@@ -102,6 +124,24 @@ def addRoutes():
             data['forId'], data['forType'], recurringInterval=recurringInterval,
             recurringIntervalCount=recurringIntervalCount)
     _socket.add_route('StripeGetPaymentLink', GetPaymentLink)
+
+    def GetAccountLink(data, auth, websocket):
+        return _pay_stripe.StripeAccountLink(data['userId'])
+    _socket.add_route('GetStripeAccountLink', GetAccountLink)
+
+    # def SaveUserStripeAccount(data, auth, websocket):
+    #     return _mongo_db_crud.Save('userStripeAccount', data['userStripeAccount'])
+    # _socket.add_route('SaveUserStripeAccount', SaveUserStripeAccount)
+
+    def GetUserStripeAccount(data, auth, websocket):
+        # return _mongo_db_crud.Get('userStripeAccount', { 'userId': data['userId'] })
+        # Just re-use stripe account link, which gets this info (as we want to check if complete too).
+        return _pay_stripe.StripeAccountLink(data['userId'])
+    _socket.add_route('GetUserStripeAccount', GetUserStripeAccount)
+
+    def StripeWithdrawMoney(data, auth, websocket):
+        return _pay_stripe.StripePayUser(data['userId'], data['amountUSD'])
+    _socket.add_route('StripeWithdrawMoney', StripeWithdrawMoney)
 
 addRoutes()
 

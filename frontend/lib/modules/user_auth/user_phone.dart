@@ -59,7 +59,8 @@ class _UserPhoneState extends State<UserPhone> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(UserClass.fromJson(data['user']));
+        var user = UserClass.fromJson(data['user']);
+        Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user, skipSession: true);
         _formVals['phoneNumberVerificationKey'] = '';
         setState(() { _message = 'Phone successfully verified'; });
       } else {

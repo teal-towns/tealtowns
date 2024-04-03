@@ -71,9 +71,19 @@ def AddWeeklyUsersToEvent(weeklyEventId: str, now = None):
                         ret['notifyUserIds']['sms'].append(userId)
     return ret
 
-def Get(weeklyEventId: str, userId: str, withWeeklyEvent: int = 0, withEvent: int = 0):
+def Get(weeklyEventId: str, userId: str, withWeeklyEvent: int = 0, withEvent: int = 0, checkByPayment: int = 1):
     query = { 'weeklyEventId': weeklyEventId, 'userId': userId, }
     ret = _mongo_db_crud.Get('userWeeklyEvent', query)
+    if '_id' not in ret['userWeeklyEvent'] and checkByPayment:
+        query = { 'userId': userId, 'forType': 'weeklyEvent', 'forId': weeklyEventId }
+        userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
+        if userPaymentSubscription is not None:
+            userWeeklyEvent = {
+                'userId': userId,
+                'weeklyEventId': weeklyEventId,
+                'attendeeCountAsk': 1,
+            }
+            ret = Save(userWeeklyEvent)
     if withWeeklyEvent:
         ret['weeklyEvent'] = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
     if withEvent:

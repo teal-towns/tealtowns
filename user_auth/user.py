@@ -31,7 +31,6 @@ def VerifyPhone(userId: str, phoneNumberVerificationKey: str):
     fields = _user_auth.getUserFields()
     fields['phoneNumberVerificationKey'] = True
     user = _user_auth.getById(userId, fields = fields)
-    print ('user', user)
     if user is None:
         ret['message'] = 'User not found'
         return ret
@@ -46,7 +45,10 @@ def VerifyPhone(userId: str, phoneNumberVerificationKey: str):
     }
     result = mongo_db.update_one('user', { '_id': mongo_db.to_object_id(userId) }, mutation)
     if result:
+        user['phoneNumberVerificationKey'] = ''
+        user['phoneNumberVerified'] = 1
         ret['valid'] = 1
+        ret['message'] = ''
         user['phoneNumberVerified'] = 1
         user['phoneNumberVerificationKey'] = user['phoneNumberVerificationKey']
         ret['user'] = user

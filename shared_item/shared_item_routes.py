@@ -42,7 +42,7 @@ def addRoutes():
 
     def GetSharedItemDownPaymentLink(data, auth, websocket):
         if data['checkAndUseBalance']:
-            retMoney = _user_payment.GetUserMoney(data['userId'])
+            retMoney = _user_payment.GetUserMoneyAndPending(data['userId'])
             if retMoney['availableUSD'] >= data['amountUSD']:
                 withoutFees = _shared_item_payment_math.RemoveFee(data['amountUSD'])
                 return { 'valid': 1, 'message': '', 'haveBalance': 1, 'totalPaid': withoutFees }

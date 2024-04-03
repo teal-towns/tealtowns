@@ -51,7 +51,10 @@ class CurrentUserState extends ChangeNotifier {
     }
   }
 
-  void setCurrentUser(UserClass user) {
+  void setCurrentUser(UserClass user, {bool skipSession = false}) {
+    if (skipSession && _currentUser != null) {
+      user.sessionId = _currentUser!.sessionId;
+    }
     _currentUser = user;
     _isLoggedIn = true;
     _socketService.setAuth(user.id, user.sessionId);

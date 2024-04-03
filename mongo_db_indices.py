@@ -38,3 +38,5 @@ def create_all_indices(db):
 
     db['userPaymentSubscription'].create_index([('userId', 1), ('forType', 1), ('forId', 1), \
         ('status', 1)], unique=False)
+    
+    db['userStripeAccount'].create_index([('userId', 1)], unique=True)
