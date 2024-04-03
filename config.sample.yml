@@ -51,3 +51,8 @@ mapbox:
 stripe:
   api_key: KEY-HERE
   secret: SECRET-HERE
+twilio:
+  account_sid: ACCOUNT-ID-HERE
+  auth_token: TOKEN-HERE
+  from: '+1xxxyyyzzzz'
+  test_mode: 1

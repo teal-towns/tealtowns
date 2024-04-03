@@ -3,6 +3,9 @@ import mongomock
 import log
 import ml_config
 import mongo_db
+import notifications
+
+from notifications_all import sms_twilio as _sms_twilio
 
 from stubs import stubs_shared_item as _stubs_shared_item
 from stubs import stubs_shared_item_owner as _stubs_shared_item_owner
@@ -15,11 +18,24 @@ _databasesLandTiles = {}
 
 _db = {}
 _inited = 0
+_initedLive = 0
 _collectionNames = ['user', 'image', 'blog',
     'weeklyEvent', 'event', 'userWeeklyEvent', 'userEvent',
     'sharedItem', 'sharedItemOwner',
-    'userMoney', 'userPayment', 'userPaymentSubscription',
+    'userMoney', 'userPayment', 'userPaymentSubscription', 'userStripeAccount',
 ]
+
+def InitLive():
+    global _initedLive
+    if not _initedLive:
+        config = ml_config.get_config()
+        log.init_logger(config)
+        db = ml_config.get_db(config)
+        config_notifications = config['notifications'] or {}
+        notifications.set_config(config_notifications)
+
+        _initedLive = 1
+
 
 def InitAllCollections():
     global _inited
@@ -41,6 +57,8 @@ def InitAllCollections():
         _stubs_user.AddDefault()
         _stubs_user_event.AddDefault()
         _stubs_weekly_event.AddDefault()
+
+        _sms_twilio.SetTestMode(1)
 
         _inited = 1
 

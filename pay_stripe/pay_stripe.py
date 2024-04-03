@@ -1,6 +1,10 @@
 import re
 import stripe
 
+from common import mongo_db_crud as _mongo_db_crud
+import mongo_db
+from user_payment import user_payment as _user_payment
+
 import ml_config
 _config = ml_config.get_config()
 
@@ -60,3 +64,82 @@ def StripePaymentLink(amountUSD: float, userId: str, title: str, forId: str, for
 #     if len(title) > maxLen:
 #         title = title[slice(0, maxLen)]
 #     return title + suffix
+
+# https://docs.stripe.com/connect/add-and-pay-out-guide?dashboard-or-api=api
+def StripeAccountLink(userId: str):
+    ret = { 'valid': 1, 'message': '', 'url': '', 'userStripeAccount': {} }
+    stripe.api_key = _config['stripe']['secret']
+    # First see if user already has one.
+    userStripeAccount = mongo_db.find_one('userStripeAccount', { 'userId': userId })['item']
+    if userStripeAccount is not None:
+        ret['userStripeAccount'] = userStripeAccount
+        # Check if complete.
+        if userStripeAccount['status'] != 'complete':
+            try:
+                res = stripe.Account.retrieve(userStripeAccount['stripeConnectedAccountId'])
+                if res['charges_enabled']:
+                    userStripeAccount['status'] = 'complete'
+                    _mongo_db_crud.Save('userStripeAccount', userStripeAccount)
+                    ret['userStripeAccount'] = userStripeAccount
+            except Exception as e:
+                print ('error', e)
+                pass
+        ret['url'] = userStripeAccount['stripeUrl']
+        return ret
+
+    res = stripe.Account.create(type="express")
+    accountId = res['id']
+    refreshUrl = _config['web_server']['urls']['base'] + '/user-money'
+    returnUrl = _config['web_server']['urls']['base'] + '/user-money'
+    # No metadata field.. Need to use returnUrl and set this on frontend..
+    # metadata = {
+    #     'userId': userId,
+    # }
+    res = stripe.AccountLink.create(account = accountId, refresh_url = refreshUrl,
+        return_url = returnUrl, type="account_onboarding")
+
+    # Save in database as pending.
+    userStripeAccount = {
+        'userId': userId,
+        'stripeConnectedAccountId': accountId,
+        'stripeUrl': res['url'],
+        'status': 'pending',
+    }
+    _mongo_db_crud.Save('userStripeAccount', userStripeAccount)
+
+    ret['url'] = res['url']
+    return ret
+
+def StripePayUser(userId: str, amountUSD: float):
+    ret = { 'valid': 1, 'message': '', 'userMoney': {}, 'availableUSD': 0, }
+    userStripeAccount = mongo_db.find_one('userStripeAccount', { 'userId': userId })['item']
+    if userStripeAccount is None:
+        ret['valid'] = 0
+        ret['message'] = 'No user stripe account.'
+        return ret
+    # Check money balance.
+    retMoney = _user_payment.GetUserMoneyAndPending(userId)
+    if retMoney['availableUSD'] < amountUSD:
+        ret['valid'] = 0
+        ret['message'] = 'The  max you can withdraw is $' + str(retMoney['availableUSD']) + '.'
+        return ret
+    accountId = userStripeAccount['stripeConnectedAccountId']
+    stripe.api_key = _config['stripe']['secret']
+    try:
+        transfer = stripe.Transfer.create(amount = int(amountUSD * 100), currency = 'usd', destination = accountId)
+        if transfer is None or 'id' not in transfer:
+            ret['valid'] = 0
+            ret['message'] = 'Could not transfer.'
+    except Exception as e:
+        print ('error', e)
+        ret['valid'] = 0
+        ret['message'] = 'Could not transfer.'
+        return ret
+    # Add payment.
+    retPay = _user_payment.AddPayment(userId, -1 * amountUSD, 'withdrawToBank', transfer['id'])
+    if not retPay['valid']:
+        return retPay
+    retMoney = _user_payment.GetUserMoneyAndPending(userId)
+    ret['userMoney'] = retMoney['userMoney']
+    ret['availableUSD'] = retMoney['availableUSD']
+    return ret

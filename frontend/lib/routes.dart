@@ -8,9 +8,11 @@ import './modules/user_auth/user_login.dart';
 import './modules/user_auth/user_logout.dart';
 import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
+import './modules/user_auth/user.dart';
 
 import './modules/about/about.dart';
 import './modules/about/team.dart';
+import './modules/about/privacy_terms.dart';
 
 import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
@@ -37,8 +39,12 @@ class Routes {
   static const passwordReset = '/password-reset';
   static const signup = '/signup';
 
+  static const user = '/user';
+
   static const about = '/about';
   static const team = '/team'; 
+  static const privacyPolicy = '/privacy-policy';
+  static const termsOfService = '/terms-of-service';
 
   static const blogList = '/blog';
   static const blogSave = '/blog-save';
@@ -46,7 +52,7 @@ class Routes {
 
   static const weeklyEvents = '/weekly-events';
   static const weeklyEventSave = '/weekly-event-save';
-  static const weeklyEventView = '/weekly-event';
+  static const weeklyEventView = '/we/:uName';
   static const eat = '/eat';
 
   static const land = '/land';
@@ -92,6 +98,11 @@ class AppGoRouter {
       ),
 
       GoRoute(
+        path: Routes.user,
+        builder: (context, state) => User(),
+      ),
+
+      GoRoute(
         path: Routes.about,
         builder: (BuildContext context, GoRouterState state) => About(),
       ),
@@ -100,7 +111,20 @@ class AppGoRouter {
         path: Routes.team,
         builder: (BuildContext context, GoRouterState state) => Team(),
       ),
-      
+
+      GoRoute(
+        path: Routes.privacyPolicy,
+        builder: (BuildContext context, GoRouterState state) => PrivacyTerms(
+          type: 'privacy',
+        ),
+      ),
+      GoRoute(
+        path: Routes.termsOfService,
+        builder: (BuildContext context, GoRouterState state) => PrivacyTerms(
+          type: 'terms',
+        ),
+      ),
+
       GoRoute(
         path: Routes.blogList,
         builder: (context, state) => BlogList(),
@@ -181,9 +205,13 @@ class AppGoRouter {
       ),
       GoRoute(
         path: Routes.weeklyEventView,
-        builder: (BuildContext context, GoRouterState state) => WeeklyEventView(
-          id: state.uri.queryParameters['id'] ?? '',
-        ),
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters["uName"];
+          if (uName != null) {
+            return WeeklyEventView(uName: uName);
+          }
+          return WeeklyEvents();
+        },
       ),
       GoRoute(
         path: Routes.eat,

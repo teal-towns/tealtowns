@@ -21,6 +21,9 @@ def RandomWords(count = 5, wordMin = 2, wordMax = 10):
 def RandomTime():
     return str(random.randint(0, 23)).zfill(2) + ':' + str(random.randint(0, 59)).zfill(2)
 
+def RandomPhone():
+    return "+1" + str(random.randint(1000000000, 9999999999))
+
 def RandomImageUrl():
     return RandomString() + '.jpg'
 

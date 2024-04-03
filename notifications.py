@@ -1,5 +1,5 @@
 import datetime
-import email_sendgrid
+from notifications_all import email_sendgrid as _email_sendgrid
 from notifications_all import email_mailchimp as _email_mailchimp
 
 import date_time
@@ -18,7 +18,7 @@ def set_config(config_notifications1 = {}):
     _config_notifications = config_notifications1
     if 'email' in _config_notifications and 'sendgrid' in _config_notifications['email'] \
          and 'api_key' in _config_notifications['email']['sendgrid']:
-        email_sendgrid.Setup(_config_notifications['email']['sendgrid']['api_key'],
+        _email_sendgrid.Setup(_config_notifications['email']['sendgrid']['api_key'],
             _config_notifications['email'])
     if 'email' in _config_notifications and 'mailchimp' in _config_notifications['email'] \
          and 'api_key' in _config_notifications['email']['mailchimp']:
@@ -39,7 +39,7 @@ def send_all(subject, body, to=None, throttleKey=None, throttleMinutes=0, skipLo
     if not block:
         try:
             if 'email' in _config_notifications and to is not None:
-                email_sendgrid.Send(subject, body, to)
+                _email_sendgrid.Send(subject, body, to)
         except Exception as e:
             if not skipLog:
                 log.log('exception', 'notifications.send_all', 'email send error')

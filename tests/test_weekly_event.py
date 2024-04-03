@@ -29,7 +29,8 @@ from user_payment import user_payment as _user_payment
 def test_WeeklyEventFlow():
     _mongo_mock.InitAllCollections()
 
-    users = _stubs_data.CreateBulk(count = 10, collectionName = 'user')
+    userDefault = { 'phoneNumberVerified': 1, }
+    users = _stubs_data.CreateBulk(count = 10, collectionName = 'user', default = userDefault)
 
     weeklyEvent = {
         "type": "sharedMeal",
@@ -68,6 +69,7 @@ def test_WeeklyEventFlow():
     weeklyEvent['adminUserIds'] = [ users[1]['_id'] ]
     retWeeklyEvent = _weekly_event.Save(weeklyEvent)
     weeklyEvent = retWeeklyEvent['weeklyEvent']
+    assert len(weeklyEvent['uName']) > 0
     assert weeklyEvent['timezone'] == 'America/Los_Angeles'
     subscriptionPrices = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
 
@@ -94,6 +96,8 @@ def test_WeeklyEventFlow():
     userAmountsCurrent[1] -= weeklyEvent['priceUSD']
     assert retUserEvent['availableUSD'] == userAmountsCurrent[1]
     assert retUserEvent['availableCredits'] == 0
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
 
     # User 2
     now = now + datetime.timedelta(hours = 1)
@@ -116,6 +120,8 @@ def test_WeeklyEventFlow():
     retTemp = _user_weekly_event.Save(user2WeeklyEvent, now = now)
     assert retTemp['valid'] == 1
     assert len(retTemp['userWeeklyEvent']['_id']) > 0
+    assert len(retTemp['notifyUserIdsHosts']['sms']) == 0
+    assert len(retTemp['notifyUserIdsAttendees']['sms']) == 0
     userEvent = mongo_db.find_one('userEvent', {'eventId': event1['_id'], 'userId': users[2]['_id']})['item']
     assert userEvent['attendeeCountAsk'] == 1
 
@@ -139,6 +145,8 @@ def test_WeeklyEventFlow():
     assert retUserEvent['valid'] == 1
     assert retUserEvent['spotsPaidFor'] == 1
     assert len(retUserEvent['userEvent']['_id']) > 0
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
 
     # User 4
     now = now + datetime.timedelta(hours = 1)
@@ -162,6 +170,13 @@ def test_WeeklyEventFlow():
     retTemp = _user_weekly_event.Save(user4WeeklyEvent, now = now)
     assert retTemp['valid'] == 1
     assert len(retTemp['userWeeklyEvent']['_id']) > 0
+    assert len(retTemp['notifyUserIdsHosts']['sms']) == 1
+    for userId in retTemp['notifyUserIdsHosts']['sms']:
+        assert userId in [users[3]['_id']]
+    # Host is already notified as host, so not as attendee.
+    assert len(retTemp['notifyUserIdsAttendees']['sms']) == 4 - 1
+    for userId in retTemp['notifyUserIdsAttendees']['sms']:
+        assert userId in [users[1]['_id'], users[2]['_id'], users[4]['_id']]
     userEvent = mongo_db.find_one('userEvent', {'eventId': event1['_id'], 'userId': users[4]['_id']})['item']
     assert userEvent['attendeeCountAsk'] == 3
     # User 3 host is now filled.
@@ -187,7 +202,16 @@ def test_WeeklyEventFlow():
     # RSVP Deadline
     # Saturday, so passed deadline.
     now = date_time.from_string('2024-03-23 09:00:00-07:00')
-    _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
+    retWeekly = _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
+    assert len(retWeekly['notifyUserIdsSubscribers']['sms']) == 2
+    for userId in retWeekly['notifyUserIdsSubscribers']['sms']:
+        assert userId in [users[2]['_id'], users[4]['_id']]
+    assert len(retWeekly['notifyUserIdsUnused']['sms']) == 1
+    for userId in retWeekly['notifyUserIdsUnused']['sms']:
+        assert userId in [users[4]['_id']]
+    assert len(retWeekly['notifyUserIdsHosts']['sms']) == 0
+    assert len(retWeekly['notifyUserIdsAttendees']['sms']) == 0
+
     credits = _user_event.GetUserEventCredits(users[4]['_id'], weeklyEvent['_id'])
     userCreditsCurrent[4] += 2
     assert credits == userCreditsCurrent[4]
@@ -221,6 +245,12 @@ def test_WeeklyEventFlow():
     assert retUserEvent['valid'] == 1
     assert retUserEvent['spotsPaidFor'] == 1
     assert retUserEvent['userEvent']['_id'] == user2Event['_id']
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 1
+    for userId in retUserEvent['notifyUserIdsHosts']['sms']:
+        assert userId in [users[2]['_id']]
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 2 - 1
+    for userId in retUserEvent['notifyUserIdsAttendees']['sms']:
+        assert userId in [users[4]['_id']]
     userEvents = mongo_db.find('userEvent', {'eventId': event2['_id']})['items']
     for userEvent in userEvents:
         if userEvent['userId'] in [users[2]['_id']]:
@@ -253,6 +283,8 @@ def test_WeeklyEventFlow():
     assert retUserEvent['spotsPaidFor'] == 1
     assert retUserEvent['userEvent']['creditsRedeemed'] == 1
     assert len(retUserEvent['userEvent']['_id']) > 0
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
     credits = _user_event.GetUserEventCredits(users[3]['_id'], weeklyEvent['_id'])
     userCreditsCurrent[3] -= 1
     assert credits == userCreditsCurrent[3]
@@ -276,6 +308,8 @@ def test_WeeklyEventFlow():
     assert retUserEvent['valid'] == 1
     assert retUserEvent['spotsPaidFor'] == 1
     assert len(retUserEvent['userEvent']['_id']) > 0
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
 
     # User 6
     now = now + datetime.timedelta(hours = 1)
@@ -298,13 +332,26 @@ def test_WeeklyEventFlow():
     retTemp = _user_weekly_event.Save(user6WeeklyEvent, now = now)
     assert retTemp['valid'] == 1
     assert len(retTemp['userWeeklyEvent']['_id']) > 0
+    assert len(retTemp['notifyUserIdsHosts']['sms']) == 0
+    assert len(retTemp['notifyUserIdsAttendees']['sms']) == 0
     userEvent = mongo_db.find_one('userEvent', {'eventId': event2['_id'], 'userId': users[6]['_id']})['item']
     assert userEvent['attendeeCountAsk'] == 1
 
     # RSVP Deadline
     # Friday, so passed deadline.
     now = date_time.from_string('2024-03-29 12:00:00-07:00')
-    _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
+    retWeekly = _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
+    assert len(retWeekly['notifyUserIdsSubscribers']['sms']) == 3
+    for userId in retWeekly['notifyUserIdsSubscribers']['sms']:
+        assert userId in [users[2]['_id'], users[4]['_id'], users[6]['_id']]
+    assert len(retWeekly['notifyUserIdsUnused']['sms']) == 0
+    assert len(retWeekly['notifyUserIdsHosts']['sms']) == 1
+    for userId in retWeekly['notifyUserIdsHosts']['sms']:
+        assert userId == users[3]['_id']
+    assert len(retWeekly['notifyUserIdsAttendees']['sms']) == 3 - 1
+    for userId in retWeekly['notifyUserIdsAttendees']['sms']:
+        assert userId in [users[5]['_id'], users[6]['_id']]
+
     credits = _user_event.GetUserEventCredits(users[3]['_id'], weeklyEvent['_id'])
     userCreditsCurrent[3] += 0.75
     assert credits == userCreditsCurrent[3]
@@ -350,6 +397,8 @@ def test_WeeklyEventFlow():
     assert retUserEvent['valid'] == 1
     assert retUserEvent['spotsPaidFor'] == 1
     assert len(retUserEvent['userEvent']['_id']) > 0
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
 
     # User 3
     now = now + datetime.timedelta(days = 1)
@@ -375,6 +424,12 @@ def test_WeeklyEventFlow():
     assert retUserEvent['spotsPaidFor'] == 1
     assert retUserEvent['userEvent']['creditsRedeemed'] == 0
     assert len(retUserEvent['userEvent']['_id']) > 0
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 1
+    for userId in retUserEvent['notifyUserIdsHosts']['sms']:
+        assert userId in [users[3]['_id']]
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 3 - 1
+    for userId in retUserEvent['notifyUserIdsAttendees']['sms']:
+        assert userId in [users[2]['_id'], users[4]['_id']]
     userEvents = mongo_db.find('userEvent', {'eventId': event3['_id']})['items']
     for userEvent in userEvents:
         if userEvent['userId'] in [users[3]['_id']]:
@@ -419,11 +474,22 @@ def test_WeeklyEventFlow():
     assert retUserEvent['valid'] == 1
     assert retUserEvent['spotsPaidFor'] == 2
     assert len(retUserEvent['userEvent']['_id']) > 0
+    assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
+    assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
 
     # RSVP Deadline
     # Friday, so passed deadline.
     now = date_time.from_string('2024-04-05 12:00:00-07:00')
-    _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
+    retWeekly = _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
+    assert len(retWeekly['notifyUserIdsSubscribers']['sms']) == 3
+    for userId in retWeekly['notifyUserIdsSubscribers']['sms']:
+        assert userId in [users[2]['_id'], users[4]['_id'], users[6]['_id']]
+    assert len(retWeekly['notifyUserIdsUnused']['sms']) == 4
+    for userId in retWeekly['notifyUserIdsUnused']['sms']:
+        assert userId in [users[4]['_id'], users[6]['_id'], users[7]['_id'], users[8]['_id']]
+    assert len(retWeekly['notifyUserIdsHosts']['sms']) == 0
+    assert len(retWeekly['notifyUserIdsAttendees']['sms']) == 0
+
     credits = _user_event.GetUserEventCredits(users[4]['_id'], weeklyEvent['_id'])
     userCreditsCurrent[4] += 1
     assert credits == userCreditsCurrent[4]
@@ -438,6 +504,7 @@ def test_WeeklyEventFlow():
     assert credits == userCreditsCurrent[8]
     userEvents = mongo_db.find('userEvent', {'eventId': event3['_id']})['items']
     # - RSVP deadline passes; not enough hosts so Users 6, 7, 8 (and 1 guest) and User 4 guest 2 may not join and each gets 1 event credit (User 8 gets 2 - for self and 1 guest) for the future.
+
     for userEvent in userEvents:
         if userEvent['userId'] in [users[6]['_id'], users[7]['_id']]:
             assert userEvent['attendeeCount'] == 0

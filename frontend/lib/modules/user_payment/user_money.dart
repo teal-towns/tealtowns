@@ -9,6 +9,9 @@ import '../../common/socket_service.dart';
 import '../user_auth/current_user_state.dart';
 import './user_money_class.dart';
 import './user_payment_class.dart';
+import './user_payout.dart';
+import './user_payments.dart';
+import './user_payment_subscriptions.dart';
 
 class UserMoney extends StatefulWidget {
   @override
@@ -67,6 +70,13 @@ class _UserMoneyState extends State<UserMoney> {
         children: [
           Text('${_currency.Format(_availableUSD, 'USD')} available'),
           // TODO - display (pending) payments
+          SizedBox(height: 10),
+          UserPayout(),
+          SizedBox(height: 10),
+          UserPaymentSubscriptions(),
+          SizedBox(height: 10),
+          UserPayments(),
+          SizedBox(height: 10),
         ]
       ),
     );

@@ -15,6 +15,7 @@ import './user_event_class.dart';
 import './user_weekly_event_class.dart';
 import './weekly_event_class.dart';
 import '../user_auth/current_user_state.dart';
+import '../user_auth/user_phone.dart';
 
 class UserWeeklyEventSave extends StatefulWidget {
   String weeklyEventId;
@@ -56,6 +57,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     _routeIds.add(_socketService.onRoute('GetUserWeeklyEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
+      print ('data ${data}');
       if (data['valid'] == 1) {
         _formVals = UserWeeklyEventClass.fromJson(data['userWeeklyEvent']).toJson();
         if (_formVals['_id'].length < 1) {
@@ -129,6 +131,18 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
         child: Text('Join Event'),
       );
     }
+
+    if (currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
+          SizedBox(height: 10),
+          UserPhone(),
+        ]
+      );
+    }
+
     if (!_inited && widget.weeklyEventId.length > 0) {
       _inited = true;
       var data = {
@@ -145,6 +159,10 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
         padding: EdgeInsets.symmetric(vertical: 10.0),
         child: LinearProgressIndicator(),
       );
+    }
+
+    if (_formVals['_id'].length > 1) {
+      return Text('You are already subscribed to this weekly event!');
     }
 
     Widget widgetForm = SizedBox.shrink();
