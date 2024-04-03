@@ -51,7 +51,7 @@ class _UserPayoutState extends State<UserPayout> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        if (data.containsKey['userStripeAccount'] && data['userStripeAccount']['status'] == 'complete') {
+        if (data.containsKey('userStripeAccount') && data['userStripeAccount']['status'] == 'complete') {
           _userStripeAccount = data['userStripeAccount'];
           setState(() { _userStripeAccount = _userStripeAccount; });
         } else {
