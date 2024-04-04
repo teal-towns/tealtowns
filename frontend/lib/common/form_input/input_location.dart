@@ -131,8 +131,8 @@ class _InputLocationState extends State<InputLocation> {
       child: FlutterLocationPicker(
         // initPosition: latLong,
         initZoom: 11,
-        minZoomLevel: 5,
-        maxZoomLevel: 16,
+        minZoomLevel: 1,
+        maxZoomLevel: 20,
         trackMyPosition: true,
         selectLocationButtonText: 'Select Location',
         onPicked: (pickedData) {
