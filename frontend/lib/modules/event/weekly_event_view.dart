@@ -123,6 +123,17 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       };
       _socketService.emit('getWeeklyEventById', data);
     }
+
+    if (_loading) {
+      return AppScaffoldComponent(
+        listWrapper: true,
+        body: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.0),
+          child: LinearProgressIndicator(),
+        )
+      );
+    }
+
     List<Widget> buttons = [];
     if (currentUserState.isLoggedIn && _weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
       buttons = [
@@ -168,14 +179,16 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     bool alreadySignedUp = false;
 
     Map<String, dynamic> config = _configService.GetConfig();
-    List<Widget> attendeeInfo = [
-      Text('This is a free event, no RSVP required!'),
-      SizedBox(height: 10),
-      // Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-      // SizedBox(height: 10),
-    ];
-    if (_weeklyEvent.priceUSD > 0) {
-      List<Widget> attendeeInfo = [
+    List<Widget> attendeeInfo = [];
+    if (_weeklyEvent.priceUSD == 0) {
+      attendeeInfo = [
+        Text('This is a free event, no RSVP required!'),
+        SizedBox(height: 10),
+        // Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+        // SizedBox(height: 10),
+      ];
+    } else {
+      attendeeInfo = [
         Text('${_attendeesCount} attending, ${_nonHostAttendeesWaitingCount} waiting'),
         SizedBox(height: 10),
       ];
