@@ -13,6 +13,7 @@ import '../../common/layout_service.dart';
 import '../../common/link_service.dart';
 import '../../common/location_service.dart';
 import '../../common/socket_service.dart';
+import '../about/welcome_about.dart';
 import './weekly_event_class.dart';
 import '../user_auth/current_user_state.dart';
 
@@ -85,9 +86,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       } else {
         _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
-      setState(() {
-        _loading = false;
-      });
+      setState(() { _loading = false; _message = _message; });
     }));
 
     _routeIds.add(_socketService.onRoute('removeWeeklyEvent', callback: (String resString) {
@@ -175,6 +174,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          WelcomeAbout(),
+          SizedBox(height: 10),
           ...columnsCreate,
           Align(
             alignment: Alignment.center,
@@ -206,12 +207,15 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         _search();
       }
       List<double> lngLat = await _locationService.GetLocation(context);
-      if (_locationService.IsDifferent(lngLat, _filters['lngLat'])) {
-        setState(() {
-          _filters['lngLat'] = lngLat;
-        });
-        if (widget.showFilters <= 0) {
-          _search();
+      // Since async, could have changed pages and will thus get an error.
+      if(mounted) {
+        if (_locationService.IsDifferent(lngLat, _filters['lngLat'])) {
+          setState(() {
+            _filters['lngLat'] = lngLat;
+          });
+          if (widget.showFilters <= 0) {
+            _search();
+          }
         }
       }
     }

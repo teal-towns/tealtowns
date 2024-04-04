@@ -71,8 +71,11 @@ def StripeAccountLink(userId: str):
     stripe.api_key = _config['stripe']['secret']
     # First see if user already has one.
     userStripeAccount = mongo_db.find_one('userStripeAccount', { 'userId': userId })['item']
+    createNew = 1
     if userStripeAccount is not None:
         ret['userStripeAccount'] = userStripeAccount
+        accountId = userStripeAccount['stripeConnectedAccountId']
+        createNew = 0
         # Check if complete.
         if userStripeAccount['status'] != 'complete':
             try:
@@ -81,31 +84,32 @@ def StripeAccountLink(userId: str):
                     userStripeAccount['status'] = 'complete'
                     _mongo_db_crud.Save('userStripeAccount', userStripeAccount)
                     ret['userStripeAccount'] = userStripeAccount
+                    return ret
             except Exception as e:
                 print ('error', e)
                 pass
-        ret['url'] = userStripeAccount['stripeUrl']
-        return ret
 
-    res = stripe.Account.create(type="express")
-    accountId = res['id']
+    if createNew:
+        res = stripe.Account.create(type="express")
+        accountId = res['id']
     refreshUrl = _config['web_server']['urls']['base'] + '/user-money'
     returnUrl = _config['web_server']['urls']['base'] + '/user-money'
     # No metadata field.. Need to use returnUrl and set this on frontend..
     # metadata = {
     #     'userId': userId,
     # }
+    # Always need to re-get url as they expire within minutes.
     res = stripe.AccountLink.create(account = accountId, refresh_url = refreshUrl,
         return_url = returnUrl, type="account_onboarding")
 
-    # Save in database as pending.
-    userStripeAccount = {
-        'userId': userId,
-        'stripeConnectedAccountId': accountId,
-        'stripeUrl': res['url'],
-        'status': 'pending',
-    }
-    _mongo_db_crud.Save('userStripeAccount', userStripeAccount)
+    if createNew:
+        # Save in database as pending.
+        userStripeAccount = {
+            'userId': userId,
+            'stripeConnectedAccountId': accountId,
+            'status': 'pending',
+        }
+        _mongo_db_crud.Save('userStripeAccount', userStripeAccount)
 
     ret['url'] = res['url']
     return ret

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 List<double> magentaTransparent = [200, 100, 240, 0.4];
 List<double> magenta = magentaTransparent.sublist(0, magentaTransparent.length - 1);
 List<double> red = [200, 100, 0];
+List<double> greyLight = [200, 200, 200];
 List<double> grey = [125, 125, 125];
 List<double> greyTransparent = [125, 125, 125, 0.4];
 List<double> greyDark = [50, 50, 50];
@@ -37,6 +38,7 @@ class ColorsService {
   }
 
   Map<String, Color> _colors = {
+    'greyLight': valsToColor(greyLight),
     'grey': valsToColor(grey),
     'greyTransparent': valsToColor(greyTransparent),
     'greyDark': valsToColor(greyDark),
@@ -47,6 +49,7 @@ class ColorsService {
   };
 
   Map<String, String> _colorsStr = {
+    'greyLight': valsToString(greyLight),
     'grey': valsToString(grey),
     'greyTransparent': valsToString(greyTransparent),
     'greyDark': valsToString(greyDark),

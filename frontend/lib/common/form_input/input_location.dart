@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:location_picker_flutter_map/location_picker_flutter_map.dart';
 
 import './input_fields.dart';
 import '../location_service.dart';
-import '../mapbox/mapbox.dart';
 import '../parse_service.dart';
 
 class InputLocation extends StatefulWidget {
@@ -30,7 +30,7 @@ class _InputLocationState extends State<InputLocation> {
   LocationService _locationService = LocationService();
   ParseService _parseService = ParseService();
 
-  final OverlayPortalController _tooltipController = OverlayPortalController();
+  final OverlayPortalController _overlayController = OverlayPortalController();
 
   final _link = LayerLink();
   Map<String, String> _formVals = {
@@ -59,7 +59,7 @@ class _InputLocationState extends State<InputLocation> {
     return CompositedTransformTarget(
       link: _link,
       child: OverlayPortal(
-        controller: _tooltipController,
+        controller: _overlayController,
         overlayChildBuilder: (BuildContext context) {
           return CompositedTransformFollower(
             link: _link,
@@ -110,7 +110,7 @@ class _InputLocationState extends State<InputLocation> {
 
   void onTap() {
     _dropdownWidth = context.size?.width;
-    _tooltipController.toggle();
+    _overlayController.toggle();
   }
 
   Widget DropdownWidget({double? width = 300, double height = 300}) {
@@ -123,20 +123,33 @@ class _InputLocationState extends State<InputLocation> {
       lng = widget.formVals[widget.formValsKey][0];
       lat = widget.formVals[widget.formValsKey][1];
     }
+    // LatLong latLong = LatLong(lat, lng);
     return Container(
       width: width,
       height: height,
       color: Colors.white,
-      child: Mapbox(mapWidth: width!, mapHeight: height, onChange: _onChangeMap,
-        longitude: lng, latitude: lat, zoom: 15,
-      ),
+      child: FlutterLocationPicker(
+        // initPosition: latLong,
+        initZoom: 11,
+        minZoomLevel: 5,
+        maxZoomLevel: 16,
+        trackMyPosition: true,
+        selectLocationButtonText: 'Select Location',
+        onPicked: (pickedData) {
+          List<double> lngLat = UpdateLngLat(pickedData.latLong.longitude, pickedData.latLong.latitude);
+          setState(() {
+            _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
+          });
+          _overlayController.toggle();
+        }
+      )
     );
   }
 
-  void _onChangeMap(var data) {
-    List<double> lngLat = UpdateLngLat(data['longitude'], data['latitude']);
-    setState(() {
-      _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
-    });
-  }
+  // void _onChangeMap(var data) {
+  //   List<double> lngLat = UpdateLngLat(data['longitude'], data['latitude']);
+  //   setState(() {
+  //     _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
+  //   });
+  // }
 }

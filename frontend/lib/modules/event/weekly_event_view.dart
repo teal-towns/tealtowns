@@ -167,6 +167,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
     bool alreadySignedUp = false;
 
+    Map<String, dynamic> config = _configService.GetConfig();
     List<Widget> attendeeInfo = [
       Text('${_attendeesCount} attending, ${_nonHostAttendeesWaitingCount} waiting'),
       SizedBox(height: 10),
@@ -182,6 +183,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           int diff = _userEvent.hostGroupSizeMax - _userEvent.hostGroupSize;
           attendeeInfo += [
             Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
+            SizedBox(height: 10),
+            Text('Share this event with your neighbors to fill your spots: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
             SizedBox(height: 10),
           ];
         }
@@ -201,10 +204,13 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           attendeeInfo += [
             Text(text1),
             SizedBox(height: 10),
+            Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
           ];
         } else {
           attendeeInfo += [
             Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
+            SizedBox(height: 10),
+            Text('Share this event with your neighbors to get another host so you can join: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
             SizedBox(height: 10),
           ];
         }
@@ -233,7 +239,6 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
-    Map<String, dynamic> config = _configService.GetConfig();
     double width = 1200;
     return AppScaffoldComponent(
       listWrapper: true,

@@ -65,6 +65,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _formFields['location']!['helpText'] = 'Where will people meet to eat?';
       _formFields['description']!['helpText'] = 'Any special instructions for where people should meet?';
       _formFields['dayOfWeek']!['helpText'] = 'We suggest Sundays at 5pm, but if you would like to do a different day or time, set it here.';
+      _formFields['priceUSD']!['helpText'] = 'This single event price will be discounted for subscriptions and hosts will earn their next event free, so with a host group size of 10, a \$10 event will be about \$7 for a yearly subscription and about \$5 event budget.';
       _formStepKeys = ['location', 'description', 'dayOfWeek', 'startTime'];
     }
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
