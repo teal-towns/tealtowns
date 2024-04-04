@@ -33,7 +33,7 @@ class _AboutState extends State<About> {
       "## Initiatives \n\n" +
       "We have 4 initiatives: 1. **Connect** (grow 100+ people local TealTowns teams doing local green projects), 2. **Own** (build a TealTowns local ownership (including housing) network to provide \$10,000 or less down payment housing and other co-purchases). 3. **Plan** (build an AI Urban Planner web / mobile product), 4. **Visualize** (build a 3D immersive experience of the plans).\n\n" +
       "## Focus \n\n" +
-      "Our first focus is start the first 100 Shared Ownership Superblocks (10 to 150 neighbors each, connecting weekly for shared meals). Through that we will also trial and select our first 4 to 8 paid team members and generate revenue to pay them.\n\n" +
+      "Our first focus is start the first 100 Shared Ownership Superblocks (100 to 150 neighbors each, connecting weekly for shared meals). Through that we will also trial and select our first 4 to 8 paid team members and generate revenue to pay them.\n\n" +
       "## More Info \n\n" +
       "See our blog for more details!\n\n" +
       "Contact us: luke.madera@gmail.com\n\n" + 

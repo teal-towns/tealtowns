@@ -197,7 +197,6 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
         "stripeConnectedAccountId": "{String}",
-        "status": "{String} pending|complete",
-        "stripeUrl": "{String}"
+        "status": "{String} pending|complete"
     }
 }
