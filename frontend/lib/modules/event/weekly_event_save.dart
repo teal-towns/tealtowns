@@ -34,7 +34,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     'startTime': { 'type': 'time' },
     'endTime': { 'type': 'time' },
     'hostGroupSizeDefault': { 'type': 'number', 'min': 0, 'required': true },
-    'priceUSD': { 'type': 'number', 'min': 5, 'required': true },
+    'priceUSD': { 'type': 'number', 'min': 0, 'required': true },
     'rsvpDeadlineHours': { 'type': 'number', 'min': 0, 'required': true },
   };
   Map<String, dynamic> _formValsDefault = {
@@ -59,6 +59,8 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _formValsDefault['dayOfWeek'] = 6;
       _formValsDefault['startTime'] = '17:00';
       _formValsDefault['endTime'] = '18:30';
+
+      _formFields['priceUSD']!['min'] = 5;
 
       _formMode = 'step';
 

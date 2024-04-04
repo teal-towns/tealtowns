@@ -169,74 +169,82 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
     Map<String, dynamic> config = _configService.GetConfig();
     List<Widget> attendeeInfo = [
-      Text('${_attendeesCount} attending, ${_nonHostAttendeesWaitingCount} waiting'),
+      Text('This is a free event, no RSVP required!'),
       SizedBox(height: 10),
+      // Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+      // SizedBox(height: 10),
     ];
-    if (_userEvent.id.length > 0) {
-      if (_userEvent.hostGroupSizeMax > 0) {
-        if (_userEvent.hostGroupSize == _userEvent.hostGroupSizeMax) {
-          attendeeInfo += [
-            Text('You are hosting ${_userEvent.hostGroupSize} people.'),
-            SizedBox(height: 10),
-          ];
-        } else {
-          int diff = _userEvent.hostGroupSizeMax - _userEvent.hostGroupSize;
-          attendeeInfo += [
-            Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
-            SizedBox(height: 10),
-            Text('Share this event with your neighbors to fill your spots: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-            SizedBox(height: 10),
-          ];
-        }
-      }
-      if (_userEvent.attendeeCountAsk > 0) {
-        alreadySignedUp = true;
-        if (_userEvent.attendeeCount > 0) {
-          int guestsGoing = _userEvent.attendeeCount - 1;
-          int guestsWaiting = _userEvent.attendeeCountAsk - _userEvent.attendeeCount - 1;
-          String text1 = 'You are going';
-          if (guestsGoing > 0) {
-            text1 += ', with ${guestsGoing} guests';
+    if (_weeklyEvent.priceUSD > 0) {
+      List<Widget> attendeeInfo = [
+        Text('${_attendeesCount} attending, ${_nonHostAttendeesWaitingCount} waiting'),
+        SizedBox(height: 10),
+      ];
+      if (_userEvent.id.length > 0) {
+        if (_userEvent.hostGroupSizeMax > 0) {
+          if (_userEvent.hostGroupSize == _userEvent.hostGroupSizeMax) {
+            attendeeInfo += [
+              Text('You are hosting ${_userEvent.hostGroupSize} people.'),
+              SizedBox(height: 10),
+            ];
+          } else {
+            int diff = _userEvent.hostGroupSizeMax - _userEvent.hostGroupSize;
+            attendeeInfo += [
+              Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
+              SizedBox(height: 10),
+              Text('Share this event with your neighbors to fill your spots: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+              SizedBox(height: 10),
+            ];
           }
-          if (guestsWaiting > 0) {
-            text1 += ', waiting on ${guestsWaiting} more spots';
+        }
+        if (_userEvent.attendeeCountAsk > 0) {
+          alreadySignedUp = true;
+          if (_userEvent.attendeeCount > 0) {
+            int guestsGoing = _userEvent.attendeeCount - 1;
+            int guestsWaiting = _userEvent.attendeeCountAsk - _userEvent.attendeeCount - 1;
+            String text1 = 'You are going';
+            if (guestsGoing > 0) {
+              text1 += ', with ${guestsGoing} guests';
+            }
+            if (guestsWaiting > 0) {
+              text1 += ', waiting on ${guestsWaiting} more spots';
+            }
+            attendeeInfo += [
+              Text(text1),
+              SizedBox(height: 10),
+              Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+            ];
+          } else {
+            attendeeInfo += [
+              Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
+              SizedBox(height: 10),
+              Text('Share this event with your neighbors to get another host so you can join: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+              SizedBox(height: 10),
+            ];
+          }
+        }
+        if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
+          String text1 = '';
+          if (_userEvent.creditsEarned > 0) {
+            text1 += '${_userEvent.creditsEarned} credits earned. ';
+          }
+          if (_userEvent.creditsRedeemed > 0) {
+            text1 += '${_userEvent.creditsRedeemed} credits redeemed. ';
           }
           attendeeInfo += [
             Text(text1),
             SizedBox(height: 10),
-            Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-          ];
-        } else {
-          attendeeInfo += [
-            Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
-            SizedBox(height: 10),
-            Text('Share this event with your neighbors to get another host so you can join: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-            SizedBox(height: 10),
           ];
         }
       }
-      if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
-        String text1 = '';
-        if (_userEvent.creditsEarned > 0) {
-          text1 += '${_userEvent.creditsEarned} credits earned. ';
-        }
-        if (_userEvent.creditsRedeemed > 0) {
-          text1 += '${_userEvent.creditsRedeemed} credits redeemed. ';
-        }
+      if (!alreadySignedUp) {
+        String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${_nextEvent.start}' : '';
         attendeeInfo += [
-          Text(text1),
+          Text(rsvpSignUpText),
+          SizedBox(height: 10),
+          UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
           SizedBox(height: 10),
         ];
       }
-    }
-    if (!alreadySignedUp) {
-      String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${_nextEvent.start}' : '';
-      attendeeInfo += [
-        Text(rsvpSignUpText),
-        SizedBox(height: 10),
-        UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
-        SizedBox(height: 10),
-      ];
     }
 
     double width = 1200;
