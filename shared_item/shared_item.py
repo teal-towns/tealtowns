@@ -3,6 +3,7 @@
 import date_time
 from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
+import mongo_db
 from shared_item import shared_item_owner as _shared_item_owner
 from shared_item import shared_item_payment as _shared_item_payment
 from shared_item import shared_item_payment_math as _shared_item_payment_math
@@ -110,16 +111,21 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
     return ret
 
 def Save(sharedItem: dict, now = None):
-    # sharedItem = SharedItemClass(**sharedItem).dict()
     ret = { 'valid': 1, 'message': '', 'sharedItem': {}, 'sharedItemOwner': {} }
-    if 'pledgedOwners' not in sharedItem:
-        sharedItem['pledgedOwners'] = 0
-    if 'fundingRequired' not in sharedItem:
+    if 'fundingRequired' not in sharedItem and 'currentPrice' in sharedItem:
         sharedItem['fundingRequired'] = sharedItem['currentPrice']
-    if 'currency' not in sharedItem:
-        sharedItem['currency'] = 'USD'
-    if 'status' not in sharedItem:
-        sharedItem['status'] = 'available'
+    insertDefaults = {
+        'pledgedOwners': 0,
+        'currency': 'USD',
+        'status': 'available',
+        'currentGenerationStart': date_time.now_string(),
+    }
+    # sharedItem = SharedItemClass(**sharedItem).dict()
+    retCheck = mongo_db.Validate('sharedItem', sharedItem, insertDefaults = insertDefaults)
+    if not retCheck['valid']:
+        return retCheck
+    sharedItem = retCheck['item']
+
     sharedItem['bought'] = int(sharedItem['bought'])
     ret = _mongo_db_crud.Save('sharedItem', sharedItem)
     # Add current user as owner if new item.
@@ -142,11 +148,13 @@ def Save(sharedItem: dict, now = None):
             'totalOwed': totalOwed,
             'generation': int(ret['sharedItem']['generation']) + 1,
             'investorOnly': 0,
+            'status': '',
         }
         skipPayment = 1 if sharedItem['bought'] else 0
+        sharedItemOwner['status'] = 'paid' if sharedItem['bought'] else 'pendingMonthlyPayment'
         retOwner = _shared_item_owner.Save(sharedItemOwner, skipPayment = skipPayment)
         ret['sharedItemOwner'] = retOwner['sharedItemOwner']
-    
+
     retUpdate = UpdateCachedOwners(ret['sharedItem']['_id'], now = now)
     ret['sharedItem'] = retUpdate['sharedItem']
 
@@ -172,7 +180,8 @@ def UpdateCachedOwners(sharedItemId: str, now = None):
         if sharedItemNew['fundingRequired'] < 0:
             sharedItemNew['fundingRequired'] = 0
         retSave = _mongo_db_crud.Save('sharedItem', sharedItemNew)
-        ret['sharedItem'] = retSave['sharedItem']
+        ret['sharedItem']['pledgedOwners'] = retSave['sharedItem']['pledgedOwners']
+        ret['sharedItem']['fundingRequired'] = retSave['sharedItem']['fundingRequired']
 
         # Check if can purchase.
         sharedItem['pledgedOwners'] = sharedItemNew['pledgedOwners']

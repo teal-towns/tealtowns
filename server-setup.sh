@@ -21,7 +21,7 @@ apt-get -y install libssl-dev && \
     pip3 install -r ./requirements.txt && \
     snap install flutter --classic && \
     flutter channel stable && flutter upgrade && flutter config --enable-web && \
-    cd frontend && flutter build web && cd ../ && \
+    cd frontend && flutter build web --web-renderer canvaskit && cd ../ && \
     cp systemd_web_server_tealtowns.service /etc/systemd/system/systemd_web_server_tealtowns.service && \
     systemctl daemon-reload && \
     systemctl enable systemd_web_server_tealtowns.service && \

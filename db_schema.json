@@ -8,22 +8,22 @@
         "firstName": "{String}",
         "lastName": "{String}",
         "sessionIds": [
-            "{String} [string of one of current session ids] 3l4klaskj3"
+            "{String} @optional [string of one of current session ids] 3l4klaskj3"
         ],
-        "passwordResetKey":"{String} [string of random string to allow resetting password] lk3jlkja",
-        "status": "{String} ['guest' until email verified, 'member'] member",
+        "passwordResetKey":"{String} @optional [string of random string to allow resetting password] lk3jlkja",
+        "status": "{String} @optional ['guest' until email verified, 'member'] member",
         "roles": [
             "{String} [one of '', 'admin']"
         ],
-        "emailVerificationKey": "{String}",
-        "emailVerified": "{Int} 1 or 0",
-        "username": "{String}",
+        "emailVerificationKey": "{String} @optional",
+        "emailVerified": "{Int} @optional 1 or 0",
+        "username": "{String} @optional",
         "location": {
             "type": "Point [https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb]",
             "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         },
-        "phoneNumber": "{String}",
-        "phoneNumberVerificationKey": "{String}",
+        "phoneNumber": "{String} @optional",
+        "phoneNumberVerificationKey": "{String} @optional",
         "phoneNumberVerified": "{Int} 1 or 0"
     },
     "image": {
@@ -55,7 +55,7 @@
         "uName": "{String}",
         "type": "{String} ''|sharedMeal",
         "title": "{String}",
-        "description": "{String}",
+        "description": "{String} @optional",
         "dayOfWeek": "{Int} [0-6, 0 = mon, 1 = tue, 2 = wed, 3 = thu, 4 = fri, 5 = sat, 6 = sun]",
         "startTime": "{String} [HH:mm]",
         "endTime": "{String} [HH:mm]",
@@ -106,7 +106,7 @@
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "title": "{String}",
-        "description": "{String}",
+        "description": "{String} @optional",
         "imageUrls": [ "{String}" ],
         "currentOwnerUserId": "{String}",
         "currentPurchaserUserId": "{String}",
@@ -118,15 +118,15 @@
             "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         },
         "bought": "{Int} 1|0 [1 if already owned, and thus no funding required]",
-        "originalPrice": "{Float}",
-        "currentPrice": "{Float}",
+        "originalPrice": "{Float} @min 1",
+        "currentPrice": "{Float} @min 1",
         "currency": "{String}",
         "generation": "{Int} [0 before first ownership / purchase, 1+ after]",
         "currentGenerationStart": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "monthsToPayBack": "{Int}",
         "maintenancePerYear": "{Float}",
         "maintenanceAvailable": "{Float} [unspent maintenance savings that can be used]",
-        "minOwners": "{Int}",
+        "minOwners": "{Int} @min 2",
         "maxOwners": "{Int}",
         "maxMeters": "{Float} [how far away other owners can be]",
         "status": "{String} available|purchasing|owned [Only available items show up to add new owners to a future generation (be co-purchased and co-owned)]",
@@ -146,7 +146,7 @@
         "totalPaidBack": "{Float} [amount this user has been paid back; this will be incremented until it equals -1 * totalOwed]",
         "investorOnly": "{Int} [1 if this owner pays only (is NOT a shared owner), 0 otherwise]",
         "status": "{String} pendingMonthlyPayment|paying|paid",
-        "stripeMonthlyPriceId": "{String} [used for stopping recurring monthly payment when done]"
+        "stripeMonthlyPriceId": "{String} @optional [used for stopping recurring monthly payment when done]"
     },
     "TODOsharedItemMaintenance": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -176,7 +176,7 @@
         "forType": "{String} [user|sharedItemOwner|event|withdrawToBank]",
         "forId": "{String} [userId|sharedItemOwnerId|eventId|stripeTransferId]",
         "status": "{String} pending|complete",
-        "notes": "{String}"
+        "notes": "{String} @optional"
     },
     "userPaymentSubscription": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

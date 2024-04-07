@@ -82,14 +82,15 @@ class _InputLocationState extends State<InputLocation> {
   }
 
   void _init() async {
-    if (widget.guessLocation) {
-      List<double> lngLat = await _locationService.GetLocation(context, useUser: widget.useUserLocation);
-      _formVals[_formValsKey] = '${lngLat[0]}, ${lngLat[1]}';
-      setState(() {
-        _formVals = _formVals;
-      });
-      UpdateLngLat(lngLat[0], lngLat[1]);
-    }
+    // Handled with trackMyPosition now.
+    // if (widget.guessLocation) {
+    //   List<double> lngLat = await _locationService.GetLocation(context, useUser: widget.useUserLocation);
+    //   _formVals[_formValsKey] = '${lngLat[0]}, ${lngLat[1]}';
+    //   setState(() {
+    //     _formVals = _formVals;
+    //   });
+    //   UpdateLngLat(lngLat[0], lngLat[1]);
+    // }
   }
 
   List<double> UpdateLngLat(double lng, double lat) {
@@ -123,17 +124,18 @@ class _InputLocationState extends State<InputLocation> {
       lng = widget.formVals[widget.formValsKey][0];
       lat = widget.formVals[widget.formValsKey][1];
     }
-    // LatLong latLong = LatLong(lat, lng);
+    LatLong latLong = LatLong(lat, lng);
+    bool trackMyPosition = _locationService.LocationValid([lng, lat]) ? false : true;
     return Container(
       width: width,
       height: height,
       color: Colors.white,
       child: FlutterLocationPicker(
-        // initPosition: latLong,
+        initPosition: latLong,
         initZoom: 11,
         minZoomLevel: 1,
         maxZoomLevel: 20,
-        trackMyPosition: true,
+        trackMyPosition: trackMyPosition,
         selectLocationButtonText: 'Select Location',
         onPicked: (pickedData) {
           List<double> lngLat = UpdateLngLat(pickedData.latLong.longitude, pickedData.latLong.latitude);

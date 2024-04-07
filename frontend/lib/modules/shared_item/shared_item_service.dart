@@ -15,7 +15,7 @@ class SharedItemService {
   double _maintenancePerYearFactor = 0.02;
   double _maintenancePerPersonPerYearMin = 5;
   double _investmentReturnPerYearFactor = 0.1;
-  double _payFeeFactor = 0.03;
+  double _payFeeFactor = 0.029 + 0.008;
   double _cutFactor = 0.01;
   double _lowFeeAmount = 300;
   double _downPerPersonMinFactor = 0.05;

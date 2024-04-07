@@ -169,7 +169,9 @@ class AppGoRouter {
       ),
       GoRoute(
         path: Routes.sharedItemSave,
-        builder: (BuildContext context, GoRouterState state) => SharedItemSave(),
+        builder: (BuildContext context, GoRouterState state) => SharedItemSave(
+          id: state.uri.queryParameters['id'] ?? '',
+        ),
       ),
 
       GoRoute(

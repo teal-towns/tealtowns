@@ -48,9 +48,7 @@ def GetById(collection: str, id1: str, db1 = None, fields = None, uName: str = '
     return ret
 
 def CleanId(obj: dict):
-    if '_id' in obj and (not obj['_id'] or len(obj['_id']) == 0):
-        del obj['_id']
-    return obj
+    return mongo_db.CleanId(obj)
 
 def Save(collection: str, obj, db1 = None):
     ret = {"valid": 1, "message": "", "insert": 0}
@@ -63,12 +61,19 @@ def Save(collection: str, obj, db1 = None):
     if "_id" not in obj:
         ret["insert"] = 1
         result = mongo_db.insert_one(collection, obj, db1 = db1)
-        ret[collection]["_id"] = mongo_db.from_object_id(result["item"]["_id"])
+        if result["valid"] == 1:
+            ret[collection]["_id"] = mongo_db.from_object_id(result["item"]["_id"])
+        else:
+            ret["valid"] = 0
+            ret["message"] = result["message"]
     else:
         ret["insert"] = 0
         query = {"_id": mongo_db.to_object_id(obj["_id"])}
         mutation = {"$set": lodash.omit(obj, ["_id", "created_at", "updated_at"])}
         result = mongo_db.update_one(collection, query, mutation, db1 = db1)
+        if result["valid"] < 1:
+            ret["valid"] = 0
+            ret["message"] = result["message"]
     return ret
 
 def RemoveById(collection: str, id1: str, db1 = None):

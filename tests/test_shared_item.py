@@ -6,13 +6,8 @@ def test_Save():
     _mongo_mock.InitAllCollections()
 
     # Should make user an owner.
-    sharedItem = {
-        'status': 'available',
-        'generation': 0,
-        'currentGenerationStart': '',
-        'currentOwnerUserId': 'userId1'
-    }
     sharedItem = _stubs_data.CreateBulk(count = 1, collectionName = 'sharedItem', saveInDatabase = 0)[0]
+    del sharedItem['currentGenerationStart']
 
     ret = _shared_item.Save(sharedItem)
     assert ret['sharedItemOwner']['sharedItemId'] == ret['sharedItem']['_id']
@@ -20,5 +15,23 @@ def test_Save():
     assert ret['sharedItemOwner']['userId'] == sharedItem['currentOwnerUserId']
 
     assert ret['sharedItem']['pledgedOwners'] == 1
+
+    _mongo_mock.CleanUp()
+
+def test_Save_invalid():
+    _mongo_mock.InitAllCollections()
+
+    sharedItem = _stubs_data.CreateBulk(count = 1, collectionName = 'sharedItem', saveInDatabase = 0)[0]
+    sharedItem['currentPrice'] = None
+    ret = _shared_item.Save(sharedItem)
+    assert ret['valid'] == 0
+    sharedItem['currentPrice'] = 0
+    ret = _shared_item.Save(sharedItem)
+    assert ret['valid'] == 0
+
+    sharedItem['currentPrice'] = 100
+    del sharedItem['title']
+    ret = _shared_item.Save(sharedItem)
+    assert ret['valid'] == 0
 
     _mongo_mock.CleanUp()

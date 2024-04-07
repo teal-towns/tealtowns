@@ -40,6 +40,10 @@ def addRoutes():
         return _mongo_db_crud.RemoveById('sharedItem', data['id'])
     _socket.add_route('removeSharedItem', Remove)
 
+    def GetById(data, auth, websocket):
+        return _mongo_db_crud.GetById('sharedItem', data['id'])
+    _socket.add_route('getSharedItemById', GetById)
+
     def GetSharedItemDownPaymentLink(data, auth, websocket):
         if data['checkAndUseBalance']:
             retMoney = _user_payment.GetUserMoneyAndPending(data['userId'])
@@ -52,8 +56,7 @@ def addRoutes():
 
     def GetSharedItemMonthlyPaymentLink(data, auth, websocket):
         # Can not use balance for recurring payments.
-        return _shared_item_payment.StripePaymentLinkMonthly(data['amountUSD'], data['sharedItemTitle'],
-            data['sharedItemId'], data['userId'])   
+        return _shared_item_payment.StripePaymentLinkMonthly(data['sharedItemOwnerId'])
     _socket.add_route('GetSharedItemMonthlyPaymentLink', GetSharedItemMonthlyPaymentLink)
 
 addRoutes()

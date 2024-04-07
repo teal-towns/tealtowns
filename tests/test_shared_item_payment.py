@@ -54,6 +54,7 @@ def test_StartPurchase_byOwners():
 
     sharedItem = _stubs_data.CreateBulk([ sharedItemBase ], collectionName = 'sharedItem', saveInDatabase = 0)[0]
     ret = _shared_item.Save(sharedItem)
+    sharedItem = ret['sharedItem']
 
     paymentInfo = _shared_item_payment_math.GetPayments(sharedItem['currentPrice'], sharedItem['monthsToPayBack'],
         sharedItem['minOwners'], sharedItem['maintenancePerYear'])
@@ -188,6 +189,7 @@ def test_StartPurchase_byFunding():
 
     sharedItem = _stubs_data.CreateBulk([ sharedItemBase ], collectionName = 'sharedItem', saveInDatabase = 0)[0]
     ret = _shared_item.Save(sharedItem)
+    sharedItem = ret['sharedItem']
 
     paymentInfo = _shared_item_payment_math.GetPayments(sharedItem['currentPrice'], sharedItem['monthsToPayBack'],
         sharedItem['minOwners'], sharedItem['maintenancePerYear'])

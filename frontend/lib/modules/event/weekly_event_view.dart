@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../app_scaffold.dart';
 import '../../common/config_service.dart';
 import '../../common/link_service.dart';
-import '../../common/mapbox/mapbox.dart';
+import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import './event_class.dart';
 import './user_event_class.dart';
@@ -267,7 +267,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Mapbox(mapWidth: width!, mapHeight: 300,
+          MapIt(mapWidth: width!, mapHeight: 300,
             longitude: _weeklyEvent.location.coordinates[0], latitude: _weeklyEvent.location.coordinates[1],
             zoom: 17, markerLngLat: [_weeklyEvent.location.coordinates[0], _weeklyEvent.location.coordinates[1]],
           ),

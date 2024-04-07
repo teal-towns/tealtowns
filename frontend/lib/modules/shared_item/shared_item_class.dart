@@ -11,7 +11,7 @@ class SharedItemClass {
   List<String> tags = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
   double originalPrice = 1000, currentPrice = 1000, maintenancePerYear = 50, maintenanceAvailable = 0, maxMeters = 1500, fundingRequired = 0;
-  int bought = 0, generation = 0, yearsPerGeneration = 2, monthsToPayBack = 0, minOwners = 1, maxOwners = 10, pledgedOwners = 0;
+  int bought = 0, generation = 0, yearsPerGeneration = 2, monthsToPayBack = 0, minOwners = 2, maxOwners = 10, pledgedOwners = 0;
   // Map<String, dynamic> xOwner = {};
   double xDistanceKm = -999;
   SharedItemOwnerClass sharedItemOwner_current = SharedItemOwnerClass.fromJson({});
@@ -62,7 +62,7 @@ class SharedItemClass {
       'currentOwnerUserId': currentOwnerUserId,
       'currentPurchaserUserId': currentPurchaserUserId,
       'tags': tags,
-      'location': location,
+      'location': { 'type': 'Point', 'coordinates': location.coordinates },
       'bought': bought,
       'originalPrice': originalPrice,
       'currentPrice': currentPrice,

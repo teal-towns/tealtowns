@@ -8,6 +8,7 @@ import '../layout_service.dart';
 import '../link_service.dart';
 import '../parse_service.dart';
 import '../socket_service.dart';
+import './image_save.dart';
 import './input_fields.dart';
 import './input_location.dart';
 import '../../modules/user_auth/current_user_state.dart';
@@ -25,10 +26,11 @@ class FormSave extends StatefulWidget {
   double fieldWidth;
   String mode;
   List<String> stepKeys;
+  String loggedOutRedirect;
 
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
     this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.id = '', this.formFields = null,
-    this.mode = '', this.stepKeys = const [] });
+    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', });
 
   @override
   _FormSaveState createState() => _FormSaveState();
@@ -56,7 +58,7 @@ class _FormSaveState extends State<FormSave> {
 
     if (!Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
       Timer(Duration(milliseconds: 500), () {
-        context.go('/login');
+        context.go(widget.loggedOutRedirect);
       });
     }
 
@@ -286,6 +288,11 @@ class _FormSaveState extends State<FormSave> {
       double? max = value.containsKey('max') ? value['max'] : null;
       input = _inputFields.inputNumber(_formVals, key, label: label, required: required, min: min, max: max,
         helpText: helpText,);
+    } else if (value['type'] == 'image') {
+      bool multiple = value.containsKey('multiple') ? value['multiple'] : false;
+      int maxImageSize = value.containsKey('maxImageSize') ? value['maxImageSize'] : 1200;
+      input = ImageSaveComponent(formVals: _formVals, formValsKey: key, multiple: multiple,
+        label: label, imageUploadSimple: true, maxImageSize: maxImageSize,);
     } else {
       int minLines = value.containsKey('minLines') ? value['minLines'] : 1;
       input = _inputFields.inputText(_formVals, key, label: label, required: required, minLines: minLines,
