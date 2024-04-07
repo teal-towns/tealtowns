@@ -274,6 +274,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
       return Column(
         children: [
           Text('Set up your monthly payment to start using your shared item!'),
+          SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
               _message = '';
@@ -379,6 +380,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
       //     SizedBox(height: 10),
       //   ];
       // } else {
+        String buttonText = _sharedItemOwner.id.length > 0 ? 'Update Your Spot' : 'Reserve Your Spot';
         colsPay += [
           ElevatedButton(
             onPressed: () {
@@ -393,7 +395,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
               }
               setState(() { _message = _message; });
             },
-            child: Text('Reserve Your Spot'),
+            child: Text(buttonText),
           ),
           SizedBox(height: 10),
         ];

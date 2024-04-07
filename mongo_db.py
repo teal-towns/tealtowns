@@ -1,5 +1,6 @@
 import pymongo
 from bson.objectid import ObjectId
+import json
 import ssl
 
 import lodash
@@ -7,6 +8,17 @@ import mongo_db_indices
 import date_time
 
 _db = None
+_dbSchema = None
+
+def CleanId(obj: dict):
+    if '_id' in obj and (not obj['_id'] or len(obj['_id']) == 0):
+        del obj['_id']
+    return obj
+
+def HaveId(obj: dict):
+    if '_id' in obj and obj['_id'] and len(obj['_id']) > 0:
+        return True
+    return False
 
 def map_object_id_to_string(obj1):
     obj1['_id'] = from_object_id(obj1['_id'])
@@ -74,9 +86,17 @@ def get_collection(collection_name, db1 = None):
     return db[collection_name]
 
 # CRUD helpers
-def insert_one(collection_name, obj1, db1 = None):
+def insert_one(collection_name, obj1, db1 = None, validate: int = 1, allowPartial: int = 0):
+    ret = { 'valid': 1, 'message': '', 'item': {}, }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
+
+    if validate:
+        retCheck = Validate(collection_name, obj1, allowPartial = allowPartial)
+        if not retCheck['valid']:
+            ret['valid'] = retCheck['valid']
+            ret['message'] = retCheck['message']
+            return ret
 
     # Add timestamp
     obj1['createdAt'] = date_time.now_string()
@@ -85,15 +105,23 @@ def insert_one(collection_name, obj1, db1 = None):
     # }, obj1);
 
     inserted_id = from_object_id(collection.insert_one(obj1).inserted_id)
-    return {
-        'item': lodash.extend_object(obj1, {
-            '_id': inserted_id
-        })
-    }
+    ret['item'] = lodash.extend_object(obj1, {
+        '_id': inserted_id
+    })
+    return ret
 
-def insert_many(collection_name, objects, db1 = None):
+def insert_many(collection_name, objects, db1 = None, validate: int = 1, allowPartial: int = 0):
+    ret = { 'valid': 1, 'message': '', 'items': [], }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
+
+    if validate:
+        for obj in objects:
+            retCheck = Validate(collection_name, obj, allowPartial = allowPartial)
+            if not retCheck['valid']:
+                ret['valid'] = retCheck['valid']
+                ret['message'] = retCheck['message']
+                return ret
 
     # Add timestamp
     for index, obj1 in enumerate(objects):
@@ -102,13 +130,20 @@ def insert_many(collection_name, objects, db1 = None):
     inserted_ids = collection.insert_many(objects).inserted_ids
     for index, obj1 in enumerate(objects):
         objects[index]['_id'] = from_object_id(inserted_ids[index])
-    return {
-        'items': objects
-    }
+    ret['items'] = objects
+    return ret
 
-def update_one(collection_name, query, mutation, upsert = False, db1 = None):
+def update_one(collection_name, query, mutation, upsert = False, db1 = None, validate: int = 1, allowPartial: int = 1):
+    ret = { 'valid': 1, 'message': '', 'acknowledged': 0, 'matched_count': 0, 'modified_count': 0, 'upserted_id': '', }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
+
+    if validate and '$set' in mutation:
+        retCheck = Validate(collection_name, mutation['$set'], allowPartial = allowPartial)
+        if not retCheck['valid']:
+            ret['valid'] = retCheck['valid']
+            ret['message'] = retCheck['message']
+            return ret
 
     # Add timestamp
     now_string = date_time.now_string()
@@ -122,15 +157,15 @@ def update_one(collection_name, query, mutation, upsert = False, db1 = None):
     # So need to just check acknowledged for success? Or a combination of matched count
     # OR modified count or upserted id?
     result = collection.update_one(query, mutation, upsert=upsert)
-    return {
-        'acknowledged': result.acknowledged,
-        'matched_count': result.matched_count,
-        'modified_count': result.modified_count,
-        'upserted_id': from_object_id(result.upserted_id)
-    }
+    ret['acknowledged'] = result.acknowledged,
+    ret['matched_count'] = result.matched_count,
+    ret['modified_count'] = result.modified_count,
+    ret['upserted_id'] = from_object_id(result.upserted_id)
+    return ret
     # TODO - find and return full updated object?
 
-def update_many(collection_name, query, mutation, db1 = None):
+def update_many(collection_name, query, mutation, db1 = None, validate: int = 1, allowPartial: int = 1):
+    ret = { 'valid': 1, 'message': '', 'modified_count': 0, }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
 
@@ -138,10 +173,16 @@ def update_many(collection_name, query, mutation, db1 = None):
     # for index, obj1 in enumerate(objects):
     #     objects[index]['updatedAt'] = date_time.now_string()
 
+    if validate and '$set' in mutation:
+        retCheck = Validate(collection_name, mutation['$set'], allowPartial = allowPartial)
+        if not retCheck['valid']:
+            ret['valid'] = retCheck['valid']
+            ret['message'] = retCheck['message']
+            return ret
+
     result = collection.update_many(query, mutation)
-    return {
-        'modified_count': result.modified_count
-    }
+    ret['modified_count'] = result.modified_count
+    return ret
     # TODO - find and return full updated objects?
 
 def find_one(collection_name, query, db1 = None, fields=None):
@@ -206,3 +247,117 @@ def aggregate(collection_name, query, db1 = None):
     return {
         'items': list(map(map_object_id_to_string, results))
     }
+
+def CheckGetSchema():
+    global _dbSchema
+    if _dbSchema is None:
+        file = open('db_schema.json', 'r')
+        _dbSchema = json.load(file)
+
+def Validate(collectionName: str, item: dict, allowPartial: int = 0,
+    skipRequired: list = ['_id', 'createdAt', 'updatedAt'], insertDefaults = {}):
+    ret = { 'valid': 1, 'message': '', 'item': item, 'removedFields': [], }
+
+    if not HaveId(item) and len(insertDefaults) > 0:
+        item = lodash.extend_object(insertDefaults, item)
+
+    CheckGetSchema()
+    if collectionName not in _dbSchema:
+        # ret['valid'] = 0
+        ret['message'] = 'Collection ' + collectionName + ' not found'
+        return ret
+
+    # Check required.
+    if not allowPartial:
+        for field in _dbSchema[collectionName]:
+            if field not in item and field not in skipRequired and '@optional' not in _dbSchema[collectionName][field]:
+                if isinstance(_dbSchema[collectionName][field], list):
+                    if '@optional' in _dbSchema[collectionName][field][0]:
+                        continue
+                    else:
+                        ret['valid'] = 0
+                        ret['message'] = 'Field ' + field + ' is required'
+                        print ('invalid', collectionName, ret['message'])
+                        return ret
+                elif isinstance(_dbSchema[collectionName][field], dict):
+                    pass
+                    # TODO - call recursively?
+                else:
+                    if '@optional' in _dbSchema[collectionName][field]:
+                        continue
+                    else:
+                        ret['valid'] = 0
+                        ret['message'] = 'Field ' + field + ' is required'
+                        print ('invalid', collectionName, ret['message'])
+                        return ret
+
+    ret = ValidatePartial(_dbSchema[collectionName], item)
+    if not ret['valid']:
+        print ('invalid', collectionName, ret['message'])
+    return ret
+
+def ValidatePartial(schema: dict, item: dict, parentField: str = ''):
+    ret = { 'valid': 1, 'message': '', 'item': item, 'removedFields': [], }
+    if isinstance(schema, list):
+        if len(schema) < 1:
+            pass
+        else:
+            for index, itemPart in enumerate(item):
+                retOne = ValidatePartial(schema[0], itemPart, parentField = parentField)
+                if not retOne['valid']:
+                    return retOne
+                item[index] = retOne['item']
+    elif isinstance(schema, dict):
+        for index, field in reversed(list(enumerate(item))):
+            if field not in schema:
+                print ('field', field, 'item', item[field])
+                del item[field]
+                ret['removedFields'].append(field)
+            else:
+                retOne = ValidatePartial(schema[field], item[field], parentField = field)
+                if not retOne['valid']:
+                    return retOne
+                item[field] = retOne['item']
+    elif '{Float}' in schema:
+        try:
+            item = float(item)
+        except Exception as e:
+            ret['valid'] = 0
+            ret['message'] = parentField + ': Invalid float: ' + str(item)
+            return ret
+        if '@min' in schema:
+            key = '@min '
+            pos = schema.find(key)
+            keyLen = len(key)
+            posEnd = schema.find(' ', pos + keyLen)
+            if posEnd < 0:
+                posEnd = len(schema)
+            minVal = float(schema[pos + keyLen:posEnd])
+            if item < minVal:
+                ret['valid'] = 0
+                ret['message'] = parentField + ': ' + str(item) + ' is below min'
+        if '@max' in schema:
+            key = '@max '
+            pos = schema.find(key)
+            keyLen = len(key)
+            posEnd = schema.find(' ', pos + keyLen)
+            if posEnd < 0:
+                posEnd = len(schema)
+            maxVal = float(schema[pos + keyLen:posEnd])
+            if item < maxVal:
+                ret['valid'] = 0
+                ret['message'] = parentField + ': ' + str(item) + ' is above max'
+    elif '{Int}' in schema:
+        try:
+            item = int(item)
+        except Exception as e:
+            ret['valid'] = 0
+            ret['message'] = parentField + ': Invalid int: ' + str(item)
+            return ret
+    elif '{ObjectId}' in schema:
+        pass
+    else:
+        item = str(item)
+
+    ret['item'] = item
+    return ret

@@ -299,9 +299,10 @@ def StripePaymentLinkMonthly(sharedItemOwnerId: str):
             {"price": priceId, "quantity": 1}
         ],
         metadata = metadata,
-        payment_intent_data = {
-            metadata: metadata
-        }
+        # TODO - can not be used with recurring prices? How to confirm when payment is made?
+        # payment_intent_data = {
+        #     'metadata': metadata
+        # },
     )
     ret['url'] = res['url']
 

@@ -23,4 +23,4 @@ jobs:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
 
       - name: Run SSH Command
-        run: ssh -oStrictHostKeyChecking=no root@tealtowns.org 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && flutter upgrade && cd frontend && flutter build web && systemctl restart systemd_web_server_tealtowns.service'
+        run: ssh -oStrictHostKeyChecking=no root@tealtowns.org 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && flutter upgrade && cd frontend && flutter build web --web-renderer canvaskit && systemctl restart systemd_web_server_tealtowns.service'

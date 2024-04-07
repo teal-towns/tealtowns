@@ -7,7 +7,7 @@ import 'package:location/location.dart';
 import 'package:universal_html/html.dart' as html;
 import '../../common/colors_service.dart';
 import '../../common/layout_service.dart';
-import '../../common/mapbox/mapbox.dart';
+import '../../common/map/mapbox.dart';
 import '../../common/math_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';

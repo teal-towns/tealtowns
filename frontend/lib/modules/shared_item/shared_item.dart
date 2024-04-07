@@ -270,7 +270,7 @@ class _SharedItemState extends State<SharedItem> {
         ElevatedButton(
           onPressed: () {
             Provider.of<SharedItemState>(context, listen: false).setSharedItem(sharedItem);
-            _linkService.Go('/shared-item-save', context, currentUserState);
+            _linkService.Go('/shared-item-save?id=${sharedItem.id}', context, currentUserState);
             // context.go('/shared-item-save');
           },
           child: Text('Edit'),

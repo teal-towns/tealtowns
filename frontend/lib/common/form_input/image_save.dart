@@ -493,7 +493,8 @@ class _ImageSaveState extends State<ImageSaveComponent> {
     if (!formValsImageSave.containsKey('from_type')) {
       formValsImageSave['from_type'] = _fromTypes[0];
     }
-    if (widget.formVals.containsKey(widget.formValsKey) && widget.formVals[widget.formValsKey] != null) {
+    if (widget.formVals.containsKey(widget.formValsKey) && widget.formVals[widget.formValsKey] != null &&
+      widget.formVals[widget.formValsKey].length > 0) {
       if (widget.formVals[widget.formValsKey] is String) {
         formValsImageSave['image_urls'] = [ widget.formVals[widget.formValsKey] ];
       } else {
