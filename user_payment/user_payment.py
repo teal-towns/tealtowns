@@ -3,10 +3,12 @@ import mongo_db
 from shared_item import shared_item_payment_math as _shared_item_payment_math
 
 def AddPayment(userId: str, amountUSD: float, forType: str, forId: str, status: str = 'complete', notes: str = '',
-    removeCutFromBalance: int = 0):
+    removeCutFromBalance: int = 0, amountUSDPreFee: float = 0):
+    amountUSDPreFee = amountUSDPreFee if amountUSDPreFee != 0 else amountUSD
     ret = _mongo_db_crud.Save('userPayment', {
         'userId': userId,
         'amountUSD': amountUSD,
+        'amountUSDPreFee': amountUSDPreFee,
         'forType': forType,
         'forId': forId,
         'status': status,

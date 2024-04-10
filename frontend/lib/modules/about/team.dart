@@ -20,25 +20,40 @@ class _TeamState extends State<Team> {
   
   // List of headshots, names, and roles
   final List<ImageData> imagesData = [
+    // ImageData(
+    //   imagePath: 'assets/images/claire-adair-headshot.jpg',
+    //   name: 'Claire Adair',
+    //   role: 'Customer Acquisition',
+    // ),
     ImageData(
-      imagePath: 'assets/images/luke-madera-headshot.jpg',
+      imagePath: 'assets/images/team/angeline-neo.jpg',
+      name: 'Angeline Neo',
+      role: 'Product Designer',
+    ),
+    ImageData(
+      imagePath: 'assets/images/team/jacob-russo-headshot.jpg',
+      name: 'Jacob Russo',
+      role: 'Web Developer',
+    ),
+    ImageData(
+      imagePath: 'assets/images/team/luke-madera-headshot.jpg',
       name: 'Luke Madera',
       role: 'Product Engineer',
-    ), 
+    ),
     ImageData(
-      imagePath: 'assets/images/layla-tadjpour-headshot.jpg',
+      imagePath: 'assets/images/team/layla-tadjpour-headshot.jpg',
       name: 'Layla Tadjpour',
       role: 'Product Engineer',
     ),
     ImageData(
-      imagePath: 'assets/images/claire-adair-headshot.jpg',
-      name: 'Claire Adair',
-      role: 'Customer Acquisition',
+      imagePath: 'assets/images/team/tolu-garcia.jpg',
+      name: 'Tolu Garcia',
+      role: 'Product Designer',
     ),
     ImageData(
-      imagePath: 'assets/images/jacob-russo-headshot.jpg',
-      name: 'Jacob Russo',
-      role: 'Web Developer',
+      imagePath: 'assets/images/team/vishad-tomar.jpg',
+      name: 'Vishad Tomar',
+      role: 'Product Designer',
     ),
   ];
 
@@ -46,7 +61,6 @@ class _TeamState extends State<Team> {
   Widget buildImageColumn(ImageData imageData) {
     return Column(
       children: [
-        
         // Headshots
         Image.asset(
           imageData.imagePath, 
@@ -54,9 +68,7 @@ class _TeamState extends State<Team> {
           height: 150, 
           fit: BoxFit.cover, 
         ),
-
-        SizedBox(height: 5), // Space
-
+        SizedBox(height: 5),
         // Text
         FittedBox(
           fit: BoxFit.fitWidth,
@@ -85,10 +97,9 @@ class _TeamState extends State<Team> {
   @override
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
-      
+      width: 750,
       body: Column(
         children: [
-          
           SizedBox(height: 20),
           // Wrap widget deals with varying number of images on different screen sizes
           Wrap(

@@ -53,7 +53,6 @@ class _PrivacyTermsState extends State<PrivacyTerms> {
 
   void _init() async {
     if (!_inited) {
-      print ('widget.type ${widget.type}');
       if (widget.type == 'terms') {
         _text = await rootBundle.loadString('assets/files/terms_of_service.md');
         setState(() { _text = _text; });

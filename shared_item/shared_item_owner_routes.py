@@ -5,9 +5,14 @@ from shared_item import shared_item_owner as _shared_item_owner
 
 def addRoutes():
     def Get(data, auth, websocket):
-        data = lodash.extend_object({ 'generation': 1, 'withSharedItem': 0 }, data)
+        data = lodash.extend_object({
+            'generation': 1,
+            'withSharedItem': 0,
+            'checkUpdatePayments': 0,
+        }, data)
         return _shared_item_owner.Get(data['id'], data['sharedItemId'], data['userId'],
-            int(data['generation']), int(data['withSharedItem']))
+            int(data['generation']), int(data['withSharedItem']),
+            checkUpdatePayments = int(data['checkUpdatePayments']))
     _socket.add_route('getSharedItemOwner', Get)
 
     def GetById(data, auth, websocket):

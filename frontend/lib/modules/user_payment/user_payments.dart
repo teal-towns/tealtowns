@@ -44,7 +44,7 @@ class _UserPaymentsState extends State<UserPayments> {
     return Container(
       child: Row(
         children: [
-          Expanded(flex: 1, child: Text('\$${userPayment.amountUSD}')),
+          Expanded(flex: 1, child: Text('\$${userPayment.amountUSDPreFee}')),
           Expanded(flex: 1, child: Text('${userPayment.forType}')),
           Expanded(flex: 1, child: Text('${userPayment.status}')),
           Expanded(flex: 1, child: Text('${userPayment.createdAt}')),

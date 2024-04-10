@@ -44,7 +44,6 @@ class _LandTileSaveState extends State<LandTileSave> {
     _routeIds.add(_socketService.onRoute('saveLandTile', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
-      print ('on saveLandTile ${data}');
       if (data['valid'] == 1) {
         setState(() {
           _loading = false;
@@ -246,7 +245,6 @@ class _LandTileSaveState extends State<LandTileSave> {
       }
     }
     // TODO: land covers, elevations, species, speciesPatterns
-    print ('save data ${data}');
     _socketService.emit('saveLandTile', data,);
   }
 

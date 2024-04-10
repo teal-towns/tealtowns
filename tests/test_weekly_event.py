@@ -130,6 +130,7 @@ def test_WeeklyEventFlow():
     user3Payment = {
         'userId': users[3]['_id'],
         'amountUSD': -1 * weeklyEvent['priceUSD'],
+        'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event1['_id'],
         'status': 'complete',
@@ -294,6 +295,7 @@ def test_WeeklyEventFlow():
     user5Payment = {
         'userId': users[5]['_id'],
         'amountUSD': -1 * weeklyEvent['priceUSD'],
+        'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event2['_id'],
         'status': 'complete',
@@ -383,6 +385,7 @@ def test_WeeklyEventFlow():
     user7Payment = {
         'userId': users[7]['_id'],
         'amountUSD': -1 * weeklyEvent['priceUSD'],
+        'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event3['_id'],
         'status': 'complete',
@@ -408,6 +411,7 @@ def test_WeeklyEventFlow():
     user3Payment = {
         'userId': users[3]['_id'],
         'amountUSD': -1 * weeklyEvent['priceUSD'],
+        'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event3['_id'],
         'status': 'complete',
@@ -460,6 +464,7 @@ def test_WeeklyEventFlow():
     user8Payment = {
         'userId': users[8]['_id'],
         'amountUSD': -1 * weeklyEvent['priceUSD'] * attendeeCountAsk,
+        'amountUSDPreFee': -1 * weeklyEvent['priceUSD'] * attendeeCountAsk,
         'forType': 'event',
         'forId': event3['_id'],
         'status': 'complete',

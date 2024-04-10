@@ -159,8 +159,9 @@ def MakeOwnerPayment(sharedItemOwnerId: str, amountUSD: float):
     sharedItem = retOwner['sharedItem']
 
     # Charge owner
+    amountUSDPreFee = amountUSD + _shared_item_payment_math.GetCut(amountUSD)
     _user_payment.AddPayment(sharedItemOwner['userId'], -1 * amountUSD, 'sharedItemOwner',
-        sharedItemOwner['_id'], removeCutFromBalance = 1)
+        sharedItemOwner['_id'], removeCutFromBalance = 1, amountUSDPreFee = amountUSDPreFee)
     query = {
         '_id': mongo_db.to_object_id(sharedItemOwner['_id']),
     }
@@ -222,6 +223,55 @@ def ComputeMonthlyPaymentAmount(sharedItemOwnerId: str, now = None):
     ret['amountUSD'] = monthlyPaymentWithFee
     ret['sharedItemTitle'] = sharedItem['title']
 
+    return ret
+
+def CheckUpdatePayments(sharedItemOwnerId: str):
+    ret = { 'valid': 1, 'message': '', 'sharedItemOwner': {}, }
+    retOwner = _shared_item_owner.Get(sharedItemOwnerId)
+    sharedItemOwner = retOwner['sharedItemOwner']
+    query = {
+        '$and': [
+            {
+                'userId': sharedItemOwner['userId'],
+            },
+            {
+                '$or': [
+                    {
+                        'forType': 'sharedItemOwner',
+                        'forId': sharedItemOwnerId,
+                    },
+                    {
+                        'forType': 'sharedItem',
+                        'forId': sharedItemOwner['sharedItemId'],
+                    },
+                ]
+            },
+        ]
+    }
+    userPayments = mongo_db.find('userPayment', query)['items']
+    totalPaid = 0
+    totalPaidBack = 0
+    for userPayment in userPayments:
+        if userPayment['amountUSD'] > 0:
+            totalPaidBack += userPayment['amountUSD']
+        else:
+            totalPaid += abs(userPayment['amountUSD'])
+    # Only check for less than money paid, as could also pay with balance or if owner (and already bought),
+    # so sharedItemOwner amounts could be MORE than actual payments (and be valid). But they cannot be LESS than
+    # any real money paid.
+    if sharedItemOwner['totalPaid'] < totalPaid or sharedItemOwner['totalPaidBack'] < totalPaidBack:
+        mutation = {
+            '$set': {
+                'totalPaid': totalPaid,
+                'totalPaidBack': totalPaidBack,
+            }
+        }
+        query = { '_id': mongo_db.to_object_id(sharedItemOwnerId), }
+        retSave = mongo_db.update_one('sharedItemOwner', query, mutation)
+        if retSave['modified_count'] > 0:
+            sharedItemOwner['totalPaid'] = totalPaid
+            sharedItemOwner['totalPaidBack'] = totalPaidBack
+    ret['sharedItemOwner'] = sharedItemOwner
     return ret
 
 def StopStripePayment(stripePriceId: str):
