@@ -42,8 +42,8 @@ async def StripeWebhook(request):
                 for key in data['metadata']:
                     data1[key] = data['metadata'][key]
 
+                amount = data['amount_total'] / 100
                 if 'forId' in data1 and 'forType' in data1:
-                    amount = data['amount_total'] / 100
                     if 'recurringInterval' in data1:
                         userPaymentSubscription = {
                             'userId': data1['userId'],
@@ -60,10 +60,11 @@ async def StripeWebhook(request):
                         _user_payment.AddPayment(data1['userId'], amount, data1['forType'],
                             data1['forId'], 'complete')
                 else:
-                    withoutPayFee = _shared_item_payment_math.RemoveFee(data['amount_total'] / 100, withCut = False)
-                    withoutFees = _shared_item_payment_math.RemoveFee(data['amount_total'] / 100)
+                    withoutPayFee = _shared_item_payment_math.RemoveFee(amount, withCut = False)
+                    withoutFees = _shared_item_payment_math.RemoveFee(amount)
                     _user_payment.AddPayment(data['metadata']['userId'], withoutPayFee, 'sharedItem',
-                        data['metadata']['sharedItemId'], 'complete', notes = 'Stripe down payment')
+                        data['metadata']['sharedItemId'], 'complete', notes = 'Stripe down payment',
+                        amountUSDPreFee = amount)
                     data1['totalPaid'] = withoutFees
 
                 jsonData = {
@@ -81,10 +82,12 @@ async def StripeWebhook(request):
         data = event.data.object
         if data['status'] in ['succeeded', 'processing']:
             if 'userId' in data['metadata']:
-                withoutPayFee = _shared_item_payment_math.RemoveFee(data['amount'] / 100, withCut = False)
-                withoutFees = _shared_item_payment_math.RemoveFee(data['amount'] / 100)
+                amount = data['amount'] / 100
+                withoutPayFee = _shared_item_payment_math.RemoveFee(amount, withCut = False)
+                withoutFees = _shared_item_payment_math.RemoveFee(amount)
                 _user_payment.AddPayment(data['metadata']['userId'], withoutPayFee, 'sharedItemOwner',
-                    data['metadata']['sharedItemOwnerId'], 'complete', notes = 'Stripe monthly payment')
+                    data['metadata']['sharedItemOwnerId'], 'complete', notes = 'Stripe monthly payment',
+                    amountUSDPreFee = amount)
                 _shared_item_payment.MakeOwnerPayment(data['metadata']['sharedItemOwnerId'], withoutFees)
 
     elif event.type == 'payment_intent.payment_failed':

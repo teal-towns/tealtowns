@@ -63,6 +63,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
   bool _loading = false;
   String _message = '';
   bool _paymentMade = false;
+  bool _loadingPayment = false;
 
   @override
   void initState() {
@@ -106,7 +107,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
       } else {
         setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; });
       }
-      setState(() { _loading = false; });
+      setState(() { _loading = false; _loadingPayment = false; });
     }));
 
     _routeIds.add(_socketService.onRoute('saveSharedItemOwner', callback: (String resString) {
@@ -220,22 +221,44 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     if (!_firstLoadDone) {
       _firstLoadDone = true;
 
-      var data = {
+      GetSharedItemOwner();
+    }
+  }
+
+  void GetSharedItemOwner({int checkUpdatePayments = 0}) {
+    var data = {
         'id': widget.sharedItemOwnerId,
         'sharedItemId': widget.sharedItemId,
         'userId': widget.userId,
         'generation': widget.generation,
         'withSharedItem': 1,
+        'checkUpdatePayments': checkUpdatePayments,
       };
       _socketService.emit('getSharedItemOwner', data);
-    }
   }
 
   Widget _buildSubmit(BuildContext context, currentUserState) {
     if (_loading) {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: 16.0),
-        child: LinearProgressIndicator(),
+      List<Widget> cols = [];
+      if (_loadingPayment) {
+        cols += [
+          SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              GetSharedItemOwner(checkUpdatePayments: 1);
+            },
+            child: Text('Refresh Once Payment Is Made'),
+          )
+        ];
+      }
+      return Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: LinearProgressIndicator(),
+          ),
+          ...cols,
+        ]
       );
     }
     // Do not allow submitting if payment has not been made.
@@ -456,6 +479,8 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
       'checkAndUseBalance': 1,
     };
     _socketService.emit('GetSharedItemDownPaymentLink', data);
+    setState(() { _loadingPayment = true; });
+    // TODO - set loading payment
   }
 
   void GetMonthlyPaymentLink(currentUserState) {
@@ -463,5 +488,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
       'sharedItemOwnerId': _sharedItemOwner.id,
     };
     _socketService.emit('GetSharedItemMonthlyPaymentLink', data);
+    setState(() { _loadingPayment = true; });
+    // TODO - set loading payment
   }
 }

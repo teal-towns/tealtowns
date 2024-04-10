@@ -38,6 +38,7 @@ class _UserEventSaveState extends State<UserEventSave> {
   int _spotsPaidFor = 0;
   double _availableUSD = 0;
   double _availableCredits = 0;
+  bool _loadingPayment = false;
 
   @override
   void initState() {
@@ -67,7 +68,7 @@ class _UserEventSaveState extends State<UserEventSave> {
             });
         }
       }
-      setState(() { _loading = false; });
+      setState(() { _loading = false; _loadingPayment = false; });
     }));
 
     _routeIds.add(_socketService.onRoute('StripeGetPaymentLink', callback: (String resString) {
@@ -118,19 +119,30 @@ class _UserEventSaveState extends State<UserEventSave> {
     }
     if (!_inited && widget.eventId.length > 0) {
       _inited = true;
-      var data = {
-        'eventId': widget.eventId,
-        'userId': currentUserState.isLoggedIn ? currentUserState.currentUser.id : '',
-        'withEvent': 1,
-        'withUserCheckPayment': 1,
-      };
-      _socketService.emit('GetUserEvent', data);
+      GetUserEvent();
     }
 
     if (_loading) {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: 10.0),
-        child: LinearProgressIndicator(),
+      List<Widget> cols = [];
+      if (_loadingPayment) {
+        cols += [
+          SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              GetUserEvent();
+            },
+            child: Text('Refresh Once Payment Is Made'),
+          )
+        ];
+      }
+      return Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10.0),
+            child: LinearProgressIndicator(),
+          ),
+          ...cols,
+        ]
       );
     }
 
@@ -244,6 +256,18 @@ class _UserEventSaveState extends State<UserEventSave> {
     );
   }
 
+  void GetUserEvent() {
+    String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+      Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+    var data = {
+      'eventId': widget.eventId,
+      'userId': userId,
+      'withEvent': 1,
+      'withUserCheckPayment': 1,
+    };
+    _socketService.emit('GetUserEvent', data);
+  }
+
   void CheckGetGetPaymentLink(currentUserState) {
     double price = _weeklyEvent.priceUSD * _formVals['attendeeCountAsk'];
     if (_availableCredits >= _formVals['attendeeCountAsk']) {
@@ -261,6 +285,7 @@ class _UserEventSaveState extends State<UserEventSave> {
         'forType': 'event',
       };
       _socketService.emit('StripeGetPaymentLink', data);
+      setState(() { _loadingPayment = true; });
     }
   }
 }

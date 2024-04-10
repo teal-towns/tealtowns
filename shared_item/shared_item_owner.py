@@ -1,7 +1,10 @@
 # from pydantic import BaseModel
 
 from common import mongo_db_crud as _mongo_db_crud
+import mongo_db
 from shared_item import shared_item as _shared_item
+from shared_item import shared_item_payment as _shared_item_payment
+from shared_item import shared_item_payment_math as _shared_item_payment_math
 from user_payment import user_payment as _user_payment
 
 # class SharedItemOwnerClass(BaseModel):
@@ -18,17 +21,41 @@ from user_payment import user_payment as _user_payment
 #     status: str = ''
 #     stripeMonthlyPriceId: str = ''
 
-def Get(id: str = '', sharedItemId: str = '', userId: str = '', generation: int = 1, withSharedItem: int = 0):
+def Get(id: str = '', sharedItemId: str = '', userId: str = '', generation: int = 1, withSharedItem: int = 0,
+    checkByPayment: int = 1, checkUpdatePayments: int = 0):
     ret = { 'valid': 1, 'message': '', 'sharedItemOwner': {}, 'sharedItem': {} }
     if len(id) > 0:
         ret['sharedItemOwner'] = _mongo_db_crud.GetById('sharedItemOwner', id)['sharedItemOwner']
     else:
         ret['sharedItemOwner'] = _mongo_db_crud.Get('sharedItemOwner',
             stringKeyVals = {'sharedItemId': sharedItemId, 'userId': userId, 'generation': generation})['sharedItemOwner']
-    # if '_id' not in ret['sharedItemOwner']:
-    #     ret['valid'] = 0
-    #     ret['message'] = 'No item found for id ' + id + ' or sharedItemId ' + sharedItemId + ' and userId ' + userId
-    #     return ret
+    # Check for down payment. Should not have to check for monthly payment as that should only happen AFTER down payment.
+    if '_id' not in ret['sharedItemOwner'] and checkByPayment and len(sharedItemId) > 0:
+        query = { 'userId': userId, 'forType': 'sharedItem', 'forId': sharedItemId }
+        userPayment = mongo_db.find_one('userPayment', query)['item']
+        ret['sharedItem'] = _mongo_db_crud.GetById('sharedItem', sharedItemId)['sharedItem']
+        if userPayment is not None:
+            payInfo = _shared_item_payment_math.GetPayments(ret['sharedItem']['currentPrice'],
+                ret['sharedItem']['monthsToPayBack'], ret['sharedItem']['minOwners'],
+                ret['sharedItem']['maintenancePerYear'])
+            totalPaid = userPayment['amountUSD']
+            totalOwed = payInfo['totalToPayBack']
+            status = 'pendingMonthlyPayment' if totalPaid < totalOwed else 'paid'
+            sharedItemOwner = {
+                'userId': userId,
+                'sharedItemId': sharedItemId,
+                'generation': ret['sharedItem']['generation'] + 1,
+                'monthlyPayment': payInfo['monthlyPayment'],
+                'totalPaid': totalPaid,
+                'totalOwed': totalOwed,
+                'totalPaidBack': 0,
+                'investorOnly': 0,
+                'status': status,
+            }
+            ret = Save(sharedItemOwner, skipPayment = 1)
+    elif '_id' in ret['sharedItemOwner'] and checkUpdatePayments:
+        retUpdate = _shared_item_payment.CheckUpdatePayments(ret['sharedItemOwner']['_id'])
+        ret['sharedItemOwner'] = retUpdate['sharedItemOwner']
 
     sharedItemId = ret['sharedItemOwner']['sharedItemId'] if ('sharedItemId' in ret['sharedItemOwner'] and \
         len(ret['sharedItemOwner']['sharedItemId']) > 0) else sharedItemId

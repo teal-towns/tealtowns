@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 
 import './modules/user_auth/current_user_state.dart';
 import './routes.dart';
@@ -148,7 +149,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildDrawer(BuildContext context, var currentUserState) {
-    List<Widget> columns = [];
+    List<Widget> columns = [
+      _buildLinkButton(context, '/weekly-events', 'Events'),
+      _buildLinkButton(context, '/own', 'Shared Items'),
+    ];
     if (currentUserState.isLoggedIn) {
       columns += [
         _buildLinkButton(context, '/user-money', 'Funds and Payments'),
@@ -157,9 +161,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     }
     if (currentUserState.hasRole('admin')) {
     }
-    columns += [
-      _buildLinkButton(context, '/about', 'About'),
-    ];
+    // columns += [
+    //   _buildLinkButton(context, '/about', 'About'),
+    // ];
+    Color footerColor = Colors.white;
 
     return Drawer(
       child: Column(
@@ -181,8 +186,41 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           ),
           ...columns,
           _buildLogoutButton(context, currentUserState),
-          // SizedBox(height: 30),
+          SizedBox(height: 30),
           // Text('Powered by Collobartive.Earth', style: TextStyle(color: Colors.white)),
+          RichText( text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'About',
+                style: TextStyle(color: footerColor),
+                recognizer: TapGestureRecognizer()..onTap = () {
+                  context.go('/about');
+                },
+              ),
+              TextSpan(
+                text: ' | ',
+                style: TextStyle(color: footerColor),
+              ),
+              TextSpan(
+                text: 'Blog',
+                style: TextStyle(color: footerColor),
+                recognizer: TapGestureRecognizer()..onTap = () {
+                  context.go('/blog');
+                },
+              ),
+              TextSpan(
+                text: ' | ',
+                style: TextStyle(color: footerColor),
+              ),
+              TextSpan(
+                text: 'Team',
+                style: TextStyle(color: footerColor),
+                recognizer: TapGestureRecognizer()..onTap = () {
+                  context.go('/team');
+                },
+              ),
+            ]
+          )),
         ],
       ),
     );
@@ -194,17 +232,13 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       //   flex: 1,
       //   child: _buildNavButton('/home', 'Home', Icons.home, context, width: double.infinity, fontSize: 10),
       // ),
+      // Expanded(
+      //   flex: 1,
+      //   child: _buildNavButton('/own', 'Own', Icons.build, context, width: double.infinity, fontSize: 10),
+      // ),
       Expanded(
         flex: 1,
-        child: _buildNavButton('/blog', 'Blog', Icons.article, context, width: double.infinity, fontSize: 10),
-      ),
-      Expanded(
-        flex: 1,
-        child: _buildNavButton('/own', 'Own', Icons.build, context, width: double.infinity, fontSize: 10),
-      ),
-      Expanded(
-        flex: 1,
-        child: _buildNavButton('/eat', 'Events', Icons.event, context, width: double.infinity, fontSize: 10),
+        child: _buildNavButton('/eat', 'Shared Meals', Icons.event, context, width: double.infinity, fontSize: 10),
       ),
     ];
     if (!currentUserState.isLoggedIn) {
@@ -317,9 +351,8 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
         title: Image.asset('assets/images/logo.png', width: 100, height: 50),
         actions: <Widget>[
           // _buildNavButton('/home', 'Home', Icons.home, context),
-          _buildNavButton('/blog', 'Blog', Icons.article, context),
-          _buildNavButton('/own', 'Own', Icons.build, context),
-          _buildNavButton('/eat', 'Events', Icons.event, context),
+          // _buildNavButton('/own', 'Own', Icons.build, context),
+          _buildNavButton('/eat', 'Shared Meals', Icons.event, context),
           _buildUserButton(context, currentUserState),
           _buildDrawerButton(context),
         ],

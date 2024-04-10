@@ -145,7 +145,7 @@
         "totalOwed": "{Float} [amount this user owes; negative if this user is owed money]",
         "totalPaidBack": "{Float} [amount this user has been paid back; this will be incremented until it equals -1 * totalOwed]",
         "investorOnly": "{Int} [1 if this owner pays only (is NOT a shared owner), 0 otherwise]",
-        "status": "{String} pendingMonthlyPayment|paying|paid",
+        "status": "{String} pendingMonthlyPayment|paying|paid [User is only added here if already paid down payment, so there are 3 states after that: 1. paid down, but have not started monthly recurring payment, 2. initiated monthly payment but not fully paid off yet, 3. fully paid]",
         "stripeMonthlyPriceId": "{String} @optional [used for stopping recurring monthly payment when done]"
     },
     "TODOsharedItemMaintenance": {
@@ -173,8 +173,9 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
         "amountUSD": "{Float} [positive if increases this user's balance (e.g. deposit or payment TO this user), negative if reduces this user's balance (e.g. withdrawal or payment FROM this user)]",
-        "forType": "{String} [user|sharedItemOwner|event|withdrawToBank]",
-        "forId": "{String} [userId|sharedItemOwnerId|eventId|stripeTransferId]",
+        "amountUSDPreFee": "{Float}",
+        "forType": "{String} [user|sharedItem|sharedItemOwner|event|withdrawToBank]",
+        "forId": "{String} [userId|sharedItemId|sharedItemOwnerId|eventId|stripeTransferId]",
         "status": "{String} pending|complete",
         "notes": "{String} @optional"
     },

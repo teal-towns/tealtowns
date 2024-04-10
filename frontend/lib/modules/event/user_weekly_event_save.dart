@@ -49,6 +49,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     'month': 0,
     'year': 0,
   };
+  bool _loadingPayment = false;
 
   @override
   void initState() {
@@ -57,7 +58,6 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     _routeIds.add(_socketService.onRoute('GetUserWeeklyEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
-      print ('data ${data}');
       if (data['valid'] == 1) {
         _formVals = UserWeeklyEventClass.fromJson(data['userWeeklyEvent']).toJson();
         if (_formVals['_id'].length < 1) {
@@ -82,7 +82,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
           setState(() { _rsvpDeadlinePassed = _rsvpDeadlinePassed; });
         }
       }
-      setState(() { _loading = false; });
+      setState(() { _loading = false; _loadingPayment = false; });
     }));
 
     _routeIds.add(_socketService.onRoute('StripeGetPaymentLink', callback: (String resString) {
@@ -145,19 +145,30 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
 
     if (!_inited && widget.weeklyEventId.length > 0) {
       _inited = true;
-      var data = {
-        'weeklyEventId': widget.weeklyEventId,
-        'userId': currentUserState.isLoggedIn ? currentUserState.currentUser.id : '',
-        'withWeeklyEvent': 1,
-        'withEvent': 1,
-      };
-      _socketService.emit('GetUserWeeklyEvent', data);
+      GetUserWeeklyEvent();
     }
 
     if (_loading) {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: 10.0),
-        child: LinearProgressIndicator(),
+      List<Widget> cols = [];
+      if (_loadingPayment) {
+        cols += [
+          SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              GetUserWeeklyEvent();
+            },
+            child: Text('Refresh Once Payment Is Made'),
+          )
+        ];
+      }
+      return Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10.0),
+            child: LinearProgressIndicator(),
+          ),
+          ...cols,
+        ]
       );
     }
 
@@ -210,6 +221,18 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
         widgetForm,
       ]
     );
+  }
+
+  void GetUserWeeklyEvent() {
+    String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+      Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+    var data = {
+      'weeklyEventId': widget.weeklyEventId,
+      'userId': userId,
+      'withWeeklyEvent': 1,
+      'withEvent': 1,
+    };
+    _socketService.emit('GetUserWeeklyEvent', data);
   }
 
   Widget BuildSubscriptions() {
@@ -281,5 +304,6 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       'recurringInterval': _formValsPay['subscription'],
     };
     _socketService.emit('StripeGetPaymentLink', data);
+    setState(() { _loadingPayment = true; });
   }
 }
