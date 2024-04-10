@@ -11,6 +11,22 @@ jobs:
   #   name: Test
   #   uses: teal-towns/tealtowns/.github/workflows/test.yml@main
 
+  # Just do this so we can get cached pip dependencies on branches?
+  cache-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
   deploy:
     name: Deploy
     # needs: test

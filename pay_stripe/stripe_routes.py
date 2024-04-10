@@ -83,7 +83,7 @@ async def StripeWebhook(request):
         if data['status'] in ['succeeded', 'processing']:
             if 'userId' in data['metadata']:
                 amount = data['amount'] / 100
-                withoutPayFee = _shared_item_payment_math.RemoveFee(amount), withCut = False)
+                withoutPayFee = _shared_item_payment_math.RemoveFee(amount, withCut = False)
                 withoutFees = _shared_item_payment_math.RemoveFee(amount)
                 _user_payment.AddPayment(data['metadata']['userId'], withoutPayFee, 'sharedItemOwner',
                     data['metadata']['sharedItemOwnerId'], 'complete', notes = 'Stripe monthly payment',

@@ -151,6 +151,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   Widget _buildDrawer(BuildContext context, var currentUserState) {
     List<Widget> columns = [
       _buildLinkButton(context, '/weekly-events', 'Events'),
+      _buildLinkButton(context, '/own', 'Shared Items'),
     ];
     if (currentUserState.isLoggedIn) {
       columns += [
@@ -231,10 +232,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       //   flex: 1,
       //   child: _buildNavButton('/home', 'Home', Icons.home, context, width: double.infinity, fontSize: 10),
       // ),
-      Expanded(
-        flex: 1,
-        child: _buildNavButton('/own', 'Own', Icons.build, context, width: double.infinity, fontSize: 10),
-      ),
+      // Expanded(
+      //   flex: 1,
+      //   child: _buildNavButton('/own', 'Own', Icons.build, context, width: double.infinity, fontSize: 10),
+      // ),
       Expanded(
         flex: 1,
         child: _buildNavButton('/eat', 'Shared Meals', Icons.event, context, width: double.infinity, fontSize: 10),
@@ -350,7 +351,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
         title: Image.asset('assets/images/logo.png', width: 100, height: 50),
         actions: <Widget>[
           // _buildNavButton('/home', 'Home', Icons.home, context),
-          _buildNavButton('/own', 'Own', Icons.build, context),
+          // _buildNavButton('/own', 'Own', Icons.build, context),
           _buildNavButton('/eat', 'Shared Meals', Icons.event, context),
           _buildUserButton(context, currentUserState),
           _buildDrawerButton(context),
