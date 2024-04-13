@@ -17,6 +17,7 @@ _default = {
     'hostMoneyPerPersonUSD': random.randint(4, 10),
     'priceUSD': random.randint(10, 20),
     'rsvpDeadlineHours': random.randint(24, 72),
+    'imageUrls': [ _stubs_data.RandomImageUrl() ],
 }
 
 def AddDefault():

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../app_scaffold.dart';
 import '../../common/form_input/form_save.dart';
 import './weekly_event_class.dart';
+import '../about/welcome_about.dart';
 import '../user_auth/current_user_state.dart';
 
 class WeeklyEventSave extends StatefulWidget {
@@ -27,6 +28,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     {'value': 6, 'label': 'Sunday'},
   ];
   Map<String, Map<String, dynamic>> _formFields = {
+    'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'location': { 'type': 'location', 'nestedCoordinates': true },
     'title': {},
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
@@ -45,6 +47,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   };
   String _formMode = '';
   List<String> _formStepKeys = [];
+  String _title = 'Create an event';
 
   @override
   void initState() {
@@ -69,6 +72,8 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _formFields['dayOfWeek']!['helpText'] = 'We suggest Sundays at 5pm, but if you would like to do a different day or time, set it here.';
       _formFields['priceUSD']!['helpText'] = 'This single event price will be discounted for subscriptions and hosts will earn their next event free, so with a host group size of 10, a \$10 event will be about \$7 for a yearly subscription and about \$5 event budget.';
       _formStepKeys = ['location', 'description', 'dayOfWeek', 'startTime'];
+
+      _title = 'Create a shared meal';
     }
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
 
@@ -82,27 +87,52 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   @override
   Widget build(BuildContext context) {
     double fieldWidth = 300;
+    Widget content = FormSave(formVals: WeeklyEventClass.fromJson(_formValsDefault).toJson(), dataName: 'weeklyEvent',
+      routeGet: 'getWeeklyEventById', routeSave: 'saveWeeklyEvent', id: widget.id, fieldWidth: fieldWidth,
+      formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, title: _title,
+      parseData: (dynamic data) => WeeklyEventClass.fromJson(data).toJson(),
+      preSave: (dynamic data) {
+        data = WeeklyEventClass.fromJson(data).toJson();
+        if (data['adminUserIds'] == null) {
+          data['adminUserIds'] = [];
+        }
+        if (data['adminUserIds'].length == 0) {
+          var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+          if (currentUser != null) {
+            data['adminUserIds'].add(currentUser.id);
+          }
+        }
+        return data;
+      }, onSave: (dynamic data) {
+        String uName = data['weeklyEvent']['uName'];
+        context.go('/we/${uName}');
+      }
+    );
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: fieldWidth,
-      body: FormSave(formVals: WeeklyEventClass.fromJson(_formValsDefault).toJson(), dataName: 'weeklyEvent',
-        routeGet: 'getWeeklyEventById', routeSave: 'saveWeeklyEvent', id: widget.id, fieldWidth: fieldWidth,
-        formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, parseData: (dynamic data) => WeeklyEventClass.fromJson(data).toJson(),
-        preSave: (dynamic data) {
-          data = WeeklyEventClass.fromJson(data).toJson();
-          if (data['adminUserIds'] == null) {
-            data['adminUserIds'] = [];
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 600) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 1, child: content),
+                SizedBox(width: 10),
+                Container(
+                  width: 300,
+                  child: WelcomeAbout(type: 'sidebar'),
+                ),
+              ]
+            );
+          } else {
+            return Column(
+              children: [
+                WelcomeAbout(),
+                SizedBox(height: 10),
+                content,
+              ]
+            );
           }
-          if (data['adminUserIds'].length == 0) {
-            var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-            if (currentUser != null) {
-              data['adminUserIds'].add(currentUser.id);
-            }
-          }
-          return data;
-        }, onSave: (dynamic data) {
-          String uName = data['weeklyEvent']['uName'];
-          context.go('/we/${uName}');
         }
       )
     );

@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 // import '../../app_scaffold.dart';
+import '../../common/colors_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_service.dart';
 import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
+import '../../common/style.dart';
 import './event_payment_service.dart';
 import './event_class.dart';
 import './user_event_save.dart';
@@ -27,10 +29,12 @@ class UserWeeklyEventSave extends StatefulWidget {
 
 class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
   List<String> _routeIds = [];
+  ColorsService _colors = ColorsService();
   EventPaymentService _eventPaymentService = EventPaymentService();
   LayoutService _layoutService = LayoutService();
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
+  Style _style = Style();
   InputFields _inputFields = InputFields();
 
   bool _loading = true;
@@ -248,44 +252,93 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     _subscriptionPrices['month'] = monthlyPrice;
     _subscriptionPrices['year'] = yearlyPrice;
 
-    return Column(
-      children: [
-        SegmentedButton<String>(
-          segments: [
-            ButtonSegment<String>(
-              value: 'single',
-              label: Text('Single Event: \$${singlePrice}'),
-            ),
-            ButtonSegment<String>(
-              value: 'month',
-              label: Column(
-                children: [
-                  Text('Monthly: \$${monthlyPrice}'),
-                  Text('Save \$${monthlySavingsPerYear} per year'),
-                ]
-              ),
-            ),
-            ButtonSegment<String>(
-              value: 'year',
-              label: Column(
-                children: [
-                  Text('Yearly: \$${yearlyPrice}'),
-                  Text('Save \$${yearlySavingsPerYear} per year'),
-                ]
-              ),
-            ),
-          ],
-          selected: <String>{_formValsPay['subscription']},
-          onSelectionChanged: (Set<String> newSelection) {
-            // By default there is only a single segment that can be
-            // selected at one time, so its value is always the first
-            // item in the selected set.
-            _formValsPay['subscription'] = newSelection.first;
+    Map<String, Map<String, dynamic>> vals = {
+      'single': {
+        'header': 'Single Event: \$${singlePrice}',
+        'body': '',
+      },
+      'month': {
+        'header': 'Monthly Subscription: \$${monthlyPrice}',
+        'body': 'Savings: \$${monthlySavingsPerYear} / year',
+      },
+      'year': {
+        'header': 'Yearly Subscription: \$${yearlyPrice}',
+        'body': 'Savings: \$${yearlySavingsPerYear} / year',
+      },
+    };
+    List<Widget> contents = [];
+    for (var keyVal in vals.entries) {
+      String key = keyVal.key;
+      bool selected = _formValsPay['subscription'] == key ? true : false;
+      String colorKey = selected ? 'white' : 'primary';
+      contents += [
+        InkWell(
+          onTap: () {
+            _formValsPay['subscription'] = key;
             setState(() {
               _formValsPay = _formValsPay;
             });
           },
+          child: Container(
+            padding: EdgeInsets.all(10),
+            color: selected ? _colors.colors['primary'] : _colors.colors['white'],
+            child: Column(
+              children: [
+                _style.Text1(keyVal.value['header'], colorKey: colorKey),
+                _style.SpacingH('medium'),
+                _style.Text1(keyVal.value['body'], colorKey: colorKey),
+              ]
+            ),
+          ),
+        )
+      ];
+    }
+
+    return Column(
+      children: [
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            ...contents,
+          ],
         ),
+        // SegmentedButton<String>(
+        //   segments: [
+        //     ButtonSegment<String>(
+        //       value: 'single',
+        //       label: Text('Single Event: \$${singlePrice}'),
+        //     ),
+        //     ButtonSegment<String>(
+        //       value: 'month',
+        //       label: Column(
+        //         children: [
+        //           Text('Monthly: \$${monthlyPrice}'),
+        //           Text('Save \$${monthlySavingsPerYear} per year'),
+        //         ]
+        //       ),
+        //     ),
+        //     ButtonSegment<String>(
+        //       value: 'year',
+        //       label: Column(
+        //         children: [
+        //           Text('Yearly: \$${yearlyPrice}'),
+        //           Text('Save \$${yearlySavingsPerYear} per year'),
+        //         ]
+        //       ),
+        //     ),
+        //   ],
+        //   selected: <String>{_formValsPay['subscription']},
+        //   onSelectionChanged: (Set<String> newSelection) {
+        //     // By default there is only a single segment that can be
+        //     // selected at one time, so its value is always the first
+        //     // item in the selected set.
+        //     _formValsPay['subscription'] = newSelection.first;
+        //     setState(() {
+        //       _formValsPay = _formValsPay;
+        //     });
+        //   },
+        // ),
         SizedBox(height: 10),
       ]
     );

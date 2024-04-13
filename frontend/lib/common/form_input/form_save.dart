@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../colors_service.dart';
+import '../style.dart';
 import '../layout_service.dart';
 import '../link_service.dart';
 import '../parse_service.dart';
@@ -27,10 +29,11 @@ class FormSave extends StatefulWidget {
   String mode;
   List<String> stepKeys;
   String loggedOutRedirect;
+  String title;
 
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
     this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.id = '', this.formFields = null,
-    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', });
+    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', });
 
   @override
   _FormSaveState createState() => _FormSaveState();
@@ -38,10 +41,12 @@ class FormSave extends StatefulWidget {
 
 class _FormSaveState extends State<FormSave> {
   List<String> _routeIds = [];
+  ColorsService _colors = ColorsService();
   LayoutService _layoutService = LayoutService();
   LinkService _linkService = LinkService();
   ParseService _parseService = ParseService();
   SocketService _socketService = SocketService();
+  Style _style = Style();
   InputFields _inputFields = InputFields();
 
   final _formKey = GlobalKey<FormState>();
@@ -51,6 +56,7 @@ class _FormSaveState extends State<FormSave> {
   String _message = '';
 
   int _step = 0;
+  int _firstStepIndex = 0;
 
   @override
   void initState() {
@@ -63,6 +69,8 @@ class _FormSaveState extends State<FormSave> {
     }
 
     _formVals = widget.formVals;
+    _firstStepIndex = GetFirstStep();
+    _step = _firstStepIndex;
 
     _routeIds.add(_socketService.onRoute(widget.routeGet, callback: (String resString) {
       var res = jsonDecode(resString);
@@ -107,12 +115,22 @@ class _FormSaveState extends State<FormSave> {
 
     CheckFirstLoad();
 
+    List<Widget> cols = [];
+    if (widget.title.length > 0) {
+      cols += [
+        _style.Text1(widget.title, size: 'xlarge'),
+        _style.Spacing(height: 'medium'),
+      ];
+    }
+
     return Form(
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          StepIcons(),
+          ...cols,
           BuildForm(context),
           _buildMessage(context),
           SizedBox(height: 50),
@@ -168,6 +186,21 @@ class _FormSaveState extends State<FormSave> {
     return SizedBox.shrink();
   }
 
+  int GetFirstStep() {
+    int step = 0;
+    if (widget.stepKeys.length < 1) {
+      return 0;
+    }
+    for (var keyVal in widget.formFields!.entries) {
+      String key = keyVal.key;
+      if (widget.stepKeys.contains(key)) {
+        return step;
+      }
+      step += 1;
+    }
+    return 0;
+  }
+
   int GetNextStep() {
     int step = 0;
     for (var keyVal in widget.formFields!.entries) {
@@ -191,6 +224,42 @@ class _FormSaveState extends State<FormSave> {
     return widget.formFields!.entries.length;
   }
 
+  Widget StepIcons() {
+    if (widget.mode == 'step' && _step < widget.formFields!.length) {
+      List<Widget> rows = [];
+      int ii = 0;
+      for (var keyVal in widget.formFields!.entries) {
+        String key = keyVal.key;
+        if (widget.stepKeys.contains(key)) {
+          if (ii > 0) {
+            rows.add(SizedBox(width: 5));
+          }
+          Color color = (ii == _step) ? _colors.colors['primary'] : _colors.colors['greyLight'];
+          rows.add(
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 10,
+                color: color,
+              )
+            )
+          );
+          if (ii < widget.stepKeys.length - 1) {
+            rows.add(SizedBox(width: 5));
+          }
+        }
+        ii += 1;
+      }
+      return Row(
+        children: <Widget>[
+          ...rows,
+          _style.Spacing(height: 'xlarge'),
+        ],
+      );
+    }
+    return SizedBox.shrink();
+  }
+
   Widget BuildForm(BuildContext context) {
     if (widget.mode == 'step' && _step < widget.formFields!.length) {
       int step = 0;
@@ -200,7 +269,7 @@ class _FormSaveState extends State<FormSave> {
         if (step == _step && (widget.stepKeys.length == 0 || widget.stepKeys.contains(key))) {
           Widget prev = SizedBox.shrink();
           Widget next = SizedBox.shrink();
-          if (_step > 0) {
+          if (_step > _firstStepIndex) {
             prev = Padding(
               padding: EdgeInsets.only(top: 15, bottom: 5),
               child: ElevatedButton(

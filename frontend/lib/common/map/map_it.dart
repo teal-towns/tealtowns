@@ -24,7 +24,7 @@ class MapIt extends StatefulWidget {
   // var polygons = [];
   // var coordinatesDraw;
 
-  MapIt({ this.mapHeight = 300, this.mapWidth = 300,
+  MapIt({ this.mapHeight = 300, this.mapWidth = double.infinity,
     this.onChange = null, this.debounceChange = 1000, this.latitude = 0,
     this.longitude = 0, this.zoom = 13.0, this.markerLngLat = const [],
     this.markerImage = 'assets/images/map-marker.png' });

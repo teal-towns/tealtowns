@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+List<double> primary = [0, 167, 0];
+List<double> secondary = [15, 69, 194];
+List<double> primaryLight = [0, 167, 0, 0.5];
+List<double> text = [90, 90, 90];
+
 List<double> magentaTransparent = [200, 100, 240, 0.4];
 List<double> magenta = magentaTransparent.sublist(0, magentaTransparent.length - 1);
 List<double> red = [200, 100, 0];
@@ -38,6 +43,11 @@ class ColorsService {
   }
 
   Map<String, Color> _colors = {
+    'primary': valsToColor(primary),
+    'secondary': valsToColor(secondary),
+    'primaryLight': valsToColor(primaryLight),
+    'text': valsToColor(text),
+
     'greyLight': valsToColor(greyLight),
     'grey': valsToColor(grey),
     'greyTransparent': valsToColor(greyTransparent),
@@ -49,6 +59,11 @@ class ColorsService {
   };
 
   Map<String, String> _colorsStr = {
+    'primary': valsToString(primary),
+    'secondary': valsToString(secondary),
+    'primaryLight': valsToString(primaryLight),
+    'text': valsToString(text),
+
     'greyLight': valsToString(greyLight),
     'grey': valsToString(grey),
     'greyTransparent': valsToString(greyTransparent),
