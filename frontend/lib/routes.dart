@@ -10,6 +10,8 @@ import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
 import './modules/user_auth/user.dart';
 
+import './modules/design_library/design_library.dart';
+
 import './modules/about/about.dart';
 import './modules/about/team.dart';
 import './modules/about/privacy_terms.dart';
@@ -38,6 +40,8 @@ class Routes {
   static const logout = '/logout';
   static const passwordReset = '/password-reset';
   static const signup = '/signup';
+
+  static const designLibrary = '/design-library';
 
   static const user = '/user';
 
@@ -95,6 +99,11 @@ class AppGoRouter {
       GoRoute(
         path: Routes.passwordReset,
         builder: (context, state) => UserPasswordResetComponent(),
+      ),
+
+      GoRoute(
+        path: Routes.designLibrary,
+        builder: (context, state) => DesignLibrary(),
       ),
 
       GoRoute(

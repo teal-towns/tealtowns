@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
@@ -8,6 +9,7 @@ import '../../common/config_service.dart';
 import '../../common/link_service.dart';
 import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
+import '../../common/style.dart';
 import './event_class.dart';
 import './user_event_class.dart';
 import './user_weekly_event_save.dart';
@@ -28,6 +30,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   ConfigService _configService = ConfigService();
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
+  Style _style = Style();
 
   bool _loading = true;
   String _message = '';
@@ -170,8 +173,13 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
     List<Widget> thisWeekEvent = [];
     if (_event.start.length > 0) {
+      String startDate = DateFormat('EEEE M/d/y').format(DateTime.parse(_event.start));
       thisWeekEvent = [
-        Text('This week\'s event starts at ${_event.start}'),
+        // Text('This week\'s event starts at ${_event.start}'),
+        // SizedBox(height: 10),
+        _style.Text1('${startDate}', left: Icon(Icons.calendar_today)),
+        SizedBox(height: 10),
+        _style.Text1('${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}', left: Icon(Icons.schedule)),
         SizedBox(height: 10),
       ];
     }
@@ -204,7 +212,9 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
             attendeeInfo += [
               Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
               SizedBox(height: 10),
-              Text('Share this event with your neighbors to fill your spots: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+              Text('Share this event with your neighbors to fill your spots:'),
+              SizedBox(height: 10),
+              Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
               SizedBox(height: 10),
             ];
           }
@@ -224,13 +234,17 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
             attendeeInfo += [
               Text(text1),
               SizedBox(height: 10),
-              Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+              Text('Share this event with your neighbors:'),
+              SizedBox(height: 10),
+              Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
             ];
           } else {
             attendeeInfo += [
               Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
               SizedBox(height: 10),
-              Text('Share this event with your neighbors to get another host so you can join: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+              Text('Share this event with your neighbors to get another host so you can join:'),
+              SizedBox(height: 10),
+              Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
               SizedBox(height: 10),
             ];
           }
@@ -250,7 +264,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         }
       }
       if (!alreadySignedUp) {
-        String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${_nextEvent.start}' : '';
+        String startDate = DateFormat('EEEE M/d/y').format(DateTime.parse(_nextEvent.start));
+        String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
         attendeeInfo += [
           Text(rsvpSignUpText),
           SizedBox(height: 10),
@@ -260,40 +275,76 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       }
     }
 
+    Widget content1 = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _style.Text1('${_weeklyEvent.title}', size: 'xlarge'),
+        SizedBox(height: 10),
+        _weeklyEvent.imageUrls.length <= 0 ?
+          Image.asset('assets/images/shared-meal.jpg', height: 300, width: double.infinity, fit: BoxFit.cover,)
+            : Image.network(_weeklyEvent.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
+        SizedBox(height: 10),
+        Text(_weeklyEvent.description),
+        SizedBox(height: 10),
+        // _style.Text1('${_weeklyEvent.xDay}s ${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}',
+        //     left: Icon(Icons.calendar_today)),
+        ...thisWeekEvent,
+        ...attendeeInfo,
+        SizedBox(height: 10),
+      ]
+    );
+
+    Widget content2 = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MapIt(mapHeight: 300,
+          longitude: _weeklyEvent.location.coordinates[0], latitude: _weeklyEvent.location.coordinates[1],
+          zoom: 17, markerLngLat: [_weeklyEvent.location.coordinates[0], _weeklyEvent.location.coordinates[1]],
+        ),
+        SizedBox(height: 10),
+        ...admins,
+        SizedBox(height: 10),
+        Text('Share this event with your neighbors:'),
+        SizedBox(height: 10),
+        Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+        SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...buttons,
+          ]
+        ),
+        SizedBox(height: 10),
+      ]
+    );
+
     double width = 1200;
     return AppScaffoldComponent(
       listWrapper: true,
       width: width,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          MapIt(mapWidth: width!, mapHeight: 300,
-            longitude: _weeklyEvent.location.coordinates[0], latitude: _weeklyEvent.location.coordinates[1],
-            zoom: 17, markerLngLat: [_weeklyEvent.location.coordinates[0], _weeklyEvent.location.coordinates[1]],
-          ),
-          SizedBox(height: 10),
-          Text('${_weeklyEvent.title}'),
-          SizedBox(height: 10),
-          Text('${_weeklyEvent.xDay}s ${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}'),
-          SizedBox(height: 10),
-          ...thisWeekEvent,
-          Text(_weeklyEvent.description),
-          SizedBox(height: 10),
-          ...admins,
-          SizedBox(height: 10),
-          Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-          SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...buttons,
-            ]
-          ),
-          SizedBox(height: 10),
-          ...attendeeInfo,
-          SizedBox(height: 10),
-        ]
-      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 600) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 2, child: content1),
+                SizedBox(width: 10),
+                Expanded(flex: 1, child: content2),
+              ]
+            );
+          } else {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                content1,
+                SizedBox(height: 10),
+                content2,
+              ]
+            );
+          }
+        }
+      )
     );
   }
   

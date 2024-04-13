@@ -68,7 +68,8 @@
         "hostGroupSizeDefault": "{Int} [(minimum) People per each host. This will also be used to calculate credits per event type.]",
         "hostMoneyPerPersonUSD": "{Float}",
         "priceUSD": "{Float} [0 if free. This is the single event price, which will be discounted for monthly and yearly subscriptions.]",
-        "rsvpDeadlineHours": "{Float} [How many hours before event to allow rsvp, otherwise the sign up is for NEXT week]"
+        "rsvpDeadlineHours": "{Float} [How many hours before event to allow rsvp, otherwise the sign up is for NEXT week]",
+        "imageUrls": [ "{String}" ]
     },
     "event": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

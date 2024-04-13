@@ -48,6 +48,7 @@ def test_WeeklyEventFlow():
         "hostMoneyPerPersonUSD": 4,
         "priceUSD": 10,
         "rsvpDeadlineHours": 72,
+        'imageUrls': [ 'img1.jpg' ],
     }
 
     # Add money balance for some users 1.
