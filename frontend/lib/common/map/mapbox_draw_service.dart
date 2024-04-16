@@ -39,7 +39,7 @@ class MapboxDrawService {
   }
 
   Future<Line> drawPolygonEdgeLine(List<LatLng> latLngs, MapboxMapController controller, 
-    {String color = 'red', bool addToDrawings = true, }) async {
+    {String color = 'secondary', bool addToDrawings = true, }) async {
     Line line = await controller.addLine(
       LineOptions(
         lineBlur: 0,
@@ -58,7 +58,7 @@ class MapboxDrawService {
   }
 
   Future<Circle> drawPolygonCircle(LatLng latLng, MapboxMapController controller,
-    {String color = 'magenta', bool addToDrawings = true, }) async {
+    {String color = 'primary', bool addToDrawings = true, }) async {
     Circle circle = await controller.addCircle(
       CircleOptions(
         geometry: latLng,
@@ -79,7 +79,7 @@ class MapboxDrawService {
   }
 
   Future<Fill> drawPolygonFill(List<List<LatLng>> latLngs, MapboxMapController controller,
-    { String color = 'magentaTransparent', bool addToDrawings = true, }) async {
+    { String color = 'primaryTransparent', bool addToDrawings = true, }) async {
     Fill fill = await controller.addFill(
       FillOptions(
         geometry: latLngs,

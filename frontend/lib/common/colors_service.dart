@@ -1,5 +1,30 @@
 import 'package:flutter/material.dart';
 
+// Note: Must also update custom_theme.dart to match
+Map<String, List<double>> _colorMap = {
+  'primary': [0, 181, 181],
+  'primaryLight': [0, 210, 210],
+  'primaryDark': [0, 93, 93],
+  'primaryTransparent': [0, 181, 181, 0.4],
+  'accent': [0, 164, 203],
+  'accentDark': [0, 100, 120, 0.5],
+  'accentTransparent': [0, 164, 203, 0.4],
+  // 'secondary': [1, 142, 211],
+  'secondary': [143, 229, 142],
+  'text': [90, 90, 90],
+  'error': [169, 46, 97],
+  'warning': [220, 145, 110],
+
+  // 'magentaTransparent': [200, 100, 240, 0.4],
+  // 'magenta': [200, 100, 240],
+  // 'red': [200, 100, 0],
+
+  'greyLight': [200, 200, 200],
+  'grey': [125, 125, 125],
+  'greyTransparent': [125, 125, 125, 0.4],
+  'greyDark': [50, 50, 50],
+  'white': [255, 255, 255],
+};
 List<double> primary = [0, 167, 0];
 List<double> secondary = [15, 69, 194];
 List<double> primaryLight = [0, 167, 0, 0.5];
@@ -42,38 +67,35 @@ class ColorsService {
     return _instance;
   }
 
-  Map<String, Color> _colors = {
-    'primary': valsToColor(primary),
-    'secondary': valsToColor(secondary),
-    'primaryLight': valsToColor(primaryLight),
-    'text': valsToColor(text),
+  Map<String, Color> _colors = {};
+  Map<String, String> _colorsStr = {};
 
-    'greyLight': valsToColor(greyLight),
-    'grey': valsToColor(grey),
-    'greyTransparent': valsToColor(greyTransparent),
-    'greyDark': valsToColor(greyDark),
-    'white': valsToColor(white),
-    'red': valsToColor(red),
-    'magentaTransparent': valsToColor(magentaTransparent),
-    'magenta': valsToColor(magenta),
-  };
+  bool _inited = false;
 
-  Map<String, String> _colorsStr = {
-    'primary': valsToString(primary),
-    'secondary': valsToString(secondary),
-    'primaryLight': valsToString(primaryLight),
-    'text': valsToString(text),
+  void Init() {
+    _inited = true;
+    for (String key in _colorMap.keys) {
+      _colors[key] = valsToColor(_colorMap[key]!);
+      _colorsStr[key] = valsToString(_colorMap[key]!);
+    }
+  }
 
-    'greyLight': valsToString(greyLight),
-    'grey': valsToString(grey),
-    'greyTransparent': valsToString(greyTransparent),
-    'greyDark': valsToString(greyDark),
-    'white': valsToString(white),
-    'red':  valsToString(red),
-    'magentaTransparent': valsToString(magentaTransparent),
-    'magenta': valsToString(magenta),
-  };
+  Map<String, Color> GetColors() {
+    if (!_inited) {
+      Init();
+    }
+    return _colors;
+  }
 
-  get colors => _colors;
-  get colorsStr => _colorsStr;
+  Map<String, String> GetColorsStr() {
+    if (!_inited) {
+      Init();
+    }
+    return _colorsStr;
+  }
+
+  // get colors => _colors;
+  // get colorsStr => _colorsStr;
+  get colors => GetColors();
+  get colorsStr => GetColorsStr();
 }
