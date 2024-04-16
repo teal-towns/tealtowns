@@ -3,9 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CustomTheme {
   static ThemeData get lightTheme {
+    Color primary = Color.fromRGBO(0, 181, 181, 1);
+    Color primaryDark = Color.fromRGBO(0, 93, 93, 1);
+    Color secondary = Color.fromRGBO(143, 229, 142, 1);
+    Color accent = Color.fromRGBO(0, 164, 203, 1);
+    Color accentDark = Color.fromRGBO(0, 100, 120, 1);
+    Color text = Color.fromRGBO(90, 90, 90, 1);
+    Color grey = Colors.grey;
+    Color white = Colors.white;
+    Color error = Color.fromRGBO(169, 46, 97, 1);
     return ThemeData(
       // https://paletton.com/#uid=53i0u0kDJDJiVIJpYEuFjqdJVjp
-      primaryColor: Color.fromRGBO(0, 167, 0, 1),
+      primaryColor: primary,
       textTheme: GoogleFonts.ptSansTextTheme().copyWith(
         displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w300),
         displayMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.w300),
@@ -17,22 +26,23 @@ class CustomTheme {
         bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
         bodyMedium: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
       ).apply(
-        bodyColor: Color.fromRGBO(90, 90, 90, 1),
-        displayColor: Color.fromRGBO(90, 90, 90, 1),
+        bodyColor: text,
+        displayColor: text,
       ),
-      colorScheme: const ColorScheme.light(
-        primary: Color.fromRGBO(0, 167, 0, 1),
-        secondary: Color.fromRGBO(15, 69, 194, 1),
-        background: Color.fromRGBO(0, 181, 181, 1),
-        surface: Color.fromRGBO(0, 93, 93, 1),
-      ).copyWith(secondary: Color.fromRGBO(15, 69, 194, 1)).copyWith(background: Colors.grey),
+      colorScheme: ColorScheme.light(
+        primary: primary,
+        secondary: secondary,
+        background: accent,
+        surface: accentDark,
+        error: error,
+      ).copyWith(secondary: secondary).copyWith(background: grey),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           // textStyle: TextStyle(
           //   letterSpacing: 1.05,
           // ),
-          foregroundColor: Colors.white,
-          backgroundColor: Color.fromRGBO(0, 167, 0, 1),
+          foregroundColor: white,
+          backgroundColor: primary,
         )
       ),
       pageTransitionsTheme: PageTransitionsTheme(builders: {
