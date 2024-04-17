@@ -22,7 +22,7 @@ def create_all_indices(db):
     db['userEvent'].create_index([('userId', 1), ('eventId', 1)], unique=True)
     db['userEvent'].create_index([('creditsPriceUSD', 1), ('hostStatus', 1), ('attendeeStatus', 1)], unique=False)
 
-    db['sharedItem'].drop_indexes()
+    # db['sharedItem'].drop_indexes()
     db['sharedItem'].create_index([('uName', 1), ('title', 1), ('currentOwnerUserId', 1), \
         ('currentPurchaserUserId', 1), ('tags', 1), \
         ('currentPrice', 1), ('minOwners', 1), ('maxOwners', 1), ('maxMeters', 1), ('bought', 1), \
