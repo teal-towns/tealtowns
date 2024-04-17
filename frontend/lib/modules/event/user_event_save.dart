@@ -122,7 +122,7 @@ class _UserEventSaveState extends State<UserEventSave> {
       GetUserEvent();
     }
 
-    if (_loading) {
+    if (_loading || _loadingPayment) {
       List<Widget> cols = [];
       if (_loadingPayment) {
         cols += [
@@ -175,6 +175,7 @@ class _UserEventSaveState extends State<UserEventSave> {
       // Text('${_attendeesCount} attending, ${_nonHostAttendeesWaitingCount} waiting'),
       // SizedBox(height: 10),
     ];
+    print ('userEvent ${_userEvent.toJson()}');
     if (_userEvent.attendeeCountAsk > 0) {
       alreadySignedUp = true;
       if (_userEvent.attendeeCount > 0) {

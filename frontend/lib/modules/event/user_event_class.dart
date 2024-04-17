@@ -4,7 +4,7 @@ class UserEventClass {
   ParseService _parseService = ParseService();
 
   String id = '', eventId = '', userId = '', hostStatus = '', attendeeStatus = '';
-  int hostGroupSizeMax = 0, hostGroupSize = 0, attendeeCountAsk = 1, attendeeCount = 0;
+  int hostGroupSizeMax = 0, hostGroupSize = 0, attendeeCountAsk = 0, attendeeCount = 0;
   double creditsEarned = 0, creditsRedeemed = 0, creditsPriceUSD = 0;
 
   UserEventClass(this.id, this.eventId, this.userId, this.hostStatus, this.attendeeStatus,
@@ -19,7 +19,7 @@ class UserEventClass {
     this.attendeeStatus = json['attendeeStatus'] ?? '';
     this.hostGroupSizeMax = json['hostGroupSizeMax'] != null ? _parseService.toIntNoNull(json['hostGroupSizeMax']) : 0;
     this.hostGroupSize = json['hostGroupSize'] != null ? _parseService.toIntNoNull(json['hostGroupSize']) : 0;
-    this.attendeeCountAsk = json['attendeeCountAsk'] != null ? _parseService.toIntNoNull(json['attendeeCountAsk']) : 1;
+    this.attendeeCountAsk = json['attendeeCountAsk'] != null ? _parseService.toIntNoNull(json['attendeeCountAsk']) : 0;
     this.attendeeCount = json['attendeeCount'] != null ? _parseService.toIntNoNull(json['attendeeCount']) : 0;
     this.creditsEarned = json['creditsEarned'] != null ? _parseService.toDoubleNoNull(json['creditsEarned']) : 0;
     this.creditsRedeemed = json['creditsRedeemed'] != null ? _parseService.toDoubleNoNull(json['creditsRedeemed']) : 0;

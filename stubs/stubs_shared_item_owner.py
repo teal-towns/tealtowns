@@ -9,6 +9,7 @@ _default = {
     'monthlyPayment': random.uniform(0, 1000),
     'totalPaid': random.uniform(0, 1000),
     'totalOwed': random.uniform(0, 1000),
+    'totalPaidBack': random.uniform(0, 1000),
     'investorOnly': random.choice([0, 1]),
     'status': '',
     'stripeMonthlyPriceId': '',

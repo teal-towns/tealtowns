@@ -13,9 +13,14 @@ def addRoutes():
             'limit': 25,
             'skip': 0,
             'sortKeys': '-createdAt',
+            'withForLink': 1,
+            'stringKeyVals': {},
         }, data)
-        return _mongo_db_crud.Search('userPayment', sortKeys = data['sortKeys'],
-            limit = data['limit'], skip = data['skip'])
+        ret = _mongo_db_crud.Search('userPayment', stringKeyVals = data['stringKeyVals'],
+            sortKeys = data['sortKeys'], limit = data['limit'], skip = data['skip'])
+        if data['withForLink']:
+            ret['userPayments'] = _user_payment.AddForLinks(ret['userPayments'])
+        return ret
     _socket.add_route('SearchUserPayments', SearchUserPayments)
 
     def SearchUserPaymentSubscriptions(data, auth, websocket):
@@ -23,9 +28,14 @@ def addRoutes():
             'limit': 25,
             'skip': 0,
             'sortKeys': '-createdAt',
+            'withForLink': 1,
+            'stringKeyVals': {},
         }, data)
-        return _mongo_db_crud.Search('userPaymentSubscription', sortKeys = data['sortKeys'],
-            limit = data['limit'], skip = data['skip'])
+        ret = _mongo_db_crud.Search('userPaymentSubscription', stringKeyVals = data['stringKeyVals'],
+            sortKeys = data['sortKeys'], limit = data['limit'], skip = data['skip'])
+        if data['withForLink']:
+            ret['userPaymentSubscriptions'] = _user_payment.AddForLinks(ret['userPaymentSubscriptions'])
+        return ret
     _socket.add_route('SearchUserPaymentSubscriptions', SearchUserPaymentSubscriptions)
 
 addRoutes()

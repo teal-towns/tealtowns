@@ -17,15 +17,6 @@ def test_Save():
     }
     sharedItemOwner = _stubs_data.CreateBulk(objs = [ obj ], collectionName = 'sharedItemOwner',
         saveInDatabase = 0)[0]
-    # sharedItemOwner = {
-    #     "sharedItemId": sharedItem['_id'],
-    #     "userId": user['_id'],
-    #     "generation": 1,
-    #     "monthlyPayment": 50,
-    #     "totalPaid": 100,
-    #     "totalOwed": 0,
-    #     "investorOnly": 0,
-    # }
     ret = _shared_item_owner.Save(sharedItemOwner)
     query = {
         'userId': sharedItemOwner['userId'],

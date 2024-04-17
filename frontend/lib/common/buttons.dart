@@ -16,4 +16,13 @@ class Buttons {
       child: Text(text),
     );
   }
+
+  Widget LinkInline(BuildContext context, String text, String url) {
+    return InkWell(
+      onTap: () {
+        context.go(url);
+      },
+      child: Text(text, style: TextStyle( color: Theme.of(context).primaryColor )),
+    );
+  }
 }

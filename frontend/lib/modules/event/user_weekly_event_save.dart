@@ -152,7 +152,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       GetUserWeeklyEvent();
     }
 
-    if (_loading) {
+    if (_loading || _loadingPayment) {
       List<Widget> cols = [];
       if (_loadingPayment) {
         cols += [

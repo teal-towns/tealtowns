@@ -238,7 +238,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
   }
 
   Widget _buildSubmit(BuildContext context, currentUserState) {
-    if (_loading) {
+    if (_loading || _loadingPayment) {
       List<Widget> cols = [];
       if (_loadingPayment) {
         cols += [

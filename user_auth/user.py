@@ -4,6 +4,9 @@ import lodash
 import mongo_db
 from notifications_all import sms_twilio as _sms_twilio
 from user_auth import user_auth as _user_auth
+import ml_config
+
+_config = ml_config.get_config()
 
 def SaveUser(user):
     ret = { 'valid': 0, 'message': '' } 
@@ -85,3 +88,6 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str):
                 ret['valid'] = 1
                 ret['message'] = 'Your phone number has been removed.'
     return ret
+
+def GetUrl(user: dict):
+    return _config['web_server']['urls']['base'] + '/u/' + str(user['username'])

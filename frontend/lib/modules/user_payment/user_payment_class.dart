@@ -4,10 +4,11 @@ class UserPaymentClass {
   ParseService _parseService = ParseService();
 
   String id = '', forType = '', forId = '', status = '', notes = '', createdAt = '', updatedAt = '';
+  String forLink = '';
   double amountUSD = 0, amountUSDPreFee = 0;
 
   UserPaymentClass(this.id, this.forType, this.forId, this.status, this.notes, this.amountUSD, this.amountUSDPreFee,
-    this.createdAt, this.updatedAt);
+    this.createdAt, this.updatedAt, this.forLink);
 
   UserPaymentClass.fromJson(Map<String, dynamic> json) {
     double amountUSD = json['amountUSD'] != null ? _parseService.toDoubleNoNull(json['amountUSD']) : 0;
@@ -20,6 +21,7 @@ class UserPaymentClass {
     this.amountUSDPreFee = json['amountUSDPreFee'] != null ? _parseService.toDoubleNoNull(json['amountUSDPreFee']) : amountUSD;
     this.createdAt = json['createdAt'] ?? '';
     this.updatedAt = json['updatedAt'] ?? '';
+    this.forLink = json['forLink'] ?? '';
   }
 
 }
