@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/buttons.dart';
+import '../../common/date_time_service.dart';
 import '../../common/paging.dart';
 import '../../common/style.dart';
 import './user_payment_class.dart';
@@ -17,6 +18,7 @@ class UserPayments extends StatefulWidget {
 
 class _UserPaymentsState extends State<UserPayments> {
   Buttons _buttons = Buttons();
+  DateTimeService _dateTime = DateTimeService();
   Style _style = Style();
 
   List<UserPaymentClass> _userPayments = [];
@@ -71,7 +73,7 @@ class _UserPaymentsState extends State<UserPayments> {
   Widget BuildUserPayment(UserPaymentClass userPayment, BuildContext context) {
     Widget forLink = userPayment.forLink.length > 0 ?
       _buttons.LinkInline(context, '${userPayment.forType}', userPayment.forLink) : Text('${userPayment.forType}');
-    String createdAt = DateFormat('M/d/y').format(DateTime.parse(userPayment.createdAt));
+    String createdAt = _dateTime.Format(userPayment.createdAt, 'M/d/y');
     return Container(
       child: Row(
         children: [

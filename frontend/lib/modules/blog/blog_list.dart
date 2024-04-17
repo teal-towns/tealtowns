@@ -7,6 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/date_time_service.dart';
 import '../../common/image_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/form_input/input_fields.dart';
@@ -22,6 +23,7 @@ class BlogList extends StatefulWidget {
 class _BlogListState extends State<BlogList> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
+  DateTimeService _dateTime = DateTimeService();
   ImageService _imageService = ImageService();
   InputFields _inputFields = InputFields();
 
@@ -130,7 +132,7 @@ class _BlogListState extends State<BlogList> {
           SizedBox(height: 5),
           //Text('Tags: ${blog.tags.join(', ')}'),
           //SizedBox(height: 5),
-          Text(DateFormat('yyyy-MM-dd').format(DateTime.parse(blog.createdAt!))),
+          Text(_dateTime.Format(blog.createdAt!, 'yyyy-MM-dd')),
           SizedBox(height: 10),
           ClipRect(
             child: Container(
