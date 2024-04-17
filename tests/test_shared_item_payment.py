@@ -50,6 +50,7 @@ def test_StartPurchase_byOwners():
     sharedItemOwnerBase = {
         'generation': sharedItemBase['generation'] + 1,
         'investorOnly': 0,
+        'totalPaidBack': 0,
     }
 
     sharedItem = _stubs_data.CreateBulk([ sharedItemBase ], collectionName = 'sharedItem', saveInDatabase = 0)[0]
