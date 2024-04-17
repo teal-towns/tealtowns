@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/config_service.dart';
+import '../../common/date_time_service.dart';
 import '../../common/link_service.dart';
 import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
@@ -28,6 +29,7 @@ class WeeklyEventView extends StatefulWidget {
 class _WeeklyEventViewState extends State<WeeklyEventView> {
   List<String> _routeIds = [];
   ConfigService _configService = ConfigService();
+  DateTimeService _dateTime = DateTimeService();
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
   Style _style = Style();
@@ -173,7 +175,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
     List<Widget> thisWeekEvent = [];
     if (_event.start.length > 0) {
-      String startDate = DateFormat('EEEE M/d/y').format(DateTime.parse(_event.start));
+      String startDate = _dateTime.Format(_event.start, 'EEEE M/d/y');
       thisWeekEvent = [
         // Text('This week\'s event starts at ${_event.start}'),
         // SizedBox(height: 10),
@@ -264,7 +266,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         }
       }
       if (!alreadySignedUp) {
-        String startDate = DateFormat('EEEE M/d/y').format(DateTime.parse(_nextEvent.start));
+        String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
         String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
         attendeeInfo += [
           Text(rsvpSignUpText),
