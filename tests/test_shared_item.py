@@ -30,7 +30,7 @@ def test_Save_invalid():
     assert ret['valid'] == 0
 
     sharedItem['currentPrice'] = 100
-    del sharedItem['title']
+    del sharedItem['generation']
     ret = _shared_item.Save(sharedItem)
     assert ret['valid'] == 0
 

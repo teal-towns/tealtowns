@@ -3,10 +3,14 @@
 import date_time
 from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
+import lodash
 import mongo_db
 from shared_item import shared_item_owner as _shared_item_owner
 from shared_item import shared_item_payment as _shared_item_payment
 from shared_item import shared_item_payment_math as _shared_item_payment_math
+import ml_config
+
+_config = ml_config.get_config()
 
 # TODO - type check all fields; add defaults for insert but NOT for update.
 # class SharedItemClass(BaseModel):
@@ -112,6 +116,8 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
 
 def Save(sharedItem: dict, now = None):
     ret = { 'valid': 1, 'message': '', 'sharedItem': {}, 'sharedItemOwner': {} }
+    if '_id' not in sharedItem:
+        sharedItem['uName'] = lodash.CreateUName(sharedItem['title'])
     if 'fundingRequired' not in sharedItem and 'currentPrice' in sharedItem:
         sharedItem['fundingRequired'] = sharedItem['currentPrice']
     insertDefaults = {
@@ -146,6 +152,7 @@ def Save(sharedItem: dict, now = None):
             'monthlyPayment': monthlyPayment,
             'totalPaid': totalPaid,
             'totalOwed': totalOwed,
+            'totalPaidBack': 0,
             'generation': int(ret['sharedItem']['generation']) + 1,
             'investorOnly': 0,
             'status': '',
@@ -191,3 +198,10 @@ def UpdateCachedOwners(sharedItemId: str, now = None):
             _shared_item_payment.StartPurchase(sharedItem, now = now)
 
     return ret
+
+def GetUrl(sharedItem: dict, sharedItemOwnerId: str = ''):
+    # return _config['web_server']['urls']['base'] + '/si/' + str(sharedItem['uName'])
+    url = _config['web_server']['urls']['base'] + '/shared-item-owner-save?sharedItemId=' + sharedItem['_id']
+    if len(sharedItemOwnerId) > 0:
+        url += '&id=' + sharedItemOwnerId
+    return url

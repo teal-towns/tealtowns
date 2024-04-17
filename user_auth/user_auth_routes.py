@@ -30,6 +30,13 @@ def addRoutes():
         return ret
     _socket.add_route('getUserById', GetUserById)
 
+    def GetUserByUsername(data, auth, websocket):
+        user = _user_auth.getByUsername(data['username'])
+        ret = { 'valid': 1, 'message': '', 'user': user }
+        ret = _route_parse.formatRet(data, ret)
+        return ret
+    _socket.add_route('getUserByUsername', GetUserByUsername)
+
     def GetUserSession(data, auth, websocket):
         ret = _user_auth.getSession(data['userId'], data['sessionId'])
         if ret['valid']:

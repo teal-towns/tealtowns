@@ -11,9 +11,10 @@ class Paging extends StatefulWidget {
   Function(dynamic)? onGet;
   int itemsPerPage;
   String sortKeys;
+  Map<String, dynamic> dataDefault;
 
   Paging({Key? key, required this.body, this.dataName= '', this.routeGet = '', this.onGet = null,
-    this.itemsPerPage = 5, this.sortKeys = '-createdAt', }) : super(key: key);
+    this.itemsPerPage = 5, this.sortKeys = '-createdAt', this.dataDefault = const {}, }) : super(key: key);
 
   @override
   _PagingState createState() => _PagingState();
@@ -60,9 +61,23 @@ class _PagingState extends State<Paging> {
   }
 
   @override
+  void dispose() {
+    _socketService.offRouteIds(_routeIds);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<Widget> colsFooter = [];
-    if (_canLoadMore) {
+    if (_loading) {
+      colsFooter = [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.0),
+          child: LinearProgressIndicator(),
+        )
+      ];
+    }
+    else if (_canLoadMore) {
       colsFooter = [
         ElevatedButton(
           onPressed: () {
@@ -105,6 +120,9 @@ class _PagingState extends State<Paging> {
       'limit': widget.itemsPerPage,
       'sortKeys': widget.sortKeys,
     };
+    for (var key in widget.dataDefault.keys) {
+      data[key] = widget.dataDefault[key];
+    }
     _socketService.emit(widget.routeGet, data);
   }
 }

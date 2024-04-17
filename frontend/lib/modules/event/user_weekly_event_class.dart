@@ -4,7 +4,7 @@ class UserWeeklyEventClass {
   ParseService _parseService = ParseService();
 
   String id = '', weeklyEventId = '', userId = '';
-  int attendeeCountAsk = 1;
+  int attendeeCountAsk = 0;
 
   UserWeeklyEventClass(this.id, this.weeklyEventId, this.userId, this.attendeeCountAsk);
 
@@ -12,7 +12,7 @@ class UserWeeklyEventClass {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.weeklyEventId = json['weeklyEventId'] ?? '';
     this.userId = json['userId'] ?? '';
-    this.attendeeCountAsk = json['attendeeCountAsk'] != null ? _parseService.toIntNoNull(json['attendeeCountAsk']) : 1;
+    this.attendeeCountAsk = json['attendeeCountAsk'] != null ? _parseService.toIntNoNull(json['attendeeCountAsk']) : 0;
   }
 
   Map<String, dynamic> toJson() =>

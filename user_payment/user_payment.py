@@ -1,6 +1,9 @@
 from common import mongo_db_crud as _mongo_db_crud
 import mongo_db
 from shared_item import shared_item_payment_math as _shared_item_payment_math
+from event import weekly_event as _weekly_event
+from shared_item import shared_item as _shared_item
+from user_auth import user as _user
 
 def AddPayment(userId: str, amountUSD: float, forType: str, forId: str, status: str = 'complete', notes: str = '',
     removeCutFromBalance: int = 0, amountUSDPreFee: float = 0):
@@ -90,3 +93,36 @@ def GetUserMoneyAndPending(userId: str):
             ret['availableUSD'] += payment['amountUSD']
 
     return ret
+
+def GetForLink(forType: str, forId: str):
+    ret = { 'valid': 1, 'message': '', 'forLink': '' }
+    if forType == 'weeklyEvent':
+        item = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(forId)})['item']
+        if item is not None:
+            ret['forLink'] = _weekly_event.GetUrl(item)
+    elif forType == 'event':
+        item = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(forId)})['item']
+        if item is not None:
+            weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(item['weeklyEventId'])})['item']
+            if weeklyEvent is not None:
+                ret['forLink'] = _weekly_event.GetUrl(weeklyEvent)
+    elif forType == 'sharedItemOwner':
+        item1 = mongo_db.find_one('sharedItemOwner', {'_id': mongo_db.to_object_id(forId)})['item']
+        if item1 is not None:
+            item = mongo_db.find_one('sharedItem', {'_id': mongo_db.to_object_id(item1['sharedItemId'])})['item']
+            if item is not None:
+                ret['forLink'] = _shared_item.GetUrl(item, sharedItemOwnerId = forId)
+    elif forType == 'sharedItem':
+        item = mongo_db.find_one('sharedItem', {'_id': mongo_db.to_object_id(forId)})['item']
+        if item is not None:
+            ret['forLink'] = _shared_item.GetUrl(item)
+    elif forType == 'user':
+        item = mongo_db.find_one('user', {'_id': mongo_db.to_object_id(forId)})['item']
+        if item is not None:
+            ret['forLink'] = _user.GetUrl(item)
+    return ret
+
+def AddForLinks(payments: list):
+    for payment in payments:
+        payment['forLink'] = GetForLink(payment['forType'], payment['forId'])['forLink']
+    return payments

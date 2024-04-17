@@ -44,6 +44,7 @@ class Routes {
   static const designLibrary = '/design-library';
 
   static const user = '/user';
+  static const userUsername = '/u/:username';
 
   static const about = '/about';
   static const team = '/team'; 
@@ -109,6 +110,16 @@ class AppGoRouter {
       GoRoute(
         path: Routes.user,
         builder: (context, state) => User(),
+      ),
+      GoRoute(
+        path: Routes.userUsername,
+        builder: (BuildContext context, GoRouterState state) {
+          String? username = state.pathParameters["username"];
+          if (username != null) {
+            return User(username: username);
+          }
+          return User();
+        },
       ),
 
       GoRoute(

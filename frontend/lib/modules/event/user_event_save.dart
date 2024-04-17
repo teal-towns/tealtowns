@@ -122,7 +122,7 @@ class _UserEventSaveState extends State<UserEventSave> {
       GetUserEvent();
     }
 
-    if (_loading) {
+    if (_loading || _loadingPayment) {
       List<Widget> cols = [];
       if (_loadingPayment) {
         cols += [

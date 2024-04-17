@@ -7,7 +7,7 @@ class SharedItemClass {
   ParseService _parseService = ParseService();
   ImageService _imageService = ImageService();
 
-  String id = '', title = '', description = '', currentOwnerUserId = '', currentPurchaserUserId = '', status = '', currency = '';
+  String id = '', uName = '', title = '', description = '', currentOwnerUserId = '', currentPurchaserUserId = '', status = '', currency = '';
   List<String> tags = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
   double originalPrice = 1000, currentPrice = 1000, maintenancePerYear = 50, maintenanceAvailable = 0, maxMeters = 1500, fundingRequired = 0;
@@ -16,13 +16,14 @@ class SharedItemClass {
   double xDistanceKm = -999;
   SharedItemOwnerClass sharedItemOwner_current = SharedItemOwnerClass.fromJson({});
 
-  SharedItemClass(this.id, this.title, this.description, this.imageUrls, this.currentOwnerUserId, this.currentPurchaserUserId, this.tags,
+  SharedItemClass(this.id, this.uName, this.title, this.description, this.imageUrls, this.currentOwnerUserId, this.currentPurchaserUserId, this.tags,
     this.location, this.bought, this.originalPrice, this.currentPrice, this.currency, this.generation, this.yearsPerGeneration, this.monthsToPayBack,
     this.maintenancePerYear, this.maintenanceAvailable, this.minOwners, this.maxOwners, this.maxMeters, this.status,
     this.pledgedOwners, this.fundingRequired, this.xDistanceKm, this.sharedItemOwner_current);
 
   SharedItemClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
+    this.uName = json['uName'] ?? '';
     this.title = json['title'] ?? '';
     this.description = json['description'] ?? '';
     this.imageUrls = _imageService.GetUrls(_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : []));
@@ -56,6 +57,7 @@ class SharedItemClass {
     {
       '_id': id,
       'id': id,
+      'uName': uName,
       'title': title,
       'description': description,
       'imageUrls': imageUrls,
