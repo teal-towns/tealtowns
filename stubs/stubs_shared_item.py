@@ -17,7 +17,7 @@ _default = {
     'currency': 'USD',
     'generation': random.randint(0, 5),
     'currentGenerationStart': '',
-    'monthsToPayBack': random.randint(0, 36),
+    'monthsToPayBack': random.randint(1, 36),
     'maintenancePerYear': random.randint(10, 1000),
     'maintenanceAvailable': random.randint(0, 1000),
     'minOwners': random.randint(1, 5),
