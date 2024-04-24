@@ -41,3 +41,7 @@ def create_all_indices(db):
         ('status', 1)], unique=False)
     
     db['userStripeAccount'].create_index([('userId', 1)], unique=True)
+
+    db['neighborhood'].create_index([('uName', 1)], unique=True)
+    db['neighborhood'].create_index([('location', '2dsphere')])
+    db['neighborhood'].create_index([('title', 1)], unique=False)
