@@ -201,5 +201,16 @@
         "userId": "{String}",
         "stripeConnectedAccountId": "{String}",
         "status": "{String} pending|complete"
+    },
+    "neighborhood": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "uName": "{String}",
+        "location": {
+            "type": "Point [https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb]",
+            "coordinates": ["{Float} [lng]", "{Float} [lat]"]
+        },
+        "title": "{String}"
     }
 }

@@ -23,6 +23,7 @@ _collectionNames = ['user', 'image', 'blog',
     'weeklyEvent', 'event', 'userWeeklyEvent', 'userEvent',
     'sharedItem', 'sharedItemOwner',
     'userMoney', 'userPayment', 'userPaymentSubscription', 'userStripeAccount',
+    'neighborhood',
 ]
 
 def InitLive():

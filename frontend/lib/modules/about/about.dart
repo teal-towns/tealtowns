@@ -36,7 +36,7 @@ class _AboutState extends State<About> {
       "Our first focus is start the first 100 Shared Ownership Superblocks (100 to 150 neighbors each, connecting weekly for shared meals). Through that we will also trial and select our first 4 to 8 paid team members and generate revenue to pay them.\n\n" +
       "## More Info \n\n" +
       "See our blog for more details!\n\n" +
-      "Contact us: luke.madera@gmail.com\n\n" + 
+      "Contact us: team@tealtowns.org\n\n" + 
       "## Get Involved \n\n" +
       "Click **Events** and **Own** to post the first events and shared items in your neighborhood!\n\n";;
     return AppScaffoldComponent(

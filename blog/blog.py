@@ -28,10 +28,16 @@ def Save(blog, userIdCreator = ''):
     ret = { 'valid': 1, 'message': '', 'blog': {} }
 
     if '_id' not in blog or not blog['_id']:
-        newData = blog
         blog['userIdCreator'] = userIdCreator
         blog['slug'] = GetSlug(blog['title'])
-        result = mongo_db.insert_one('blog', newData)
+        insertDefaults = {
+            'tags': [],
+        }
+        retCheck = mongo_db.Validate('blog', blog, insertDefaults = insertDefaults)
+        if not retCheck['valid']:
+            return retCheck
+        blog = retCheck['item']
+        result = mongo_db.insert_one('blog', blog)
         blog['_id'] = mongo_db.from_object_id(result['item']['_id'])
     else:
         query = {
