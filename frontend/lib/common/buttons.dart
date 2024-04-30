@@ -17,6 +17,15 @@ class Buttons {
     );
   }
 
+  Widget LinkElevated(BuildContext context, String text, String url) {
+    return ElevatedButton(
+      onPressed: () {
+        context.go(url);
+      },
+      child: Text(text),
+    );
+  }
+
   Widget LinkInline(BuildContext context, String text, String url) {
     return InkWell(
       onTap: () {

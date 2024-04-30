@@ -20,18 +20,18 @@ import './shared_item_owner_class.dart';
 import '../user_auth/current_user_state.dart';
 
 
-class SharedItem extends StatefulWidget {
+class SharedItems extends StatefulWidget {
   final double lat;
   final double lng;
   final double maxMeters;
 
-  SharedItem({ this.lat = -999, this.lng = -999, this.maxMeters = 1500, });
+  SharedItems({ this.lat = -999, this.lng = -999, this.maxMeters = 1500, });
 
   @override
-  _SharedItemState createState() => _SharedItemState();
+  _SharedItemsState createState() => _SharedItemsState();
 }
 
-class _SharedItemState extends State<SharedItem> {
+class _SharedItemsState extends State<SharedItems> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();

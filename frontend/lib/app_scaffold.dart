@@ -151,6 +151,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   Widget _buildDrawer(BuildContext context, var currentUserState) {
     List<Widget> columns = [
       _buildLinkButton(context, '/weekly-events', 'Events'),
+      _buildLinkButton(context, '/neighborhoods', 'Neighborhoods'),
       _buildLinkButton(context, '/own', 'Shared Items'),
     ];
     if (currentUserState.isLoggedIn) {
