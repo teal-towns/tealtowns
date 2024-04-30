@@ -35,13 +35,14 @@ class Style {
   }
 
   Widget Text1(String text, { String size = 'medium', Widget? left = null, Widget? right = null,
-    String colorKey = 'text', }) {
+    String colorKey = 'text', FontWeight fontWeight = FontWeight.normal }) {
     if (!_fontSizeMap.containsKey(size)) {
       size = 'medium';
     }
     Widget content = Text(text, style: TextStyle(
       fontSize: _fontSizeMap[size],
       color: _colors.colors[colorKey],
+      fontWeight: fontWeight,
     ));
     if (left != null || right != null) {
       List<Widget> rows = [];

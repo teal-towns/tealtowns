@@ -65,7 +65,10 @@ class LocationService {
     return true;
   }
 
-  Future<List<double>> GetLocation(BuildContext context, {bool useUser = true}) async {
+  Future<List<double>> GetLocation(BuildContext context, {bool useUser = true, bool useCache = true}) async {
+    if (useCache && LocationValid(_lngLat)) {
+      return _lngLat;
+    }
     var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
     List<double> lngLat = [0, 0];
     if (useUser && currentUser != null && currentUser.location.coordinates.length > 0 &&

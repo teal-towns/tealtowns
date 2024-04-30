@@ -26,7 +26,11 @@ import './modules/event/weekly_event_view.dart';
 
 import './modules/land/land_page.dart';
 
-import './modules/shared_item/shared_item.dart';
+import './modules/neighborhood/neighborhood.dart';
+import './modules/neighborhood/neighborhoods_page.dart';
+import './modules/neighborhood/neighborhood_save.dart';
+
+import './modules/shared_item/shared_items.dart';
 import './modules/shared_item/shared_item_save.dart';
 import './modules/shared_item/shared_item_owner_save.dart';
 
@@ -62,7 +66,11 @@ class Routes {
 
   static const land = '/land';
 
-  static const sharedItem = '/own';
+  static const neighborhoodSave = '/neighborhood-save';
+  static const neighborhoodView = '/n/:uName';
+  static const neighborhoods = '/neighborhoods';
+
+  static const sharedItems = '/own';
   static const sharedItemSave = '/shared-item-save';
   static const sharedItemOwnerSave = '/shared-item-owner-save';
 
@@ -180,8 +188,31 @@ class AppGoRouter {
       ),
 
       GoRoute(
-        path: Routes.sharedItem,
-        builder: (BuildContext context, GoRouterState state) => SharedItem(
+        path: Routes.neighborhoods,
+        builder: (context, state) => NeighborhoodsPage(),
+      ),
+      GoRoute(
+        path: Routes.neighborhoodSave,
+        builder: (BuildContext context, GoRouterState state) => NeighborhoodSave(
+          uName: state.uri.queryParameters['uName'] ?? '',
+          lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
+          lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
+        )
+      ),
+      GoRoute(
+        path: Routes.neighborhoodView,
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters["uName"];
+          if (uName != null) {
+            return Neighborhood(uName: uName);
+          }
+          return NeighborhoodSave();
+        },
+      ),
+
+      GoRoute(
+        path: Routes.sharedItems,
+        builder: (BuildContext context, GoRouterState state) => SharedItems(
           lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
           lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
           maxMeters: double.parse(state.uri.queryParameters['range'] ?? '1500'),

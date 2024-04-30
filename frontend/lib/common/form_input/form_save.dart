@@ -24,6 +24,7 @@ class FormSave extends StatefulWidget {
   Function(dynamic)? preSave;
   Function(dynamic)? parseData;
   String? id;
+  String? uName;
   Map<String, Map<String, dynamic>>? formFields;
   double fieldWidth;
   String mode;
@@ -32,7 +33,7 @@ class FormSave extends StatefulWidget {
   String title;
 
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
-    this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.id = '', this.formFields = null,
+    this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.id = '', this.uName = '', this.formFields = null,
     this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', });
 
   @override
@@ -146,6 +147,11 @@ class _FormSaveState extends State<FormSave> {
       if (widget.id != null && widget.id!.length > 0) {
         var data = {
           'id': widget.id,
+        };
+        _socketService.emit(widget.routeGet, data);
+      } else if (widget.uName != null && widget.uName!.length > 0) {
+        var data = {
+          'uName': widget.uName,
         };
         _socketService.emit(widget.routeGet, data);
       }

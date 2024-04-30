@@ -2,6 +2,7 @@ import copy
 
 import lodash
 import mongo_db
+from common import math_polygon as _math_polygon
 
 def ValidateRequired(obj, keys):
     ret = {"valid": 1, "message": ""}
@@ -29,6 +30,9 @@ def Get(collection: str, stringKeyVals = {}, db1 = None):
     if item is not None:
         ret[collection] = item
     return ret
+
+def GetByUName(collection: str, uName: str, db1 = None, fields = None):
+    return GetById(collection, '', db1 = db1, fields = fields, uName = uName)
 
 def GetById(collection: str, id1: str, db1 = None, fields = None, uName: str = ''):
     ret = {"valid": 1, "message": ""}
@@ -58,6 +62,11 @@ def Save(collection: str, obj, db1 = None):
         del obj['_id']
     if 'createdAt' in obj:
         del obj['createdAt']
+    if 'uName' in obj:
+        retValid = ValidateUName(collection, obj, db1 = db1)
+        if retValid["valid"] < 1:
+            return retValid
+
     if "_id" not in obj:
         ret["insert"] = 1
         result = mongo_db.insert_one(collection, obj, db1 = db1)
@@ -76,6 +85,17 @@ def Save(collection: str, obj, db1 = None):
             ret["message"] = result["message"]
     return ret
 
+def ValidateUName(collection: str, obj: dict, db1 = None):
+    ret = {"valid": 1, "message": "", }
+    query = { "uName": obj["uName"] }
+    if "_id" in obj:
+        query["_id"] = {"$ne": mongo_db.to_object_id(obj["_id"])}
+    item = mongo_db.find_one(collection, query, db1 = db1, fields = { "uName": 1 })["item"]
+    if item is not None:
+        ret['valid'] = 0
+        ret['message'] = "uName already exists."
+    return ret
+
 def RemoveById(collection: str, id1: str, db1 = None):
     ret = {"valid": 1, "message": ""}
     query = {"_id": mongo_db.to_object_id(id1)}
@@ -84,12 +104,15 @@ def RemoveById(collection: str, id1: str, db1 = None):
 
 # e.g. search('twin_model', { 'name': 'mod' }, { 'disease_names': ['alzheimer'] }, sortKeys = 'name,-created_at')
 def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
-    skip=0, notInListKeyVals={}, minKeyVals = {}, maxKeyVals = {}, query = {}, fields = None, db1 = None):
+    skip=0, notInListKeyVals={}, minKeyVals = {}, maxKeyVals = {}, locationKeyVals = {}, query = {},
+    fields = None, db1 = None, withLocationDistance: int = 0, locationDistanceSuffix: str = '_DistanceKm',
+    locationDistancePrecision = 2):
     ret = {"valid": 1, "message": ""}
     objKey = collection + "s"
     ret[objKey] = []
 
-    query1 = FormSearchQuery(stringKeyVals, listKeyVals, notInListKeyVals, minKeyVals, maxKeyVals, query = query)
+    query1 = FormSearchQuery(stringKeyVals, listKeyVals, notInListKeyVals, minKeyVals, maxKeyVals,
+        locationKeyVals = locationKeyVals, query = query)
 
     sort = None
     if len(sortKeys) > 0:
@@ -102,10 +125,17 @@ def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
             sort[sortKey] = sortVal
 
     ret[objKey] = mongo_db.find(collection, query1, limit=limit, skip=skip, sort_obj=sort, fields = fields, db1 = db1)["items"]
+    if (withLocationDistance > 0):
+        for index, item in enumerate(ret[objKey]):
+            for key in locationKeyVals:
+                locationKey = key + locationDistanceSuffix
+                lngLat = locationKeyVals[key]['lngLat']
+                ret[objKey][index][locationKey] = round(_math_polygon.Haversine(item[key]['coordinates'],
+                    lngLat, units = 'kilometers'), locationDistancePrecision)
     return ret
 
 def FormSearchQuery(stringKeyVals={}, listKeyVals={}, notInListKeyVals={}, minKeyVals = {},
-    maxKeyVals = {}, query = {}):
+    maxKeyVals = {}, locationKeyVals = {}, query = {}):
     queryCopy = copy.deepcopy(query)
     for key in stringKeyVals:
         if len(stringKeyVals[key]) > 0:
@@ -125,4 +155,15 @@ def FormSearchQuery(stringKeyVals={}, listKeyVals={}, notInListKeyVals={}, minKe
     for key in maxKeyVals:
         # if len(maxKeyVals[key]) > 0:
         queryCopy[key] = {"$lte": maxKeyVals[key]}
+    for key in locationKeyVals:
+        if 'lngLat' in locationKeyVals[key] and 'maxMeters' in locationKeyVals[key]:
+            queryCopy[key] = {
+                '$nearSphere': {
+                    '$geometry': {
+                        'type': 'Point',
+                        'coordinates': locationKeyVals[key]['lngLat'],
+                    },
+                    '$maxDistance': locationKeyVals[key]['maxMeters'],
+                }
+            }
     return queryCopy
