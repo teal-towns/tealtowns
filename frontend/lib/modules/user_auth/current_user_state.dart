@@ -34,11 +34,14 @@ class CurrentUserState extends ChangeNotifier {
           if (user.id.length > 0) {
             setCurrentUser(user);
           }
+        } else {
+          clearUser();
         }
         _status = "done";
       }));
 
       _routeIds.add(_socketService.onRoute('logout', callback: (String resString) {
+        clearUser();
         _status = "done";
       }));
     }
