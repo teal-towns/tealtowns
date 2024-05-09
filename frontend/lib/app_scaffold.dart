@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 
 import './modules/user_auth/current_user_state.dart';
+import './modules/neighborhood/neighborhood_state.dart';
 import './routes.dart';
 
 _launchURL(url) async {
@@ -223,7 +224,20 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildHeader(BuildContext context, var currentUserState) {
-    List<Widget> rows = [
+    List<Widget> rows = [];
+    if (currentUserState.isLoggedIn) {
+      var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+      // var neighborhoodState = context.watch<NeighborhoodState>();
+      if (neighborhoodState.defaultUserNeighborhood != null) {
+        rows += [
+          Expanded(
+            flex: 1,
+            child: _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}', 'Neighborhood', Icons.house, context, width: double.infinity, fontSize: 10),
+          ),
+        ];
+      }
+    }
+    rows += [
       // Expanded(
       //   flex: 1,
       //   child: _buildNavButton('/home', 'Home', Icons.home, context, width: double.infinity, fontSize: 10),
@@ -340,6 +354,17 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildMedium(BuildContext context, var currentUserState) {
+    List<Widget> buttons = [];
+    if (currentUserState.isLoggedIn) {
+      var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+      // var neighborhoodState = context.watch<NeighborhoodState>();
+      if (neighborhoodState.defaultUserNeighborhood != null) {
+        buttons += [
+          _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}',
+            'Neighborhood', Icons.house, context),
+        ];
+      }
+    }
     Widget content = Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -354,6 +379,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
         actions: <Widget>[
           // _buildNavButton('/home', 'Home', Icons.home, context),
           // _buildNavButton('/own', 'Own', Icons.build, context),
+          ...buttons,
           _buildNavButton('/eat', 'Shared Meals', Icons.event, context),
           _buildUserButton(context, currentUserState),
           _buildDrawerButton(context),

@@ -59,7 +59,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       }
     }));
 
-    Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods(notify: false);
+    // Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods(notify: false);
 
     SearchNeighborhoods();
   }
