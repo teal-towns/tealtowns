@@ -7,6 +7,10 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0, 
     withConnections: int = 0, weeklyEventsCount: int = 3, sharedItemsCount: int = 3, maxMeters: float = 500,
     limitCount: int = 250, withUsersCount: int = 0):
     ret = _mongo_db_crud.GetByUName('neighborhood', uName)
+    if '_id' not in ret['neighborhood']:
+        ret['valid'] = 0
+        ret['message'] = 'Neighborhood not found for ' + uName
+        return ret
 
     lngLat = ret['neighborhood']['location']['coordinates']
     if withWeeklyEvents or withUsersCount:
