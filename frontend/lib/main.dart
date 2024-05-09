@@ -90,7 +90,15 @@ class _MyApp extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<CurrentUserState>(context, listen: false).checkAndLogin();
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    currentUserState.checkAndLogin();
+    var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+    if(currentUserState.isLoggedIn) {
+      String userId = currentUserState.currentUser.id;
+      neighborhoodState.CheckAndGet(userId, notify: false);
+    } else {
+      neighborhoodState.ClearUserNeighborhoods(notify: false);
+    }
 
     return MaterialApp.router(
       theme: CustomTheme.lightTheme,

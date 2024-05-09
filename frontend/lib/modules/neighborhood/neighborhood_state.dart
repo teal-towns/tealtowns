@@ -48,10 +48,8 @@ class NeighborhoodState extends ChangeNotifier {
   void CheckAndGet(String userId, {bool notify = true}) {
     GetLocalstorage();
     List<dynamic>? _localStorageUserNeighborhoods = _localstorage?.getItem('userNeighborhoods');
-    print ('neighborhoods $userId $_localStorageUserNeighborhoods');
     List<UserNeighborhoodClass> userNeighborhoods = _localStorageUserNeighborhoods != null ?
       UserNeighborhoodClass.parseList(_localStorageUserNeighborhoods) : [];
-    print ('userNeighborhoods.length ${userNeighborhoods.length}');
     if (userNeighborhoods.length < 1) {
       // _status = "loading";
       _socketService.emit('SearchUserNeighborhoods', { 'userId': userId, 'withNeighborhoods': 1, });

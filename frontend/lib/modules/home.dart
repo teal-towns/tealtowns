@@ -24,22 +24,23 @@ class _HomeComponentState extends State<HomeComponent> {
     // Timer(Duration(milliseconds: 500), () {
     //   context.go('/about');
     // });
-    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
-    if(currentUserState.isLoggedIn) {
-      String userId = currentUserState.currentUser.id;
-      neighborhoodState.CheckAndGet(userId);
-    } else {
-      neighborhoodState.ClearUserNeighborhoods(notify: false);
-    }
+
+    // var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    // var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+    // if(currentUserState.isLoggedIn) {
+    //   String userId = currentUserState.currentUser.id;
+    //   neighborhoodState.CheckAndGet(userId);
+    // } else {
+    //   neighborhoodState.ClearUserNeighborhoods(notify: false);
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    var neighborhoodState = context.watch<NeighborhoodState>();
-    if (neighborhoodState.defaultUserNeighborhood != null) {
-      context.go('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}');
-    }
+    // var neighborhoodState = context.watch<NeighborhoodState>();
+    // if (neighborhoodState.defaultUserNeighborhood != null) {
+    //   context.go('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}');
+    // }
 
     double imageSize = 150;
     return AppScaffoldComponent(
