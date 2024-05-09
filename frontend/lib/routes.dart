@@ -29,6 +29,8 @@ import './modules/land/land_page.dart';
 import './modules/neighborhood/neighborhood.dart';
 import './modules/neighborhood/neighborhoods_page.dart';
 import './modules/neighborhood/neighborhood_save.dart';
+import './modules/neighborhood/belonging_survey.dart';
+import './modules/neighborhood/neighborhood_journey_page.dart';
 
 import './modules/shared_item/shared_items.dart';
 import './modules/shared_item/shared_item_save.dart';
@@ -69,6 +71,8 @@ class Routes {
   static const neighborhoodSave = '/neighborhood-save';
   static const neighborhoodView = '/n/:uName';
   static const neighborhoods = '/neighborhoods';
+  static const neighborhoodJourney = '/neighborhood-journey';
+  static const belongingSurvey = '/belonging-survey';
 
   static const sharedItems = '/own';
   static const sharedItemSave = '/shared-item-save';
@@ -208,6 +212,14 @@ class AppGoRouter {
           }
           return NeighborhoodSave();
         },
+      ),
+      GoRoute(
+        path: Routes.neighborhoodJourney,
+        builder: (context, state) => NeighborhoodJourneyPage(),
+      ),
+      GoRoute(
+        path: Routes.belongingSurvey,
+        builder: (context, state) => BelongingSurvey(),
       ),
 
       GoRoute(

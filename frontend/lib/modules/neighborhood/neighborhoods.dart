@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import './neighborhood_class.dart';
+import './neighborhood_state.dart';
+import '../user_auth/current_user_state.dart';
 import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/layout_service.dart';
@@ -49,11 +51,17 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       setState(() { _loading = false; });
     }));
 
-    var data = {
-      'location': { 'lngLat': [widget.lng, widget.lat], 'maxMeters': widget.maxMeters, },
-      'withLocationDistance': 1,
-    };
-    _socketService.emit('SearchNeighborhoods', data);
+    _routeIds.add(_socketService.onRoute('SaveUserNeighborhood', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        SearchNeighborhoods();
+      }
+    }));
+
+    Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods(notify: false);
+
+    SearchNeighborhoods();
   }
 
   @override
@@ -74,10 +82,25 @@ class _NeighborhoodsState extends State<Neighborhoods> {
     } else {
       List<Widget> elements = [];
       for (var i = 0; i < _neighborhoods.length; i++) {
+        List<Widget> colsDefault = [ SizedBox.shrink() ];
+        if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn &&
+          (!_neighborhoods[i].userNeighborhood.containsKey('status') ||
+          _neighborhoods[i].userNeighborhood['status'] != 'default')) {
+          colsDefault = [
+            ElevatedButton(
+              onPressed: () {
+                SaveUserNeighborhood(_neighborhoods[i].id);
+              },
+              child: Text('Make Default'),
+            ),
+            SizedBox(height: 10),
+          ];
+        }
         elements.add(Column(
           children: [
             Text('${_neighborhoods[i].title} (${_neighborhoods[i].location_DistanceKm} km)'),
             SizedBox(height: 10),
+            ...colsDefault,
             _buttons.LinkInline(context, '${config['SERVER_URL']}/n/${_neighborhoods[i].uName}', '/n/${_neighborhoods[i].uName}'),
           ]
         ));
@@ -92,5 +115,31 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         _buttons.LinkElevated(context, 'Create Neighborhood', '/neighborhood-save'),
       ]
     );
+  }
+
+  void SearchNeighborhoods() {
+    String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+      Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+    var data = {
+      'location': { 'lngLat': [widget.lng, widget.lat], 'maxMeters': widget.maxMeters, },
+      'withLocationDistance': 1,
+      'userId': userId,
+    };
+    _socketService.emit('SearchNeighborhoods', data);
+  }
+
+  void SaveUserNeighborhood(String neighborhoodId) {
+    String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+      Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+    var data = {
+      'userNeighborhood': {
+        'neighborhoodId': neighborhoodId,
+        'userId': userId,
+        'status': 'default',
+      },
+      'removeDefault': 1,
+    };
+    _socketService.emit('SaveUserNeighborhood', data);
+    Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods();
   }
 }

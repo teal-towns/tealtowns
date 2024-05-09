@@ -167,6 +167,29 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     // ];
     Color footerColor = Colors.white;
 
+    List<Map<String, dynamic>> links = [
+      { 'text': 'About', 'link': '/about', },
+      { 'text': 'Blog', 'link': '/blog', },
+      { 'text': 'Team', 'link': '/team', },
+      { 'text': 'Belonging Survey', 'link': '/belonging-survey', },
+      { 'text': 'Neighborhood Journey', 'link': '/neighborhood-journey', },
+    ];
+    List<TextSpan> spanLinks = [];
+    for (var link in links) {
+      spanLinks.add(
+        TextSpan(
+          text: link['text'],
+          style: TextStyle(color: footerColor),
+          recognizer: TapGestureRecognizer()..onTap = () {
+            context.go(link['link']);
+          },
+        ),
+      );
+      if (link != links.last) {
+        spanLinks.add(TextSpan(text: ' | ', style: TextStyle(color: footerColor),));
+      }
+    }
+
     return Drawer(
       child: Column(
         children: <Widget>[
@@ -189,37 +212,9 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           _buildLogoutButton(context, currentUserState),
           SizedBox(height: 30),
           // Text('Powered by Collobartive.Earth', style: TextStyle(color: Colors.white)),
-          RichText( text: TextSpan(
+          RichText( textAlign: TextAlign.center, text: TextSpan(
             children: [
-              TextSpan(
-                text: 'About',
-                style: TextStyle(color: footerColor),
-                recognizer: TapGestureRecognizer()..onTap = () {
-                  context.go('/about');
-                },
-              ),
-              TextSpan(
-                text: ' | ',
-                style: TextStyle(color: footerColor),
-              ),
-              TextSpan(
-                text: 'Blog',
-                style: TextStyle(color: footerColor),
-                recognizer: TapGestureRecognizer()..onTap = () {
-                  context.go('/blog');
-                },
-              ),
-              TextSpan(
-                text: ' | ',
-                style: TextStyle(color: footerColor),
-              ),
-              TextSpan(
-                text: 'Team',
-                style: TextStyle(color: footerColor),
-                recognizer: TapGestureRecognizer()..onTap = () {
-                  context.go('/team');
-                },
-              ),
+              ...spanLinks,
             ]
           )),
         ],
@@ -349,7 +344,13 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
-        title: Image.asset('assets/images/logo.png', width: 100, height: 50),
+        // title: Image.asset('assets/images/logo.png', width: 100, height: 50),
+        title: InkWell(
+          onTap: () {
+            context.go('/home');
+          },
+          child: Image.asset('assets/images/logo.png', width: 100, height: 50),
+        ),
         actions: <Widget>[
           // _buildNavButton('/home', 'Home', Icons.home, context),
           // _buildNavButton('/own', 'Own', Icons.build, context),

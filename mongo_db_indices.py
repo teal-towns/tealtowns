@@ -45,3 +45,5 @@ def create_all_indices(db):
     db['neighborhood'].create_index([('uName', 1)], unique=True)
     db['neighborhood'].create_index([('location', '2dsphere')])
     db['neighborhood'].create_index([('title', 1)], unique=False)
+
+    db['userNeighborhood'].create_index([('userId', 1), ('neighborhoodId', 1)], unique=True)

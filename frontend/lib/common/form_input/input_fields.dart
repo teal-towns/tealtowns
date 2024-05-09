@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 //import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 import './input_checkbox.dart';
+import './input_select_buttons.dart';
+import '../colors_service.dart';
 import '../parse_service.dart';
 
 class InputFields {
@@ -15,6 +17,7 @@ class InputFields {
     return _instance;
   }
 
+  ColorsService _colors = ColorsService();
   ParseService _parseService = ParseService();
 
   Widget inputEmail(var formVals, String? formValsKey, { String label = 'Email',
@@ -425,6 +428,46 @@ class InputFields {
     ), helpText: helpText);
   }
 
+  Widget inputSelectButtons(var options, var formVals, String? formValsKey, { String label = '',
+    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '', }) {
+    String value = '';
+    if (formValsKey == null) {
+      value = formVals;
+    } else {
+      value = (formVals.containsKey(formValsKey)) ? formVals[formValsKey].toString() : '';
+    }
+    if (options.length < 1) {
+      return SizedBox.shrink();
+    }
+    return InputWrapper(SelectButtonsFormField(
+      options: options,
+      colorSelected: _colors.colors['primary'],
+      color: _colors.colors['greyLight'],
+      label: label,
+      initialValue: value,
+      onSaved: (value) {
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
+        }
+      },
+      onChanged: (value) {
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
+        }
+        if (onChanged != null) {
+          onChanged(value!);
+        }
+      },
+      validator: (value) {
+        return null;
+      },
+    ), helpText: helpText);
+  }
+
   Widget inputSelectSearch(var options, var context, var formVals, String? formValsKey, { String label = '',
     String hint = '', var fieldKey = null, bool required = false, onChanged = null, onKeyUp = null,
     int debounceChange = 1000, String helpText = '', }) {
@@ -617,7 +660,13 @@ Widget InputWrapper(Widget child, { String helpText = '', }) {
       ]
     );
   }
-  return child;
+  // return child;
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      child,
+    ]
+  );
 }
 
 String? validateEmail(String? value) {

@@ -13,10 +13,12 @@ def addRoutes():
             'withLocationDistance': 0,
             'limit': 25,
             'skip': 0,
+            'userId': '',
         }, data)
-        return _mongo_db_crud.Search('neighborhood', { 'title': data['title'], },
+        return _neighborhood.SearchNear(stringKeyVals = { 'title': data['title'], },
             locationKeyVals = { 'location': data['location'], }, limit = data['limit'], skip = data['skip'],
-            withLocationDistance = data['withLocationDistance'])
+            withLocationDistance = data['withLocationDistance'],
+            userId = data['userId'])
     _socket.add_route('SearchNeighborhoods', Search)
 
     def Save(data, auth, websocket):
@@ -38,10 +40,11 @@ def addRoutes():
             'weeklyEventsCount': 3,
             'sharedItemsCount': 3,
             'limitCount': 250,
+            'withUsersCount': 0,
         }, data)
         return _neighborhood.GetByUName(data['uName'], data['withWeeklyEvents'], data['withSharedItems'],
             data['withSustainability'], data['withConnections'], data['weeklyEventsCount'],
-            data['sharedItemsCount'], limitCount = data['limitCount'])
+            data['sharedItemsCount'], limitCount = data['limitCount'], withUsersCount = data['withUsersCount'])
     _socket.add_route('GetNeighborhoodByUName', GetByUName)
 
 addRoutes()

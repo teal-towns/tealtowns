@@ -27,14 +27,17 @@ class FormSave extends StatefulWidget {
   String? uName;
   Map<String, Map<String, dynamic>>? formFields;
   double fieldWidth;
+  String align;
   String mode;
   List<String> stepKeys;
   String loggedOutRedirect;
   String title;
+  String saveText;
 
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
-    this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.id = '', this.uName = '', this.formFields = null,
-    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', });
+    this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.align = 'center', this.id = '',
+    this.uName = '', this.formFields = null,
+    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', this.saveText = 'Save', });
 
   @override
   _FormSaveState createState() => _FormSaveState();
@@ -144,16 +147,18 @@ class _FormSaveState extends State<FormSave> {
     if (!_firstLoadDone) {
       _firstLoadDone = true;
 
-      if (widget.id != null && widget.id!.length > 0) {
-        var data = {
-          'id': widget.id,
-        };
-        _socketService.emit(widget.routeGet, data);
-      } else if (widget.uName != null && widget.uName!.length > 0) {
-        var data = {
-          'uName': widget.uName,
-        };
-        _socketService.emit(widget.routeGet, data);
+      if (widget.routeGet.length > 0) {
+        if (widget.id != null && widget.id!.length > 0) {
+          var data = {
+            'id': widget.id,
+          };
+          _socketService.emit(widget.routeGet, data);
+        } else if (widget.uName != null && widget.uName!.length > 0) {
+          var data = {
+            'uName': widget.uName,
+          };
+          _socketService.emit(widget.routeGet, data);
+        }
       }
     }
   }
@@ -180,7 +185,7 @@ class _FormSaveState extends State<FormSave> {
           }
           setState(() { _message = _message; });
         },
-        child: Text('Save'),
+        child: Text(widget.saveText),
       ),
     );
   }
@@ -323,7 +328,9 @@ class _FormSaveState extends State<FormSave> {
       }
     }
 
+    CrossAxisAlignment align = widget.align == 'center' ? CrossAxisAlignment.center : CrossAxisAlignment.start;
     return Column(
+      crossAxisAlignment: align,
       children: [
         FormFields(),
         _buildSubmit(context),
@@ -336,7 +343,7 @@ class _FormSaveState extends State<FormSave> {
     widget.formFields!.forEach((key, value) {
       inputs.add(FormField(key, value));
     });
-    return _layoutService.WrapWidth(inputs, width: widget.fieldWidth);
+    return _layoutService.WrapWidth(inputs, width: widget.fieldWidth, align: widget.align,);
   }
 
   Widget FormField(key, value) {
@@ -356,6 +363,8 @@ class _FormSaveState extends State<FormSave> {
         nestedCoordinates: nestedCoordinates);
     } else if (value['type'] == 'select') {
       input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText,);
+    } else if (value['type'] == 'selectButtons') {
+      input = _inputFields.inputSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText,);
     } else if (value['type'] == 'time') {
       input = _inputFields.inputTime(_formVals, key, label: label, required: required, helpText: helpText,);
     } else if (value['type'] == 'number') {
@@ -407,6 +416,10 @@ class _FormSaveState extends State<FormSave> {
   }
 
   void saveData(var data) {
-    _socketService.emit(widget.routeSave, data);
+    if (widget.routeSave.length > 0) {
+      _socketService.emit(widget.routeSave, data);
+    } else {
+      setState(() { _loading = false; });
+    }
   }
 }
