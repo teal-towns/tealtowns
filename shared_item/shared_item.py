@@ -42,7 +42,7 @@ _config = ml_config.get_config()
 
 def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [], fundingRequired_min: float = -1,
     fundingRequired_max: float = -1, limit: int = 25, skip: int = 0, withOwnerUserId: str = '',
-    myType: str = ''):
+    myType: str = '', status: str = 'available'):
     query = {}
     listKeyVals = {}
     useDistance = 0
@@ -73,7 +73,7 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
                     '$maxDistance': maxMeters,
                 }
             },
-            'status': 'available',
+            'status': status,
         }
     minKeyVals = {}
     if fundingRequired_min > 0:

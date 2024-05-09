@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../app_scaffold.dart';
 import '../common/buttons.dart';
 import '../common/style.dart';
+import '../modules/neighborhood/neighborhood_state.dart';
+import '../modules/user_auth/current_user_state.dart';
 
 class HomeComponent extends StatefulWidget {
   @override
@@ -15,16 +18,29 @@ class _HomeComponentState extends State<HomeComponent> {
   Buttons _buttons = Buttons();
   Style _style = Style();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   Timer(Duration(milliseconds: 500), () {
-  //     context.go('/about');
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    // Timer(Duration(milliseconds: 500), () {
+    //   context.go('/about');
+    // });
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+    if(currentUserState.isLoggedIn) {
+      String userId = currentUserState.currentUser.id;
+      neighborhoodState.CheckAndGet(userId);
+    } else {
+      neighborhoodState.ClearUserNeighborhoods(notify: false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    var neighborhoodState = context.watch<NeighborhoodState>();
+    if (neighborhoodState.defaultUserNeighborhood != null) {
+      context.go('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}');
+    }
+
     double imageSize = 150;
     return AppScaffoldComponent(
       listWrapper: true,
@@ -73,9 +89,10 @@ class _HomeComponentState extends State<HomeComponent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buttons.LinkElevated(context, 'Create event', '/weekly-event-save'),
-              _style.SpacingV('xlarge'),
-              _buttons.LinkElevated(context, 'Join an event', '/weekly-events'),
+              // _buttons.LinkElevated(context, 'Create event', '/weekly-event-save'),
+              _buttons.LinkElevated(context, 'Join your neighborhood', '/neighborhoods'),
+              // _style.SpacingV('xlarge'),
+              // _buttons.LinkElevated(context, 'Join or create an event', '/weekly-events'),
             ]
           ),
           _style.SpacingH('xlarge'),

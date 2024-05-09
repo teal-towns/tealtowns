@@ -9,6 +9,8 @@ import '../../common/layout_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './neighborhood_class.dart';
+import './neighborhood_journey.dart';
+import './neighborhood_journey_service.dart';
 import '../event/weekly_event_class.dart';
 import '../shared_item/shared_item_class.dart';
 import '../user_auth/current_user_state.dart';
@@ -26,6 +28,7 @@ class Neighborhood extends StatefulWidget {
 class _NeighborhoodState extends State<Neighborhood> {
   Buttons _buttons = Buttons();
   LayoutService _layoutService = LayoutService();
+  NeighborhoodJourneyService _neighborhoodJourneyService = NeighborhoodJourneyService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Style _style = Style();
@@ -33,9 +36,12 @@ class _NeighborhoodState extends State<Neighborhood> {
   NeighborhoodClass _neighborhood = NeighborhoodClass.fromJson({});
   int _weeklyEventsCount = 0;
   int _sharedItemsCount = 0;
+  int _usersCount = 0;
   List<WeeklyEventClass> _weeklyEvents = [];
   List<SharedItemClass> _sharedItems = [];
   bool _inited = false;
+  List<Map<String, dynamic>> _journeySteps = [];
+  bool _showFullNeighborhoodJourney = false;
 
   @override
   void initState() {
@@ -48,6 +54,7 @@ class _NeighborhoodState extends State<Neighborhood> {
         _neighborhood = NeighborhoodClass.fromJson(data['neighborhood']);
         _weeklyEventsCount = data['weeklyEventsCount'];
         _sharedItemsCount = data['sharedItemsCount'];
+        _usersCount = data['usersCount'];
         _weeklyEvents = [];
         for (var i = 0; i < data['weeklyEvents'].length; i++) {
           _weeklyEvents.add(WeeklyEventClass.fromJson(data['weeklyEvents'][i]));
@@ -56,12 +63,15 @@ class _NeighborhoodState extends State<Neighborhood> {
         for (var i = 0; i < data['sharedItems'].length; i++) {
           _sharedItems.add(SharedItemClass.fromJson(data['sharedItems'][i]));
         }
+        _journeySteps = _neighborhoodJourneyService.StepsWithComplete(_usersCount, _weeklyEventsCount, _sharedItemsCount);
         setState(() {
           _neighborhood = _neighborhood;
           _weeklyEventsCount = _weeklyEventsCount;
           _sharedItemsCount = _sharedItemsCount;
+          _usersCount = _usersCount;
           _weeklyEvents = _weeklyEvents;
           _sharedItems = _sharedItems;
+          _journeySteps = _journeySteps;
         });
       }
     }));
@@ -132,6 +142,14 @@ class _NeighborhoodState extends State<Neighborhood> {
       ];
     }
 
+    List<Widget> colsFullJourney = [];
+    if (_showFullNeighborhoodJourney) {
+      colsFullJourney = [
+        SizedBox(height: 10),
+        NeighborhoodJourney(),
+      ];
+    }
+
     double lng = _neighborhood.location.coordinates[0];
     double lat = _neighborhood.location.coordinates[1];
     return AppScaffoldComponent(
@@ -141,6 +159,18 @@ class _NeighborhoodState extends State<Neighborhood> {
         children: [
           _style.Text1('${_neighborhood.title}', size: 'xlarge'),
           _style.SpacingH('medium'),
+          NeighborhoodJourney(steps: _journeySteps, currentStepOnly: true,),
+          _style.SpacingH('medium'),
+          // _buttons.Link(context, 'View Full Neighborhood Journey', '/neighborhood-journey'),
+          TextButton(
+            onPressed: () {
+              _showFullNeighborhoodJourney = !_showFullNeighborhoodJourney;
+              setState(() { _showFullNeighborhoodJourney = _showFullNeighborhoodJourney; });
+            },
+            child: Text(_showFullNeighborhoodJourney ? 'Hide Full Neighborhood Journey' : 'View Full Neighborhood Journey'),
+          ),
+          ...colsFullJourney,
+          _style.SpacingH('large'),
           Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,6 +208,7 @@ class _NeighborhoodState extends State<Neighborhood> {
       'withSharedItems': 1,
       'withConnections': 1,
       'withSustainability': 1,
+      'withUsersCount': 1,
       'limitCount': widget.limitCount,
     };
     _socketService.emit('GetNeighborhoodByUName', data);

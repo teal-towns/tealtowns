@@ -7,6 +7,7 @@ import notifications
 
 from notifications_all import sms_twilio as _sms_twilio
 
+from stubs import stubs_event as _stubs_event
 from stubs import stubs_shared_item as _stubs_shared_item
 from stubs import stubs_shared_item_owner as _stubs_shared_item_owner
 from stubs import stubs_user as _stubs_user
@@ -23,7 +24,7 @@ _collectionNames = ['user', 'image', 'blog',
     'weeklyEvent', 'event', 'userWeeklyEvent', 'userEvent',
     'sharedItem', 'sharedItemOwner',
     'userMoney', 'userPayment', 'userPaymentSubscription', 'userStripeAccount',
-    'neighborhood',
+    'neighborhood', 'userNeighborhood',
 ]
 
 def InitLive():
@@ -53,6 +54,7 @@ def InitAllCollections():
         config = ml_config.get_config()
         log.init_logger(config)
 
+        _stubs_event.AddDefault()
         _stubs_shared_item.AddDefault()
         _stubs_shared_item_owner.AddDefault()
         _stubs_user.AddDefault()

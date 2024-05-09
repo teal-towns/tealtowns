@@ -17,6 +17,7 @@ import './routes.dart';
 import './styles/custom_theme.dart';
 
 import './modules/blog/blog_state.dart';
+import './modules/neighborhood/neighborhood_state.dart';
 import './modules/shared_item/shared_item_state.dart';
 
 main() async {
@@ -72,6 +73,7 @@ main() async {
       //ChangeNotifierProvider(create: (context) => AppState()),
       ChangeNotifierProvider(create: (context) => CurrentUserState()),
       ChangeNotifierProvider(create: (context) => BlogState()),
+      ChangeNotifierProvider(create: (context) => NeighborhoodState()),
       ChangeNotifierProvider(create: (context) => SharedItemState()),
     ],
     child: MyApp(),

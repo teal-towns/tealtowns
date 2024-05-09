@@ -24,6 +24,13 @@ class _DesignLibraryState extends State<DesignLibrary> {
     {'value': 5, 'label': 'Saturday'},
     {'value': 6, 'label': 'Sunday'},
   ];
+  List<Map<String, dynamic>> _optsRange = [
+    {'value': 1, 'label': 'Strongly disagree'},
+    {'value': 2, 'label': 'Disagree'},
+    {'value': 3, 'label': 'Neutral'},
+    {'value': 4, 'label': 'Agree'},
+    {'value': 5, 'label': 'Strongly agree'},
+  ];
   Map<String, Map<String, dynamic>> _formFields = {
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'location': { 'type': 'location', 'nestedCoordinates': true },
@@ -32,9 +39,11 @@ class _DesignLibraryState extends State<DesignLibrary> {
     'dayOfWeek': { 'type': 'select' },
     'startTime': { 'type': 'time' },
     'hostGroupSizeDefault': { 'type': 'number', 'min': 0, 'required': true },
+    'range': { 'type': 'selectButtons', 'label': 'I like food?' },
   };
   Map<String, dynamic>_formVals = {
     'location': { 'coordinates': [0,0] },
+    'range': 2,
   };
 
   @override
@@ -42,6 +51,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
     super.initState();
 
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
+    _formFields['range']!['options'] = _optsRange;
   }
 
   @override

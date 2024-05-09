@@ -11,11 +11,12 @@ class LayoutService {
 
   get headerHeight => _headerHeight;
 
-  Widget WrapWidth(List<Widget> children, {double width = 250, double spacing = 10}) {
+  Widget WrapWidth(List<Widget> children, {double width = 250, double spacing = 10, String align = 'center'}) {
+    WrapAlignment wrapAlignment = align == 'center' ? WrapAlignment.center : WrapAlignment.start;
     return Wrap(
       spacing: spacing,
       runSpacing: spacing,
-      // alignment: WrapAlignment.center,
+      alignment: wrapAlignment,
       children: <Widget> [
         ...children.map((child) {
           return SizedBox(

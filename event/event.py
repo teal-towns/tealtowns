@@ -70,3 +70,21 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
     nextWeek = thisWeek + datetime.timedelta(days = 7)
     ret['nextStart'] = date_time.string(nextWeek)
     return ret
+
+def GetUsersAttending(daysPast: int = 7, weeklyEventIds: list = [], now = None):
+    ret = { 'valid': 1, 'message': '', 'eventsCount': 0, 'usersCount': 0, }
+    now = now if now is not None else date_time.now()
+    minDate = date_time.string(now - datetime.timedelta(days=daysPast))
+    query = { 'start': { '$gte': minDate } }
+    if len(weeklyEventIds) > 0:
+        query['weeklyEventId'] = { '$in': weeklyEventIds }
+    events = mongo_db.find('event', query)['items']
+    ret['eventsCount'] = len(events)
+    if len(events) > 0:
+        eventIds = []
+        for event in events:
+            eventIds.append(event['_id'])
+        query = { 'eventId': { '$in': eventIds }, 'attendeeCount': { '$gte': 1 } }
+        userIds = mongo_db.findDistinct('userEvent', 'userId', query)['values']
+        ret['usersCount'] = len(userIds)
+    return ret

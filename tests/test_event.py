@@ -1,5 +1,8 @@
 import date_time
 from event import event as _event
+import mongo_db
+import mongo_mock as _mongo_mock
+from stubs import stubs_data as _stubs_data
 
 def test_GetNextEventStart():
     # Event Sunday 17:00
@@ -32,3 +35,82 @@ def test_GetNextEventStart():
     now = date_time.from_string('2024-03-25T09:11:00-07:00')
     start = _event.GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline = 24, now = now)['nextStart']
     assert start == '2024-03-31T17:00:00-07:00'
+
+def test_GetUsersAttending():
+    _mongo_mock.InitAllCollections()
+    users = _stubs_data.CreateBulk(count = 10, collectionName = 'user')
+
+    events = [
+        { 'start': '2024-03-01T17:00:00-07:00' },
+        { 'start': '2024-03-03T17:00:00-07:00' },
+        { 'start': '2024-03-05T17:00:00-07:00' },
+        { 'start': '2024-03-07T17:00:00-07:00' },
+        { 'start': '2024-03-09T17:00:00-07:00' },
+    ]
+    events = _stubs_data.CreateBulk(objs = events, collectionName = 'event')
+
+    # Now is 1 day after the last event, meaning 4 events are within a week (event 0 is NOT)
+    now = date_time.from_string('2024-03-10T17:00:00-07:00')
+
+    # 0 since only attendee > 0 is for event 0, which is too far in the past.
+    userEvents = [
+        { 'userId': users[0]['_id'], 'eventId': events[0]['_id'], 'attendeeCount': 3, },
+        { 'userId': users[1]['_id'], 'eventId': events[1]['_id'], },
+        { 'userId': users[2]['_id'], 'eventId': events[2]['_id'], },
+    ]
+    userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
+    ret = _event.GetUsersAttending(now = now)
+    assert ret['eventsCount'] == 4
+    assert ret['usersCount'] == 0
+    mongo_db.delete_many('userEvent', {})
+
+    # All 3
+    userEvents = [
+        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[1]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[2]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 3, },
+    ]
+    userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
+    ret = _event.GetUsersAttending(now = now)
+    assert ret['eventsCount'] == 4
+    assert ret['usersCount'] == 3
+    mongo_db.delete_many('userEvent', {})
+
+    # 0 since filter by weekly event id
+    userEvents = [
+        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[1]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[2]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 3, },
+    ]
+    userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
+    ret = _event.GetUsersAttending(weeklyEventIds = ['badid'], now = now)
+    assert ret['eventsCount'] == 0
+    assert ret['usersCount'] == 0
+    mongo_db.delete_many('userEvent', {})
+
+    # Only 1 since same user 3 times
+    userEvents = [
+        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[0]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[0]['_id'], 'eventId': events[3]['_id'], 'attendeeCount': 3, },
+    ]
+    userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
+    ret = _event.GetUsersAttending(now = now)
+    assert ret['eventsCount'] == 4
+    assert ret['usersCount'] == 1
+    mongo_db.delete_many('userEvent', {})
+
+    # 2 since only 2 unique users
+    userEvents = [
+        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[1]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[0]['_id'], 'eventId': events[3]['_id'], 'attendeeCount': 3, },
+        { 'userId': users[0]['_id'], 'eventId': events[4]['_id'], 'attendeeCount': 1, },
+    ]
+    userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
+    ret = _event.GetUsersAttending(now = now)
+    assert ret['eventsCount'] == 4
+    assert ret['usersCount'] == 2
+    mongo_db.delete_many('userEvent', {})
+
+    _mongo_mock.CleanUp()

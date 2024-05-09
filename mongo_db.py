@@ -224,6 +224,14 @@ def find(collection_name, query, db1 = None, fields=None, limit=250, skip = 0, s
         'items': list(map(map_object_id_to_string, results))
     }
 
+def findDistinct(collectionName: str, distinctField: str, query: dict, db1 = None):
+    db = db_default(db1)
+    collection = get_collection(collectionName, db)
+    values = collection.distinct(distinctField, query)
+    return {
+        'values': values,
+    }
+
 def delete_one(collection_name, query, db1 = None):
     db = db_default(db1)
     collection = get_collection(collection_name, db)
