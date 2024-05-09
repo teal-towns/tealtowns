@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 
 import './modules/user_auth/current_user_state.dart';
-import '../modules/neighborhood/neighborhood_state.dart';
+import './modules/neighborhood/neighborhood_state.dart';
 import './routes.dart';
 
 _launchURL(url) async {
