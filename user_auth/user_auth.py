@@ -11,7 +11,8 @@ _config = ml_config.get_config()
 
 def encrypt_password(password, salt = 'K4L1Y08Rmx39SIvO'):
     salt = bytes(salt, 'utf-8')
-    return hashlib.scrypt(bytes(password, 'utf-8'), salt = salt, n = 2, r = 8, p = 1)
+    # Need to convert to hex (no special characters) as bytes may be escaped (e.g. \ to \\) when stored in the database.
+    return hashlib.scrypt(bytes(password, 'utf-8'), salt = salt, n = 2, r = 8, p = 1).hex()
 
 def check_encrypted_password(password, hashed):
     if encrypt_password(password) == hashed:
