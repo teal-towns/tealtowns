@@ -73,6 +73,8 @@ class _NeighborhoodState extends State<Neighborhood> {
           _sharedItems = _sharedItems;
           _journeySteps = _journeySteps;
         });
+      } else {
+        context.go('/neighborhoods');
       }
     }));
   }
