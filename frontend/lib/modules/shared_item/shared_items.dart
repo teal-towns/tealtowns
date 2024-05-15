@@ -283,7 +283,7 @@ class _SharedItemsState extends State<SharedItems> {
         //   },
         //   child: Text('Delete'),
         //   style: ElevatedButton.styleFrom(
-        //     foregroundColor: Theme.of(context).errorColor,
+        //     foregroundColor: Theme.of(context).colorScheme.error,
         //   ),
         // ),
         // SizedBox(width: 10),
@@ -403,7 +403,7 @@ class _SharedItemsState extends State<SharedItems> {
               :Image.network(sharedItem.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
           SizedBox(height: 5),
           Text(sharedItem.title!,
-            style: Theme.of(context).textTheme.headline2,
+            style: Theme.of(context).textTheme.displayMedium,
           ),
           SizedBox(height: 5),
           //Text('Tags: ${sharedItem.tags.join(', ')}'),
