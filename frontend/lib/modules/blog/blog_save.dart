@@ -155,12 +155,12 @@ class _BlogSaveState extends State<BlogSave> {
                               launch(href!);
                             },
                             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                              h1: Theme.of(context).textTheme.headline1,
-                              h2: Theme.of(context).textTheme.headline2,
-                              h3: Theme.of(context).textTheme.headline3,
-                              h4: Theme.of(context).textTheme.headline4,
-                              h5: Theme.of(context).textTheme.headline5,
-                              h6: Theme.of(context).textTheme.headline6,
+                              h1: Theme.of(context).textTheme.displayLarge,
+                              h2: Theme.of(context).textTheme.displayMedium,
+                              h3: Theme.of(context).textTheme.displaySmall,
+                              h4: Theme.of(context).textTheme.headlineMedium,
+                              h5: Theme.of(context).textTheme.headlineSmall,
+                              h6: Theme.of(context).textTheme.titleLarge,
                             ),
                           ),
                         )

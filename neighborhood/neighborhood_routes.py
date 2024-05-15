@@ -22,7 +22,7 @@ def addRoutes():
     _socket.add_route('SearchNeighborhoods', Search)
 
     def Save(data, auth, websocket):
-        regex = re.compile('[^a-zA-Z]')
+        regex = re.compile('[^a-zA-Z0-9]')
         data['neighborhood']['uName'] = regex.sub('', data['neighborhood']['uName'].lower())
         return _mongo_db_crud.Save('neighborhood', data['neighborhood'])
     _socket.add_route('SaveNeighborhood', Save)
@@ -41,10 +41,12 @@ def addRoutes():
             'sharedItemsCount': 3,
             'limitCount': 250,
             'withUsersCount': 0,
+            'userId': '',
         }, data)
         return _neighborhood.GetByUName(data['uName'], data['withWeeklyEvents'], data['withSharedItems'],
             data['withSustainability'], data['withConnections'], data['weeklyEventsCount'],
-            data['sharedItemsCount'], limitCount = data['limitCount'], withUsersCount = data['withUsersCount'])
+            data['sharedItemsCount'], limitCount = data['limitCount'], withUsersCount = data['withUsersCount'],
+            userId = data['userId'])
     _socket.add_route('GetNeighborhoodByUName', GetByUName)
 
 addRoutes()

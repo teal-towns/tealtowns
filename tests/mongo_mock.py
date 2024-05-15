@@ -25,6 +25,7 @@ _collectionNames = ['user', 'image', 'blog',
     'sharedItem', 'sharedItemOwner',
     'userMoney', 'userPayment', 'userPaymentSubscription', 'userStripeAccount',
     'neighborhood', 'userNeighborhood',
+    'certificationLevel', 'journeyStep', 'neighborhoodCertificationLevel', 'neighborhoodJourneyStep',
 ]
 
 def InitLive():

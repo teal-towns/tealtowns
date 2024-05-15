@@ -25,7 +25,7 @@ def GetSubscriptionDiscounts(weeklyPrice: float, hostGroupSize: int):
         'yearlySavingsPerYear': yearlySavingsPerYear, 'monthlySavingsPerYear': monthlySavingsPerYear,
         'eventFunds': payInfo['eventFunds'] }
 
-def GetPayInfo(funds: float, eventsPerPayPeriod: float):
+def GetPayInfo(funds: float, eventsPerPayPeriod: float = 1):
     fundsPerEvent = funds / eventsPerPayPeriod
     payFee = fundsPerEvent * _payFeeFactor + _payFeeFixed
     payFeePerEvent = payFee / eventsPerPayPeriod

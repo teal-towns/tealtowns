@@ -8,7 +8,10 @@ import './neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
 import '../../common/buttons.dart';
 import '../../common/config_service.dart';
+import '../../common/form_input/input_location.dart';
 import '../../common/layout_service.dart';
+import '../../common/style.dart';
+import '../../common/location_service.dart';
 import '../../common/socket_service.dart';
 
 class Neighborhoods extends StatefulWidget {
@@ -25,12 +28,15 @@ class _NeighborhoodsState extends State<Neighborhoods> {
   Buttons _buttons = Buttons();
   ConfigService _config = ConfigService();
   LayoutService _layoutService = LayoutService();
+  LocationService _locationService = LocationService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
+  Style _style = Style();
 
   List<NeighborhoodClass> _neighborhoods = [];
   String _message = '';
-  bool _loading = true;
+  bool _loading = false;
+  Map<String, dynamic> _formVals = {};
 
   @override
   void initState() {
@@ -59,9 +65,14 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       }
     }));
 
+    _formVals['location'] = [widget.lng, widget.lat];
+
     // Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods(notify: false);
 
-    SearchNeighborhoods();
+    List<double> lngLat = [widget.lng, widget.lat];
+    if (_locationService.LocationValid(lngLat)) {
+      SearchNeighborhoods();
+    }
   }
 
   @override
@@ -72,56 +83,85 @@ class _NeighborhoodsState extends State<Neighborhoods> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> colsLoading = [ SizedBox.shrink() ];
     if (_loading) {
-      return LinearProgressIndicator();
+      colsLoading = [
+        LinearProgressIndicator(),
+        SizedBox(height: 10),
+      ];
     }
     Map<String, dynamic> config = _config.GetConfig();
-    Widget content;
-    if (_neighborhoods.length <= 0) {
-      content = Text('No neighborhoods near this location yet, create one!');
+    List<Widget> content = [];
+    if (!_locationService.LocationValid(_formVals['location'])) {
+      content = [ Text('Enter your location to see neighborhoods near you.') ];
     } else {
-      List<Widget> elements = [];
-      for (var i = 0; i < _neighborhoods.length; i++) {
-        List<Widget> colsDefault = [ SizedBox.shrink() ];
-        if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn &&
-          (!_neighborhoods[i].userNeighborhood.containsKey('status') ||
-          _neighborhoods[i].userNeighborhood['status'] != 'default')) {
-          colsDefault = [
-            ElevatedButton(
-              onPressed: () {
-                SaveUserNeighborhood(_neighborhoods[i].id);
-              },
-              child: Text('Make Default'),
-            ),
-            SizedBox(height: 10),
-          ];
+      if (_neighborhoods.length <= 0) {
+        content = [ Text('No neighborhoods near this location yet, create one!') ];
+      } else {
+        List<Widget> elements = [];
+        for (var i = 0; i < _neighborhoods.length; i++) {
+          List<Widget> colsDefault = [ SizedBox.shrink() ];
+          if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn &&
+            (!_neighborhoods[i].userNeighborhood.containsKey('status') ||
+            _neighborhoods[i].userNeighborhood['status'] != 'default')) {
+            colsDefault = [
+              ElevatedButton(
+                onPressed: () {
+                  SaveUserNeighborhood(_neighborhoods[i].id);
+                },
+                child: Text('Make Default'),
+              ),
+              SizedBox(height: 10),
+            ];
+          }
+          elements.add(Column(
+            children: [
+              Text('${_neighborhoods[i].title} (${_neighborhoods[i].location_DistanceKm} km)'),
+              SizedBox(height: 10),
+              ...colsDefault,
+              _buttons.LinkInline(context, '${config['SERVER_URL']}/n/${_neighborhoods[i].uName}', '/n/${_neighborhoods[i].uName}'),
+            ]
+          ));
         }
-        elements.add(Column(
-          children: [
-            Text('${_neighborhoods[i].title} (${_neighborhoods[i].location_DistanceKm} km)'),
-            SizedBox(height: 10),
-            ...colsDefault,
-            _buttons.LinkInline(context, '${config['SERVER_URL']}/n/${_neighborhoods[i].uName}', '/n/${_neighborhoods[i].uName}'),
-          ]
-        ));
+        content = [ _layoutService.WrapWidth(elements, width: 300) ];
+
+        // content += [
+        //   SizedBox(height: 20),
+        //   _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save'),
+        // ];
       }
-      content = _layoutService.WrapWidth(elements, width: 300);
     }
 
     return Column(
       children: [
-        content,
+        _style.Text1('Join or create your neighborhood to get started', size: 'large', fontWeight: FontWeight.bold),
+        _style.SpacingH('medium'),
+        Align(
+          alignment: Alignment.topRight,
+          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save'),
+        ),
+        _style.SpacingH('medium'),
+        _layoutService.WrapWidth([
+          InputLocation(formVals: _formVals, formValsKey: 'location', nestedCoordinates: false,
+            onChange: (List<double?> lngLat) {
+              SearchNeighborhoods();
+          })],
+        width: 300),
+        ...colsLoading,
         SizedBox(height: 10),
-        _buttons.LinkElevated(context, 'Create Neighborhood', '/neighborhood-save'),
+        ...content,
+        // Extra height for input location overlay.
+        SizedBox(height: 250),
       ]
     );
   }
 
   void SearchNeighborhoods() {
+    setState(() { _loading = true; });
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
-      'location': { 'lngLat': [widget.lng, widget.lat], 'maxMeters': widget.maxMeters, },
+      'location': { 'lngLat': _formVals['location'], 'maxMeters': widget.maxMeters, },
       'withLocationDistance': 1,
       'userId': userId,
     };
@@ -137,7 +177,6 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         'userId': userId,
         'status': 'default',
       },
-      'removeDefault': 1,
     };
     _socketService.emit('SaveUserNeighborhood', data);
     Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods();

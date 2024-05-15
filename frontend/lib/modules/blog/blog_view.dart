@@ -80,7 +80,7 @@ class _BlogViewState extends State<BlogView> {
                   launch(href!);
                 },
                 styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                  p: Theme.of(context).textTheme.headline6,
+                  p: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
             ]
@@ -101,7 +101,7 @@ class _BlogViewState extends State<BlogView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(_blog.title!,
-                style: Theme.of(context).textTheme.headline1,
+                style: Theme.of(context).textTheme.displayLarge,
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 5),
@@ -114,12 +114,12 @@ class _BlogViewState extends State<BlogView> {
                   launch(href!);
                 },
                 styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                  h1: Theme.of(context).textTheme.headline1,
-                  h2: Theme.of(context).textTheme.headline2,
-                  h3: Theme.of(context).textTheme.headline3,
-                  h4: Theme.of(context).textTheme.headline4,
-                  h5: Theme.of(context).textTheme.headline5,
-                  h6: Theme.of(context).textTheme.headline6,
+                  h1: Theme.of(context).textTheme.displayLarge,
+                  h2: Theme.of(context).textTheme.displayMedium,
+                  h3: Theme.of(context).textTheme.displaySmall,
+                  h4: Theme.of(context).textTheme.headlineMedium,
+                  h5: Theme.of(context).textTheme.headlineSmall,
+                  h6: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
             ]

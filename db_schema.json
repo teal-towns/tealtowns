@@ -75,8 +75,23 @@
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
-        "weeklyEventId": "{String} [A new event is generated each week and sign ups for the weeklyEvent are stored here]",
-        "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
+        "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+        "weeklyEventId": "{String} @optional [A new event is generated each week and sign ups for the weeklyEvent are stored here. For NON weekly events, the rest of the fields apply, otherwise they are blank.]",
+        "uName": "{String} @optional",
+        "type": "{String} @optional ''|sharedMeal",
+        "title": "{String} @optional",
+        "description": "{String} @optional",
+        "timezone": "{String} @optional America/Los_Angeles",
+        "location": {
+            "type": "Point",
+            "coordinates": ["{Float} [lng]", "{Float} [lat]"]
+        },
+        "adminUserIds": [ "{String} @optional" ],
+        "hostGroupSizeDefault": "{Int} @optional [(minimum) People per each host. This will also be used to calculate credits per event type.]",
+        "hostMoneyPerPersonUSD": "{Float} @optional",
+        "priceUSD": "{Float} @optional [0 if free.]",
+        "rsvpDeadlineHours": "{Float} @optional [How many hours before event to allow rsvp]",
+        "imageUrls": [ "{String} @optional" ]
     },
     "userWeeklyEvent": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -220,5 +235,55 @@
         "userId": "{String}",
         "neighborhoodId": "{String}",
         "status": "{String} default|''"
+    },
+    "XcertificationLevel": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "uName": "{String}",
+        "scale": "{String} neighborhood|superblock|town",
+        "category": "{String}",
+        "scorings": ["{String} [Survey questions in order with first being worth 1 point, 2nd worth 2 points, etc.]"],
+        "order": "{Int} [1, 2, 3, etc. for the rough order to do these in if multiple for this certificationLevelUName. Multiple levels may have the same order value.]"
+    },
+    "XjourneyStep": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "uName": "{String}",
+        "certificationLevelUName": "{String}",
+        "title": "{String}",
+        "actions": ["{String}"],
+        "order": "{Int} [1, 2, 3, etc. for the rough order to do these in if multiple for this certificationLevelUName. Multiple steps may have the same order value.]"
+    },
+    "XneighborhoodCertificationLevel": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "neighborhoodId": "{String}",
+        "certificationLevelId": "{String}",
+        "points": "{Int}"
+    },
+    "XneighborhoodJourneyStep": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "neighborhoodId": "{String}",
+        "journeyStepId": "{String}",
+        "actionsCompleteIndices": "[{Int}]"
+    },
+    "message": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "userId": "{String}",
+        "message": "{String}",
+        "forType": "{String} event",
+        "forId":"{String} [eventId]",
+        "imageUrls": [ "{String}" ],
+        "likeUserIds": [ "{String}" ],
+        "subMessageIds": [ "{String}" ],
+        "type": "{String} neighborhood",
+        "typeId": "{String} [neighborhoodId]"
     }
 }

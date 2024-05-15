@@ -5,12 +5,19 @@ from shared_item import shared_item as _shared_item
 
 def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0, withSustainability: int = 0,
     withConnections: int = 0, weeklyEventsCount: int = 3, sharedItemsCount: int = 3, maxMeters: float = 500,
-    limitCount: int = 250, withUsersCount: int = 0):
+    limitCount: int = 250, withUsersCount: int = 0, userId: str = ''):
     ret = _mongo_db_crud.GetByUName('neighborhood', uName)
     if '_id' not in ret['neighborhood']:
         ret['valid'] = 0
         ret['message'] = 'Neighborhood not found for ' + uName
         return ret
+    
+    if userId:
+        userNeighborhoods = _mongo_db_crud.Search('userNeighborhood', stringKeyVals = {'userId': userId})['userNeighborhoods']
+        neighborhoodId = ret['neighborhood']['_id']
+        for userNeighborhood in userNeighborhoods:
+            if neighborhoodId == userNeighborhood['neighborhoodId']:
+                ret['neighborhood']['userNeighborhood'] = userNeighborhood
 
     lngLat = ret['neighborhood']['location']['coordinates']
     if withWeeklyEvents or withUsersCount:
@@ -47,5 +54,6 @@ def SearchNear(stringKeyVals: dict = {}, locationKeyVals: dict = {}, limit: int 
             for userNeighborhood in userNeighborhoods:
                 if neighborhoodId == userNeighborhood['neighborhoodId']:
                     ret['neighborhoods'][index]['userNeighborhood'] = userNeighborhood
+                    break
 
     return ret

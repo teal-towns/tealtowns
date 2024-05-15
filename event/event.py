@@ -3,7 +3,62 @@ import pytz
 
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
+import lodash
 import mongo_db
+from event import event_payment as _event_payment
+from event import user_event as _user_event
+
+def GetById(eventId: str, withAdmins: int = 1, withUserEvents: int = 0,
+    withUserId: str = '', eventUName: str = ''):
+    ret = _mongo_db_crud.GetById('event', eventId, uName = eventUName)
+    if not ret['valid'] or '_id' not in ret['event']:
+        return ret
+    if len(eventId) < 1:
+        eventId = ret['event']['_id']
+    if withAdmins:
+        userIds = []
+        for userId in ret['event']['adminUserIds']:
+            if userId not in userIds:
+                userIds.append(userId)
+        listKeyVals = { '_id': userIds }
+        fields = { "firstName": 1, "lastName": 1, "email": 1, }
+        users = _mongo_db_crud.Search('user', listKeyVals = listKeyVals, fields = fields)['users']
+        usersIdMap = {}
+        for user in users:
+            usersIdMap[user['_id']] = user
+        ret['event']['adminUsers'] = []
+        for userId in ret['event']['adminUserIds']:
+            user = usersIdMap[userId] if userId in usersIdMap else {}
+            ret['event']['adminUsers'].append(user)
+
+    if withUserEvents:
+        retStats = _user_event.GetStats(ret['event']['_id'], withUserId = withUserId)
+        ret['attendeesCount'] = retStats['attendeesCount']
+        ret['attendeesWaitingCount'] = retStats['attendeesWaitingCount']
+        ret['nonHostAttendeesWaitingCount'] = retStats['nonHostAttendeesWaitingCount']
+        ret['userEvent'] = retStats['userEvent']
+
+    return ret
+
+def Save(event: dict):
+    event = _mongo_db_crud.CleanId(event)
+    if '_id' not in event:
+        event['uName'] = lodash.CreateUName(event['title'])
+    else:
+        # Do not allow changing some fields.
+        eventExisting = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(event['_id'])})['item']
+        if eventExisting:
+            event['hostGroupSizeDefault'] = eventExisting['hostGroupSizeDefault']
+            event['priceUSD'] = eventExisting['priceUSD']
+    if 'timezone' not in event or event['timezone'] == '':
+        event['timezone'] = date_time.GetTimezoneFromLngLat(event['location']['coordinates'])
+    payInfo = _event_payment.GetPayInfo(event['priceUSD'], event['hostGroupSizeDefault'])
+    event['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
+    return _mongo_db_crud.Save('event', event)
+
+def Remove(eventId: str):
+    mongo_db.delete_many('userEvent', { 'eventId': eventId })
+    return _mongo_db_crud.RemoveById('event', eventId)
 
 def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 24, now = None, autoCreate: int = 1):
     now = now if now is not None else date_time.now()

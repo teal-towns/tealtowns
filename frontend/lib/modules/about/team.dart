@@ -33,7 +33,7 @@ class _TeamState extends State<Team> {
     ImageData(
       imagePath: 'assets/images/team/jacob-russo-headshot.jpg',
       name: 'Jacob Russo',
-      role: 'Web Developer',
+      role: 'Product Engineer',
     ),
     ImageData(
       imagePath: 'assets/images/team/luke-madera-headshot.jpg',

@@ -174,8 +174,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          WelcomeAbout(),
-          SizedBox(height: 10),
+          // WelcomeAbout(),
+          // SizedBox(height: 10),
           ...columnsCreate,
           Align(
             alignment: Alignment.center,
@@ -271,7 +271,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
               },
               child: Text('Delete'),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Theme.of(context).errorColor,
+                foregroundColor: Theme.of(context).colorScheme.error,
               ),
             ),
             SizedBox(width: 10),

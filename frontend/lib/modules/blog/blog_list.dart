@@ -114,7 +114,7 @@ class _BlogListState extends State<BlogList> {
           },
           child: Text('Delete'),
           style: ElevatedButton.styleFrom(
-            foregroundColor: Theme.of(context).errorColor,
+            foregroundColor: Theme.of(context).colorScheme.error,
           ),
         ),
       ];
@@ -127,7 +127,7 @@ class _BlogListState extends State<BlogList> {
           Image.network(_imageService.GetUrl(blog.imageUrl!), height: 300, width: double.infinity, fit: BoxFit.cover),
           SizedBox(height: 5),
           Text(blog.title!,
-            style: Theme.of(context).textTheme.headline2,
+            style: Theme.of(context).textTheme.displayMedium,
           ),
           SizedBox(height: 5),
           //Text('Tags: ${blog.tags.join(', ')}'),
@@ -146,12 +146,12 @@ class _BlogListState extends State<BlogList> {
                       launch(href!);
                     },
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                      h1: Theme.of(context).textTheme.headline1,
-                      h2: Theme.of(context).textTheme.headline2,
-                      h3: Theme.of(context).textTheme.headline3,
-                      h4: Theme.of(context).textTheme.headline4,
-                      h5: Theme.of(context).textTheme.headline5,
-                      h6: Theme.of(context).textTheme.headline6,
+                      h1: Theme.of(context).textTheme.displayLarge,
+                      h2: Theme.of(context).textTheme.displayMedium,
+                      h3: Theme.of(context).textTheme.displaySmall,
+                      h4: Theme.of(context).textTheme.headlineMedium,
+                      h5: Theme.of(context).textTheme.headlineSmall,
+                      h6: Theme.of(context).textTheme.titleLarge,
                     ),
                   )
                 ]

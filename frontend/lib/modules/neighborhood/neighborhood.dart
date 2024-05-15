@@ -9,6 +9,7 @@ import '../../common/layout_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './neighborhood_class.dart';
+import './neighborhood_state.dart';
 import './neighborhood_journey.dart';
 import './neighborhood_journey_service.dart';
 import '../event/weekly_event_class.dart';
@@ -40,7 +41,9 @@ class _NeighborhoodState extends State<Neighborhood> {
   List<WeeklyEventClass> _weeklyEvents = [];
   List<SharedItemClass> _sharedItems = [];
   bool _inited = false;
-  List<Map<String, dynamic>> _journeySteps = [];
+  bool _loading = false;
+  List<Map<String, dynamic>> _belongingSteps = [];
+  List<Map<String, dynamic>> _sustainableSteps = [];
   bool _showFullNeighborhoodJourney = false;
 
   @override
@@ -63,7 +66,8 @@ class _NeighborhoodState extends State<Neighborhood> {
         for (var i = 0; i < data['sharedItems'].length; i++) {
           _sharedItems.add(SharedItemClass.fromJson(data['sharedItems'][i]));
         }
-        _journeySteps = _neighborhoodJourneyService.StepsWithComplete(_usersCount, _weeklyEventsCount, _sharedItemsCount);
+        _belongingSteps = _neighborhoodJourneyService.BelongingStepsWithComplete(_usersCount, _weeklyEventsCount, _sharedItemsCount);
+        _sustainableSteps = _neighborhoodJourneyService.SustainableSteps();
         setState(() {
           _neighborhood = _neighborhood;
           _weeklyEventsCount = _weeklyEventsCount;
@@ -71,10 +75,20 @@ class _NeighborhoodState extends State<Neighborhood> {
           _usersCount = _usersCount;
           _weeklyEvents = _weeklyEvents;
           _sharedItems = _sharedItems;
-          _journeySteps = _journeySteps;
+          _belongingSteps = _belongingSteps;
+          _sustainableSteps = _sustainableSteps;
+          _loading = false;
         });
       } else {
         context.go('/neighborhoods');
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('SaveUserNeighborhood', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        GetNeighborhood();
       }
     }));
   }
@@ -90,6 +104,13 @@ class _NeighborhoodState extends State<Neighborhood> {
     if (!_inited) {
       _inited = true;
       GetNeighborhood();
+    }
+
+    if (_loading) {
+      return AppScaffoldComponent(
+        listWrapper: true,
+        body: LinearProgressIndicator(),
+      );
     }
 
     List<Widget> colsWeeklyEvents = [];
@@ -152,6 +173,21 @@ class _NeighborhoodState extends State<Neighborhood> {
       ];
     }
 
+    List<Widget> colsJoin = [];
+    if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn &&
+      (!_neighborhood.userNeighborhood.containsKey('status') ||
+      _neighborhood.userNeighborhood['status'] != 'default')) {
+      colsJoin = [
+        ElevatedButton(
+          onPressed: () {
+            SaveUserNeighborhood(_neighborhood.id);
+          },
+          child: Text('Join Neighborhood'),
+        ),
+        SizedBox(height: 10),
+      ];
+    }
+
     double lng = _neighborhood.location.coordinates[0];
     double lat = _neighborhood.location.coordinates[1];
     return AppScaffoldComponent(
@@ -160,8 +196,12 @@ class _NeighborhoodState extends State<Neighborhood> {
         // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _style.Text1('${_neighborhood.title}', size: 'xlarge'),
+          ...colsJoin,
           _style.SpacingH('medium'),
-          NeighborhoodJourney(steps: _journeySteps, currentStepOnly: true,),
+          // _style.Text1('Continue your neighborhood journey; your Weekly Challenge is:',),
+          // _style.SpacingH('medium'),
+          NeighborhoodJourney(belongingSteps: _belongingSteps, sustainableSteps: _sustainableSteps,
+            currentStepOnly: true, showTitles: false,),
           _style.SpacingH('medium'),
           // _buttons.Link(context, 'View Full Neighborhood Journey', '/neighborhood-journey'),
           TextButton(
@@ -204,6 +244,9 @@ class _NeighborhoodState extends State<Neighborhood> {
   }
 
   void GetNeighborhood() {
+    setState(() { _loading = true; });
+    String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+      Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
       'uName': widget.uName,
       'withWeeklyEvents': 1,
@@ -212,7 +255,22 @@ class _NeighborhoodState extends State<Neighborhood> {
       'withSustainability': 1,
       'withUsersCount': 1,
       'limitCount': widget.limitCount,
+      'userId': userId,
     };
     _socketService.emit('GetNeighborhoodByUName', data);
+  }
+
+  void SaveUserNeighborhood(String neighborhoodId) {
+    String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+      Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+    var data = {
+      'userNeighborhood': {
+        'neighborhoodId': neighborhoodId,
+        'userId': userId,
+        'status': 'default',
+      },
+    };
+    _socketService.emit('SaveUserNeighborhood', data);
+    Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods();
   }
 }

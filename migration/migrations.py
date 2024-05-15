@@ -4,6 +4,7 @@ import mongo_db
 def RunAll():
     # SharedItemMaxMeters()
     # SharedItemUName()
+    # ImportCertificationLevels()
     pass
 
 def SharedItemMaxMeters():
@@ -66,3 +67,10 @@ def SharedItemUName():
         if len(items) < limit:
             print('Updated ' + str(updatedCounter) + ' items')
             break
+
+# def ImportCertificationLevels():
+#     from neighborhood import certification_level_import as _certification_level_import
+#     items = mongo_db.find('certificationLevel', {})['items']
+#     if len(items) == 0:
+#         _certification_level_import.ImportToDB()
+#         print ('Imported certificationLevels')

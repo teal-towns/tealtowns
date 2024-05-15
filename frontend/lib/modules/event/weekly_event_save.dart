@@ -110,6 +110,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     );
     return AppScaffoldComponent(
       listWrapper: true,
+      width: 600,
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 600) {
@@ -117,18 +118,18 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(flex: 1, child: content),
-                SizedBox(width: 10),
-                Container(
-                  width: 300,
-                  child: WelcomeAbout(type: 'sidebar'),
-                ),
+                // SizedBox(width: 10),
+                // Container(
+                //   width: 300,
+                //   child: WelcomeAbout(type: 'sidebar'),
+                // ),
               ]
             );
           } else {
             return Column(
               children: [
-                WelcomeAbout(),
-                SizedBox(height: 10),
+                // WelcomeAbout(),
+                // SizedBox(height: 10),
                 content,
               ]
             );
