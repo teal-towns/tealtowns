@@ -47,3 +47,13 @@ def create_all_indices(db):
     db['neighborhood'].create_index([('title', 1)], unique=False)
 
     db['userNeighborhood'].create_index([('userId', 1), ('neighborhoodId', 1)], unique=True)
+
+    # db['certificationLevel'].create_index([('uName', 1)], unique=True)
+    # db['certificationLevel'].create_index([('scale', 1), ('category', 1), ('order', 1)], unique=False)
+
+    # db['journeyStep'].create_index([('uName', 1)], unique=True)
+    # db['journeyStep'].create_index([('certificationLevelUName', 1), ('order', 1)], unique=False)
+
+    # db['neighborhoodCertificationLevel'].create_index([('neighborhoodId', 1), ('certificationLevelId', 1)], unique=True)
+
+    # db['neighborhoodJourneyStep'].create_index([('neighborhoodId', 1), ('journeyStepId', 1)], unique=True)

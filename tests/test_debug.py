@@ -22,4 +22,8 @@ def test_Debug():
     # from common import mongo_db_crud as _mongo_db_crud
     # retItems = _mongo_db_crud.Search('sharedItem', { 'title': 'compost' })
     # print ('retItems', len(retItems['sharedItems']), retItems)
+
+    # from neighborhood import certification_level_import as _certification_level_import
+    # _mongo_mock.InitLive()
+    # _certification_level_import.ImportToDB()
     pass

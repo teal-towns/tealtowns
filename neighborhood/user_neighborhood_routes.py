@@ -6,10 +6,7 @@ from neighborhood import user_neighborhood as _user_neighborhood
 def addRoutes():
 
     def Save(data, auth, websocket):
-        if 'removeDefault' in data and data['removeDefault']:
-            # First remove any existing defaults.
-            _user_neighborhood.SetAllStatus(data['userNeighborhood']['userId'], '')
-        return _mongo_db_crud.Save('userNeighborhood', data['userNeighborhood'])
+        return _user_neighborhood.Save(data['userNeighborhood'])
     _socket.add_route('SaveUserNeighborhood', Save)
 
     def Search(data, auth, websocket):

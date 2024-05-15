@@ -23,7 +23,7 @@ def addRoutes():
     _socket.add_route('saveWeeklyEvent', Save)
 
     def RemoveById(data, auth, websocket):
-        return _mongo_db_crud.RemoveById('weeklyEvent', data['id'])
+        return _weekly_event.Remove(data['id'])
     _socket.add_route('removeWeeklyEvent', RemoveById)
 
     def SearchNear(data, auth, websocket):

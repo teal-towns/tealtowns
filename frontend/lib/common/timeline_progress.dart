@@ -7,9 +7,10 @@ class TimelineProgress extends StatefulWidget {
   List<Color> colors;
   double stepHeight;
   bool currentStepOnly;
+  bool showNumbers;
 
   TimelineProgress({Key? key, required this.steps, this.colors = const [], this.stepHeight = 50,
-    this.currentStepOnly = false, }) : super(key: key);
+    this.currentStepOnly = false, this.showNumbers = true, }) : super(key: key);
 
   @override
   _TimelineProgressState createState() => _TimelineProgressState();
@@ -58,11 +59,11 @@ class _TimelineProgressState extends State<TimelineProgress> {
     double height = widget.stepHeight;
     double opacity = step['opacity'] ?? 1;
 
-    List<Widget> rowsTitle = [
-      _style.Text1('${(stepIndex + 1)}.', size: 'large', fontWeight: FontWeight.bold,),
-      // _style.Spacing(height: 'small'),
-      _style.Text1(step['title'], size: 'large', fontWeight: FontWeight.bold,),
-    ];
+    List<Widget> rowsTitle = [];
+    if (widget.showNumbers) {
+      rowsTitle += [ _style.Text1('${(stepIndex + 1)}.', size: 'large', fontWeight: FontWeight.bold,) ];
+    }
+    rowsTitle += [ _style.Text1(step['title'], size: 'large', fontWeight: FontWeight.bold,) ];
     Radius radius = Radius.circular(50);
     List<Widget> icon = [ Container(
       padding: EdgeInsets.all(10),
@@ -82,7 +83,11 @@ class _TimelineProgressState extends State<TimelineProgress> {
     if (!step.containsKey('description') && step.containsKey('descriptionSteps')) {
       List<Widget> descriptions = [];
       for (var j = 0; j < step['descriptionSteps'].length; j++) {
-        descriptions.add(Text('${step['descriptionSteps'][j]}'));
+        if (stepIndex % 2 == 1) {
+          descriptions.add(Text('${step['descriptionSteps'][j]}', textAlign: TextAlign.right));
+        } else {
+          descriptions.add(Text('${step['descriptionSteps'][j]}'));
+        }
         if (j < step['descriptionSteps'].length - 1) {
           descriptions.add(SizedBox(height: 10));
         }

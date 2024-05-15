@@ -174,8 +174,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          WelcomeAbout(),
-          SizedBox(height: 10),
+          // WelcomeAbout(),
+          // SizedBox(height: 10),
           ...columnsCreate,
           Align(
             alignment: Alignment.center,
