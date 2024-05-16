@@ -535,3 +535,20 @@ def test_WeeklyEventFlow():
             assert userEvent['attendeeCountAsk'] == 3
 
     _mongo_mock.CleanUp()
+
+def test_SaveWeeklyEvent():
+    _mongo_mock.InitAllCollections()
+
+    weeklyEvents = _stubs_data.CreateBulk(count = 1, collectionName = 'weeklyEvent',)
+    weeklyEvent = weeklyEvents[0]
+    # This is an edit since already created it above.
+    retWeeklyEvent = _weekly_event.Save(weeklyEvent)
+    weeklyEvent = retWeeklyEvent['weeklyEvent']
+    assert len(weeklyEvent['uName']) > 0
+    # Edit again
+    weeklyEvent['title'] = 'title edit'
+    retWeeklyEvent = _weekly_event.Save(weeklyEvent)
+    assert retWeeklyEvent['valid'] == 1
+    assert retWeeklyEvent['weeklyEvent']['title'] == weeklyEvent['title']
+
+    _mongo_mock.CleanUp()

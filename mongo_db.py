@@ -189,7 +189,7 @@ def find_one(collection_name, query, db1 = None, fields=None):
     db = db_default(db1)
     collection = get_collection(collection_name, db)
     # Need to convert _id to and from object id to work properly.
-    if '_id' in query and query['_id']:
+    if '_id' in query and query['_id'] and isinstance(query['_id'], str):
         query['_id'] = to_object_id(query['_id'])
 
     if fields is not None:
