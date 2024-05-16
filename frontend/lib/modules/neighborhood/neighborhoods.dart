@@ -10,6 +10,7 @@ import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/form_input/input_location.dart';
 import '../../common/layout_service.dart';
+import '../../common/link_service.dart';
 import '../../common/style.dart';
 import '../../common/location_service.dart';
 import '../../common/socket_service.dart';
@@ -28,6 +29,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
   Buttons _buttons = Buttons();
   ConfigService _config = ConfigService();
   LayoutService _layoutService = LayoutService();
+  LinkService _linkService = LinkService();
   LocationService _locationService = LocationService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -124,11 +126,6 @@ class _NeighborhoodsState extends State<Neighborhoods> {
           ));
         }
         content = [ _layoutService.WrapWidth(elements, width: 300) ];
-
-        // content += [
-        //   SizedBox(height: 20),
-        //   _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save'),
-        // ];
       }
     }
 
@@ -138,7 +135,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         _style.SpacingH('medium'),
         Align(
           alignment: Alignment.topRight,
-          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save'),
+          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save', checkLoggedIn: true),
         ),
         _style.SpacingH('medium'),
         _layoutService.WrapWidth([
@@ -150,8 +147,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         ...colsLoading,
         SizedBox(height: 10),
         ...content,
-        // Extra height for input location overlay.
-        SizedBox(height: 250),
+        SizedBox(height: 50),
       ]
     );
   }

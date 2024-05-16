@@ -5,6 +5,8 @@ from common import socket as _socket
 from user_auth import user_auth as _user_auth
 from user_auth import user as _user
 
+from neighborhood import user_neighborhood as _user_neighborhood
+
 # router = APIRouter()
 
 def addRoutes():
@@ -53,6 +55,9 @@ def addRoutes():
             if 'roles' in ret['user']:
                 # del ret['user']['roles']
                 ret['user']['roles'] = ",".join(ret['user']['roles'])
+            if 'withUserNeighborhoods' in data and data['withUserNeighborhoods']:
+                ret['userNeighborhoods'] = _user_neighborhood.Search(stringKeyVals = { 'userId': ret['user']['_id'], },
+                    withNeighborhoods = 1)['userNeighborhoods']
         return ret
     _socket.add_route('login', Login)
 

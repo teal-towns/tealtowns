@@ -6,7 +6,9 @@ def addRoutes():
     def Get(data, auth, websocket):
         withEvent = data['withEvent'] if 'withEvent' in data else 0
         withUserCheckPayment = data['withUserCheckPayment'] if 'withUserCheckPayment' in data else 0
-        return _user_event.Get(data['eventId'], data['userId'], withEvent, withUserCheckPayment)
+        withWeeklyEvent = data['withWeeklyEvent'] if 'withWeeklyEvent' in data else 0
+        return _user_event.Get(data['eventId'], data['userId'], withEvent, withUserCheckPayment,
+            withWeeklyEvent)
     _socket.add_route('GetUserEvent', Get)
 
     def Save(data, auth, websocket):
@@ -16,5 +18,9 @@ def addRoutes():
     # def RemoveById(data, auth, websocket):
     #     return _mongo_db_crud.RemoveById('userEvent', data['id'])
     # _socket.add_route('removeUserEvent', RemoveById)
+
+    def GetUsers(data, auth, websocket):
+        return _user_event.GetUsers(data['eventId'])
+    _socket.add_route('GetUserEventUsers', GetUsers)
 
 addRoutes()

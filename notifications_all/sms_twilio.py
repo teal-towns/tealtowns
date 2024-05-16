@@ -2,6 +2,7 @@ from twilio.rest import Client
 
 import log
 import ml_config
+import mongo_db
 _config = ml_config.get_config()
 
 _testMode = 0
@@ -34,4 +35,18 @@ def Send(body: str, toNumber: str, fromNumber: str = ''):
         ret['valid'] = 0
         ret['message'] = 'Twilio send error'
         log.log('warn', 'sms_twilio.Send error', str(e))
+    return ret
+
+def SendToUsers(body: str, userIds: list, fromNumber: str = ''):
+    ret = { 'valid': 1, 'message': '', 'countSent': 0, }
+    objectIds = []
+    for userId in userIds:
+        objectIds.append(mongo_db.to_object_id(userId))
+    query = {'_id': {'$in': objectIds}, 'phoneNumberVerified': 1, }
+    fields = { 'phoneNumber': 1, }
+    users = mongo_db.find('user', query, fields = fields)['items']
+    for user in users:
+        retOne = Send(body, user['phoneNumber'], fromNumber)
+        if retOne['valid']:
+            ret['countSent'] += 1
     return ret

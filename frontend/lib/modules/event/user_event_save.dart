@@ -59,6 +59,10 @@ class _UserEventSaveState extends State<UserEventSave> {
           _event = EventClass.fromJson(data['event']);
           setState(() { _formVals = _formVals; });
         }
+        if (data.containsKey('weeklyEvent')) {
+          _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
+          setState(() { _weeklyEvent = _weeklyEvent; });
+        }
         if (data.containsKey('userCheckPayment')) {
             setState(() {
               _spotsPaidFor = data['userCheckPayment']['spotsPaidFor'];
@@ -95,7 +99,7 @@ class _UserEventSaveState extends State<UserEventSave> {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        context.go('/eat');
+        context.go('/weekly-events');
       }
     }));
   }
@@ -112,7 +116,7 @@ class _UserEventSaveState extends State<UserEventSave> {
     if (!currentUserState.isLoggedIn) {
       return ElevatedButton(
         onPressed: () {
-          context.go('/login');
+          _linkService.Go('', context, currentUserState: currentUserState);
         },
         child: Text('Join Event'),
       );
@@ -146,27 +150,32 @@ class _UserEventSaveState extends State<UserEventSave> {
       );
     }
 
-    String hostLabel = 'How many people will you host? Earn 1 free event per ${_weeklyEvent.hostGroupSizeDefault} people.';
-    Widget widgetHost = _inputFields.inputNumber(_formVals, 'hostGroupSizeMax', required: true, label: hostLabel,);
-    // Do not allow changing if already complete and have a host group.
-    if (_userEvent.id.length > 0 && _userEvent.hostStatus == 'complete' && _userEvent.hostGroupSize > 0) {
-      widgetHost = SizedBox.shrink();
+    Widget widgetHost = SizedBox.shrink();
+    if (_weeklyEvent.priceUSD > 0) {
+      String hostLabel = 'How many people will you host? Earn 1 free event per ${_weeklyEvent.hostGroupSizeDefault} people.';
+      widgetHost = _inputFields.inputNumber(_formVals, 'hostGroupSizeMax', required: true, label: hostLabel,);
+      // Do not allow changing if already complete and have a host group.
+      if (_userEvent.id.length > 0 && _userEvent.hostStatus == 'complete' && _userEvent.hostGroupSize > 0) {
+        widgetHost = SizedBox.shrink();
+      }
     }
     double attendeeMin = _userEvent.attendeeCount > 0 ? _userEvent.attendeeCount.toDouble() : 1;
 
     List<Widget> colsCreditsMoney = [];
-    if (_availableUSD >= _weeklyEvent.priceUSD || _availableCredits >= 1) {
-      String text = '';
-      if (_availableCredits >= 1) {
-        text += 'You have ${_availableCredits.toStringAsFixed(2)} credits. ';
+    if (_weeklyEvent.priceUSD > 0) {
+      if (_availableUSD >= _weeklyEvent.priceUSD || _availableCredits >= 1) {
+        String text = '';
+        if (_availableCredits >= 1) {
+          text += 'You have ${_availableCredits.toStringAsFixed(2)} credits. ';
+        }
+        if (_availableUSD >= _weeklyEvent.priceUSD) {
+          text += 'You have \$${_availableUSD.toStringAsFixed(2)}. ';
+        }
+        colsCreditsMoney = [
+          Text(text),
+          SizedBox(height: 10),
+        ];
       }
-      if (_availableUSD >= _weeklyEvent.priceUSD) {
-        text += 'You have \$${_availableUSD.toStringAsFixed(2)}. ';
-      }
-      colsCreditsMoney = [
-        Text(text),
-        SizedBox(height: 10),
-      ];
     }
 
     bool alreadySignedUp = false;
@@ -264,13 +273,16 @@ class _UserEventSaveState extends State<UserEventSave> {
       'userId': userId,
       'withEvent': 1,
       'withUserCheckPayment': 1,
+      'withWeeklyEvent': 1,
     };
     _socketService.emit('GetUserEvent', data);
   }
 
   void CheckGetGetPaymentLink(currentUserState) {
     double price = _weeklyEvent.priceUSD * _formVals['attendeeCountAsk'];
-    if (_availableCredits >= _formVals['attendeeCountAsk']) {
+    if (_weeklyEvent.priceUSD == 0) {
+      _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'free' });
+    } else if (_availableCredits >= _formVals['attendeeCountAsk']) {
       _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'credits' });
     } else if (_availableUSD >= price) {
       _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'userMoney' });

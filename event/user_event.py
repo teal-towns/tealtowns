@@ -14,6 +14,7 @@ def Save(userEvent: dict, payType: str):
     ret = { 'valid': 1, 'message': '', 'userEvent': {}, 'spotsPaidFor': 0, 'availableUSD': 0, 'availableCredits': 0,
         'notifyUserIdsHosts': {}, 'notifyUserIdsAttendees': {}, }
 
+    weeklyEvent = None
     userEventExisting = None
     if '_id' in userEvent:
         userEventExisting = mongo_db.find_one('userEvent', {'_id': mongo_db.to_object_id(userEvent['_id'])})['item']
@@ -44,22 +45,39 @@ def Save(userEvent: dict, payType: str):
             'creditsPriceUSD': weeklyEvent['priceUSD'],
         }, userEvent)
 
-    retPay = CheckAndTakePayment(userEvent['userId'], userEvent['eventId'], userEvent['attendeeCountAsk'], payType)
-    if not retPay['valid']:
-        return retPay
-    userEvent['creditsRedeemed'] = retPay['creditsRedeemed']
+    checkPay = 1
+    freeEvent = 0
+    if payType == 'free':
+        if not weeklyEvent:
+            event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
+            weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+        if weeklyEvent['priceUSD'] == 0:
+            checkPay = 0
+            freeEvent = 1
+
+    userEvent['creditsRedeemed'] = 0
+    if checkPay:
+        retPay = CheckAndTakePayment(userEvent['userId'], userEvent['eventId'], userEvent['attendeeCountAsk'], payType)
+        if not retPay['valid']:
+            return retPay
+        userEvent['creditsRedeemed'] = retPay['creditsRedeemed']
+    elif freeEvent:
+        userEvent['attendeeCount'] = userEvent['attendeeCountAsk']
+        userEvent['attendeeStatus'] = 'complete'
 
     ret = _mongo_db_crud.Save('userEvent', userEvent)
-    ret['spotsPaidFor'] = retPay['spotsPaidFor']
-    ret['availableUSD'] = retPay['availableUSD']
-    ret['availableCredits'] = retPay['availableCredits']
+    if checkPay:
+        ret['spotsPaidFor'] = retPay['spotsPaidFor']
+        ret['availableUSD'] = retPay['availableUSD']
+        ret['availableCredits'] = retPay['availableCredits']
 
-    retCheck = CheckAddHostsAndAttendees(userEvent['eventId'])
-    ret['notifyUserIdsHosts'] = retCheck['notifyUserIdsHosts']
-    ret['notifyUserIdsAttendees'] = retCheck['notifyUserIdsAttendees']
-    # If updated, re-get event to return.
-    if userEvent['userId'] in retCheck['userIdsUpdated']:
-        ret['userEvent'] = mongo_db.find_one('userEvent', {'_id': mongo_db.to_object_id(ret['userEvent']['_id'])})['item']
+    if not freeEvent:
+        retCheck = CheckAddHostsAndAttendees(userEvent['eventId'])
+        ret['notifyUserIdsHosts'] = retCheck['notifyUserIdsHosts']
+        ret['notifyUserIdsAttendees'] = retCheck['notifyUserIdsAttendees']
+        # If updated, re-get event to return.
+        if userEvent['userId'] in retCheck['userIdsUpdated']:
+            ret['userEvent'] = mongo_db.find_one('userEvent', {'_id': mongo_db.to_object_id(ret['userEvent']['_id'])})['item']
 
     return ret
 
@@ -396,7 +414,23 @@ def GetStats(eventId: str, withUserId: str = ''):
             ret['nonHostAttendeesWaitingCount'] += userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
     return ret
 
-def Get(eventId: str, userId: str, withEvent: int = 0, withUserCheckPayment: int = 0, checkByPayment: int = 1):
+def GetUsers(eventId: str, withUsers: int = 1):
+    ret = { 'valid': 1, 'message': '', 'userEvents': [], }
+    ret['userEvents'] = mongo_db.find('userEvent', { 'eventId': eventId })['items']
+    if withUsers:
+        indicesMap = {}
+        userObjectIds = []
+        for index, userEvent in enumerate(ret['userEvents']):
+            userObjectIds.append(mongo_db.to_object_id(userEvent['userId']))
+            indicesMap[userEvent['userId']] = index
+        fields = { 'firstName': 1, 'lastName': 1, 'username': 1, }
+        users = mongo_db.find('user', { '_id': { '$in': userObjectIds } }, fields = fields)['items']
+        for user in users:
+            ret['userEvents'][indicesMap[user['_id']]]['user'] = user
+    return ret
+
+def Get(eventId: str, userId: str, withEvent: int = 0, withUserCheckPayment: int = 0, checkByPayment: int = 1,
+    withWeeklyEvent: int = 0):
     query = { 'eventId': eventId, 'userId': userId, }
     ret = _mongo_db_crud.Get('userEvent', query)
     if '_id' not in ret['userEvent'] and checkByPayment:
@@ -411,6 +445,8 @@ def Get(eventId: str, userId: str, withEvent: int = 0, withUserCheckPayment: int
             ret = Save(userEvent, 'paid')
     if withEvent:
         ret['event'] = mongo_db.find_one('event', { '_id': mongo_db.to_object_id(eventId) })['item']
+        if withWeeklyEvent:
+            ret['weeklyEvent'] = mongo_db.find_one('weeklyEvent', { '_id': ret['event']['weeklyEventId'] })['item']
     if withUserCheckPayment:
         ret['userCheckPayment'] = CheckAndTakePayment(userId, eventId, 1)
     return ret

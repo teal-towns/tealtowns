@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/config_service.dart';
@@ -45,6 +46,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   int _attendeesCount = 0;
   int _nonHostAttendeesWaitingCount = 0;
   UserEventClass _userEvent = UserEventClass.fromJson({});
+  List<UserEventClass> _userEvents = [];
 
   @override
   void initState() {
@@ -86,7 +88,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         }
       } else {
         _message = data['message'].length > 0 ? data['message'] : 'Error.';
-        context.go('/eat');
+        context.go('/weekly-events');
       }
       setState(() {
         _loading = false;
@@ -97,13 +99,25 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        context.go('/eat');
+        context.go('/weekly-events');
       } else {
         _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
       setState(() {
         _loading = false;
       });
+    }));
+
+    _routeIds.add(_socketService.onRoute('GetUserEventUsers', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _userEvents = [];
+        for (var i = 0; i < data['userEvents'].length; i++) {
+          _userEvents.add(UserEventClass.fromJson(data['userEvents'][i]));
+        }
+        setState(() { _userEvents = _userEvents; });
+      }
     }));
   }
 
@@ -144,7 +158,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       buttons = [
         ElevatedButton(
           onPressed: () {
-            _linkService.Go('/weekly-event-save?id=${_weeklyEvent.id}', context, currentUserState);
+            _linkService.Go('/weekly-event-save?id=${_weeklyEvent.id}', context, currentUserState: currentUserState);
           },
           child: Text('Edit'),
         ),
@@ -189,19 +203,73 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     bool alreadySignedUp = false;
 
     Map<String, dynamic> config = _configService.GetConfig();
-    List<Widget> attendeeInfo = [];
+
+    List<Widget> colsShareQR = [
+      QrImageView(
+        data: '${config['SERVER_URL']}/we/${_weeklyEvent.uName}',
+        version: QrVersions.auto,
+        size: 200.0,
+      ),
+      SizedBox(height: 10),
+      Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+      SizedBox(height: 10),
+    ];
+    List<Widget> colsShare = [
+      Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+      SizedBox(height: 10),
+    ];
+
+    String text1 = '${_attendeesCount} attending';
+    if (_nonHostAttendeesWaitingCount > 0) {
+      text1 += ', ${_nonHostAttendeesWaitingCount} waiting';
+    }
+    List<Widget> attendeeInfo = [
+      // Text(text1),
+      TextButton(
+        onPressed: () {
+          _socketService.emit('GetUserEventUsers', { 'eventId': _event.id });
+        },
+        child: Text(text1),
+      ),
+      SizedBox(height: 10),
+    ];
+    if (_userEvents.length > 0) {
+      List<String> attendeeTexts = [];
+      List<String> waitingTexts = [];
+      for (int i = 0; i < _userEvents.length; i++) {
+        if (_userEvents[i].attendeeCount == 0) {
+          waitingTexts.add('${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}');
+        } else {
+          String text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
+          if (_userEvents[i].attendeeCount > 1) {
+            text += ' (+${_userEvents[i].attendeeCount - 1})';
+          }
+          attendeeTexts.add(text);
+        }
+      }
+      if (attendeeTexts.length > 0) {
+        attendeeTexts.sort();
+        attendeeInfo += [
+          Text('Attending'),
+          Text('${attendeeTexts.join(', ')}'),
+        ];
+      }
+      if (waitingTexts.length > 0) {
+        waitingTexts.sort();
+        attendeeInfo += [
+          Text('Waiting'),
+          Text('${waitingTexts.join(', ')}'),
+        ];
+      }
+      attendeeInfo += [ SizedBox(height: 10) ];
+    }
     if (_weeklyEvent.priceUSD == 0) {
-      attendeeInfo = [
-        Text('This is a free event, no RSVP required!'),
-        SizedBox(height: 10),
-        // Text('Share this event with your neighbors: ${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+      attendeeInfo += [
+        // Text('This is a free event, no RSVP required!'),
         // SizedBox(height: 10),
+        ...colsShare,
       ];
     } else {
-      attendeeInfo = [
-        Text('${_attendeesCount} attending, ${_nonHostAttendeesWaitingCount} waiting'),
-        SizedBox(height: 10),
-      ];
       if (_userEvent.id.length > 0) {
         if (_userEvent.hostGroupSizeMax > 0) {
           if (_userEvent.hostGroupSize == _userEvent.hostGroupSizeMax) {
@@ -216,8 +284,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
               SizedBox(height: 10),
               Text('Share this event with your neighbors to fill your spots:'),
               SizedBox(height: 10),
-              Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-              SizedBox(height: 10),
+              ...colsShare,
             ];
           }
         }
@@ -238,7 +305,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
               SizedBox(height: 10),
               Text('Share this event with your neighbors:'),
               SizedBox(height: 10),
-              Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+              ...colsShare,
             ];
           } else {
             attendeeInfo += [
@@ -246,8 +313,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
               SizedBox(height: 10),
               Text('Share this event with your neighbors to get another host so you can join:'),
               SizedBox(height: 10),
-              Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-              SizedBox(height: 10),
+              ...colsShare,
             ];
           }
         }
@@ -265,16 +331,16 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           ];
         }
       }
-      if (!alreadySignedUp) {
-        String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
-        String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
-        attendeeInfo += [
-          Text(rsvpSignUpText),
-          SizedBox(height: 10),
-          UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
-          SizedBox(height: 10),
-        ];
-      }
+    }
+    if (!alreadySignedUp) {
+      String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
+      String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
+      attendeeInfo += [
+        Text(rsvpSignUpText),
+        SizedBox(height: 10),
+        UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
+        SizedBox(height: 10),
+      ];
     }
 
     Widget content1 = Column(
@@ -308,8 +374,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         SizedBox(height: 10),
         Text('Share this event with your neighbors:'),
         SizedBox(height: 10),
-        Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
-        SizedBox(height: 10),
+        ...colsShareQR,
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

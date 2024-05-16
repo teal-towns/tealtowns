@@ -159,7 +159,7 @@ class _SharedItemsState extends State<SharedItems> {
           child: ElevatedButton(
             onPressed: () {
               Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
-              _linkService.Go('/shared-item-save', context, currentUserState);
+              _linkService.Go('/shared-item-save', context, currentUserState: currentUserState);
             },
             child: Text('Post New Item'),
           ),
@@ -270,7 +270,7 @@ class _SharedItemsState extends State<SharedItems> {
         ElevatedButton(
           onPressed: () {
             Provider.of<SharedItemState>(context, listen: false).setSharedItem(sharedItem);
-            _linkService.Go('/shared-item-save?id=${sharedItem.id}', context, currentUserState);
+            _linkService.Go('/shared-item-save?id=${sharedItem.id}', context, currentUserState: currentUserState);
             // context.go('/shared-item-save');
           },
           child: Text('Edit'),
@@ -348,7 +348,7 @@ class _SharedItemsState extends State<SharedItems> {
         ElevatedButton(
           onPressed: () {
             String id = sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
+            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
           },
           child: Text('Invest'),
         ),
@@ -372,7 +372,7 @@ class _SharedItemsState extends State<SharedItems> {
         ElevatedButton(
           onPressed: () {
             String id = sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
+            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
           },
           child: Text('Co-Buy'),
         ),
@@ -385,7 +385,7 @@ class _SharedItemsState extends State<SharedItems> {
         ElevatedButton(
           onPressed: () {
             String id = sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState);
+            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
           },
           child: Text('Set Up Monthly Payments'),
         ),
@@ -459,7 +459,7 @@ class _SharedItemsState extends State<SharedItems> {
         ElevatedButton(
           onPressed: () {
             Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
-            _linkService.Go('/shared-item-save', context, currentUserState);
+            _linkService.Go('/shared-item-save', context, currentUserState: currentUserState);
           },
           child: Text('Post the first Shared Item!'),
         ),

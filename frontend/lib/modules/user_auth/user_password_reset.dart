@@ -37,7 +37,13 @@ class _UserPasswordResetState extends State<UserPasswordResetComponent> {
           var user = UserClass.fromJson(data['user']);
           if (user.id.length > 0) {
             Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
-            context.go(Routes.home);
+            String route = '/home';
+            String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
+            if (redirectUrl.length > 0) {
+              route = redirectUrl;
+              Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl('');
+            }
+            context.go(route);
           } else {
             setState(() { _message = data['message'].length > 0 ? data['message'] : 'Please try again.'; });
           }

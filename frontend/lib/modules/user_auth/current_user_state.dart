@@ -17,12 +17,15 @@ class CurrentUserState extends ChangeNotifier {
   LocalStorage? _localstorage = null;
   List<String> _routeIds = [];
   String _status = "done";
+  String _redirectUrl = '';
 
   get isLoggedIn => _isLoggedIn;
 
   get currentUser => _currentUser;
 
   get status => _status;
+
+  get redirectUrl => _redirectUrl;
 
   void init() {
     if (_routeIds.length == 0) {
@@ -130,5 +133,9 @@ class CurrentUserState extends ChangeNotifier {
   @override
   String toString() {
     return 'CurrentUserState{_currentUser: $_currentUser, _isLoggedIn: $_isLoggedIn, _routeIds: $_routeIds, _status: $_status}';
+  }
+
+  void SetRedirectUrl(String url) {
+    _redirectUrl = url;
   }
 }

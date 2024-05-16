@@ -51,6 +51,20 @@ def GetById(collection: str, id1: str, db1 = None, fields = None, uName: str = '
         ret["message"] = "Invalid id (or uName). id: " + id1 + " uName: " + uName 
     return ret
 
+def GetByIds(collection: str, ids: list, db1 = None, fields = None):
+    ret = {"valid": 1, "message": ""}
+    ret[collection] = []
+    objectIds = []
+    for id1 in ids:
+        objectIds.append(mongo_db.to_object_id(id1))
+    try:
+        query = {"_id": {"$in": objectIds}}
+        ret[collection] = mongo_db.find(collection, query, db1 = db1, fields = fields)["items"]
+    except Exception:
+        ret["valid"] = 0
+        ret["message"] = "One or more invalid ids."
+    return ret
+
 def CleanId(obj: dict):
     return mongo_db.CleanId(obj)
 

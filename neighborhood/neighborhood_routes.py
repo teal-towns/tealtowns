@@ -41,12 +41,13 @@ def addRoutes():
             'sharedItemsCount': 3,
             'limitCount': 250,
             'withUsersCount': 0,
+            'withEventUsersCount': 0,
             'userId': '',
         }, data)
         return _neighborhood.GetByUName(data['uName'], data['withWeeklyEvents'], data['withSharedItems'],
             data['withSustainability'], data['withConnections'], data['weeklyEventsCount'],
             data['sharedItemsCount'], limitCount = data['limitCount'], withUsersCount = data['withUsersCount'],
-            userId = data['userId'])
+            withEventUsersCount = data['withEventUsersCount'], userId = data['userId'])
     _socket.add_route('GetNeighborhoodByUName', GetByUName)
 
 addRoutes()

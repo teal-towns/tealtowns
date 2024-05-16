@@ -113,7 +113,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        context.go('/eat');
+        context.go('/weekly-events');
       }
     }));
   }
@@ -130,7 +130,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     if (!currentUserState.isLoggedIn) {
       return ElevatedButton(
         onPressed: () {
-          context.go('/login');
+          _linkService.Go('', context, currentUserState: currentUserState);
         },
         child: Text('Join Event'),
       );
@@ -180,8 +180,15 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       return Text('You are already subscribed to this weekly event!');
     }
 
+    List<Widget> colsSubsription = [];
+    if (_weeklyEvent.priceUSD != 0) {
+      colsSubsription = [
+        BuildSubscriptions(),
+        SizedBox(height: 10),
+      ];
+    }
     Widget widgetForm = SizedBox.shrink();
-    if (_formValsPay['subscription'] == 'single') {
+    if (_formValsPay['subscription'] == 'single' || _weeklyEvent.priceUSD == 0) {
       String eventId = _rsvpDeadlinePassed > 0 ? _nextEvent.id : _event.id;
       widgetForm = UserEventSave(eventId: eventId);
     } else {
@@ -220,8 +227,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BuildSubscriptions(),
-        SizedBox(height: 10),
+        ...colsSubsription,
         widgetForm,
       ]
     );

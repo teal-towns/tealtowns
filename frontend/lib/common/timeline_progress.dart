@@ -8,9 +8,10 @@ class TimelineProgress extends StatefulWidget {
   double stepHeight;
   bool currentStepOnly;
   bool showNumbers;
+  double singleColumnWidth;
 
   TimelineProgress({Key? key, required this.steps, this.colors = const [], this.stepHeight = 50,
-    this.currentStepOnly = false, this.showNumbers = true, }) : super(key: key);
+    this.currentStepOnly = false, this.showNumbers = true, this.singleColumnWidth = 600, }) : super(key: key);
 
   @override
   _TimelineProgressState createState() => _TimelineProgressState();
@@ -45,14 +46,26 @@ class _TimelineProgressState extends State<TimelineProgress> {
       ];
     }
 
-    return Column(
-      children: [
-        ...widget.steps.map((step) => BuildStep(step, widget.steps.indexOf(step))).toList(),
-      ]
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < widget.singleColumnWidth) {
+          return Column(
+            children: [
+              ...widget.steps.map((step) => BuildStep(step, widget.steps.indexOf(step), singleColumn: true)).toList(),
+            ]
+          );
+        } else {
+          return Column(
+            children: [
+              ...widget.steps.map((step) => BuildStep(step, widget.steps.indexOf(step))).toList(),
+            ]
+          );
+        }
+      }
     );
   }
 
-  Widget BuildStep(Map<String, dynamic> step, int stepIndex) {
+  Widget BuildStep(Map<String, dynamic> step, int stepIndex, { bool singleColumn = false }) {
     if (widget.currentStepOnly && (!step.containsKey('current') || !step['current'])) {
       return SizedBox.shrink();
     }
@@ -83,7 +96,7 @@ class _TimelineProgressState extends State<TimelineProgress> {
     if (!step.containsKey('description') && step.containsKey('descriptionSteps')) {
       List<Widget> descriptions = [];
       for (var j = 0; j < step['descriptionSteps'].length; j++) {
-        if (stepIndex % 2 == 1) {
+        if (stepIndex % 2 == 1 && !singleColumn) {
           descriptions.add(Text('${step['descriptionSteps'][j]}', textAlign: TextAlign.right));
         } else {
           descriptions.add(Text('${step['descriptionSteps'][j]}'));
@@ -97,7 +110,39 @@ class _TimelineProgressState extends State<TimelineProgress> {
         mainAxisAlignment: MainAxisAlignment.center, children: descriptions,);
     }
 
-    if (stepIndex % 2 == 0) {
+    if (singleColumn) {
+      return Opacity(opacity: opacity, child: Column(
+        children: [
+          Container(
+            height: height,
+            padding: padding,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
+              color: widget.colors[stepIndex],
+            ),
+            child: Row(
+              children: [
+                ...icon,
+                Expanded(flex: 1, child: Container()),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ...rowsTitle,
+                  ]
+                ),
+              ]
+            )
+          ),
+          Container(
+            height: height,
+            padding: padding,
+            alignment: Alignment.centerLeft,
+            child: step['description'],
+          ),
+        ]
+      ));
+    } else if (stepIndex % 2 == 0) {
       // left: image, title, right: description
       return Opacity(opacity: opacity, child: Row(
         children: [

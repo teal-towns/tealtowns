@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
+import '../../common/config_service.dart';
 import '../../common/layout_service.dart';
+import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './neighborhood_class.dart';
@@ -28,7 +31,9 @@ class Neighborhood extends StatefulWidget {
 
 class _NeighborhoodState extends State<Neighborhood> {
   Buttons _buttons = Buttons();
+  ConfigService _configService = ConfigService();
   LayoutService _layoutService = LayoutService();
+  LinkService _linkService = LinkService();
   NeighborhoodJourneyService _neighborhoodJourneyService = NeighborhoodJourneyService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -38,6 +43,7 @@ class _NeighborhoodState extends State<Neighborhood> {
   int _weeklyEventsCount = 0;
   int _sharedItemsCount = 0;
   int _usersCount = 0;
+  int _eventUsersCount = 0;
   List<WeeklyEventClass> _weeklyEvents = [];
   List<SharedItemClass> _sharedItems = [];
   bool _inited = false;
@@ -58,6 +64,7 @@ class _NeighborhoodState extends State<Neighborhood> {
         _weeklyEventsCount = data['weeklyEventsCount'];
         _sharedItemsCount = data['sharedItemsCount'];
         _usersCount = data['usersCount'];
+        _eventUsersCount = data['eventUsersCount'];
         _weeklyEvents = [];
         for (var i = 0; i < data['weeklyEvents'].length; i++) {
           _weeklyEvents.add(WeeklyEventClass.fromJson(data['weeklyEvents'][i]));
@@ -66,13 +73,14 @@ class _NeighborhoodState extends State<Neighborhood> {
         for (var i = 0; i < data['sharedItems'].length; i++) {
           _sharedItems.add(SharedItemClass.fromJson(data['sharedItems'][i]));
         }
-        _belongingSteps = _neighborhoodJourneyService.BelongingStepsWithComplete(_usersCount, _weeklyEventsCount, _sharedItemsCount);
+        _belongingSteps = _neighborhoodJourneyService.BelongingStepsWithComplete(_eventUsersCount, _weeklyEventsCount, _sharedItemsCount);
         _sustainableSteps = _neighborhoodJourneyService.SustainableSteps();
         setState(() {
           _neighborhood = _neighborhood;
           _weeklyEventsCount = _weeklyEventsCount;
           _sharedItemsCount = _sharedItemsCount;
           _usersCount = _usersCount;
+          _eventUsersCount = _eventUsersCount;
           _weeklyEvents = _weeklyEvents;
           _sharedItems = _sharedItems;
           _belongingSteps = _belongingSteps;
@@ -105,6 +113,7 @@ class _NeighborhoodState extends State<Neighborhood> {
       _inited = true;
       GetNeighborhood();
     }
+    Map<String, dynamic> config = _configService.GetConfig();
 
     if (_loading) {
       return AppScaffoldComponent(
@@ -174,13 +183,18 @@ class _NeighborhoodState extends State<Neighborhood> {
     }
 
     List<Widget> colsJoin = [];
-    if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn &&
-      (!_neighborhood.userNeighborhood.containsKey('status') ||
-      _neighborhood.userNeighborhood['status'] != 'default')) {
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (!currentUserState.isLoggedIn || 
+      (currentUserState.isLoggedIn && (!_neighborhood.userNeighborhood.containsKey('status') ||
+      _neighborhood.userNeighborhood['status'] != 'default'))) {
       colsJoin = [
         ElevatedButton(
           onPressed: () {
-            SaveUserNeighborhood(_neighborhood.id);
+            if (!currentUserState.isLoggedIn) {
+              _linkService.Go('/n/${_neighborhood.uName}', context, currentUserState: currentUserState);
+            } else {
+              SaveUserNeighborhood(_neighborhood.id);
+            }
           },
           child: Text('Join Neighborhood'),
         ),
@@ -237,6 +251,18 @@ class _NeighborhoodState extends State<Neighborhood> {
             )
           ),
           _style.SpacingH('large'),
+          _style.Text1('${_usersCount} neighbors thus far'),
+          _style.SpacingH('medium'),
+          _style.Text1('Share your neighborhood with your neighbors', size: 'large'),
+          _style.SpacingH('medium'),
+          QrImageView(
+            data: '${config['SERVER_URL']}/n/${_neighborhood.uName}',
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
+          _style.SpacingH('medium'),
+          Text('${config['SERVER_URL']}/n/${_neighborhood.uName}'),
+          _style.SpacingH('medium'),
           // TODO - sustainability and connections
         ]
       )
@@ -254,6 +280,7 @@ class _NeighborhoodState extends State<Neighborhood> {
       'withConnections': 1,
       'withSustainability': 1,
       'withUsersCount': 1,
+      'withEventUsersCount': 1,
       'limitCount': widget.limitCount,
       'userId': userId,
     };

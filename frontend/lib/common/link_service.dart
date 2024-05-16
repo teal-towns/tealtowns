@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../modules/user_auth/current_user_state.dart';
@@ -11,8 +12,15 @@ class LinkService {
     return _instance;
   }
 
-  void Go(String url, BuildContext context, CurrentUserState currentUserState) {
+  void Go(String url, BuildContext context, {CurrentUserState? currentUserState = null}) {
+    if (url.length < 1) {
+      url = Uri.base.path;
+    }
+    if (currentUserState == null) {
+      currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    }
     if (!currentUserState.isLoggedIn) {
+      Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl(url);
       context.go('/login');
     } else {
       context.go(url);
