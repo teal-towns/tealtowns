@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../app_scaffold.dart';
 import '../common/buttons.dart';
+import '../common/config_service.dart';
 import '../common/style.dart';
 import '../common/timeline_progress.dart';
 import '../modules/neighborhood/neighborhoods.dart';
@@ -16,6 +18,7 @@ class HomeComponent extends StatefulWidget {
 
 class _HomeComponentState extends State<HomeComponent> {
   Buttons _buttons = Buttons();
+  ConfigService _configService = ConfigService();
   Style _style = Style();
 
   List<Map<String, dynamic>> _steps = [
@@ -38,7 +41,7 @@ class _HomeComponentState extends State<HomeComponent> {
       'Neighbors work together to progress each week along the journey',
     ], },
     { 'title': 'Belonging', 'icon': Icons.volunteer_activism, 'descriptionSteps': [
-      'People are the foundation, so the first step is to connect with your neighbors over a shared meal and other weekly events',
+      'The first step is to connect with your neighbors over a shared meal and other weekly events',
       'Regular meetings build trust and facilitate conversations and small 1% greener actions, such as co-owning items',
     ], },
     // { 'title': 'Sustainable', 'icon': Icons.compost, 'descriptionSteps': [
@@ -49,6 +52,7 @@ class _HomeComponentState extends State<HomeComponent> {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> config = _configService.GetConfig();
     return AppScaffoldComponent(
       listWrapper: true,
       width: 1200,
@@ -58,10 +62,22 @@ class _HomeComponentState extends State<HomeComponent> {
           _style.SpacingH('medium'),
           _buttons.Link(context, 'Start building your Teal Town', '/neighborhoods'),
           _style.SpacingH('medium'),
-          TimelineProgress(steps: _steps, stepHeight: 125, showNumbers: false,),
+          TimelineProgress(steps: _steps, stepHeight: 125, showNumbers: false, singleColumnWidth: 700,),
           _style.SpacingH('xlarge'),
           Neighborhoods(),
+          _style.SpacingH('medium'),
+          _style.Text1('Invite your neighbors!', size: 'large',),
+          _style.SpacingH('medium'),
+          QrImageView(
+            data: '${config['SERVER_URL']}',
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
+          _style.SpacingH('medium'),
+          _style.Text1('${config['SERVER_URL']}',),
           _style.SpacingH('xlarge'),
+          // Extra height for neighborhoods input location overlay.
+          SizedBox(height: 100),
         ]
       )
     );

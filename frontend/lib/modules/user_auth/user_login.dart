@@ -10,6 +10,9 @@ import '../../common/form_input/input_fields.dart';
 import './current_user_state.dart';
 import '../../routes.dart';
 
+import '../neighborhood/neighborhood_state.dart';
+import '../neighborhood/user_neighborhood_class.dart';
+
 class UserLoginComponent extends StatefulWidget {
   @override
   _UserLoginState createState() => _UserLoginState();
@@ -36,8 +39,25 @@ class _UserLoginState extends State<UserLoginComponent> {
       if (data['valid'] == 1 && data.containsKey('user')) {
         var user = UserClass.fromJson(data['user']);
         if (user.id.length > 0) {
+          String route = '/home';
           Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
-          context.go(Routes.home);
+          if (data.containsKey('userNeighborhoods')) {
+            List<UserNeighborhoodClass> userNeighborhoods = [];
+            for (var i = 0; i < data['userNeighborhoods'].length; i++) {
+              UserNeighborhoodClass userNeighborhood = UserNeighborhoodClass.fromJson(data['userNeighborhoods'][i]);
+              userNeighborhoods.add(userNeighborhood);
+              if (userNeighborhood.status == 'default') {
+                route = '/n/${userNeighborhood.neighborhood.uName}';
+              }
+            }
+            Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
+          }
+          String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
+          if (redirectUrl.length > 0) {
+            route = redirectUrl;
+            Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl('');
+          }
+          context.go(route);
         } else {
           setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid login, please try again'; });
         }
@@ -77,6 +97,7 @@ class _UserLoginState extends State<UserLoginComponent> {
               if (_formKey.currentState?.validate() == true) {
                 setState(() { _loading = true; });
                 _formKey.currentState?.save();
+                formVals['withUserNeighborhoods'] = 1;
                 _socketService.emit('login', formVals);
               } else {
                 setState(() { _loading = false; });

@@ -146,7 +146,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
             if (widget.type.length > 0) {
               url += '?type=${widget.type}';
             }
-            _linkService.Go(url, context, currentUserState);
+            _linkService.Go(url, context, currentUserState: currentUserState);
           },
           child: Text('Create New Event'),
         ),
@@ -260,7 +260,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
           children: [
             ElevatedButton(
               onPressed: () {
-                _linkService.Go('/weekly-event-save?id=${weeklyEvent.id}', context, currentUserState);
+                _linkService.Go('/weekly-event-save?id=${weeklyEvent.id}', context, currentUserState: currentUserState);
               },
               child: Text('Edit'),
             ),
@@ -344,7 +344,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
             if (widget.type.length > 0) {
               url += '?type=${widget.type}';
             }
-            _linkService.Go(url, context, currentUserState);
+            _linkService.Go(url, context, currentUserState: currentUserState);
           },
           child: Text('Add the first event!'),
         ),
