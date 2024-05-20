@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class SelectButtonsFormField extends FormField<String> {
-  SelectButtonsFormField({ var options, String? label,
-    FormFieldSetter<String>? onSaved, FormFieldValidator<String>? validator,
-    String initialValue = '', ValueChanged<String?>? onChanged, Color colorSelected = Colors.blue,
+class MultiSelectButtonsFormField extends FormField<List<String>> {
+  MultiSelectButtonsFormField({ var options, String? label,
+    FormFieldSetter<List<String>>? onSaved, FormFieldValidator<List<String>>? validator,
+    List<String> initialValue = const [], ValueChanged<List<String?>>? onChanged, Color colorSelected = Colors.blue,
     Color color = Colors.grey, }) : super(
       onSaved: onSaved,
       validator: validator,
       initialValue: initialValue,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      builder: (FormFieldState<String> state) {
+      builder: (FormFieldState<List<String>> state) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -22,9 +22,12 @@ class SelectButtonsFormField extends FormField<String> {
                 return FilledButton(
                   child: Text(opt['label']),
                   onPressed: () {
-                    var newVal = opt['value'].toString();
-                    if (state.value.toString() == newVal) {
-                      newVal = '';
+                    var val = opt['value'].toString();
+                    var newVal = state.value!;
+                    if (!state.value!.contains(val)) {
+                      newVal.add(val);
+                    } else {
+                      newVal.remove(val);
                     }
                     state.didChange(newVal);
                     if (onChanged != null) {
@@ -32,7 +35,7 @@ class SelectButtonsFormField extends FormField<String> {
                     }
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: state.value.toString() == opt['value'].toString() ? colorSelected : color,
+                    backgroundColor: state.value!.contains(opt['value'].toString()) ? colorSelected : color,
                   ),
                 );
               }).toList(),

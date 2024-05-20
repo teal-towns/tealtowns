@@ -60,20 +60,34 @@ def Remove(eventId: str):
     mongo_db.delete_many('userEvent', { 'eventId': eventId })
     return _mongo_db_crud.RemoveById('event', eventId)
 
-def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 24, now = None, autoCreate: int = 1):
+def GetEventWithWeekly(eventId: str):
+    ret = { "valid": 1, "message": "", 'weeklyEvent': {}, }
+    ret['event'] = mongo_db.find_one('event', { "_id": mongo_db.to_object_id(eventId) })['item']
+    if ret['event'] is not None:
+        if 'weeklyEventId' in ret['event'] and len(ret['event']['weeklyEventId']) > 0:
+            ret['weeklyEvent'] = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(ret['event']['weeklyEventId'])})['item']
+            # eventStart = date_time.from_string(ret['event']['start'])
+            # retNext = GetNextEventFromWeekly(ret['event']['weeklyEventId'], now = eventStart, weeklyEvent = ret['weeklyEvent'])
+            # ret['nextEvent'] = retNext['event']
+    return ret
+
+def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 24, now = None, autoCreate: int = 1,
+    weeklyEvent: dict = None):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 0, 'message': '', 'event': {} }
-    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
+    if weeklyEvent is None:
+        weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
     ret['weeklyEvent'] = weeklyEvent
-    nextStart = GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline, now)['nextStart']
+    retNext = GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline, now)
     event = {
         'weeklyEventId': weeklyEventId,
-        'start': nextStart,
+        'start': retNext['nextStart'],
     }
     eventFind = mongo_db.find_one('event', event)['item']
     if eventFind:
         ret['event'] = eventFind
     elif not eventFind and autoCreate:
+        event['end'] = retNext['nextEnd']
         ret['event'] = _mongo_db_crud.Save('event', event)['event']
     return ret
 
@@ -88,6 +102,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
     }
     eventFind = mongo_db.find_one('event', event)['item']
     if not eventFind and autoCreate:
+        event['end'] = retNext['thisWeekEnd']
         eventFind = _mongo_db_crud.Save('event', event)['event']
     if eventFind:
         ret['thisWeekEvent'] = eventFind
@@ -98,13 +113,28 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
         }
         eventNextFind = mongo_db.find_one('event', eventNext)['item']
         if not eventNextFind and autoCreate:
+            eventNext['end'] = retNext['nextEnd']
             eventNextFind = _mongo_db_crud.Save('event', eventNext)['event']
         if eventNextFind:
             ret['nextWeekEvent'] = eventNextFind
     return ret
 
+def GetMostRecentPastEvent(weeklyEventId: str, now = None):
+    ret = { 'valid': 1, 'message': '', 'event': {}, }
+    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
+    retNext = GetNextEventStart(weeklyEvent, now = now, minHoursBeforeRsvpDeadline = 0)
+    pastStart = date_time.from_string(retNext['thisWeekStart']) - datetime.timedelta(days = 7)
+    pastStart = date_time.string(pastStart)
+    event = {
+        'weeklyEventId': weeklyEventId,
+        'start': pastStart,
+    }
+    ret['event'] = mongo_db.find_one('event', event)['item']
+    return ret
+
 def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, now = None):
-    ret = { 'valid': 1, 'message': '', 'nextStart': '', 'rsvpDeadlinePassed': 0, 'thisWeekStart': '', }
+    ret = { 'valid': 1, 'message': '', 'nextStart': '', 'rsvpDeadlinePassed': 0, 'thisWeekStart': '',
+        'nextEnd': '', 'thisWeekEnd': '', }
     now = now if now is not None else date_time.now()
     now = date_time.ToTimezone(now, weeklyEvent['timezone'])
 
@@ -113,7 +143,18 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
     thisWeek = date_time.create(now.year, now.month, now.day, hour, minute, tz = weeklyEvent['timezone'])
     # Add difference between weekdays.
     thisWeek += datetime.timedelta(days=(weeklyEvent['dayOfWeek'] - now.weekday()))
+    if thisWeek < now:
+        thisWeek += datetime.timedelta(days = 7)
     ret['thisWeekStart'] = date_time.string(thisWeek)
+    hourEnd = int(weeklyEvent['endTime'][0:2])
+    minuteEnd = int(weeklyEvent['endTime'][3:5])
+    durationHours = hourEnd - hour
+    if durationHours < 0:
+        durationHours += 24
+    durationMinutes = minuteEnd - minute
+    duration = durationHours * 60 + durationMinutes
+    thisWeekEnd = thisWeek + datetime.timedelta(minutes = duration)
+    ret['thisWeekEnd'] = date_time.string(thisWeekEnd)
 
     hoursBuffer = minHoursBeforeRsvpDeadline + weeklyEvent['rsvpDeadlineHours']
     diffHours = date_time.diff(thisWeek, now, 'hours')
@@ -121,9 +162,12 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
         ret['rsvpDeadlinePassed'] = 1
     if (diffHours >= hoursBuffer):
         ret['nextStart'] = date_time.string(thisWeek)
+        ret['nextEnd'] = date_time.string(thisWeekEnd)
         return ret
     nextWeek = thisWeek + datetime.timedelta(days = 7)
     ret['nextStart'] = date_time.string(nextWeek)
+    nextWeekEnd = thisWeekEnd + datetime.timedelta(days = 7)
+    ret['nextEnd'] = date_time.string(nextWeekEnd)
     return ret
 
 def GetUsersAttending(daysPast: int = 7, weeklyEventIds: list = [], now = None):

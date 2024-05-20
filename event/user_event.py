@@ -43,6 +43,7 @@ def Save(userEvent: dict, payType: str):
             'creditsEarned': 0,
             'creditsRedeemed': 0,
             'creditsPriceUSD': weeklyEvent['priceUSD'],
+            'eventEnd': event['end'],
         }, userEvent)
 
     checkPay = 1
@@ -427,6 +428,21 @@ def GetUsers(eventId: str, withUsers: int = 1):
         users = mongo_db.find('user', { '_id': { '$in': userObjectIds } }, fields = fields)['items']
         for user in users:
             ret['userEvents'][indicesMap[user['_id']]]['user'] = user
+    return ret
+
+def NotifyUsers(eventId: str, smsContent: str, minAttendeeCount: int = 0):
+    ret = { 'valid': 1, 'message': '', 'notifyUserIds': { 'sms': [], }, }
+    query = { 'eventId': eventId, }
+    if minAttendeeCount > 0:
+        query['attendeeCount'] = { '$gte': minAttendeeCount }
+    userEvents = mongo_db.find('userEvent', query)['items']
+    for userEvent in userEvents:
+        retPhone = _user.GetPhone(userEvent['userId'])
+        if retPhone['valid']:
+            body = smsContent
+            retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+            if retSms['valid']:
+                ret['notifyUserIds']['sms'].append(userEvent['userId'])
     return ret
 
 def Get(eventId: str, userId: str, withEvent: int = 0, withUserCheckPayment: int = 0, checkByPayment: int = 1,

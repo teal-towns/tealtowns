@@ -5,6 +5,7 @@ import ml_config
 import mongo_db
 import notifications
 
+from notifications_all import email_sendgrid as _email_sendgrid
 from notifications_all import sms_twilio as _sms_twilio
 
 from stubs import stubs_event as _stubs_event
@@ -27,6 +28,7 @@ _collectionNames = ['user', 'image', 'blog',
     'neighborhood', 'userNeighborhood',
     'certificationLevel', 'journeyStep', 'neighborhoodCertificationLevel', 'neighborhoodJourneyStep',
     'userMessage',
+    'eventFeedback', 'userFeedback',
 ]
 
 def InitLive():
@@ -64,6 +66,7 @@ def InitAllCollections():
         _stubs_weekly_event.AddDefault()
 
         _sms_twilio.SetTestMode(1)
+        _email_sendgrid.SetTestMode(1)
 
         _inited = 1
 

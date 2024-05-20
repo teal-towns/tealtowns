@@ -34,6 +34,9 @@ _wsUsers = {}
 _wsGroups = {}
 
 def AddClient(userId, ws):
+    if len(userId) < 1:
+        print ('AddClient empty userId', userId)
+        return {}
     # Allow multiple connections for the same user.
     socketObj = {
         'ws': ws,
@@ -80,13 +83,18 @@ def RemoveClient(wsId):
             break
     return {}
 
-def AddUsersToGroup(groupName, userIds):
+def AddUsersToGroup(groupName, userIds, ws: None):
     if groupName not in _wsGroups:
         _wsGroups[groupName] = { 'userIds': userIds }
+        if ws is not None:
+            for userId in userIds:
+                AddClient(userId, ws)
     else:
         for userId in userIds:
             if userId not in _wsGroups[groupName]['userIds']:
                 _wsGroups[groupName]['userIds'].append(userId)
+            if ws is not None:
+                AddClient(userId, ws)
     return {}
 
 def RemoveGroup(groupName):
@@ -116,7 +124,7 @@ def GetUserIdsInGroup(groupName, skipUserIds=[]):
                 userIds.append(userId)
     return userIds
 
-async def SendToUsers(sendBytes, userIds, skipUserIds=[]):
+async def SendToUsers(sendBytes, userIds: list, skipUserIds=[]):
     for userId in userIds:
         if userId not in skipUserIds and userId in _wsUsers:
             for socket in _wsUsers[userId]['sockets']:
@@ -128,16 +136,16 @@ async def SendToUsers(sendBytes, userIds, skipUserIds=[]):
                     RemoveClient(socketId)
     return {}
 
-async def SendToUsersJson(jsonData, userIds, skipUserIds = []):
+async def SendToUsersJson(jsonData, userIds: list, skipUserIds = []):
     utf8Bytes = json.dumps(jsonData).encode(encoding='utf-8')
     return await SendToUsers(utf8Bytes, userIds, skipUserIds)
 
-async def SendToGroups(sendBytes, groupNames, skipUserIds=[]):
+async def SendToGroups(sendBytes, groupNames: list, skipUserIds=[]):
     for groupName in groupNames:
         if groupName in _wsGroups:
             await SendToUsers(sendBytes, _wsGroups[groupName]['userIds'], skipUserIds)
     return {}
 
-async def SendToGroupsJson(jsonData, groupNames, skipUserIds = []):
+async def SendToGroupsJson(jsonData, groupNames: list, skipUserIds = []):
     utf8Bytes = json.dumps(jsonData).encode(encoding='utf-8')
     return await SendToGroups(utf8Bytes, groupNames, skipUserIds)

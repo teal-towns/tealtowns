@@ -41,7 +41,10 @@ _migrations.RunAll()
 httpRoutesFunc = []
 from blog import blog_routes as _blog_routes
 from common import common_routes as _common_routes
+from event import event_routes as _event_routes
+from event import event_feedback_routes as _event_feedback_routes
 from event import user_event_routes as _user_event_routes
+from event import user_feedback_routes as _user_feedback_routes
 from event import user_weekly_event_routes as _user_weekly_event_routes
 from event import weekly_event_routes as _weekly_event_routes
 from image import image_routes as _image_routes
@@ -64,6 +67,9 @@ log.log('warn', 'web_server starting')
 from event import weekly_event as _weekly_event
 thread = threading.Thread(target = _weekly_event.CheckRSVPDeadlineLoop, args=())
 thread.start()
+from event import event_feedback as _event_feedback
+thread2 = threading.Thread(target = _event_feedback.CheckEventFeedbackLoop, args=())
+thread2.start()
 
 # Regular websocket
 async def websocket_handler(request):
@@ -85,7 +91,7 @@ async def websocket_handler(request):
             try:
                 dataRaw = json.loads(dataString)
                 auth = dataRaw["auth"] if "auth" in dataRaw else {}
-                if 'userId' in auth:
+                if 'userId' in auth and auth['userId'] != '':
                     _websocket_clients.AddClient(auth['userId'], websocket)
                 msgId = dataRaw['data']['_msgId'] if '_msgId' in dataRaw['data'] else ''
                 retData = _route_permissions.Allowed(dataRaw["route"], auth, dataRaw["data"])

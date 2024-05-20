@@ -100,6 +100,7 @@ def insert_one(collection_name, obj1, db1 = None, validate: int = 1, allowPartia
 
     # Add timestamp
     obj1['createdAt'] = date_time.now_string()
+    obj1['updatedAt'] = date_time.now_string()
     # obj = lodash.extend_object({
     #     'createdAt': date_time.now_string()
     # }, obj1);
@@ -126,6 +127,7 @@ def insert_many(collection_name, objects, db1 = None, validate: int = 1, allowPa
     # Add timestamp
     for index, obj1 in enumerate(objects):
         objects[index]['createdAt'] = date_time.now_string()
+        objects[index]['updatedAt'] = date_time.now_string()
 
     inserted_ids = collection.insert_many(objects).inserted_ids
     for index, obj1 in enumerate(objects):

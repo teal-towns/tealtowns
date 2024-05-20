@@ -85,6 +85,7 @@ def test_WeeklyEventFlow():
         'userId': users[1]['_id'],
         'hostGroupSizeMax': 0,
         'attendeeCountAsk': 1,
+        'eventEnd': event1['end'],
     }
     retPayCheck = _user_event.CheckAndTakePayment(users[1]['_id'], event1['_id'], user1Event['attendeeCountAsk'])
     assert retPayCheck['availableUSD'] == userAmountsCurrent[1]
@@ -142,6 +143,7 @@ def test_WeeklyEventFlow():
         'userId': users[3]['_id'],
         'hostGroupSizeMax': 4,
         'attendeeCountAsk': 1,
+        'eventEnd': event1['end'],
     }
     retUserEvent = _user_event.Save(user3Event, 'paid')
     assert retUserEvent['valid'] == 1
@@ -279,6 +281,7 @@ def test_WeeklyEventFlow():
         'userId': users[3]['_id'],
         'hostGroupSizeMax': 4,
         'attendeeCountAsk': 1,
+        'eventEnd': event2['end'],
     }
     retUserEvent = _user_event.Save(user3Event, 'credits')
     assert retUserEvent['valid'] == 1
@@ -306,6 +309,7 @@ def test_WeeklyEventFlow():
         'eventId': event2['_id'],
         'userId': users[5]['_id'],
         'attendeeCountAsk': 1,
+        'eventEnd': event2['end'],
     }
     retUserEvent = _user_event.Save(user5Event, 'paid')
     assert retUserEvent['valid'] == 1
@@ -396,6 +400,7 @@ def test_WeeklyEventFlow():
         'eventId': event3['_id'],
         'userId': users[7]['_id'],
         'attendeeCountAsk': 1,
+        'eventEnd': event3['end'],
     }
     retUserEvent = _user_event.Save(user7Event, 'paid')
     assert retUserEvent['valid'] == 1
@@ -423,6 +428,7 @@ def test_WeeklyEventFlow():
         'userId': users[3]['_id'],
         'hostGroupSizeMax': 4,
         'attendeeCountAsk': 1,
+        'eventEnd': event3['end'],
     }
     retUserEvent = _user_event.Save(user3Event, 'paid')
     assert retUserEvent['valid'] == 1
@@ -475,6 +481,7 @@ def test_WeeklyEventFlow():
         'eventId': event3['_id'],
         'userId': users[8]['_id'],
         'attendeeCountAsk': attendeeCountAsk,
+        'eventEnd': event3['end'],
     }
     retUserEvent = _user_event.Save(user8Event, 'paid')
     assert retUserEvent['valid'] == 1

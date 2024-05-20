@@ -58,6 +58,7 @@ def AddWeeklyUsersToEvent(weeklyEventId: str, now = None):
                 'eventId': retEvent['event']['_id'],
                 'hostGroupSizeMax': 0,
                 'attendeeCountAsk': userWeeklyEvent['attendeeCountAsk'],
+                'eventEnd': retEvent['event']['end'],
             }
             retUserEvent = _user_event.Save(userEvent, 'paidSubscription')
             ret['notifyUserIdsHosts']['sms'] += retUserEvent['notifyUserIdsHosts']['sms']

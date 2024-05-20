@@ -365,6 +365,8 @@ class _FormSaveState extends State<FormSave> {
       input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText,);
     } else if (value['type'] == 'selectButtons') {
       input = _inputFields.inputSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText,);
+    } else if (value['type'] == 'multiSelectButtons') {
+      input = _inputFields.inputMultiSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText,);
     } else if (value['type'] == 'time') {
       input = _inputFields.inputTime(_formVals, key, label: label, required: required, helpText: helpText,);
     } else if (value['type'] == 'number') {

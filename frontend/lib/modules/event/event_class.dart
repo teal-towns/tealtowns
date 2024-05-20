@@ -1,12 +1,13 @@
 class EventClass {
-  String id = '', weeklyEventId = '', start = '';
+  String id = '', weeklyEventId = '', start = '', end = '';
 
-  EventClass(this.id, this.weeklyEventId, this.start);
+  EventClass(this.id, this.weeklyEventId, this.start, this.end);
 
   EventClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.weeklyEventId = json['weeklyEventId'] ?? '';
     this.start = json['start'] ?? '';
+    this.end = json['end'] ?? '';
   }
 
   Map<String, dynamic> toJson() =>
@@ -14,5 +15,6 @@ class EventClass {
       '_id': id,
       'weeklyEventId': weeklyEventId,
       'start': start,
+      'end': end,
     };
 }

@@ -3,9 +3,16 @@ from sendgrid.helpers.mail import Mail
 import logging
 
 import ml_config
+_config = ml_config.get_config()
 
 sg = False
 _configEmail = None
+
+_testMode = 0
+
+def SetTestMode(testMode: int):
+    global _testMode
+    _testMode = testMode
 
 def Setup(api_key, configEmail):
     global sg
@@ -14,6 +21,9 @@ def Setup(api_key, configEmail):
     _configEmail = configEmail
 
 def Send(subject, body, to, from1=None, cc="", bcc=""):
+    ret = { 'valid': 1, 'message': '', }
+    if _testMode or ('test_mode' in _config['twilio'] and _config['twilio']['test_mode']):
+        return ret
     global _configEmail
     from1 = from1 if from1 is not None else _configEmail['from']
     logger = logging.getLogger('default-logger')

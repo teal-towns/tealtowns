@@ -40,6 +40,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
     'startTime': { 'type': 'time' },
     'hostGroupSizeDefault': { 'type': 'number', 'min': 0, 'required': true },
     'range': { 'type': 'selectButtons', 'label': 'I like food?' },
+    'ranges': { 'type': 'multiSelectButtons', 'label': 'Choose multiple', },
   };
   Map<String, dynamic>_formVals = {
     'location': { 'coordinates': [0,0] },
@@ -52,6 +53,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
 
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
     _formFields['range']!['options'] = _optsRange;
+    _formFields['ranges']!['options'] = _optsRange;
   }
 
   @override

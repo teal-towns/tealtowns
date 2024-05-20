@@ -15,6 +15,9 @@ class LinkService {
   void Go(String url, BuildContext context, {CurrentUserState? currentUserState = null}) {
     if (url.length < 1) {
       url = Uri.base.path;
+      if (Uri.base.query.length > 0) {
+        url = url + '?' + Uri.base.query;
+      }
     }
     if (currentUserState == null) {
       currentUserState = Provider.of<CurrentUserState>(context, listen: false);

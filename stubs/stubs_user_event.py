@@ -14,6 +14,7 @@ _default = {
     'creditsEarned': 0,
     'creditsRedeemed': 0,
     'creditsPriceUSD': random.randint(10, 20),
+    'eventEnd': _stubs_data.RandomTime(),
 }
 
 def AddDefault():
