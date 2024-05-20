@@ -12,42 +12,42 @@ class Buttons {
 
   LinkService _linkService = LinkService();
 
-  Widget Link(BuildContext context, String text, String url, {bool checkLoggedIn = false}) {
+  Widget Link(BuildContext context, String text, String url, {bool checkLoggedIn = false, bool launchUrl = false}) {
     return TextButton(
       onPressed: () {
-        if (checkLoggedIn) {
-          _linkService.Go(url, context);
-        } else {
-          context.go(url);
-        }
+        OnPress(context, url, checkLoggedIn: checkLoggedIn, launchUrl: launchUrl);
       },
       child: Text(text),
     );
   }
 
-  Widget LinkElevated(BuildContext context, String text, String url, {bool checkLoggedIn = false}) {
+  Widget LinkElevated(BuildContext context, String text, String url, {bool checkLoggedIn = false, bool launchUrl = false}) {
     return ElevatedButton(
       onPressed: () {
-        if (checkLoggedIn) {
-          _linkService.Go(url, context);
-        } else {
-          context.go(url);
-        }
+        OnPress(context, url, checkLoggedIn: checkLoggedIn, launchUrl: launchUrl);
       },
       child: Text(text),
     );
   }
 
-  Widget LinkInline(BuildContext context, String text, String url, {bool checkLoggedIn = false}) {
+  Widget LinkInline(BuildContext context, String text, String url, {bool checkLoggedIn = false, bool launchUrl = false}) {
     return InkWell(
       onTap: () {
-        if (checkLoggedIn) {
-          _linkService.Go(url, context);
-        } else {
-          context.go(url);
-        }
+        OnPress(context, url, checkLoggedIn: checkLoggedIn, launchUrl: launchUrl);
       },
       child: Text(text, style: TextStyle( color: Theme.of(context).primaryColor )),
     );
+  }
+
+  void OnPress(BuildContext context, String url, {bool checkLoggedIn = false, bool launchUrl = false}) {
+    if (launchUrl) {
+      _linkService.LaunchURL(url);
+    } else {
+      if (checkLoggedIn) {
+        _linkService.Go(url, context);
+      } else {
+        context.go(url);
+      }
+    }
   }
 }

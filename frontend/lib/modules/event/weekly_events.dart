@@ -353,14 +353,12 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
 
   void _search({int lastPageNumber = 0}) {
-    if (_locationService.LocationValid(_filters['lngLat'])) {
-      if(mounted) {
-        setState(() {
-          _loading = true;
-          _message = '';
-          _canLoadMore = false;
-        });
-      }
+    if (mounted && _locationService.LocationValid(_filters['lngLat'])) {
+      setState(() {
+        _loading = true;
+        _message = '';
+        _canLoadMore = false;
+      });
       var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
       if (lastPageNumber != 0) {
         _lastPageNumber = lastPageNumber;

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/date_time_service.dart';
 import '../../common/link_service.dart';
@@ -13,6 +14,7 @@ import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './event_class.dart';
+import './event_feedback.dart';
 import './user_event_class.dart';
 import './user_weekly_event_save.dart';
 import './weekly_event_class.dart';
@@ -29,6 +31,7 @@ class WeeklyEventView extends StatefulWidget {
 
 class _WeeklyEventViewState extends State<WeeklyEventView> {
   List<String> _routeIds = [];
+  Buttons _buttons = Buttons();
   ConfigService _configService = ConfigService();
   DateTimeService _dateTime = DateTimeService();
   LinkService _linkService = LinkService();
@@ -204,18 +207,19 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
     Map<String, dynamic> config = _configService.GetConfig();
 
+    String shareUrl = '${config['SERVER_URL']}/we/${_weeklyEvent.uName}';
     List<Widget> colsShareQR = [
       QrImageView(
-        data: '${config['SERVER_URL']}/we/${_weeklyEvent.uName}',
+        data: shareUrl,
         version: QrVersions.auto,
         size: 200.0,
       ),
       SizedBox(height: 10),
-      Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+      Text(shareUrl),
       SizedBox(height: 10),
     ];
     List<Widget> colsShare = [
-      Text('${config['SERVER_URL']}/we/${_weeklyEvent.uName}'),
+      Text(shareUrl),
       SizedBox(height: 10),
     ];
 
@@ -343,6 +347,33 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
+    String format = 'yMMdTHHmmss';
+    String start1 = _dateTime.Format(_event.start, format);
+    String end1 = _event.end.length > 0 ? _event.end : _event.start;
+    end1 = _dateTime.Format(end1, format);
+    String timezone = _weeklyEvent.timezone;
+    String details = Uri.encodeComponent(shareUrl);
+    String title = Uri.encodeComponent(_weeklyEvent.title);
+    String location = Uri.encodeComponent('${_weeklyEvent.location.coordinates[1]},${_weeklyEvent.location.coordinates[0]}');
+    // https://www.labnol.org/calendar/
+    // https://calendar.google.com/calendar/render?action=TEMPLATE&dates=20240517T021500Z%2F20240517T024500Z&details=https%3A%2F%2Ftest.com%2Fyes&text=Todos%20Santos%20Park%20Day
+    List<Map<String, String>> calendarLinks = [
+      { 'name': 'Google', 'url': 'https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${start1}%2F${end1}&details=${details}&text=${title}&location=${location}&ctz=${timezone}' },
+    ];
+    List<Widget> colsCalendar = [
+      Text('Add to your calendar:'),
+      SizedBox(height: 10),
+      Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: [
+          ...calendarLinks.map<Widget>((link) {
+            return _buttons.Link(context, link['name']!, link['url']!, launchUrl: true);
+          })
+        ]
+      )
+    ];
+
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -359,6 +390,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         ...thisWeekEvent,
         ...attendeeInfo,
         SizedBox(height: 10),
+        EventFeedback(weeklyEventId: _weeklyEvent.id),
+        SizedBox(height: 10),
       ]
     );
 
@@ -371,6 +404,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         ),
         SizedBox(height: 10),
         ...admins,
+        SizedBox(height: 10),
+        ...colsCalendar,
         SizedBox(height: 10),
         Text('Share this event with your neighbors:'),
         SizedBox(height: 10),

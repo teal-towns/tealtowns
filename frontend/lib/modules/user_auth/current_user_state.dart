@@ -18,6 +18,8 @@ class CurrentUserState extends ChangeNotifier {
   List<String> _routeIds = [];
   String _status = "done";
   String _redirectUrl = '';
+  String _routerRedirectUrl = '';
+  var _routerRedirectTimeout = null;
 
   get isLoggedIn => _isLoggedIn;
 
@@ -26,6 +28,8 @@ class CurrentUserState extends ChangeNotifier {
   get status => _status;
 
   get redirectUrl => _redirectUrl;
+
+  get routerRedirectUrl => _routerRedirectUrl;
 
   void init() {
     if (_routeIds.length == 0) {
@@ -36,6 +40,17 @@ class CurrentUserState extends ChangeNotifier {
           UserClass user = UserClass.fromJson(data['user']);
           if (user.id.length > 0) {
             setCurrentUser(user);
+          }
+          if (data.containsKey('checkUserFeedback')) {
+            // if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0 &&
+            //   (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
+            if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0) {
+              _routerRedirectUrl = '/event-feedback?eventId=' + data['checkUserFeedback']['missingFeedbackEventIds'][0];
+              // print ('routerRedirectUrl ${_routerRedirectUrl}');
+              // _routerRedirectTimeout = DateTime.now().add(const Duration(seconds: 5));
+              // print ('timeouts ${_routerRedirectTimeout}');
+              // notifyListeners();
+            }
           }
         } else {
           clearUser();
@@ -79,6 +94,9 @@ class CurrentUserState extends ChangeNotifier {
     getLocalstorage();
     _localstorage?.deleteItem('currentUser');
 
+    _routerRedirectUrl = '';
+    _routerRedirectTimeout = null;
+
     notifyListeners();
   }
 
@@ -88,7 +106,8 @@ class CurrentUserState extends ChangeNotifier {
     UserClass? user = _localStorageUser != null ? UserClass.fromJson(_localStorageUser) : null;
     if (user != null && user.id.length > 0 && user.sessionId.length > 0) {
       _status = "loading";
-      _socketService.emit('getUserSession', {  'userId': user.id, 'sessionId': user.sessionId });
+      _socketService.emit('getUserSession', {  'userId': user.id, 'sessionId': user.sessionId,
+        'withCheckUserFeedback': 1 });
       _currentUser = user;
       _isLoggedIn = true;
     }
@@ -137,5 +156,13 @@ class CurrentUserState extends ChangeNotifier {
 
   void SetRedirectUrl(String url) {
     _redirectUrl = url;
+  }
+
+  String GetRouterRedirectUrl() {
+    if (_routerRedirectUrl.length > 0 && (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
+      _routerRedirectTimeout = DateTime.now().add(const Duration(minutes: 5));
+      return _routerRedirectUrl;
+    }
+    return '';
   }
 }

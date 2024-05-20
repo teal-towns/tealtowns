@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -399,7 +400,13 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
 
   @override
   Widget build(BuildContext context) {
-    var currentUserState = context.watch<CurrentUserState?>();
+    var currentUserState = context.watch<CurrentUserState>();
+    String url = currentUserState.GetRouterRedirectUrl();
+    if (url.length > 0) {
+      Timer(Duration(milliseconds: 500), () {
+        context.go(url);
+      });
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 600) {

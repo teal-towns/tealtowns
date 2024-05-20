@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import './modules/home.dart';
 import './modules/route_not_found.dart';
@@ -23,6 +24,7 @@ import './modules/blog/blog_view.dart';
 import './modules/event/weekly_events.dart';
 import './modules/event/weekly_event_save.dart';
 import './modules/event/weekly_event_view.dart';
+import './modules/event/event_feedback_save_page.dart';
 
 import './modules/land/land_page.dart';
 
@@ -37,6 +39,8 @@ import './modules/shared_item/shared_item_save.dart';
 import './modules/shared_item/shared_item_owner_save.dart';
 
 import './modules/user_payment/user_money.dart';
+
+import './modules/user_auth/current_user_state.dart';
 
 class Routes {
   static const home = '/home';
@@ -65,6 +69,7 @@ class Routes {
   static const weeklyEventSave = '/weekly-event-save';
   static const weeklyEventView = '/we/:uName';
   static const eat = '/eat';
+  static const eventFeedbackSave = '/event-feedback';
 
   static const land = '/land';
 
@@ -289,11 +294,28 @@ class AppGoRouter {
           showFilters: 0,
         ),
       ),
+      GoRoute(
+        path: Routes.eventFeedbackSave,
+        builder: (BuildContext context, GoRouterState state) => EventFeedbackSavePage(
+          eventId: state.uri.queryParameters['eventId'] ?? '',
+        )
+      ),
 
       GoRoute(
         path: Routes.notFound,
         builder: (context, state) => RouteNotFoundPage(),
       ),
     ],
+    // Not working well.. Just did in AppScaffoldComponent instead.
+    // redirect: (BuildContext context, GoRouterState state) {
+    //   // var currentUserState = context.watch<CurrentUserState>();
+    //   var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    //   String url = currentUserState.routerRedirectUrl;
+    //   print ('url ${url}');
+    //   if (url != '') {
+    //     return url;
+    //   }
+    //   return null;
+    // }
   );
 }

@@ -6,6 +6,7 @@ from user_auth import user_auth as _user_auth
 from user_auth import user as _user
 
 from neighborhood import user_neighborhood as _user_neighborhood
+from event import user_feedback as _user_feedback
 
 # router = APIRouter()
 
@@ -45,6 +46,8 @@ def addRoutes():
             # Join (to string) any nested fields for C# typings..
             if 'roles' in ret['user']:
                 ret['user']['roles'] = ",".join(ret['user']['roles'])
+            if 'withCheckUserFeedback' in data and data['withCheckUserFeedback']:
+                ret['checkUserFeedback'] = _user_feedback.CheckAskForFeedback(data['userId'])
         return ret
     _socket.add_route('getUserSession', GetUserSession)
 

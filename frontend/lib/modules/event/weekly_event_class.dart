@@ -7,7 +7,7 @@ class WeeklyEventClass {
   ImageService _imageService = ImageService();
   ParseService _parseService = ParseService();
 
-  String id = '', uName = '', title = '', description = '', startTime = '', endTime = '', type = '';
+  String id = '', uName = '', title = '', description = '', startTime = '', endTime = '', timezone = '', type = '';
   List<String> adminUserIds = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
   int dayOfWeek = 0, hostGroupSizeDefault = 0;
@@ -15,7 +15,8 @@ class WeeklyEventClass {
   List<UserClass> adminUsers = [];
   String xDay = '';
 
-  WeeklyEventClass(this.id, this.uName, this.title, this.description, this.startTime, this.endTime, this.type, this.adminUserIds,
+  WeeklyEventClass(this.id, this.uName, this.title, this.description, this.startTime, this.endTime,
+    this.timezone, this.type, this.adminUserIds,
     this.imageUrls, this.location, this.dayOfWeek, this.hostGroupSizeDefault, this.rsvpDeadlineHours, this.priceUSD,
     this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay);
 
@@ -27,6 +28,7 @@ class WeeklyEventClass {
     this.description = json['description'] ?? '';
     this.startTime = json['startTime'] ?? '';
     this.endTime = json['endTime'] ?? '';
+    this.timezone = json['timezone'] ?? '';
     this.type = json['type'] ?? '';
     this.adminUserIds = _parseService.parseListString(json['adminUserIds'] != null ? json['adminUserIds'] : []);
     this.imageUrls = _imageService.GetUrls(_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : []));
@@ -50,6 +52,7 @@ class WeeklyEventClass {
       'description': description,
       'startTime': startTime,
       'endTime': endTime,
+      'timezone': timezone,
       'type': type,
       'adminUserIds': adminUserIds,
       'imageUrls': imageUrls,

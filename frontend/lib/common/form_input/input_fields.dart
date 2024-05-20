@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import './input_checkbox.dart';
 import './input_select_buttons.dart';
+import './input_multi_select_buttons.dart';
 import '../colors_service.dart';
 import '../parse_service.dart';
 
@@ -429,7 +430,7 @@ class InputFields {
   }
 
   Widget inputSelectButtons(var options, var formVals, String? formValsKey, { String label = '',
-    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '', }) {
+    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '',}) {
     String value = '';
     if (formValsKey == null) {
       value = formVals;
@@ -463,6 +464,46 @@ class InputFields {
         }
       },
       validator: (value) {
+        return null;
+      },
+    ), helpText: helpText);
+  }
+
+  Widget inputMultiSelectButtons(var options, var formVals, String? formValsKey, { String label = '',
+    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '',}) {
+    List<String> values = [];
+    if (formValsKey == null) {
+      values = formVals;
+    } else {
+      values = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : [];
+    }
+    if (options.length < 1) {
+      return SizedBox.shrink();
+    }
+    return InputWrapper(MultiSelectButtonsFormField(
+      options: options,
+      colorSelected: _colors.colors['primary'],
+      color: _colors.colors['greyLight'],
+      label: label,
+      initialValue: values,
+      onSaved: (values) {
+        if (formValsKey == null) {
+          formVals = values;
+        } else {
+          formVals[formValsKey] = values;
+        }
+      },
+      onChanged: (values) {
+        if (formValsKey == null) {
+          formVals = values;
+        } else {
+          formVals[formValsKey] = values;
+        }
+        if (onChanged != null) {
+          onChanged(values!);
+        }
+      },
+      validator: (values) {
         return null;
       },
     ), helpText: helpText);

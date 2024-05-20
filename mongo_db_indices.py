@@ -60,3 +60,7 @@ def create_all_indices(db):
 
     db['userMessage'].create_index([('userId', 1), ('forType', 1), ('forId', 1), ('type', 1),
         ('typeId', 1)], unique=False)
+    
+    db['eventFeedback'].create_index([('eventId', 1)], unique=True)
+
+    db['userFeedback'].create_index([('userId', 1), ('forType', 1), ('forId', 1)], unique=True)

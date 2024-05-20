@@ -83,13 +83,15 @@ class _InputLocationState extends State<InputLocation> {
 
   void _init() async {
     // Handled with trackMyPosition now.
-    if (widget.guessLocation) {
+    if (mounted && widget.guessLocation) {
       List<double> lngLat = await _locationService.GetLocation(context, useUser: widget.useUserLocation);
-      _formVals[_formValsKey] = '${lngLat[0]}, ${lngLat[1]}';
-      setState(() {
-        _formVals = _formVals;
-      });
-      UpdateLngLat(lngLat[0], lngLat[1]);
+      if (mounted) {
+        _formVals[_formValsKey] = '${lngLat[0]}, ${lngLat[1]}';
+        setState(() {
+          _formVals = _formVals;
+        });
+        UpdateLngLat(lngLat[0], lngLat[1]);
+      }
     }
   }
 
