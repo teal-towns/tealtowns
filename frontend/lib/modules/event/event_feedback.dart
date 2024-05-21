@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
+import '../../common/date_time_service.dart';
 import '../../common/socket_service.dart';
+import './event_class.dart';
 import './event_feedback_class.dart';
 import './user_feedback_class.dart';
 
@@ -14,10 +16,12 @@ class EventFeedback extends StatefulWidget {
 }
 
 class _EventFeedbackState extends State<EventFeedback> {
+  DateTimeService _dateTime = DateTimeService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
 
   EventFeedbackClass _eventFeedback = EventFeedbackClass.fromJson({});
+  EventClass _event = EventClass.fromJson({});
   List<UserFeedbackClass> _userFeedbacks = [];
   List<String> _feedbackVoteStrings = [];
   Map<String, dynamic> _willJoinNextWeekStats = {
@@ -40,6 +44,7 @@ class _EventFeedbackState extends State<EventFeedback> {
       var data = res['data'];
       if (data['valid'] == 1) {
         _eventFeedback = EventFeedbackClass.fromJson(data['eventFeedback']);
+        _event = EventClass.fromJson(data['event']);
         for (int i = 0; i < _eventFeedback.feedbackVotes.length; i++) {
           int count = _eventFeedback.feedbackVotes[i].userIds.length;
           _feedbackVoteStrings.add('(${count}) ${_eventFeedback.feedbackVotes[i].feedback}');
@@ -67,6 +72,7 @@ class _EventFeedbackState extends State<EventFeedback> {
           }
         }
         setState(() {
+          _event = _event;
           _eventFeedback = _eventFeedback;
           _feedbackVoteStrings = _feedbackVoteStrings;
           _userFeedbacks = _userFeedbacks;
@@ -92,10 +98,11 @@ class _EventFeedbackState extends State<EventFeedback> {
       return SizedBox.shrink();
     }
     String peopleCount = _userFeedbacks.length == 1 ? '1 person' : '${_userFeedbacks.length} people';
+    String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Feedback From Past Event (${peopleCount})'),
+        Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
         SizedBox(height: 10),
         Wrap(
           spacing: 10,

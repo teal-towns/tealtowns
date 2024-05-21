@@ -227,6 +227,7 @@ class _UserEventSaveState extends State<UserEventSave> {
       colsSignUp = [
         _layoutService.WrapWidth([
           _inputFields.inputNumber(_formVals, 'attendeeCountAsk', min: attendeeMin, required: true, label: 'How many total spots would you like (including yourself)?',),
+          _inputFields.inputText(_formVals, 'rsvpNote', label: 'Note (optional)',),
           widgetHost,
         ], width: fieldWidth),
         SizedBox(height: 10),

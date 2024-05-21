@@ -117,7 +117,8 @@
         "creditsEarned": "{Float} [if host, which could be fractional credits; if get 1 credit for every 10 people and hosted 5 would be 0.5 credits]",
         "creditsRedeemed": "{Float}",
         "creditsPriceUSD": "{Float} [the price copied from the weeklyEvent.priceUSD to compute remaining credits per event type (price)]",
-        "eventEnd": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Copied from event for userFeedback look ups performance]"
+        "eventEnd": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Copied from event for userFeedback look ups performance]",
+        "rsvpNote": "{String} @optional [What host is cooking for shared meal, etc.]"
     },
     "sharedItem": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

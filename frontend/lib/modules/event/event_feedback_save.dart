@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
@@ -21,6 +22,7 @@ class EventFeedbackSave extends StatefulWidget {
 }
 
 class _EventFeedbackSaveState extends State<EventFeedbackSave> {
+  DateTimeService _dateTime = DateTimeService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
@@ -151,7 +153,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     if (widget.eventId.length < 1) {
       return Text('No event id');
     }
-    if (!_eventFeedback.containsKey('_id')) {
+    if (!_eventFeedback.containsKey('_id') || _event.id.length < 1 || _event.start.length < 1) {
       return LinearProgressIndicator();
     }
 
@@ -197,10 +199,12 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
       ];
     }
 
+    print ('_event.start ${_event.start}');
+    String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What is 1 improvement that would make this event better?'),
+        Text('What is 1 improvement that would make this event better? (${_weeklyEvent.title}, ${eventStart})'),
         SizedBox(height: 10,),
         ...colsFeedback,
         _inputFields.inputText(_formValsEventFeedback, 'feedback', label: 'Write your feedback',),

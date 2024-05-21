@@ -75,6 +75,7 @@ def GetByWeeklyEvent(weeklyEventId: str, withUserFeedback: int = 0):
     if '_id' in retPastEvent['event']:
         retFeedback = GetByEvent(retPastEvent['event']['_id'], autoCreate = 0)
         ret['eventFeedback'] = retFeedback['eventFeedback']
+        ret['event'] = retPastEvent['event']
         if withUserFeedback:
             query = { 'forType': 'event', 'forId': retPastEvent['event']['_id'] }
             ret['userFeedbacks'] = mongo_db.find('userFeedback', query)['items']
