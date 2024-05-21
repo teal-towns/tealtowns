@@ -5,8 +5,8 @@ import lodash
 import mongo_db
 
 def RunAll():
-    AddEventEnd()
-    AddUserEventEnd()
+    # AddEventEnd()
+    # AddUserEventEnd()
     # SharedItemMaxMeters()
     # SharedItemUName()
     # ImportCertificationLevels()

@@ -241,12 +241,24 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       List<String> attendeeTexts = [];
       List<String> waitingTexts = [];
       for (int i = 0; i < _userEvents.length; i++) {
+        String rsvpNote = _userEvents[i].rsvpNote;
+        String text = '';
         if (_userEvents[i].attendeeCount == 0) {
-          waitingTexts.add('${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}');
+          text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
+          if (rsvpNote.length > 0) {
+            text += ' (${rsvpNote})';
+          }
+          waitingTexts.add(text);
         } else {
           String text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
           if (_userEvents[i].attendeeCount > 1) {
-            text += ' (+${_userEvents[i].attendeeCount - 1})';
+            if (rsvpNote.length > 0) {
+              text += ' (+${_userEvents[i].attendeeCount - 1}, ${rsvpNote})';
+            } else {
+              text += ' (+${_userEvents[i].attendeeCount - 1})';
+            }
+          } else if (rsvpNote.length > 0) {
+            text += ' (${rsvpNote})';
           }
           attendeeTexts.add(text);
         }
