@@ -54,6 +54,9 @@ class _UserEventSaveState extends State<UserEventSave> {
           _formVals['eventId'] = widget.eventId;
           _formVals['userId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
         }
+        if (_userEvent.id.length > 0) {
+          _formVals = _userEvent.toJson();
+        }
         setState(() { _formVals = _formVals; _userEvent = _userEvent; });
         if (data.containsKey('event')) {
           _event = EventClass.fromJson(data['event']);
@@ -150,13 +153,12 @@ class _UserEventSaveState extends State<UserEventSave> {
       );
     }
 
-    Widget widgetHost = SizedBox.shrink();
+    List<Widget> colsHost = [];
     if (_weeklyEvent.priceUSD > 0) {
-      String hostLabel = 'How many people will you host? Earn 1 free event per ${_weeklyEvent.hostGroupSizeDefault} people.';
-      widgetHost = _inputFields.inputNumber(_formVals, 'hostGroupSizeMax', required: true, label: hostLabel,);
       // Do not allow changing if already complete and have a host group.
-      if (_userEvent.id.length > 0 && _userEvent.hostStatus == 'complete' && _userEvent.hostGroupSize > 0) {
-        widgetHost = SizedBox.shrink();
+      if (!(_userEvent.id.length > 0 && _userEvent.hostStatus == 'complete' && _userEvent.hostGroupSize > 0)) {
+        String hostLabel = 'How many people will you host? Earn 1 free event per ${_weeklyEvent.hostGroupSizeDefault} people.';
+        colsHost += [ _inputFields.inputNumber(_formVals, 'hostGroupSizeMax', required: true, label: hostLabel,) ];
       }
     }
     double attendeeMin = _userEvent.attendeeCount > 0 ? _userEvent.attendeeCount.toDouble() : 1;
@@ -222,15 +224,20 @@ class _UserEventSaveState extends State<UserEventSave> {
     }
 
     double fieldWidth = 350;
-    List<Widget> colsSignUp = [];
+    List<Widget> colsAttendee = [];
     if (!alreadySignedUp) {
-      colsSignUp = [
-        _layoutService.WrapWidth([
-          _inputFields.inputNumber(_formVals, 'attendeeCountAsk', min: attendeeMin, required: true, label: 'How many total spots would you like (including yourself)?',),
-          _inputFields.inputText(_formVals, 'rsvpNote', label: 'Note (optional)',),
-          widgetHost,
-        ], width: fieldWidth),
-        SizedBox(height: 10),
+      colsAttendee += [ _inputFields.inputNumber(_formVals, 'attendeeCountAsk', min: attendeeMin, required: true, label: 'How many total spots would you like (including yourself)?',) ];
+    }
+    List<Widget> colsSignUp = [
+      _layoutService.WrapWidth([
+        ...colsAttendee,
+        ...colsHost,
+        _inputFields.inputText(_formVals, 'rsvpNote', label: 'Note (optional)',),
+      ], width: fieldWidth, align: 'left'),
+      SizedBox(height: 10),
+    ];
+    if (!alreadySignedUp) {
+      colsSignUp += [
         ...colsCreditsMoney,
         ElevatedButton(
           onPressed: () {
@@ -244,6 +251,22 @@ class _UserEventSaveState extends State<UserEventSave> {
             }
           },
           child: Text('Join Event'),
+        )
+      ];
+    } else {
+      colsSignUp += [
+        ElevatedButton(
+          onPressed: () {
+            setState(() { _message = ''; });
+            if (_formKey.currentState?.validate() == true) {
+              setState(() { _loading = true; });
+              _formKey.currentState?.save();
+              _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'unchanged' });
+            } else {
+              setState(() { _loading = false; });
+            }
+          },
+          child: Text('Update RSVP'),
         )
       ];
     }

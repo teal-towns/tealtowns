@@ -18,6 +18,10 @@ def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0):
     if ret['eventFeedback'] is None and autoCreate:
         eventFeedback = { "eventId": eventId, "feedbackVotes": [], "notificationSent": notificationSent, }
         ret = _mongo_db_crud.Save('eventFeedback', eventFeedback)
+    if ret['eventFeedback'] is None:
+        ret['valid'] = 0
+        ret['message'] = 'No feedback found for event ' + eventId
+        ret['eventFeedback'] = {}
     return ret
 
 def AddFeedbackVote(eventFeedbackId: str, feedbackVote: dict):
