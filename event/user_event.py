@@ -30,8 +30,8 @@ def Save(userEvent: dict, payType: str):
         # If increase attendee count, reset status to pending.
         elif userEvent['attendeeCountAsk'] >= userEventExisting['attendeeCountAsk']:
             userEvent['attendeeStatus'] = 'pending'
-        if userEvent['attendeeCountAsk'] == userEventExisting['attendeeCountAsk']:
-            checkPay = 0
+        # if userEvent['attendeeCountAsk'] == userEventExisting['attendeeCountAsk']:
+        #     checkPay = 0
         userEvent = lodash.extend_object(userEventExisting, userEvent)
     else:
         event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
