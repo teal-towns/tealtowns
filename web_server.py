@@ -50,6 +50,7 @@ from event import weekly_event_routes as _weekly_event_routes
 from image import image_routes as _image_routes
 from neighborhood import neighborhood_routes as _neighborhood_routes
 from neighborhood import user_neighborhood_routes as _user_neighborhood_routes
+from analytics import analytics_routes as _analytics_routes
 from shared_item import shared_item_routes as _shared_item_routes
 from shared_item import shared_item_owner_routes as _shared_item_owner_routes
 from pay_stripe import stripe_routes as _stripe_routes
@@ -58,6 +59,7 @@ from user_auth import user_auth_routes as _user_auth_routes
 from user_message import user_message_routes as _user_message_routes
 from user_payment import user_payment_routes as _user_payment_routes
 from vector_tiles import vector_tiles_routes as _vector_tiles_routes
+from analytics import analytics_routes as _analysics_routes
 
 paths_index = config['web_server']['index'] if 'index' in config['web_server'] else None
 paths_static = config['web_server']['static'] if 'static' in config['web_server'] else None

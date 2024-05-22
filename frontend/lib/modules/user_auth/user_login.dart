@@ -157,6 +157,12 @@ class _UserLoginState extends State<UserLoginComponent> {
                       },
                       child: Text('No account? Sign up.'),
                     ),
+                     TextButton(
+                      onPressed: () {
+                        context.go(Routes.analytics);
+                      },
+                      child: Text('Analytics.'),
+                    ),
                   ]
                 ),
               ),

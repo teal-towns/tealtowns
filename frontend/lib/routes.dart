@@ -10,8 +10,11 @@ import './modules/user_auth/user_logout.dart';
 import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
 import './modules/user_auth/user.dart';
+import './modules/analytics/analytics.dart';
 
 import './modules/design_library/design_library.dart';
+
+import './modules/analytics/analytics.dart';
 
 import './modules/about/about.dart';
 import './modules/about/team.dart';
@@ -84,6 +87,7 @@ class Routes {
   static const sharedItemOwnerSave = '/shared-item-owner-save';
 
   static const userMoney = '/user-money';
+  static const analytics = '/analytics';
 }
 
 class AppGoRouter {
@@ -305,6 +309,10 @@ class AppGoRouter {
         path: Routes.notFound,
         builder: (context, state) => RouteNotFoundPage(),
       ),
+      GoRoute(
+        path: Routes.analytics,
+        builder: (context, state) => AllNeighborhoods(),
+        ),
     ],
     // Not working well.. Just did in AppScaffoldComponent instead.
     // redirect: (BuildContext context, GoRouterState state) {
