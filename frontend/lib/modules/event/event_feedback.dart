@@ -42,7 +42,7 @@ class _EventFeedbackState extends State<EventFeedback> {
     _routeIds.add(_socketService.onRoute('GetEventFeedbackByWeeklyEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
-      if (data['valid'] == 1) {
+      if (data['valid'] == 1 && data.containsKey('eventFeedback')) {
         _eventFeedback = EventFeedbackClass.fromJson(data['eventFeedback']);
         _event = EventClass.fromJson(data['event']);
         for (int i = 0; i < _eventFeedback.feedbackVotes.length; i++) {

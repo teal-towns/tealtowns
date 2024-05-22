@@ -13,21 +13,50 @@ class SocketService {
   var _channels = {};
   var _callbacksByRoute = {};
   var _auth = {};
+  Map<String, dynamic> _infoByServer = {};
 
   void connect(urlsMap) {
     urlsMap.forEach((serverKey, url) {
-      _channels[serverKey] = WebSocketChannel.connect(Uri.parse(url));
-
-      _channels[serverKey].stream.listen((message) {
-        handleMessage(message, serverKey);
-      });
-
+      _infoByServer[serverKey] = {
+        'status': '',
+      };
+      ConnectOne(serverKey, url);
       _callbacksByRoute[serverKey] = {};
       _auth[serverKey] = {
         'userId': '',
         'sessionId': '',
       };
     });
+  }
+
+  void ConnectOne(serverKey, url) {
+    if (_infoByServer[serverKey]['status'] != 'connected') {
+      try {
+        _channels[serverKey] = WebSocketChannel.connect(Uri.parse(url));
+        _infoByServer[serverKey]['status'] = 'connected';
+        print ('Socket connected to ${url}');
+
+        _channels[serverKey].stream.listen((message) {
+          handleMessage(message, serverKey);
+        }, onError: (e) {
+          Reconnect(serverKey, url);
+        }, onDone: (() {
+          Reconnect(serverKey, url);
+        }));
+      } catch (e) {
+        Reconnect(serverKey, url);
+      }
+    }
+  }
+
+  void Reconnect(serverKey, url) {
+    if (_infoByServer[serverKey]['status'] == 'connected') {
+      print ('Socket disconnected, waiting then reconnecting..');
+      _infoByServer[serverKey]['status'] = 'disconnected';
+      Future.delayed(Duration(seconds: 5)).then((value) {
+        ConnectOne(serverKey, url);
+      });
+    }
   }
 
   void handleMessage(message, serverKey) {

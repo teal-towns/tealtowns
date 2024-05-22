@@ -17,6 +17,7 @@ import './event_class.dart';
 import './event_feedback.dart';
 import './user_event_class.dart';
 import './user_weekly_event_save.dart';
+import './user_event_save.dart';
 import './weekly_event_class.dart';
 import '../user_auth/current_user_state.dart';
 
@@ -238,7 +239,9 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       SizedBox(height: 10),
     ];
     if (_userEvents.length > 0) {
+      List<String> hostTexts = [];
       List<String> attendeeTexts = [];
+      List<String> waitingHostTexts = [];
       List<String> waitingTexts = [];
       for (int i = 0; i < _userEvents.length; i++) {
         String rsvpNote = _userEvents[i].rsvpNote;
@@ -246,9 +249,19 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         if (_userEvents[i].attendeeCount == 0) {
           text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
           if (rsvpNote.length > 0) {
-            text += ' (${rsvpNote})';
+            if (_userEvents[i].hostGroupSizeMax > 0) {
+              text += ' (${_userEvents[i].hostGroupSizeMax}, ${rsvpNote})';
+            } else {
+              text += ' (${rsvpNote})';
+            }
+          } else if (_userEvents[i].hostGroupSizeMax > 0) {
+            text += ' (${_userEvents[i].hostGroupSizeMax})';
           }
-          waitingTexts.add(text);
+          if (_userEvents[i].hostGroupSizeMax > 0) {
+            waitingHostTexts.add(text);
+          } else {
+            waitingTexts.add(text);
+          }
         } else {
           String text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
           if (_userEvents[i].attendeeCount > 1) {
@@ -260,20 +273,38 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           } else if (rsvpNote.length > 0) {
             text += ' (${rsvpNote})';
           }
-          attendeeTexts.add(text);
+          if (_userEvents[i].hostGroupSize > 0) {
+            hostTexts.add(text);
+          } else {
+            attendeeTexts.add(text);
+          }
         }
+      }
+      if (hostTexts.length > 0) {
+        hostTexts.sort();
+        attendeeInfo += [
+          Text('${hostTexts.length} Hosting'),
+          Text('${hostTexts.join(', ')}'),
+        ];
+      }
+      if (waitingHostTexts.length > 0) {
+        waitingHostTexts.sort();
+        attendeeInfo += [
+          Text('${waitingHostTexts.length} Waiting to Host'),
+          Text('${waitingHostTexts.join(', ')}'),
+        ];
       }
       if (attendeeTexts.length > 0) {
         attendeeTexts.sort();
         attendeeInfo += [
-          Text('Attending'),
+          Text('${attendeeTexts.length} Attending'),
           Text('${attendeeTexts.join(', ')}'),
         ];
       }
       if (waitingTexts.length > 0) {
         waitingTexts.sort();
         attendeeInfo += [
-          Text('Waiting'),
+          Text('${waitingTexts.length} Waiting'),
           Text('${waitingTexts.join(', ')}'),
         ];
       }
@@ -287,52 +318,55 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     } else {
       if (_userEvent.id.length > 0) {
-        if (_userEvent.hostGroupSizeMax > 0) {
-          if (_userEvent.hostGroupSize == _userEvent.hostGroupSizeMax) {
-            attendeeInfo += [
-              Text('You are hosting ${_userEvent.hostGroupSize} people.'),
-              SizedBox(height: 10),
-            ];
-          } else {
-            int diff = _userEvent.hostGroupSizeMax - _userEvent.hostGroupSize;
-            attendeeInfo += [
-              Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
-              SizedBox(height: 10),
-              Text('Share this event with your neighbors to fill your spots:'),
-              SizedBox(height: 10),
-              ...colsShare,
-            ];
-          }
-        }
         if (_userEvent.attendeeCountAsk > 0) {
           alreadySignedUp = true;
-          if (_userEvent.attendeeCount > 0) {
-            int guestsGoing = _userEvent.attendeeCount - 1;
-            int guestsWaiting = _userEvent.attendeeCountAsk - _userEvent.attendeeCount - 1;
-            String text1 = 'You are going';
-            if (guestsGoing > 0) {
-              text1 += ', with ${guestsGoing} guests';
-            }
-            if (guestsWaiting > 0) {
-              text1 += ', waiting on ${guestsWaiting} more spots';
-            }
-            attendeeInfo += [
-              Text(text1),
-              SizedBox(height: 10),
-              Text('Share this event with your neighbors:'),
-              SizedBox(height: 10),
-              ...colsShare,
-            ];
-          } else {
-            attendeeInfo += [
-              Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
-              SizedBox(height: 10),
-              Text('Share this event with your neighbors to get another host so you can join:'),
-              SizedBox(height: 10),
-              ...colsShare,
-            ];
-          }
         }
+        // This is already shown in UserEventSave
+        // if (_userEvent.hostGroupSizeMax > 0) {
+        //   if (_userEvent.hostGroupSize == _userEvent.hostGroupSizeMax) {
+        //     attendeeInfo += [
+        //       Text('You are hosting ${_userEvent.hostGroupSize} people.'),
+        //       SizedBox(height: 10),
+        //     ];
+        //   } else {
+        //     int diff = _userEvent.hostGroupSizeMax - _userEvent.hostGroupSize;
+        //     attendeeInfo += [
+        //       Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
+        //       SizedBox(height: 10),
+        //       Text('Share this event with your neighbors to fill your spots:'),
+        //       SizedBox(height: 10),
+        //       ...colsShare,
+        //     ];
+        //   }
+        // }
+        // if (_userEvent.attendeeCountAsk > 0) {
+        //   if (_userEvent.attendeeCount > 0) {
+        //     int guestsGoing = _userEvent.attendeeCount - 1;
+        //     int guestsWaiting = _userEvent.attendeeCountAsk - _userEvent.attendeeCount - 1;
+        //     String text1 = 'You are going';
+        //     if (guestsGoing > 0) {
+        //       text1 += ', with ${guestsGoing} guests';
+        //     }
+        //     if (guestsWaiting > 0) {
+        //       text1 += ', waiting on ${guestsWaiting} more spots';
+        //     }
+        //     attendeeInfo += [
+        //       Text(text1),
+        //       SizedBox(height: 10),
+        //       Text('Share this event with your neighbors:'),
+        //       SizedBox(height: 10),
+        //       ...colsShare,
+        //     ];
+        //   } else {
+        //     attendeeInfo += [
+        //       Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
+        //       SizedBox(height: 10),
+        //       Text('Share this event with your neighbors to get another host so you can join:'),
+        //       SizedBox(height: 10),
+        //       ...colsShare,
+        //     ];
+        //   }
+        // }
         if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
           String text1 = '';
           if (_userEvent.creditsEarned > 0) {
@@ -349,12 +383,19 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       }
     }
     if (!alreadySignedUp) {
+      print ('not alreadySignedUp');
       String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
       String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
       attendeeInfo += [
         Text(rsvpSignUpText),
         SizedBox(height: 10),
         UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
+        SizedBox(height: 10),
+      ];
+    } else {
+      print ('UserEvent alreadySignedUp ${_userEvent.eventId}');
+      attendeeInfo += [
+        UserEventSave(eventId: _userEvent.eventId),
         SizedBox(height: 10),
       ];
     }

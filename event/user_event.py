@@ -14,6 +14,7 @@ def Save(userEvent: dict, payType: str):
     ret = { 'valid': 1, 'message': '', 'userEvent': {}, 'spotsPaidFor': 0, 'availableUSD': 0, 'availableCredits': 0,
         'notifyUserIdsHosts': {}, 'notifyUserIdsAttendees': {}, }
 
+    checkPay = 1
     weeklyEvent = None
     userEventExisting = None
     if '_id' in userEvent:
@@ -29,6 +30,8 @@ def Save(userEvent: dict, payType: str):
         # If increase attendee count, reset status to pending.
         elif userEvent['attendeeCountAsk'] >= userEventExisting['attendeeCountAsk']:
             userEvent['attendeeStatus'] = 'pending'
+        if userEvent['attendeeCountAsk'] == userEventExisting['attendeeCountAsk']:
+            checkPay = 0
         userEvent = lodash.extend_object(userEventExisting, userEvent)
     else:
         event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
@@ -46,9 +49,8 @@ def Save(userEvent: dict, payType: str):
             'eventEnd': event['end'],
         }, userEvent)
 
-    checkPay = 1
     freeEvent = 0
-    if payType == 'free':
+    if payType == 'free' and checkPay:
         if not weeklyEvent:
             event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
             weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
