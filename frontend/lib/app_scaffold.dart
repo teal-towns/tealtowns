@@ -164,6 +164,9 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       ];
     }
     if (currentUserState.hasRole('admin')) {
+      columns += [
+         _buildLinkButton(context, '/analytics', 'Analytics'),
+      ];
     }
     // columns += [
     //   _buildLinkButton(context, '/about', 'About'),
