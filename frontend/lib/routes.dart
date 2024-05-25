@@ -10,7 +10,6 @@ import './modules/user_auth/user_logout.dart';
 import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
 import './modules/user_auth/user.dart';
-import './modules/analytics/analytics.dart';
 
 import './modules/design_library/design_library.dart';
 
