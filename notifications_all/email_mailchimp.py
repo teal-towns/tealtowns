@@ -33,7 +33,7 @@ def Send(subject, body, toEmails, from1=None, cc="", bcc="", trackOpens = True):
     from1 = from1 if from1 is not None else _configEmail['from']
     logger = logging.getLogger('default-logger')
     if not _mailchimp:
-        logger.warn('email_mailchimp not setup. No email will be sent.')
+        logger.warning('email_mailchimp not setup. No email will be sent.')
         return
 
     if isinstance(toEmails, str):

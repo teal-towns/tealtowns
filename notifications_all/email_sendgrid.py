@@ -28,7 +28,7 @@ def Send(subject, body, to, from1=None, cc="", bcc=""):
     from1 = from1 if from1 is not None else _configEmail['from']
     logger = logging.getLogger('default-logger')
     if not sg:
-        logger.warn('email_sendgrid not setup. No email will be sent.')
+        logger.warning('email_sendgrid not setup. No email will be sent.')
         return
 
     mail = Mail(

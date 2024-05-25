@@ -107,7 +107,7 @@ def log(level_key='debug', *messages):
             if _logLevel <= 20:
                 logDisplayed = 1
         elif level_key == 'warn':
-            _logger.warn(message)
+            _logger.warning(message)
             if _logLevel <= 30:
                 logDisplayed = 1
         elif level_key == 'exception':

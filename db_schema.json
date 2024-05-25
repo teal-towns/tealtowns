@@ -204,7 +204,7 @@
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
-        "amountUSD": "{Float}",
+        "amountUSD": "{Float} always positive (>0). This is the pre fee amount.",
         "recurringInterval": "{String} [day|week|month|year]",
         "recurringIntervalCount": "{Int} 1+", 
         "forType": "{String} [weeklyEvent]",

@@ -19,6 +19,7 @@ def AddPayment(userId: str, amountUSD: float, forType: str, forId: str, status: 
     })
     if status == 'complete':
         UpdateBalance(userId, amountUSD, removeCutFromBalance = removeCutFromBalance)
+        CheckMoveRevenueToBank(amountUSDPreFee, forType, forId)
     return ret
 
 def UpdatePayment(userPaymentId: str, status: str, removeCutFromBalance: int = 0):
@@ -34,7 +35,23 @@ def UpdatePayment(userPaymentId: str, status: str, removeCutFromBalance: int = 0
     if status == 'complete':
         item = mongo_db.find_one('userPayment', query)["item"]
         UpdateBalance(item['userId'], item['amountUSD'], removeCutFromBalance = removeCutFromBalance)
+        CheckMoveRevenueToBank(item['amountUSDPreFee'], item['forType'], item['forId'])
     return ret
+
+def AddPaymentSubscription(userPaymentSubscription: dict):
+    ret = _mongo_db_crud.Save('userPaymentSubscription', userPaymentSubscription)
+    if userPaymentSubscription['status'] == 'complete':
+        # Make negative to pass in as we only take revenue on payments from a user, which are negative amounts,
+        # but subscriptions are always stored as positive.
+        amountUSDPreFee = -1 * userPaymentSubscription['amountUSD']
+        CheckMoveRevenueToBank(amountUSDPreFee, userPaymentSubscription['forType'], userPaymentSubscription['forId'])
+    return ret
+
+def CheckMoveRevenueToBank(amountUSDPreFee: float, forType: str, forId: str):
+    # Only move revenue if a payment FROM the user.
+    # if amountUSDPreFee < 0:
+    # TODO
+    pass
 
 def UpdateBalance(userId: str, amountUSD: float, removeCutFromBalance: int = 0):
     amountFinal = amountUSD

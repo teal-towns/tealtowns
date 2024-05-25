@@ -55,7 +55,7 @@ async def StripeWebhook(request):
                             'status': 'complete',
                             'stripeId': data['id'],
                         }
-                        _mongo_db_crud.Save('userPaymentSubscription', userPaymentSubscription)
+                        _user_payment.AddPaymentSubscription(userPaymentSubscription)
                     else:
                         _user_payment.AddPayment(data1['userId'], amount, data1['forType'],
                             data1['forId'], 'complete')

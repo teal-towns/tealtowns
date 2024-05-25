@@ -27,7 +27,7 @@ def GetSubscriptionDiscounts(weeklyPrice: float, hostGroupSize: int):
 
 def GetPayInfo(funds: float, eventsPerPayPeriod: float = 1):
     fundsPerEvent = funds / eventsPerPayPeriod
-    payFee = fundsPerEvent * _payFeeFactor + _payFeeFixed
+    payFee = funds * _payFeeFactor + _payFeeFixed
     payFeePerEvent = payFee / eventsPerPayPeriod
     cutPerEvent = math.ceil(fundsPerEvent * _cutFactor)
     eventFunds = math.floor(fundsPerEvent - payFeePerEvent - cutPerEvent)

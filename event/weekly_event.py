@@ -83,7 +83,7 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
 
     if withEvent:
         retEvents = _event.GetNextEvents(weeklyEventId, minHoursBeforeRsvpDeadline = 0)
-        ret['event'] = retEvents['thisWeekEvent']
+        ret['event'] = retEvents['nextWeekEvent'] if retEvents['rsvpDeadlinePassed'] else retEvents['thisWeekEvent']
         ret['rsvpDeadlinePassed'] = retEvents['rsvpDeadlinePassed']
         ret['nextEvent'] = retEvents['nextWeekEvent']
         if withUserEvents:

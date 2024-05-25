@@ -122,6 +122,8 @@ class _NeighborhoodState extends State<Neighborhood> {
       );
     }
 
+    double lng = _neighborhood.location.coordinates[0];
+    double lat = _neighborhood.location.coordinates[1];
     List<Widget> colsWeeklyEvents = [];
     if (_weeklyEventsCount > 0) {
       List<Widget> elements = [];
@@ -145,6 +147,11 @@ class _NeighborhoodState extends State<Neighborhood> {
       colsWeeklyEvents = [
         _layoutService.WrapWidth(elements, width: 300),
         SizedBox(height: 10),
+        _buttons.LinkElevated(context, 'View All Events', '/weekly-events?lng=${lng}&lat=${lat}'),
+      ];
+    } else {
+      colsWeeklyEvents = [
+        _buttons.LinkElevated(context, 'Create Event', '/weekly-event-save', checkLoggedIn: true),
       ];
     }
 
@@ -169,8 +176,11 @@ class _NeighborhoodState extends State<Neighborhood> {
         }
       }
       colsSharedItems = [
+        _style.Text1('${_sharedItemsCount} Shared Items', size: 'large'),
+        _style.SpacingH('medium'),
         _layoutService.WrapWidth(elements, width: 300),
         SizedBox(height: 10),
+        _buttons.LinkElevated(context, 'View All Shared Items', '/own?lng=${lng}&lat=${lat}'),
       ];
     }
 
@@ -202,8 +212,6 @@ class _NeighborhoodState extends State<Neighborhood> {
       ];
     }
 
-    double lng = _neighborhood.location.coordinates[0];
-    double lat = _neighborhood.location.coordinates[1];
     return AppScaffoldComponent(
       listWrapper: true,
       body: Column(
@@ -234,7 +242,6 @@ class _NeighborhoodState extends State<Neighborhood> {
                 _style.Text1('${_weeklyEventsCount} Weekly Events', size: 'large'),
                 _style.SpacingH('medium'),
                 ...colsWeeklyEvents,
-                _buttons.LinkElevated(context, 'View All Events', '/weekly-events?lng=${lng}&lat=${lat}'),
               ]
             )
           ),
@@ -243,10 +250,7 @@ class _NeighborhoodState extends State<Neighborhood> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _style.Text1('${_sharedItemsCount} Shared Items', size: 'large'),
-                _style.SpacingH('medium'),
                 ...colsSharedItems,
-                _buttons.LinkElevated(context, 'View All Shared Items', '/own?lng=${lng}&lat=${lat}'),
               ]
             )
           ),

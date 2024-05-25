@@ -56,3 +56,12 @@ twilio:
   auth_token: TOKEN-HERE
   from: '+1xxxyyyzzzz'
   test_mode: 1
+mercury:
+  api_token: TOKEN-HERE
+  accounts:
+    - key: MercuryEndUserFunds
+      account_id: ACCOUNT-ID
+  recipients:
+    - key: MercuryUserRevenue
+      account_number: ACCOUNT-NUMBER
+      routing_number: ROUTING-NUMBER

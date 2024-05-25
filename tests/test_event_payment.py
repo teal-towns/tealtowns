@@ -18,3 +18,19 @@ def test_GetSubscriptionDiscounts():
     ret = { 'yearlyPrice': 351.0, 'monthlyPrice': 36.0,
         'yearlySavingsPerYear': 117.0, 'monthlySavingsPerYear': 36.0, 'eventFunds': 5.0 }
     assert _event_payment.GetSubscriptionDiscounts(9, 0) == ret
+
+def test_GetPayInfo():
+    ret = { 'eventFunds': 8.0 }
+    assert _event_payment.GetPayInfo(10, 1) == ret
+
+    ret = { 'eventFunds': 95 }
+    assert _event_payment.GetPayInfo(100, 1) == ret
+
+    ret = { 'eventFunds': 6 }
+    assert _event_payment.GetPayInfo(390, 52) == ret
+
+    ret = { 'eventFunds': 17 }
+    assert _event_payment.GetPayInfo(1000, 52) == ret
+
+    ret = { 'eventFunds': 183 }
+    assert _event_payment.GetPayInfo(10000, 52) == ret
