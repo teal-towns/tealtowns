@@ -311,7 +311,7 @@ class AppGoRouter {
       ),
       GoRoute(
         path: Routes.analytics,
-        builder: (context, state) => AllNeighborhoods(),
+        builder: (context, state) => DisplayNeighborhoods(),
         ),
     ],
     // Not working well.. Just did in AppScaffoldComponent instead.
