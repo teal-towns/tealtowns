@@ -79,7 +79,7 @@ def test_GetUsersAttending():
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)
     assert ret['eventsCount'] == 4
-    assert ret['usersCount'] == 0
+    assert ret['uniqueUsersCount'] == 0
     mongo_db.delete_many('userEvent', {})
 
     # All 3
@@ -91,7 +91,7 @@ def test_GetUsersAttending():
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)
     assert ret['eventsCount'] == 4
-    assert ret['usersCount'] == 3
+    assert ret['uniqueUsersCount'] == 3
     mongo_db.delete_many('userEvent', {})
 
     # 0 since filter by weekly event id
@@ -103,7 +103,7 @@ def test_GetUsersAttending():
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(weeklyEventIds = ['badid'], now = now)
     assert ret['eventsCount'] == 0
-    assert ret['usersCount'] == 0
+    assert ret['uniqueUsersCount'] == 0
     mongo_db.delete_many('userEvent', {})
 
     # Only 1 since same user 3 times
@@ -115,7 +115,7 @@ def test_GetUsersAttending():
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)
     assert ret['eventsCount'] == 4
-    assert ret['usersCount'] == 1
+    assert ret['uniqueUsersCount'] == 1
     mongo_db.delete_many('userEvent', {})
 
     # 2 since only 2 unique users
@@ -128,7 +128,7 @@ def test_GetUsersAttending():
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)
     assert ret['eventsCount'] == 4
-    assert ret['usersCount'] == 2
+    assert ret['uniqueUsersCount'] == 2
     mongo_db.delete_many('userEvent', {})
 
     _mongo_mock.CleanUp()

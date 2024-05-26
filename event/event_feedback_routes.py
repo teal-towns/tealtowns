@@ -5,7 +5,10 @@ import websocket_clients as _websocket_clients
 
 def AddRoutes():
     def GetByEvent(data, auth, websocket):
-        return _event_feedback.GetByEvent(data['eventId'])
+        withUserFeedback = data['withUserFeedback'] if 'withUserFeedback' in data else 0
+        withEvent = data['withEvent'] if 'withEvent' in data else 0
+        return _event_feedback.GetByEvent(data['eventId'], withUserFeedback = withUserFeedback,
+            withEvent = withEvent)
     _socket.add_route('GetEventFeedbackByEvent', GetByEvent)
 
     def GetByWeeklyEvent(data, auth, websocket):

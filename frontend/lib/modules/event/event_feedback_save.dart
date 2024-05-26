@@ -199,7 +199,6 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
       ];
     }
 
-    print ('_event.start ${_event.start}');
     String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

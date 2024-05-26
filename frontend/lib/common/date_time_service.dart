@@ -8,8 +8,11 @@ class DateTimeService {
     return _instance;
   }
 
-  String Format(var dateTime, String format) {
-    var dateValue = DateTime.parse(dateTime).toUtc().toLocal();
+  String Format(var dateTime, String format, {bool local = true}) {
+    var dateValue = DateTime.parse(dateTime);
+    if (local) {
+      dateValue = dateValue.toUtc().toLocal();
+    }
     return DateFormat(format).format(dateValue);
   }
 }

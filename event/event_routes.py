@@ -16,6 +16,10 @@ def addRoutes():
             data['withUserEvents'], data['withUserId'], eventUName = data['uName'])
     _socket.add_route('GetEventById', GetById)
 
+    # def GetByIds(data, auth, websocket):
+    #     return _event.GetByIds(data['ids'])
+    # _socket.add_route('GetEventsByIds', GetByIds)
+
     def GetEventWithWeekly(data, auth, websocket):
         return _event.GetEventWithWeekly(data['eventId'])
     _socket.add_route('GetEventWithWeekly', GetEventWithWeekly)

@@ -170,20 +170,77 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
     ret['nextEnd'] = date_time.string(nextWeekEnd)
     return ret
 
-def GetUsersAttending(daysPast: int = 7, weeklyEventIds: list = [], now = None):
-    ret = { 'valid': 1, 'message': '', 'eventsCount': 0, 'usersCount': 0, }
+def GetUsersAttending(daysPast: int = 7, weeklyEventIds: list = [], now = None,
+    minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False, limit: int = 100000):
+    ret = { 'valid': 1, 'message': '', 'eventsCount': 0, 'uniqueUsersCount': 0, 'eventInfos': [], }
     now = now if now is not None else date_time.now()
-    minDate = date_time.string(now - datetime.timedelta(days=daysPast))
-    query = { 'start': { '$gte': minDate } }
+    if minDateString == '':
+        minDateString = date_time.string(now - datetime.timedelta(days=daysPast))
+    query = { 'start': { '$gte': minDateString } }
+    if maxDateString != '':
+        query['start']['$lte'] = maxDateString
     if len(weeklyEventIds) > 0:
         query['weeklyEventId'] = { '$in': weeklyEventIds }
     events = mongo_db.find('event', query)['items']
     ret['eventsCount'] = len(events)
+    eventInfosMap = {}
     if len(events) > 0:
         eventIds = []
-        for event in events:
+        for index, event in enumerate(events):
             eventIds.append(event['_id'])
+            ret['eventInfos'].append({ 'id': event['_id'], 'start': event['start'], 'attendeeCount': 0, })
+            eventInfosMap[event['_id']] = index
         query = { 'eventId': { '$in': eventIds }, 'attendeeCount': { '$gte': 1 } }
         userIds = mongo_db.findDistinct('userEvent', 'userId', query)['values']
-        ret['usersCount'] = len(userIds)
+        ret['uniqueUsersCount'] = len(userIds)
+        if withFreePaidStats:
+            fields = { 'creditsPriceUSD': 1, 'eventId': 1, 'attendeeCount': 1, }
+            userEvents = mongo_db.find('userEvent', query, fields = fields, limit = limit)['items']
+            ret['totalEventUsersCount'] = len(userEvents)
+            ret['freeEventsCount'] = 0
+            ret['paidEventsCount'] = 0
+            ret['totalFreeEventUsersCount'] = 0
+            ret['totalPaidEventUsersCount'] = 0
+            ret['totalCutUSD'] = 0
+            freeEventsMap = {}
+            paidEventsMap = {}
+            for userEvent in userEvents:
+                ret['eventInfos'][eventInfosMap[userEvent['eventId']]]['attendeeCount'] += userEvent['attendeeCount']
+                if userEvent['creditsPriceUSD'] == 0:
+                    ret['totalFreeEventUsersCount'] += 1
+                    if userEvent['eventId'] not in freeEventsMap:
+                        freeEventsMap[userEvent['eventId']] = 1
+                        ret['freeEventsCount'] += 1
+                else:
+                    ret['totalPaidEventUsersCount'] += 1
+                    # Assume fixed $1 per paid event.
+                    ret['totalCutUSD'] += 1
+                    if userEvent['eventId'] not in paidEventsMap:
+                        paidEventsMap[userEvent['eventId']] = 1
+                        ret['paidEventsCount'] += 1
     return ret
+
+# def GetByIds(ids: list = [], weeklyEventFields = None):
+#     weeklyEventFields = weeklyEventFields if weeklyEventFields is not None else \
+#         { '_id': 1, 'uName': 1, 'type': 1, 'title': 1, 'priceUSD': 1, }
+#     ret = { 'valid': 1, 'message': '', 'events': [] }
+#     objectIds = []
+#     for eventId in ids:
+#         objectIds.append(mongo_db.to_object_id(eventId))
+#     events = mongo_db.find('event', { '_id': { '$in': objectIds } })['items']
+#     weeklyEventIds = []
+#     objectIds = []
+#     indicesMap = {}
+#     for index, event in enumerate(events):
+#         if event['weeklyEventId'] not in weeklyEventIds:
+#             weeklyEventIds.append(event['weeklyEventId'])
+#             objectIds.append(mongo_db.to_object_id(event['weeklyEventId']))
+#             if event['weeklyEventId'] not in indicesMap:
+#                 indicesMap[event['weeklyEventId']] = []
+#             indicesMap[event['weeklyEventId']].append(index)
+#     fields = weeklyEventFields
+#     weeklyEvents = mongo_db.find('weeklyEvent', { '_id': { '$in': objectIds } }, fields = fields)['items']
+#     for weeklyEvent in weeklyEvents:
+#         events[indicesMap[weeklyEvent['_id']]]['weeklyEvent'] = weeklyEvent
+#     ret['events'] = events
+#     return ret

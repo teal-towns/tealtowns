@@ -13,8 +13,6 @@ import './modules/user_auth/user.dart';
 
 import './modules/design_library/design_library.dart';
 
-import './modules/analytics/analytics.dart';
-
 import './modules/about/about.dart';
 import './modules/about/team.dart';
 import './modules/about/privacy_terms.dart';
@@ -27,6 +25,7 @@ import './modules/event/weekly_events.dart';
 import './modules/event/weekly_event_save.dart';
 import './modules/event/weekly_event_view.dart';
 import './modules/event/event_feedback_save_page.dart';
+import './modules/event/event_feedback_page.dart';
 
 import './modules/land/land_page.dart';
 
@@ -35,6 +34,7 @@ import './modules/neighborhood/neighborhoods_page.dart';
 import './modules/neighborhood/neighborhood_save.dart';
 import './modules/neighborhood/belonging_survey.dart';
 import './modules/neighborhood/neighborhood_journey_page.dart';
+import './modules/neighborhood/neighborhood_stats.dart';
 
 import './modules/shared_item/shared_items.dart';
 import './modules/shared_item/shared_item_save.dart';
@@ -71,7 +71,8 @@ class Routes {
   static const weeklyEventSave = '/weekly-event-save';
   static const weeklyEventView = '/we/:uName';
   static const eat = '/eat';
-  static const eventFeedbackSave = '/event-feedback';
+  static const eventFeedbackSave = '/event-feedback-save';
+  static const eventFeedback = '/event-feedback';
 
   static const land = '/land';
 
@@ -79,6 +80,7 @@ class Routes {
   static const neighborhoodView = '/n/:uName';
   static const neighborhoods = '/neighborhoods';
   static const neighborhoodJourney = '/neighborhood-journey';
+  static const neighborhoodStats = '/neighborhood-stats/:uName';
   static const belongingSurvey = '/belonging-survey';
 
   static const sharedItems = '/own';
@@ -86,7 +88,6 @@ class Routes {
   static const sharedItemOwnerSave = '/shared-item-owner-save';
 
   static const userMoney = '/user-money';
-  static const analytics = '/analytics';
 }
 
 class AppGoRouter {
@@ -222,6 +223,17 @@ class AppGoRouter {
         },
       ),
       GoRoute(
+        path: Routes.neighborhoodStats,
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters["uName"];
+          if (uName != null) {
+            return NeighborhoodStats(uName: uName,
+              showFreePaid: state.uri.queryParameters['showFreePaid'] != null ? true : false,);
+          }
+          return NeighborhoodsPage();
+        },
+      ),
+      GoRoute(
         path: Routes.neighborhoodJourney,
         builder: (context, state) => NeighborhoodJourneyPage(),
       ),
@@ -303,15 +315,18 @@ class AppGoRouter {
           eventId: state.uri.queryParameters['eventId'] ?? '',
         )
       ),
+      GoRoute(
+        path: Routes.eventFeedback,
+        builder: (BuildContext context, GoRouterState state) => EventFeedbackPage(
+          eventId: state.uri.queryParameters['eventId'] ?? '',
+          weeklyEventId: state.uri.queryParameters['weeklyEventId'] ?? '',
+        )
+      ),
 
       GoRoute(
         path: Routes.notFound,
         builder: (context, state) => RouteNotFoundPage(),
       ),
-      GoRoute(
-        path: Routes.analytics,
-        builder: (context, state) => DisplayNeighborhoods(),
-        ),
     ],
     // Not working well.. Just did in AppScaffoldComponent instead.
     // redirect: (BuildContext context, GoRouterState state) {
