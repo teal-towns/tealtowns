@@ -45,7 +45,7 @@ class CurrentUserState extends ChangeNotifier {
             // if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0 &&
             //   (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
             if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0) {
-              _routerRedirectUrl = '/event-feedback?eventId=' + data['checkUserFeedback']['missingFeedbackEventIds'][0];
+              _routerRedirectUrl = '/event-feedback-save?eventId=' + data['checkUserFeedback']['missingFeedbackEventIds'][0];
               // print ('routerRedirectUrl ${_routerRedirectUrl}');
               // _routerRedirectTimeout = DateTime.now().add(const Duration(seconds: 5));
               // print ('timeouts ${_routerRedirectTimeout}');

@@ -116,7 +116,7 @@
         "attendeeStatus": "{String} pending|complete",
         "creditsEarned": "{Float} [if host, which could be fractional credits; if get 1 credit for every 10 people and hosted 5 would be 0.5 credits]",
         "creditsRedeemed": "{Float}",
-        "creditsPriceUSD": "{Float} [the price copied from the weeklyEvent.priceUSD to compute remaining credits per event type (price)]",
+        "creditsPriceUSD": "{Float} [the price copied from the weeklyEvent.priceUSD to compute remaining credits per event type (price). Also for stats.]",
         "eventEnd": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Copied from event for userFeedback look ups performance]",
         "rsvpNote": "{String} @optional [What host is cooking for shared meal, etc.]"
     },
@@ -313,5 +313,29 @@
         "willJoinNextWeek": "{String} yes|no|futureWeek",
         "willInvite": "{String} @optional no|willMeetNewNeighbor",
         "invites": [ "{String} @optional" ]
+    },
+    "neighborhoodStatsMonthlyCache": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "neighborhoodUName": "{String}",
+        "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "end": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Used for partial updates during the month; will be done once this equals the 1st of the next month] 2023-06-13 15:30:00 -0700",
+        "usersCount": "{Int}",
+        "weeklyEventsCount": "{Int}",
+        "uniqueEventUsersCount": "{Int}",
+        "eventInfos": [
+            {
+                "id": "{String}",
+                "start": "{String}",
+                "attendeeCount": "{Int}"
+            }
+        ],
+        "freeEventsCount": "{Int}",
+        "paidEventsCount": "{Int}",
+        "totalEventUsersCount": "{Int}",
+        "totalFreeEventUsersCount": "{Int}",
+        "totalPaidEventUsersCount": "{Int}",
+        "totalCutUSD": "{Float}"
     }
 }

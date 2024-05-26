@@ -29,6 +29,7 @@ _collectionNames = ['user', 'image', 'blog',
     'certificationLevel', 'journeyStep', 'neighborhoodCertificationLevel', 'neighborhoodJourneyStep',
     'userMessage',
     'eventFeedback', 'userFeedback',
+    'neighborhoodStatsMonthlyCache',
 ]
 
 def InitLive():

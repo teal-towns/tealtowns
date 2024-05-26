@@ -64,3 +64,6 @@ def create_all_indices(db):
     db['eventFeedback'].create_index([('eventId', 1)], unique=True)
 
     db['userFeedback'].create_index([('userId', 1), ('forType', 1), ('forId', 1)], unique=True)
+
+    db['neighborhoodStatsMonthlyCache'].create_index([('neighborhoodUName', 1), ('start', 1)], unique=True)
+    db['neighborhoodStatsMonthlyCache'].create_index([('end', 1)], unique=False)

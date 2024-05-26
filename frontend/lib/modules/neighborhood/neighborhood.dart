@@ -43,7 +43,7 @@ class _NeighborhoodState extends State<Neighborhood> {
   int _weeklyEventsCount = 0;
   int _sharedItemsCount = 0;
   int _usersCount = 0;
-  int _eventUsersCount = 0;
+  int _uniqueEventUsersCount = 0;
   List<WeeklyEventClass> _weeklyEvents = [];
   List<SharedItemClass> _sharedItems = [];
   bool _inited = false;
@@ -64,7 +64,7 @@ class _NeighborhoodState extends State<Neighborhood> {
         _weeklyEventsCount = data['weeklyEventsCount'];
         _sharedItemsCount = data['sharedItemsCount'];
         _usersCount = data['usersCount'];
-        _eventUsersCount = data['eventUsersCount'];
+        _uniqueEventUsersCount = data['uniqueEventUsersCount'];
         _weeklyEvents = [];
         for (var i = 0; i < data['weeklyEvents'].length; i++) {
           _weeklyEvents.add(WeeklyEventClass.fromJson(data['weeklyEvents'][i]));
@@ -73,14 +73,14 @@ class _NeighborhoodState extends State<Neighborhood> {
         for (var i = 0; i < data['sharedItems'].length; i++) {
           _sharedItems.add(SharedItemClass.fromJson(data['sharedItems'][i]));
         }
-        _belongingSteps = _neighborhoodJourneyService.BelongingStepsWithComplete(_eventUsersCount, _weeklyEventsCount, _sharedItemsCount);
+        _belongingSteps = _neighborhoodJourneyService.BelongingStepsWithComplete(_uniqueEventUsersCount, _weeklyEventsCount, _sharedItemsCount);
         _sustainableSteps = _neighborhoodJourneyService.SustainableSteps();
         setState(() {
           _neighborhood = _neighborhood;
           _weeklyEventsCount = _weeklyEventsCount;
           _sharedItemsCount = _sharedItemsCount;
           _usersCount = _usersCount;
-          _eventUsersCount = _eventUsersCount;
+          _uniqueEventUsersCount = _uniqueEventUsersCount;
           _weeklyEvents = _weeklyEvents;
           _sharedItems = _sharedItems;
           _belongingSteps = _belongingSteps;
@@ -255,7 +255,8 @@ class _NeighborhoodState extends State<Neighborhood> {
             )
           ),
           _style.SpacingH('large'),
-          _style.Text1('${_usersCount} neighbors thus far'),
+          _style.Text1('${_usersCount} neighbors thus far, ${_uniqueEventUsersCount} attended events last week'),
+          _buttons.Link(context, 'See All Stats', '/neighborhood-stats/${_neighborhood.uName}'),
           _style.SpacingH('medium'),
           _style.Text1('Share your neighborhood with your neighbors', size: 'large'),
           _style.SpacingH('medium'),
@@ -281,10 +282,8 @@ class _NeighborhoodState extends State<Neighborhood> {
       'uName': widget.uName,
       'withWeeklyEvents': 1,
       'withSharedItems': 1,
-      'withConnections': 1,
-      'withSustainability': 1,
       'withUsersCount': 1,
-      'withEventUsersCount': 1,
+      'withUniqueEventUsersCount': 1,
       'limitCount': widget.limitCount,
       'userId': userId,
     };

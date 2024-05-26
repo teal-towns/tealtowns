@@ -12,8 +12,9 @@ from event import user_event as _user_event
 
 _config = ml_config.get_config()
 
-def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0):
-    ret = { "valid": 1, "message": "", }
+def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0, withUserFeedback: int = 0,
+    withEvent: int = 0,):
+    ret = { "valid": 1, "message": "", 'userFeedbacks': [], }
     ret['eventFeedback'] = mongo_db.find_one('eventFeedback', { "eventId": eventId })['item']
     if ret['eventFeedback'] is None and autoCreate:
         eventFeedback = { "eventId": eventId, "feedbackVotes": [], "notificationSent": notificationSent, }
@@ -22,6 +23,13 @@ def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0):
         ret['valid'] = 0
         ret['message'] = 'No feedback found for event ' + eventId
         ret['eventFeedback'] = {}
+    else:
+        if withUserFeedback:
+            query = { 'forType': 'event', 'forId': eventId }
+            ret['userFeedbacks'] = mongo_db.find('userFeedback', query)['items']
+        if withEvent:
+            ret['event'] = mongo_db.find_one('event', { "_id": mongo_db.to_object_id(eventId) })['item']
+
     return ret
 
 def AddFeedbackVote(eventFeedbackId: str, feedbackVote: dict):
@@ -81,8 +89,7 @@ def GetByWeeklyEvent(weeklyEventId: str, withUserFeedback: int = 0):
         ret['eventFeedback'] = retFeedback['eventFeedback']
         ret['event'] = retPastEvent['event']
         if withUserFeedback:
-            query = { 'forType': 'event', 'forId': retPastEvent['event']['_id'] }
-            ret['userFeedbacks'] = mongo_db.find('userFeedback', query)['items']
+            ret['userFeedbacks'] = retFeedback['userFeedbacks']
     return ret
 
 def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterEndMinutes: int = 20):
@@ -94,12 +101,16 @@ def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterE
     fields = { '_id': 1 }
     events = mongo_db.find('event', query, fields = fields)['items']
     eventIds = [ event['_id'] for event in events ]
-    query = { 'eventId': { '$in': eventIds }, 'notificationSent': 1, }
+    query = { 'eventId': { '$in': eventIds } }
     fields = { '_id': 1, 'eventId': 1, }
-    eventFeedbacksDone = mongo_db.find('eventFeedback', query, fields = fields)['items']
+    eventFeedbacksExisting = mongo_db.find('eventFeedback', query, fields = fields)['items']
     eventIdsDoneMap = {}
-    for eventFeedback in eventFeedbacksDone:
-        eventIdsDoneMap[eventFeedback['eventId']] = 1
+    eventFeedbackByEventId = {}
+    for eventFeedback in eventFeedbacksExisting:
+        if 'notificationSent' in eventFeedback and eventFeedback['notificationSent'] == 1:
+            eventIdsDoneMap[eventFeedback['eventId']] = 1
+        else:
+            eventFeedbackByEventId[eventFeedback['eventId']] = eventFeedback
     for event in events:
         if event['_id'] not in eventIdsDoneMap:
             # Send notification to get feedback.
@@ -107,12 +118,14 @@ def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterE
             retNotify = _user_event.NotifyUsers(event['_id'], smsContent, minAttendeeCount = 1)
             ret['notifyByEvent'][event['_id']] = { 'notifyUserIds': retNotify['notifyUserIds'] }
             eventFeedback = { "eventId": event['_id'], "feedbackVotes": [], "notificationSent": 1, }
+            if event['_id'] in eventFeedbackByEventId:
+                eventFeedback['_id'] = eventFeedbackByEventId[event['_id']]['_id']
             retOne = _mongo_db_crud.Save('eventFeedback', eventFeedback)
             ret['newFeedbackEventIds'].append(event['_id'])
     return ret
 
 def GetUrl(eventId: str):
-    return _config['web_server']['urls']['base'] + '/event-feedback?eventId=' + str(eventId)
+    return _config['web_server']['urls']['base'] + '/event-feedback-save?eventId=' + str(eventId)
 
 def CheckEventFeedbackLoop(timeoutMinutes = 15):
     log.log('info', 'event_feedback.CheckEventFeedbackLoop starting')

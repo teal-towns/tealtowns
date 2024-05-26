@@ -35,19 +35,17 @@ def addRoutes():
         data = lodash.extend_object({
             'withWeeklyEvents': 0,
             'withSharedItems': 0,
-            'withConnections': 0,
-            'withSustainability': 0,
             'weeklyEventsCount': 3,
             'sharedItemsCount': 3,
             'limitCount': 250,
             'withUsersCount': 0,
-            'withEventUsersCount': 0,
+            'withUniqueEventUsersCount': 0,
             'userId': '',
         }, data)
         return _neighborhood.GetByUName(data['uName'], data['withWeeklyEvents'], data['withSharedItems'],
-            data['withSustainability'], data['withConnections'], data['weeklyEventsCount'],
+            data['weeklyEventsCount'],
             data['sharedItemsCount'], limitCount = data['limitCount'], withUsersCount = data['withUsersCount'],
-            withEventUsersCount = data['withEventUsersCount'], userId = data['userId'])
+            withUniqueEventUsersCount = data['withUniqueEventUsersCount'], userId = data['userId'])
     _socket.add_route('GetNeighborhoodByUName', GetByUName)
 
 addRoutes()
