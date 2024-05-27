@@ -29,10 +29,12 @@ import './modules/event/event_feedback_page.dart';
 
 import './modules/land/land_page.dart';
 
+import './modules/neighborhood/belonging_survey.dart';
 import './modules/neighborhood/neighborhood.dart';
 import './modules/neighborhood/neighborhoods_page.dart';
 import './modules/neighborhood/neighborhood_save.dart';
-import './modules/neighborhood/belonging_survey.dart';
+import './modules/neighborhood/neighborhood_group.dart';
+import './modules/neighborhood/neighborhood_group_save.dart';
 import './modules/neighborhood/neighborhood_journey_page.dart';
 import './modules/neighborhood/neighborhood_stats.dart';
 
@@ -76,12 +78,14 @@ class Routes {
 
   static const land = '/land';
 
+  static const belongingSurvey = '/belonging-survey';
   static const neighborhoodSave = '/neighborhood-save';
   static const neighborhoodView = '/n/:uName';
   static const neighborhoods = '/neighborhoods';
+  static const neighborhoodGroupSave = '/neighborhood-group-save';
+  static const neighborhoodGroup = '/neighborhood-group/:uName';
   static const neighborhoodJourney = '/neighborhood-journey';
   static const neighborhoodStats = '/neighborhood-stats/:uName';
-  static const belongingSurvey = '/belonging-survey';
 
   static const sharedItems = '/own';
   static const sharedItemSave = '/shared-item-save';
@@ -221,6 +225,22 @@ class AppGoRouter {
           }
           return NeighborhoodSave();
         },
+      ),
+      GoRoute(
+        path: Routes.neighborhoodGroup,
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters["uName"];
+          if (uName != null) {
+            return NeighborhoodGroup(uName: uName);
+          }
+          return HomeComponent();
+        },
+      ),
+      GoRoute(
+        path: Routes.neighborhoodGroupSave,
+        builder: (BuildContext context, GoRouterState state) => NeighborhoodGroupSave(
+          uName: state.uri.queryParameters['uName'] ?? '',
+        )
       ),
       GoRoute(
         path: Routes.neighborhoodStats,

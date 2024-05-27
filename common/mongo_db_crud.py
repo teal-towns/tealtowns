@@ -1,4 +1,5 @@
 import copy
+import re
 
 import lodash
 import mongo_db
@@ -68,7 +69,7 @@ def GetByIds(collection: str, ids: list, db1 = None, fields = None):
 def CleanId(obj: dict):
     return mongo_db.CleanId(obj)
 
-def Save(collection: str, obj, db1 = None):
+def Save(collection: str, obj, db1 = None, uNameRegex: str = '[^a-zA-Z0-9]'):
     ret = {"valid": 1, "message": "", "insert": 0}
     ret[collection] = obj
 
@@ -77,6 +78,8 @@ def Save(collection: str, obj, db1 = None):
     if 'createdAt' in obj:
         del obj['createdAt']
     if 'uName' in obj:
+        regex = re.compile(uNameRegex)
+        obj['uName'] = regex.sub('', obj['uName'].lower())
         retValid = ValidateUName(collection, obj, db1 = db1)
         if retValid["valid"] < 1:
             return retValid

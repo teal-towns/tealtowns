@@ -48,6 +48,8 @@ def create_all_indices(db):
 
     db['userNeighborhood'].create_index([('userId', 1), ('neighborhoodId', 1)], unique=True)
 
+    db['neighborhoodGroup'].create_index([('uName', 1)], unique=True)
+
     # db['certificationLevel'].create_index([('uName', 1)], unique=True)
     # db['certificationLevel'].create_index([('scale', 1), ('category', 1), ('order', 1)], unique=False)
 
