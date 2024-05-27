@@ -49,6 +49,7 @@ from event import user_weekly_event_routes as _user_weekly_event_routes
 from event import weekly_event_routes as _weekly_event_routes
 from image import image_routes as _image_routes
 from neighborhood import neighborhood_routes as _neighborhood_routes
+from neighborhood import neighborhood_group_routes as _neighborhood_group_routes
 from neighborhood import neighborhood_stats_routes as _neighborhood_stats_routes
 from neighborhood import user_neighborhood_routes as _user_neighborhood_routes
 from shared_item import shared_item_routes as _shared_item_routes
