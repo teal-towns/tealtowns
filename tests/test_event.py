@@ -17,25 +17,26 @@ def test_GetNextEventStart():
     # Now is Thursday morning.
     now = date_time.from_string('2024-03-21T09:11:00-07:00')
     start = _event.GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline = 24, now = now)['nextStart']
-    assert start == '2024-03-31T17:00:00-07:00'
+    # assert start == '2024-03-31T17:00:00-07:00'
+    assert start == '2024-04-01T00:00:00+00:00'
 
     start = _event.GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline = 2, now = now)['nextStart']
-    assert start == '2024-03-24T17:00:00-07:00'
+    assert start == '2024-03-25T00:00:00+00:00'
 
     # Now is Wednesday morning.
     now = date_time.from_string('2024-03-20T09:11:00-07:00')
     start = _event.GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline = 24, now = now)['nextStart']
-    assert start == '2024-03-24T17:00:00-07:00'
+    assert start == '2024-03-25T00:00:00+00:00'
 
     # Now is Sunday morning.
     now = date_time.from_string('2024-03-24T09:11:00-07:00')
     start = _event.GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline = 24, now = now)['nextStart']
-    assert start == '2024-03-31T17:00:00-07:00'
+    assert start == '2024-04-01T00:00:00+00:00'
 
     # Now is Monday morning.
     now = date_time.from_string('2024-03-25T09:11:00-07:00')
     start = _event.GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline = 24, now = now)['nextStart']
-    assert start == '2024-03-31T17:00:00-07:00'
+    assert start == '2024-04-01T00:00:00+00:00'
 
 def test_GetNextEvents():
     _mongo_mock.InitAllCollections()
@@ -50,8 +51,8 @@ def test_GetNextEvents():
     weeklyEvent = weeklyEvents[0]
     now = date_time.from_string('2024-05-19T17:00:00-07:00')
     retEvents = _event.GetNextEvents(weeklyEvent['_id'], now = now)
-    assert retEvents['thisWeekEvent']['start'] == '2024-05-25T16:00:00-07:00'
-    assert retEvents['nextWeekEvent']['start'] == '2024-05-25T16:00:00-07:00'
+    assert retEvents['thisWeekEvent']['start'] == '2024-05-25T23:00:00+00:00'
+    assert retEvents['nextWeekEvent']['start'] == '2024-05-25T23:00:00+00:00'
     _mongo_mock.CleanUp()
 
 def test_GetUsersAttending():
@@ -59,16 +60,16 @@ def test_GetUsersAttending():
     users = _stubs_data.CreateBulk(count = 10, collectionName = 'user')
 
     events = [
-        { 'start': '2024-03-01T17:00:00-07:00' },
-        { 'start': '2024-03-03T17:00:00-07:00' },
-        { 'start': '2024-03-05T17:00:00-07:00' },
-        { 'start': '2024-03-07T17:00:00-07:00' },
-        { 'start': '2024-03-09T17:00:00-07:00' },
+        { 'start': '2024-03-01T17:00:00+00:00' },
+        { 'start': '2024-03-03T17:00:00+00:00' },
+        { 'start': '2024-03-05T17:00:00+00:00' },
+        { 'start': '2024-03-07T17:00:00+00:00' },
+        { 'start': '2024-03-09T17:00:00+00:00' },
     ]
     events = _stubs_data.CreateBulk(objs = events, collectionName = 'event')
 
     # Now is 1 day after the last event, meaning 4 events are within a week (event 0 is NOT)
-    now = date_time.from_string('2024-03-10T17:00:00-07:00')
+    now = date_time.from_string('2024-03-10T17:00:00+00:00')
 
     # 0 since only attendee > 0 is for event 0, which is too far in the past.
     userEvents = [

@@ -145,6 +145,7 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
     thisWeek += datetime.timedelta(days=(weeklyEvent['dayOfWeek'] - now.weekday()))
     if thisWeek < now:
         thisWeek += datetime.timedelta(days = 7)
+    thisWeek = date_time.toUTC(thisWeek)
     ret['thisWeekStart'] = date_time.string(thisWeek)
     hourEnd = int(weeklyEvent['endTime'][0:2])
     minuteEnd = int(weeklyEvent['endTime'][3:5])

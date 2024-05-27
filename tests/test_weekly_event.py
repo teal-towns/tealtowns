@@ -76,10 +76,11 @@ def test_WeeklyEventFlow():
 
     # User 1
     # Wednesday, so next event is this Sunday.
-    now = date_time.from_string('2024-03-20 09:00:00-07:00')
+    now = date_time.from_string('2024-03-20 09:00:00+00:00')
     retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
     event1 = retEvent['event']
-    assert event1['start'] == '2024-03-24T17:00:00-07:00'
+    # assert event1['start'] == '2024-03-24T17:00:00-07:00'
+    assert event1['start'] == '2024-03-25T00:00:00+00:00'
     user1Event = {
         'eventId': event1['_id'],
         'userId': users[1]['_id'],
@@ -205,7 +206,7 @@ def test_WeeklyEventFlow():
 
     # RSVP Deadline
     # Saturday, so passed deadline.
-    now = date_time.from_string('2024-03-23 09:00:00-07:00')
+    now = date_time.from_string('2024-03-23 09:00:00+00:00')
     retWeekly = _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
     assert len(retWeekly['notifyUserIdsSubscribers']['sms']) == 2
     for userId in retWeekly['notifyUserIdsSubscribers']['sms']:
@@ -221,7 +222,8 @@ def test_WeeklyEventFlow():
     assert credits == userCreditsCurrent[4]
     retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
     event2 = retEvent['event']
-    assert event2['start'] == '2024-03-31T17:00:00-07:00'
+    # assert event2['start'] == '2024-03-31T17:00:00+00:00'
+    assert event2['start'] == '2024-04-01T00:00:00+00:00'
     userEvents = mongo_db.find('userEvent', {'eventId': event2['_id']})['items']
     for userEvent in userEvents:
         if userEvent['userId'] in [users[2]['_id']]:
@@ -241,7 +243,7 @@ def test_WeeklyEventFlow():
     #     - A new event for next week is auto created with Users 2, 4 (plus 2 guests) and 6 added.
     # User 2
     # Sunday night
-    now = date_time.from_string('2024-03-24 18:00:00-07:00')
+    now = date_time.from_string('2024-03-24 18:00:00+00:00')
     user2Event = mongo_db.find_one('userEvent', {'eventId': event2['_id'], 'userId': users[2]['_id']})['item']
     user2Event['hostGroupSizeMax'] = 4
     user2Event['hostStatus'] = 'pending'
@@ -346,7 +348,7 @@ def test_WeeklyEventFlow():
 
     # RSVP Deadline
     # Friday, so passed deadline.
-    now = date_time.from_string('2024-03-29 12:00:00-07:00')
+    now = date_time.from_string('2024-03-29 12:00:00+00:00')
     retWeekly = _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
     assert len(retWeekly['notifyUserIdsSubscribers']['sms']) == 3
     for userId in retWeekly['notifyUserIdsSubscribers']['sms']:
@@ -367,7 +369,8 @@ def test_WeeklyEventFlow():
     assert userMoney['balanceUSD'] == userAmountsCurrent[3]
     retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
     event3 = retEvent['event']
-    assert event3['start'] == '2024-04-07T17:00:00-07:00'
+    # assert event3['start'] == '2024-04-07T17:00:00+00:00'
+    assert event3['start'] == '2024-04-08T00:00:00+00:00'
     userEvents = mongo_db.find('userEvent', {'eventId': event3['_id']})['items']
     for userEvent in userEvents:
         if userEvent['userId'] in [users[2]['_id'], users[6]['_id']]:
@@ -386,7 +389,7 @@ def test_WeeklyEventFlow():
 
     # User 7
     # Saturday (for the following Sunday)
-    now = date_time.from_string('2024-03-30 16:00:00-07:00')
+    now = date_time.from_string('2024-03-30 16:00:00+00:00')
     user7Payment = {
         'userId': users[7]['_id'],
         'amountUSD': -1 * weeklyEvent['priceUSD'],
@@ -492,7 +495,7 @@ def test_WeeklyEventFlow():
 
     # RSVP Deadline
     # Friday, so passed deadline.
-    now = date_time.from_string('2024-04-05 12:00:00-07:00')
+    now = date_time.from_string('2024-04-05 12:00:00+00:00')
     retWeekly = _weekly_event.CheckRSVPDeadline(weeklyEvent['_id'], now = now)
     assert len(retWeekly['notifyUserIdsSubscribers']['sms']) == 3
     for userId in retWeekly['notifyUserIdsSubscribers']['sms']:
@@ -533,7 +536,8 @@ def test_WeeklyEventFlow():
             assert userEvent['creditsEarned'] == 2
     retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
     event4 = retEvent['event']
-    assert event4['start'] == '2024-04-14T17:00:00-07:00'
+    # assert event4['start'] == '2024-04-14T17:00:00+00:00'
+    assert event4['start'] == '2024-04-15T00:00:00+00:00'
     userEvents = mongo_db.find('userEvent', {'eventId': event4['_id']})['items']
     for userEvent in userEvents:
         if userEvent['userId'] in [users[2]['_id'], users[6]['_id']]:

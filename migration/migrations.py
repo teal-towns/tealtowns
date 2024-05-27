@@ -5,12 +5,75 @@ import lodash
 import mongo_db
 
 def RunAll():
+    TimesToUTC()
     # AddEventEnd()
     # AddUserEventEnd()
     # SharedItemMaxMeters()
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def TimesToUTC():
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {}
+        fields = { 'start': 1, 'end': 1,}
+        items = mongo_db.find('event', query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('TimesToUTC event', len(items))
+        for item in items:
+            startUTC = date_time.string(date_time.toUTC(date_time.from_string(item['start'])))
+            endUTC = date_time.string(date_time.toUTC(date_time.from_string(item['end'])))
+            if startUTC != item['start'] or endUTC != item['end']:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mutation = {
+                    '$set': {
+                        'start': startUTC,
+                        'end': endUTC,
+                    }
+                }
+
+                # print (query, mutation, item['start'], item['end'])
+                mongo_db.update_one('event', query, mutation)
+                updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
+    
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {}
+        fields = { 'eventEnd': 1,}
+        items = mongo_db.find('userEvent', query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('TimesToUTC userEvent', len(items))
+        for item in items:
+            endUTC = date_time.string(date_time.toUTC(date_time.from_string(item['eventEnd'])))
+            if endUTC != item['eventEnd']:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mutation = {
+                    '$set': {
+                        'eventEnd': endUTC,
+                    }
+                }
+
+                # print (query, mutation, item['start'], item['end'])
+                mongo_db.update_one('userEvent', query, mutation)
+                updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
 
 def AddEventEnd():
     limit = 250
@@ -52,6 +115,10 @@ def AddEventEnd():
                     updatedCounter += 1
                 else:
                     print ('No weeklyEvent', item)
+                    query = {
+                        '_id': mongo_db.to_object_id(item['_id'])
+                    }
+                    mongo_db.delete_one('event', query)
             else:
                 print ('No weeklyEventId', item)
 
@@ -86,6 +153,10 @@ def AddUserEventEnd():
                 updatedCounter += 1
             else:
                 print ('No event, or no end', item['eventId'], 'event', event)
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mongo_db.delete_one('userEvent', query)
 
         if len(items) < limit:
             print('Updated ' + str(updatedCounter) + ' items')
