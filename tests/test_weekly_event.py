@@ -551,7 +551,7 @@ def test_WeeklyEventFlow():
 def test_SaveWeeklyEvent():
     _mongo_mock.InitAllCollections()
 
-    weeklyEvents = _stubs_data.CreateBulk(count = 1, collectionName = 'weeklyEvent',)
+    weeklyEvents = _stubs_data.CreateBulk(count = 3, collectionName = 'weeklyEvent', saveInDatabase = 0)
     weeklyEvent = weeklyEvents[0]
     # This is an edit since already created it above.
     retWeeklyEvent = _weekly_event.Save(weeklyEvent)
@@ -559,8 +559,55 @@ def test_SaveWeeklyEvent():
     assert len(weeklyEvent['uName']) > 0
     # Edit again
     weeklyEvent['title'] = 'title edit'
+    # Do not allow editing price.
+    originalPrice = weeklyEvent['priceUSD']
+    newPrice = 1234
+    weeklyEvent['priceUSD'] = newPrice
     retWeeklyEvent = _weekly_event.Save(weeklyEvent)
     assert retWeeklyEvent['valid'] == 1
     assert retWeeklyEvent['weeklyEvent']['title'] == weeklyEvent['title']
+    assert retWeeklyEvent['weeklyEvent']['priceUSD'] == originalPrice
 
+    # Price must be $0 or $5 minimum
+    weeklyEvent = weeklyEvents[1]
+    weeklyEvent['priceUSD'] = 1
+    retWeeklyEvent = _weekly_event.Save(weeklyEvent)
+    assert retWeeklyEvent['weeklyEvent']['priceUSD'] == 0
+
+    weeklyEvent = weeklyEvents[2]
+    weeklyEvent['priceUSD'] = 4
+    retWeeklyEvent = _weekly_event.Save(weeklyEvent)
+    assert retWeeklyEvent['weeklyEvent']['priceUSD'] == 5
+
+    _mongo_mock.CleanUp()
+
+def test_ArchivedWeeklyEvent():
+    _mongo_mock.InitAllCollections()
+    weeklyEvents = _stubs_data.CreateBulk(count = 3, collectionName = 'weeklyEvent')
+    ret = _weekly_event.SearchNear([])
+    assert len(ret['weeklyEvents']) == 3
+
+    now = date_time.from_string('2024-03-20 09:00:00+00:00')
+    retEvent = _event.GetNextEventFromWeekly(weeklyEvents[0]['_id'], now = now)
+    assert len(retEvent['event']['_id']) > 0
+    now = date_time.from_string('2024-03-29 09:00:00+00:00')
+    ret = _event.GetNextEvents(weeklyEvents[0]['_id'], now = now)
+    assert len(ret['thisWeekEvent']['_id']) > 0
+    assert len(ret['nextWeekEvent']['_id']) > 0
+
+    # Remove (archive)
+    _weekly_event.Remove(weeklyEvents[0]['_id'])
+    # Should not show up in search results
+    ret = _weekly_event.SearchNear([])
+    assert len(ret['weeklyEvents']) == 2
+    for weeklyEvent in ret['weeklyEvents']:
+        assert weeklyEvent['_id'] in [weeklyEvents[1]['_id'], weeklyEvents[2]['_id']]
+    # Should not create new
+    now = date_time.from_string('2024-04-30 09:00:00+00:00')
+    retEvent = _event.GetNextEventFromWeekly(weeklyEvents[0]['_id'], now = now)
+    assert retEvent['event'] == {}
+    now = date_time.from_string('2024-04-29 09:00:00+00:00')
+    ret = _event.GetNextEvents(weeklyEvents[0]['_id'], now = now)
+    assert ret['thisWeekEvent'] == {}
+    assert ret['nextWeekEvent'] == {}
     _mongo_mock.CleanUp()

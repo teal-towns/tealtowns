@@ -15,19 +15,21 @@ import ml_config
 
 _config = ml_config.get_config()
 
-def SearchNear(lngLat: list, maxMeters: float, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
+def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
     type: str = '', archived: int = 0):
-    query = {
-        'location': {
-            '$nearSphere': {
-                '$geometry': {
-                    'type': 'Point',
-                    'coordinates': lngLat,
-                },
-                '$maxDistance': maxMeters,
-            }
-        },
-    }
+    query = {}
+    if len(lngLat) > 0:
+        query = {
+            'location': {
+                '$nearSphere': {
+                    '$geometry': {
+                        'type': 'Point',
+                        'coordinates': lngLat,
+                    },
+                    '$maxDistance': maxMeters,
+                }
+            },
+        }
     sortKeys = "dayOfWeek,startTime"
     ret = _mongo_db_crud.Search('weeklyEvent', {'title': title, 'type': type}, equalsKeyVals = {'archived': archived},
         limit = limit, skip = skip, query = query, sortKeys = sortKeys)
@@ -35,8 +37,9 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', limit: int = 250
     # Calculate distance
     # May also be able to use geoNear https://stackoverflow.com/questions/33864461/mongodb-print-distance-between-two-points
     for index, item in reversed(list(enumerate(ret['weeklyEvents']))):
-        ret['weeklyEvents'][index]['xDistanceKm'] = round(_math_polygon.Haversine(item['location']['coordinates'],
-            lngLat, units = 'kilometers'), 3)
+        if len(lngLat) > 0:
+            ret['weeklyEvents'][index]['xDistanceKm'] = round(_math_polygon.Haversine(item['location']['coordinates'],
+                lngLat, units = 'kilometers'), 3)
         if withAdmins:
             for userId in item['adminUserIds']:
                 if userId not in userIds:
@@ -100,6 +103,11 @@ def Save(weeklyEvent: dict):
     if '_id' not in weeklyEvent:
         # Many weekly events will have the same title, so just use blank string to keep them shorter.
         weeklyEvent['uName'] = lodash.CreateUName('')
+        if weeklyEvent['priceUSD'] > 0 and weeklyEvent['priceUSD'] < 5:
+            if weeklyEvent['priceUSD'] < 2.5:
+                weeklyEvent['priceUSD'] = 0
+            else:
+                weeklyEvent['priceUSD'] = 5
     else:
         # Do not allow changing some fields.
         weeklyEventExisting = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEvent['_id'])})['item']
@@ -134,22 +142,23 @@ def CheckRSVPDeadline(weeklyEventId: str, now = None):
     ret = { 'valid': 1, 'message': '', 'newUserEvents': [], 'notifyUserIdsSubscribers': {},
         'notifyUserIdsHosts': {}, 'notifyUserIdsAttendees': {}, 'notifyUserIdsUnused': {}, }
     weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
-    retCheck = _event.GetNextEventStart(weeklyEvent, now = now)
-    # See if deadline passed.
-    if retCheck['rsvpDeadlinePassed']:
-        # See if this is the first time passed (most recent event is still this week's event).
-        sortObj = { 'start': -1 }
-        events = mongo_db.find('event', {'weeklyEventId': weeklyEvent['_id']}, sort_obj = sortObj)['items']
-        if len(events) > 0:
-            currentEvent = events[0]
-            if currentEvent['start'] == retCheck['thisWeekStart']:
-                retAdd = _user_event.CheckAddHostsAndAttendees(currentEvent['_id'], fillAll = 1)
-                ret['notifyUserIdsUnused'] = retAdd['notifyUserIdsUnused']
-                ret['notifyUserIdsAttendees'] = retAdd['notifyUserIdsAttendees']
-                ret['notifyUserIdsHosts'] = retAdd['notifyUserIdsHosts']
-                retUsers = _user_weekly_event.AddWeeklyUsersToEvent(weeklyEvent['_id'], now = now)
-                ret['newUserEvents'] = retUsers['newUserEvents']
-                ret['notifyUserIdsSubscribers'] = retUsers['notifyUserIds']
+    if not weeklyEvent['archived']:
+        retCheck = _event.GetNextEventStart(weeklyEvent, now = now)
+        # See if deadline passed.
+        if retCheck['rsvpDeadlinePassed']:
+            # See if this is the first time passed (most recent event is still this week's event).
+            sortObj = { 'start': -1 }
+            events = mongo_db.find('event', {'weeklyEventId': weeklyEvent['_id']}, sort_obj = sortObj)['items']
+            if len(events) > 0:
+                currentEvent = events[0]
+                if currentEvent['start'] == retCheck['thisWeekStart']:
+                    retAdd = _user_event.CheckAddHostsAndAttendees(currentEvent['_id'], fillAll = 1)
+                    ret['notifyUserIdsUnused'] = retAdd['notifyUserIdsUnused']
+                    ret['notifyUserIdsAttendees'] = retAdd['notifyUserIdsAttendees']
+                    ret['notifyUserIdsHosts'] = retAdd['notifyUserIdsHosts']
+                    retUsers = _user_weekly_event.AddWeeklyUsersToEvent(weeklyEvent['_id'], now = now)
+                    ret['newUserEvents'] = retUsers['newUserEvents']
+                    ret['notifyUserIdsSubscribers'] = retUsers['notifyUserIds']
     return ret
 
 def CheckAllRSVPDeadlines(now = None):

@@ -1,5 +1,7 @@
 import random
 
+import copy
+
 # from common import mongo_db_crud as _mongo_db_crud
 import lodash
 import mongo_db
@@ -41,7 +43,7 @@ def GetDefaultFromCollectionName(collectionName: str):
     #     'user': _stubs_user.GetDefault(),
     # }
     if collectionName in _nameDefaultsMap:
-        return _nameDefaultsMap[collectionName]
+        return _nameDefaultsMap[collectionName]()
     return {}
 
 def CreateBulk(objs: list = [], default: dict = {}, base: dict = {}, collectionName: str = '', count: int = 1,
@@ -50,12 +52,14 @@ def CreateBulk(objs: list = [], default: dict = {}, base: dict = {}, collectionN
         objs = []
         for i in range(0, count):
             objs.append({})
-    if len(base) < 1 and len(collectionName) > 0:
-        base = GetDefaultFromCollectionName(collectionName)
-
-    newDefault = lodash.extend_object(base, default)
     newObjs = []
     for obj in objs:
+        newBase = {}
+        if len(base) < 1 and len(collectionName) > 0:
+            newBase = GetDefaultFromCollectionName(collectionName)
+        else:
+            newBase = copy.deepcopy(base)
+        newDefault = lodash.extend_object(newBase, default)
         newObjs.append(lodash.extend_object(newDefault, obj))
     if len(collectionName) > 0 and saveInDatabase:
         newObjs = mongo_db.insert_many(collectionName, newObjs)['items']
