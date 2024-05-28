@@ -21,21 +21,19 @@ _users = [
     }
 ]
 
-_default = {
-  'email': _stubs_data.RandomString() + '@email.com',
-  'password': _stubs_data.RandomString(),
-  'firstName': _stubs_data.RandomWord(),
-  'lastName': _stubs_data.RandomWord(),
-  'roles': [''],
-  'phoneNumber': _stubs_data.RandomPhone(),
-  'phoneNumberVerified': random.randint(0, 1),
-}
+def GetDefault():
+    return {
+        'email': _stubs_data.RandomString() + '@email.com',
+        'password': _stubs_data.RandomString(),
+        'firstName': _stubs_data.RandomWord(),
+        'lastName': _stubs_data.RandomWord(),
+        'roles': [''],
+        'phoneNumber': _stubs_data.RandomPhone(),
+        'phoneNumberVerified': random.randint(0, 1),
+    }
 
 def AddDefault():
-    _stubs_data.AddToNameMap('user', _default)
-
-# def GetDefault():
-#     return _default
+    _stubs_data.AddToNameMap('user', GetDefault)
 
 def GetAll():
     global _users

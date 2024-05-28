@@ -86,7 +86,7 @@ def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int =
     eventFind = mongo_db.find_one('event', event)['item']
     if eventFind:
         ret['event'] = eventFind
-    elif not eventFind and autoCreate:
+    elif not eventFind and autoCreate and not weeklyEvent['archived']:
         event['end'] = retNext['nextEnd']
         ret['event'] = _mongo_db_crud.Save('event', event)['event']
     return ret
@@ -101,7 +101,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
         'start': retNext['thisWeekStart'],
     }
     eventFind = mongo_db.find_one('event', event)['item']
-    if not eventFind and autoCreate:
+    if not eventFind and autoCreate and not weeklyEvent['archived']:
         event['end'] = retNext['thisWeekEnd']
         eventFind = _mongo_db_crud.Save('event', event)['event']
     if eventFind:
@@ -112,7 +112,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
             'start': retNext['nextStart'],
         }
         eventNextFind = mongo_db.find_one('event', eventNext)['item']
-        if not eventNextFind and autoCreate:
+        if not eventNextFind and autoCreate and not weeklyEvent['archived']:
             eventNext['end'] = retNext['nextEnd']
             eventNextFind = _mongo_db_crud.Save('event', eventNext)['event']
         if eventNextFind:
