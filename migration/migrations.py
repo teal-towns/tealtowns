@@ -5,6 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
+    WeeklyEventArchived()
     # TimesToUTC()
     # AddEventEnd()
     # AddUserEventEnd()
@@ -12,6 +13,35 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def WeeklyEventArchived():
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'archived': { '$exists': 0 }}
+        fields = { 'archived': 1,}
+        items = mongo_db.find('weeklyEvent', query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('WeeklyEventArchived weeklyEvent', len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'archived': 0,
+                }
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one('weeklyEvent', query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
 
 def TimesToUTC():
     limit = 250

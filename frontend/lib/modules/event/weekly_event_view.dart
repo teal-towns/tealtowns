@@ -383,7 +383,6 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       }
     }
     if (!alreadySignedUp) {
-      print ('not alreadySignedUp');
       String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
       String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
       attendeeInfo += [
@@ -393,7 +392,6 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         SizedBox(height: 10),
       ];
     } else {
-      print ('UserEvent alreadySignedUp ${_userEvent.eventId}');
       attendeeInfo += [
         UserEventSave(eventId: _userEvent.eventId),
         SizedBox(height: 10),

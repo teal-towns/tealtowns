@@ -130,6 +130,8 @@ def GetMostRecentPastEvent(weeklyEventId: str, now = None):
         'start': pastStart,
     }
     ret['event'] = mongo_db.find_one('event', event)['item']
+    if ret['event'] is None:
+        ret['event'] = {}
     return ret
 
 def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, now = None):

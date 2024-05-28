@@ -44,6 +44,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     'priceUSD': 0,
     'rsvpDeadlineHours': 0,
     'type': '',
+    'archived': 0,
   };
   String _formMode = '';
   List<String> _formStepKeys = [];
