@@ -123,13 +123,13 @@ def RemoveById(collection: str, id1: str, db1 = None):
 def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
     skip=0, notInListKeyVals={}, minKeyVals = {}, maxKeyVals = {}, locationKeyVals = {}, query = {},
     fields = None, db1 = None, withLocationDistance: int = 0, locationDistanceSuffix: str = '_DistanceKm',
-    locationDistancePrecision = 2):
+    locationDistancePrecision = 2, equalsKeyVals = {}):
     ret = {"valid": 1, "message": ""}
     objKey = collection + "s"
     ret[objKey] = []
 
     query1 = FormSearchQuery(stringKeyVals, listKeyVals, notInListKeyVals, minKeyVals, maxKeyVals,
-        locationKeyVals = locationKeyVals, query = query)
+        locationKeyVals = locationKeyVals, query = query, equalsKeyVals = equalsKeyVals)
 
     sort = None
     if len(sortKeys) > 0:
@@ -152,11 +152,13 @@ def Search(collection, stringKeyVals={}, listKeyVals={}, sortKeys="", limit=250,
     return ret
 
 def FormSearchQuery(stringKeyVals={}, listKeyVals={}, notInListKeyVals={}, minKeyVals = {},
-    maxKeyVals = {}, locationKeyVals = {}, query = {}):
+    maxKeyVals = {}, locationKeyVals = {}, query = {}, equalsKeyVals = {}):
     queryCopy = copy.deepcopy(query)
     for key in stringKeyVals:
         if len(stringKeyVals[key]) > 0:
             queryCopy[key] = {"$regex": stringKeyVals[key], "$options": "i"}
+    for key in equalsKeyVals:
+        queryCopy[key] = equalsKeyVals[key]
     for key in listKeyVals:
         if len(listKeyVals[key]) > 0:
             if key == "_id":

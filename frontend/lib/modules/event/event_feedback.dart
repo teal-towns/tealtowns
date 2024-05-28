@@ -43,7 +43,7 @@ class _EventFeedbackState extends State<EventFeedback> {
     _routeIds.add(_socketService.onRoute('GetEventFeedbackByWeeklyEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
-      if (data['valid'] == 1 && data.containsKey('eventFeedback')) {
+      if (data['valid'] == 1 && data.containsKey('eventFeedback') && data.containsKey('event')) {
         SetData(data);
       }
     }));
@@ -51,7 +51,7 @@ class _EventFeedbackState extends State<EventFeedback> {
     _routeIds.add(_socketService.onRoute('GetEventFeedbackByEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
-      if (data['valid'] == 1 && data.containsKey('eventFeedback')) {
+      if (data['valid'] == 1 && data.containsKey('eventFeedback') && data.containsKey('event')) {
         SetData(data);
       }
     }));

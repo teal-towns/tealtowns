@@ -18,6 +18,7 @@ _default = {
     'priceUSD': random.randint(10, 20),
     'rsvpDeadlineHours': random.randint(24, 72),
     'imageUrls': [ _stubs_data.RandomImageUrl() ],
+    'archived': 0,
 }
 
 def AddDefault():

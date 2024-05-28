@@ -12,6 +12,7 @@ def create_all_indices(db):
     # db['weeklyEvent'].drop()
     db['weeklyEvent'].create_index([('uName', 1)], unique=True)
     db['weeklyEvent'].create_index([('title', 1), ('type', 1), ('priceUSD', 1)], unique=False)
+    db['weeklyEvent'].create_index([('archived', 1)], unique=False)
     db['weeklyEvent'].create_index([('location', '2dsphere')])
 
     db['event'].create_index([('weeklyEventId', 1), ('start', 1)], unique=False)

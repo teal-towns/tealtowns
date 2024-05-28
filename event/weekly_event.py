@@ -16,7 +16,7 @@ import ml_config
 _config = ml_config.get_config()
 
 def SearchNear(lngLat: list, maxMeters: float, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
-    type: str = ''):
+    type: str = '', archived: int = 0):
     query = {
         'location': {
             '$nearSphere': {
@@ -29,8 +29,8 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', limit: int = 250
         },
     }
     sortKeys = "dayOfWeek,startTime"
-    ret = _mongo_db_crud.Search('weeklyEvent', {'title': title, 'type': type}, limit = limit, skip = skip, query = query,
-        sortKeys = sortKeys)
+    ret = _mongo_db_crud.Search('weeklyEvent', {'title': title, 'type': type}, equalsKeyVals = {'archived': archived},
+        limit = limit, skip = skip, query = query, sortKeys = sortKeys)
     userIds = []
     # Calculate distance
     # May also be able to use geoNear https://stackoverflow.com/questions/33864461/mongodb-print-distance-between-two-points
@@ -113,17 +113,22 @@ def Save(weeklyEvent: dict):
     return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)
 
 def Remove(weeklyEventId: str):
-    query = { 'weeklyEventId': weeklyEventId }
-    events = mongo_db.find('event', query)['items']
-    eventIds = []
-    for event in events:
-        eventIds.append(event['_id'])
-    mongo_db.delete_many('userEvent', { 'eventId': { '$in': eventIds } })
+    # Soft delete to preserve stats.
+    # query = { 'weeklyEventId': weeklyEventId }
+    # events = mongo_db.find('event', query)['items']
+    # eventIds = []
+    # for event in events:
+    #     eventIds.append(event['_id'])
+    # mongo_db.delete_many('userEvent', { 'eventId': { '$in': eventIds } })
 
-    mongo_db.delete_many('event', { 'weeklyEventId': weeklyEventId })
+    # mongo_db.delete_many('event', { 'weeklyEventId': weeklyEventId })
     # TODO - end stripe subscription
-    mongo_db.delete_many('userWeeklyEvent', { 'weeklyEventId': weeklyEventId })
-    return _mongo_db_crud.RemoveById('weeklyEvent', weeklyEventId)
+    # mongo_db.delete_many('userWeeklyEvent', { 'weeklyEventId': weeklyEventId })
+    # return _mongo_db_crud.RemoveById('weeklyEvent', weeklyEventId)
+    mutation = { '$set': { 'archived': 1 } }
+    query = { '_id': mongo_db.to_object_id(weeklyEventId) }
+    mongo_db.update_one('weeklyEvent', query, mutation)
+    return { 'valid': 1, 'message': '', }
 
 def CheckRSVPDeadline(weeklyEventId: str, now = None):
     ret = { 'valid': 1, 'message': '', 'newUserEvents': [], 'notifyUserIdsSubscribers': {},

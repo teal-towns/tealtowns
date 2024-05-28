@@ -10,14 +10,14 @@ class WeeklyEventClass {
   String id = '', uName = '', title = '', description = '', startTime = '', endTime = '', timezone = '', type = '';
   List<String> adminUserIds = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
-  int dayOfWeek = 0, hostGroupSizeDefault = 0;
+  int dayOfWeek = 0, hostGroupSizeDefault = 0, archived = 0;
   double rsvpDeadlineHours = 0, priceUSD = 0, hostMoneyPerPersonUSD = 0, xDistanceKm = -999;
   List<UserClass> adminUsers = [];
   String xDay = '';
 
   WeeklyEventClass(this.id, this.uName, this.title, this.description, this.startTime, this.endTime,
     this.timezone, this.type, this.adminUserIds,
-    this.imageUrls, this.location, this.dayOfWeek, this.hostGroupSizeDefault, this.rsvpDeadlineHours, this.priceUSD,
+    this.imageUrls, this.location, this.dayOfWeek, this.hostGroupSizeDefault, this.archived, this.rsvpDeadlineHours, this.priceUSD,
     this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay);
 
   WeeklyEventClass.fromJson(Map<String, dynamic> json) {
@@ -35,6 +35,7 @@ class WeeklyEventClass {
     this.location = LocationClass.fromJson(json['location'] ?? {});
     this.dayOfWeek = json['dayOfWeek'] != null ? _parseService.toIntNoNull(json['dayOfWeek']) : 0;
     this.hostGroupSizeDefault = json['hostGroupSizeDefault'] != null ? _parseService.toIntNoNull(json['hostGroupSizeDefault']) : 0;
+    this.archived = json['archived'] != null ? _parseService.toIntNoNull(json['archived']) : 0;
     this.rsvpDeadlineHours = json['rsvpDeadlineHours'] != null ? _parseService.toDoubleNoNull(json['rsvpDeadlineHours']) : 0;
     this.priceUSD = json['priceUSD'] != null ? _parseService.toDoubleNoNull(json['priceUSD']) : 0;
     this.hostMoneyPerPersonUSD = json['hostMoneyPerPersonUSD'] != null ? _parseService.toDoubleNoNull(json['hostMoneyPerPersonUSD']) : 0;
@@ -59,6 +60,7 @@ class WeeklyEventClass {
       'location': { 'type': 'Point', 'coordinates': location.coordinates },
       'dayOfWeek': dayOfWeek,
       'hostGroupSizeDefault': hostGroupSizeDefault,
+      'archived': archived,
       'rsvpDeadlineHours': rsvpDeadlineHours,
       'priceUSD': priceUSD,
       'hostMoneyPerPersonUSD': hostMoneyPerPersonUSD,
