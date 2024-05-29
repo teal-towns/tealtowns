@@ -7,23 +7,26 @@ class SharedItemClass {
   ParseService _parseService = ParseService();
   ImageService _imageService = ImageService();
 
-  String id = '', uName = '', title = '', description = '', currentOwnerUserId = '', currentPurchaserUserId = '', status = '', currency = '';
+  String id = '', uName = '', neighborhoodUName = '', title = '', description = '', currentOwnerUserId = '',
+    currentPurchaserUserId = '', status = '', currency = '';
   List<String> tags = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
   double originalPrice = 1000, currentPrice = 1000, maintenancePerYear = 50, maintenanceAvailable = 0, maxMeters = 1500, fundingRequired = 0;
-  int bought = 0, generation = 0, yearsPerGeneration = 2, monthsToPayBack = 0, minOwners = 2, maxOwners = 10, pledgedOwners = 0;
+  int bought = 0, generation = 0, monthsToPayBack = 0, minOwners = 2, maxOwners = 10, pledgedOwners = 0;
   // Map<String, dynamic> xOwner = {};
   double xDistanceKm = -999;
   SharedItemOwnerClass sharedItemOwner_current = SharedItemOwnerClass.fromJson({});
 
-  SharedItemClass(this.id, this.uName, this.title, this.description, this.imageUrls, this.currentOwnerUserId, this.currentPurchaserUserId, this.tags,
-    this.location, this.bought, this.originalPrice, this.currentPrice, this.currency, this.generation, this.yearsPerGeneration, this.monthsToPayBack,
+  SharedItemClass(this.id, this.uName, this.neighborhoodUName, this.title, this.description, this.imageUrls,
+    this.currentOwnerUserId, this.currentPurchaserUserId, this.tags,
+    this.location, this.bought, this.originalPrice, this.currentPrice, this.currency, this.generation, this.monthsToPayBack,
     this.maintenancePerYear, this.maintenanceAvailable, this.minOwners, this.maxOwners, this.maxMeters, this.status,
     this.pledgedOwners, this.fundingRequired, this.xDistanceKm, this.sharedItemOwner_current);
 
   SharedItemClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.uName = json['uName'] ?? '';
+    this.neighborhoodUName = json['neighborhoodUName'] ?? '';
     this.title = json['title'] ?? '';
     this.description = json['description'] ?? '';
     this.imageUrls = _imageService.GetUrls(_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : []));
@@ -36,7 +39,6 @@ class SharedItemClass {
     this.currentPrice = json['currentPrice'] != null ? _parseService.toDoubleNoNull(json['currentPrice']) : 1000;
     this.currency = json['currency'] ?? 'USD';
     this.generation = json['generation'] != null ? _parseService.toIntNoNull(json['generation']) : 0;
-    this.yearsPerGeneration = json['yearsPerGeneration'] != null ? _parseService.toIntNoNull(json['yearsPerGeneration']) : 2;
     this.monthsToPayBack = json['monthsToPayBack'] != null ? _parseService.toIntNoNull(json['monthsToPayBack']) : 12;
     this.maintenancePerYear = json['maintenancePerYear'] != null ? _parseService.toDoubleNoNull(json['maintenancePerYear']) : 50;
     this.maintenanceAvailable = json['maintenanceAvailable'] != null ? _parseService.toDoubleNoNull(json['maintenanceAvailable']) : 0;
@@ -56,8 +58,8 @@ class SharedItemClass {
   Map<String, dynamic> toJson() =>
     {
       '_id': id,
-      'id': id,
       'uName': uName,
+      'neighborhoodUName': neighborhoodUName,
       'title': title,
       'description': description,
       'imageUrls': imageUrls,
@@ -70,7 +72,6 @@ class SharedItemClass {
       'currentPrice': currentPrice,
       'currency': currency,
       'generation': generation,
-      'yearsPerGeneration': yearsPerGeneration,
       'monthsToPayBack': monthsToPayBack,
       'maintenancePerYear': maintenancePerYear,
       'maintenanceAvailable': maintenanceAvailable,

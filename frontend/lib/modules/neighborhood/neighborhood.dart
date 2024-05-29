@@ -9,6 +9,7 @@ import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/layout_service.dart';
 import '../../common/link_service.dart';
+import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './neighborhood_class.dart';
@@ -257,6 +258,14 @@ class _NeighborhoodState extends State<Neighborhood> {
           _style.SpacingH('large'),
           _style.Text1('${_usersCount} neighbors thus far, ${_uniqueEventUsersCount} attended events last week'),
           _buttons.Link(context, 'See All Stats', '/neighborhood-stats/${_neighborhood.uName}'),
+          _style.SpacingH('medium'),
+          Container(
+            width: 300,
+            child: MapIt(mapHeight: 300,
+              longitude: _neighborhood.location.coordinates[0], latitude: _neighborhood.location.coordinates[1],
+              zoom: 15, markerLngLat: [_neighborhood.location.coordinates[0], _neighborhood.location.coordinates[1]],
+            ),
+          ),
           _style.SpacingH('medium'),
           _style.Text1('Share your neighborhood with your neighbors', size: 'large'),
           _style.SpacingH('medium'),

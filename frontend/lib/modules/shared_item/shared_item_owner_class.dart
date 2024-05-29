@@ -25,7 +25,6 @@ class SharedItemOwnerClass {
   Map<String, dynamic> toJson() =>
     {
       '_id': id,
-      // 'id': id,
       'sharedItemId': sharedItemId,
       'userId': userId,
       'monthlyPayment': monthlyPayment,

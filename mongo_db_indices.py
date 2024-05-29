@@ -13,9 +13,11 @@ def create_all_indices(db):
     db['weeklyEvent'].create_index([('uName', 1)], unique=True)
     db['weeklyEvent'].create_index([('title', 1), ('type', 1), ('priceUSD', 1)], unique=False)
     db['weeklyEvent'].create_index([('archived', 1)], unique=False)
+    db['weeklyEvent'].create_index([('neighborhoodUName', 1)], unique=False)
     db['weeklyEvent'].create_index([('location', '2dsphere')])
 
     db['event'].create_index([('weeklyEventId', 1), ('start', 1)], unique=False)
+    db['event'].create_index([('neighborhoodUName', 1)], unique=False)
 
     db['userWeeklyEvent'].create_index([('userId', 1), ('weeklyEventId', 1)], unique=True)
     db['userWeeklyEvent'].create_index([('status', 1)], unique=False)
@@ -30,6 +32,7 @@ def create_all_indices(db):
         ('status', 1), ('pledgedOwners', 1), ('fundingRequired', 1)], unique=False, \
         name = 'sharedItemIndex')
     db['sharedItem'].create_index([('location', '2dsphere')])
+    db['sharedItem'].create_index([('neighborhoodUName', 1)], unique=False)
     # print ('sharedItem index', db['sharedItem'].index_information())
 
     db['sharedItemOwner'].create_index([('sharedItemId', 1), ('userId', 1), ('generation', 1)], unique=True)
@@ -68,5 +71,6 @@ def create_all_indices(db):
 
     db['userFeedback'].create_index([('userId', 1), ('forType', 1), ('forId', 1)], unique=True)
 
+    db['neighborhoodStatsMonthlyCache'].drop()
     db['neighborhoodStatsMonthlyCache'].create_index([('neighborhoodUName', 1), ('start', 1)], unique=True)
     db['neighborhoodStatsMonthlyCache'].create_index([('end', 1)], unique=False)

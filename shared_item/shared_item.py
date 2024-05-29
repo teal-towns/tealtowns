@@ -116,6 +116,7 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
 
 def Save(sharedItem: dict, now = None):
     ret = { 'valid': 1, 'message': '', 'sharedItem': {}, 'sharedItemOwner': {} }
+    sharedItem = _mongo_db_crud.CleanId(sharedItem)
     if '_id' not in sharedItem:
         sharedItem['uName'] = lodash.CreateUName(sharedItem['title'])
     if 'fundingRequired' not in sharedItem and 'currentPrice' in sharedItem:

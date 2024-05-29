@@ -7,6 +7,7 @@ def GetDefault():
         'weeklyEventId': _stubs_data.RandomString(6),
         'start': _stubs_data.RandomTime(),
         'end': _stubs_data.RandomTime(),
+        'neighborhoodUName': _stubs_data.RandomString(6),
     }
 
 def AddDefault():
