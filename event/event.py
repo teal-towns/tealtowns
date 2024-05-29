@@ -82,6 +82,7 @@ def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int =
     event = {
         'weeklyEventId': weeklyEventId,
         'start': retNext['nextStart'],
+        'neighborhoodUName': weeklyEvent['neighborhoodUName'],
     }
     eventFind = mongo_db.find_one('event', event)['item']
     if eventFind:
@@ -99,6 +100,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
     event = {
         'weeklyEventId': weeklyEventId,
         'start': retNext['thisWeekStart'],
+        'neighborhoodUName': weeklyEvent['neighborhoodUName'],
     }
     eventFind = mongo_db.find_one('event', event)['item']
     if not eventFind and autoCreate and not weeklyEvent['archived']:
@@ -110,6 +112,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
         eventNext = {
             'weeklyEventId': weeklyEventId,
             'start': retNext['nextStart'],
+            'neighborhoodUName': weeklyEvent['neighborhoodUName'],
         }
         eventNextFind = mongo_db.find_one('event', eventNext)['item']
         if not eventNextFind and autoCreate and not weeklyEvent['archived']:
@@ -173,16 +176,21 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
     ret['nextEnd'] = date_time.string(nextWeekEnd)
     return ret
 
-def GetUsersAttending(daysPast: int = 7, weeklyEventIds: list = [], now = None,
+def GetUsersAttending(daysPast: int = 7, weeklyEventIds = None, now = None,
     minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False, limit: int = 100000):
-    ret = { 'valid': 1, 'message': '', 'eventsCount': 0, 'uniqueUsersCount': 0, 'eventInfos': [], }
+    ret = { 'valid': 1, 'message': '', 'eventsCount': 0, 'uniqueUsersCount': 0, 'eventInfos': [], 
+        'totalEventUsersCount': 0, 'freeEventsCount': 0, 'paidEventsCount': 0,
+        'totalPaidEventUsersCount': 0, 'totalFreeEventUsersCount': 0, 'totalCutUSD': 0, }
     now = now if now is not None else date_time.now()
+    if weeklyEventIds is not None:
+        if len(weeklyEventIds) == 0:
+            return ret
     if minDateString == '':
         minDateString = date_time.string(now - datetime.timedelta(days=daysPast))
     query = { 'start': { '$gte': minDateString } }
     if maxDateString != '':
         query['start']['$lte'] = maxDateString
-    if len(weeklyEventIds) > 0:
+    if weeklyEventIds is not None and len(weeklyEventIds) > 0:
         query['weeklyEventId'] = { '$in': weeklyEventIds }
     events = mongo_db.find('event', query)['items']
     ret['eventsCount'] = len(events)

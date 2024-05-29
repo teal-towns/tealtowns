@@ -5,7 +5,8 @@ import lodash
 import mongo_db
 
 def RunAll():
-    WeeklyEventArchived()
+    AddNeighborhoodUName()
+    # WeeklyEventArchived()
     # TimesToUTC()
     # AddEventEnd()
     # AddUserEventEnd()
@@ -13,6 +14,38 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def AddNeighborhoodUName():
+    collections = ['weeklyEvent', 'event', 'sharedItem']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'neighborhoodUName': { '$exists': 0 } }
+            fields = { '_id': 1, 'uName': 1,}
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('AddNeighborhoodUName', collection, len(items))
+            for item in items:
+                neighborhoodUName = 'southsidefw' if 'uName' in item and item['uName'] == 'fma4t' else 'concordpc'
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mutation = {
+                    '$set': {
+                        'neighborhoodUName': neighborhoodUName,
+                    }
+                }
+
+                # print (query, mutation)
+                mongo_db.update_one(collection, query, mutation)
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def WeeklyEventArchived():
     limit = 250

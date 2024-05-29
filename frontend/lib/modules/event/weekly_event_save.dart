@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import '../../app_scaffold.dart';
 import '../../common/form_input/form_save.dart';
 import './weekly_event_class.dart';
 import '../about/welcome_about.dart';
+import '../neighborhood/neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
 
 class WeeklyEventSave extends StatefulWidget {
@@ -53,6 +55,15 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   @override
   void initState() {
     super.initState();
+
+    var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+    if (neighborhoodState.defaultUserNeighborhood != null) {
+      _formValsDefault['neighborhoodUName'] = neighborhoodState.defaultUserNeighborhood!.neighborhood.uName;
+    } else {
+      Timer(Duration(milliseconds: 200), () {
+        context.go('/neighborhoods');
+      });
+    }
 
     _formValsDefault['type'] = widget.type;
     if (widget.type == 'sharedMeal') {

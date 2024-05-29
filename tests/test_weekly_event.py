@@ -50,6 +50,7 @@ def test_WeeklyEventFlow():
         "rsvpDeadlineHours": 72,
         'imageUrls': [ 'img1.jpg' ],
         'archived': 0,
+        'neighborhoodUName': 'testNeighborhood1',
     }
 
     # Add money balance for some users 1.

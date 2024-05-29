@@ -5,6 +5,7 @@ from stubs import stubs_data as _stubs_data
 def GetDefault():
     return {
         'uName': _stubs_data.RandomString(6),
+        'neighborhoodUName': _stubs_data.RandomString(6),
         'title': _stubs_data.RandomWords(2),
         'description': _stubs_data.RandomWords(10),
         'imageUrls': [ _stubs_data.RandomImageUrl() ],

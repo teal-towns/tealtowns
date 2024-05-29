@@ -7,7 +7,7 @@ from shared_item import shared_item as _shared_item
 def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
     weeklyEventsCount: int = 3, sharedItemsCount: int = 3, maxMeters: float = 500,
     limitCount: int = 250, withUsersCount: int = 0, withUniqueEventUsersCount: int = 0, userId: str = '',
-    minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False):
+    minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False, withType: str = 'location'):
     ret = _mongo_db_crud.GetByUName('neighborhood', uName)
     if '_id' not in ret['neighborhood']:
         ret['valid'] = 0
@@ -15,6 +15,7 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
         return ret
 
     neighborhoodId = ret['neighborhood']['_id']
+    neighborhoodUName = ret['neighborhood']['uName']
     if userId:
         userNeighborhoods = _mongo_db_crud.Search('userNeighborhood', stringKeyVals = {'userId': userId})['userNeighborhoods']
         for userNeighborhood in userNeighborhoods:
@@ -23,7 +24,11 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
 
     lngLat = ret['neighborhood']['location']['coordinates']
     if withWeeklyEvents or withUniqueEventUsersCount:
-        items = _weekly_event.SearchNear(lngLat, maxMeters, limit = limitCount)['weeklyEvents']
+        items = []
+        if withType == 'uName':
+            items = mongo_db.find('weeklyEvent', {'neighborhoodUName': neighborhoodUName}, limit = limitCount)['items']
+        else:
+            items = _weekly_event.SearchNear(lngLat, maxMeters, limit = limitCount)['weeklyEvents']
         ret['weeklyEventsCount'] = len(items)
         ret['weeklyEvents'] = items[slice(0, weeklyEventsCount)] if len(items) > weeklyEventsCount else items
         if withUniqueEventUsersCount:
@@ -45,7 +50,11 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
         items = mongo_db.find('userNeighborhood', {'neighborhoodId': neighborhoodId})['items']
         ret['usersCount'] = len(items)
     if withSharedItems:
-        items = _shared_item.SearchNear(lngLat, maxMeters, limit = limitCount)['sharedItems']
+        items = []
+        if withType == 'uName':
+            items = mongo_db.find('sharedItem', {'neighborhoodUName': neighborhoodUName}, limit = limitCount)['items']
+        else:
+            items = _shared_item.SearchNear(lngLat, maxMeters, limit = limitCount)['sharedItems']
         ret['sharedItemsCount'] = len(items)
         ret['sharedItems'] = items[slice(0, sharedItemsCount)] if len(items) > sharedItemsCount else items
     return ret

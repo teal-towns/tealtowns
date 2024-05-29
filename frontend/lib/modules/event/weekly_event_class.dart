@@ -7,7 +7,8 @@ class WeeklyEventClass {
   ImageService _imageService = ImageService();
   ParseService _parseService = ParseService();
 
-  String id = '', uName = '', title = '', description = '', startTime = '', endTime = '', timezone = '', type = '';
+  String id = '', uName = '', neighborhoodUName = '', title = '', description = '', startTime = '', endTime = '',
+    timezone = '', type = '';
   List<String> adminUserIds = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
   int dayOfWeek = 0, hostGroupSizeDefault = 0, archived = 0;
@@ -15,7 +16,7 @@ class WeeklyEventClass {
   List<UserClass> adminUsers = [];
   String xDay = '';
 
-  WeeklyEventClass(this.id, this.uName, this.title, this.description, this.startTime, this.endTime,
+  WeeklyEventClass(this.id, this.uName, this.neighborhoodUName, this.title, this.description, this.startTime, this.endTime,
     this.timezone, this.type, this.adminUserIds,
     this.imageUrls, this.location, this.dayOfWeek, this.hostGroupSizeDefault, this.archived, this.rsvpDeadlineHours, this.priceUSD,
     this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay);
@@ -24,6 +25,7 @@ class WeeklyEventClass {
     List<String> days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.uName = json['uName'] ?? '';
+    this.neighborhoodUName = json['neighborhoodUName'] ?? '';
     this.title = json['title'] ?? '';
     this.description = json['description'] ?? '';
     this.startTime = json['startTime'] ?? '';
@@ -47,8 +49,8 @@ class WeeklyEventClass {
   Map<String, dynamic> toJson() =>
     {
       '_id': id,
-    //   'id': id,
       'uName': uName,
+      'neighborhoodUName': neighborhoodUName,
       'title': title,
       'description': description,
       'startTime': startTime,

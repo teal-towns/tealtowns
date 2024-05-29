@@ -21,7 +21,8 @@ def ComputeNeighborhoodStats(uName: str, now = None, withPrevious: bool = True):
     ret['neighborhoodStats'] = mongo_db.find_one('neighborhoodStatsMonthlyCache', query)['item']
     if ret['neighborhoodStats'] is None:
         retOne = _neighborhood.GetByUName(uName, withUniqueEventUsersCount = 1, withUsersCount = 1,
-            minDateString = start, maxDateString = end, limitCount = 10000, withFreePaidStats = True)
+            minDateString = start, maxDateString = end, limitCount = 10000, withFreePaidStats = True, 
+            withType = 'uName')
         neighborhoodStats = {
             'neighborhoodUName': uName,
             'start': start,
