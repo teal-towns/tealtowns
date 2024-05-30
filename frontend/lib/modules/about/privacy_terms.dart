@@ -30,7 +30,8 @@ class _PrivacyTermsState extends State<PrivacyTerms> {
   Widget build(BuildContext context) {
     
     return AppScaffoldComponent(
-      body: ListView(
+      listWrapper: true,
+      body: Column(
         children: [
           SizedBox(height: 30),
           MarkdownBody(

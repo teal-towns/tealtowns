@@ -113,6 +113,7 @@ flutter:
   #
     - family: CustomIcon
       fonts:
-        - asset: assets/fonts/CustomIcon.ttf
+        # - asset: assets/fonts/CustomIcon.ttf
+        - asset: fonts/CustomIcon.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

@@ -143,15 +143,8 @@ class _BlogViewState extends State<BlogView> {
 //""";
 
     return AppScaffoldComponent(
-      body: ListView(
-        children: <Widget> [
-          Container(
-            //width: 600,
-            padding: const EdgeInsets.only(bottom: 50),
-            child: _buildBlog(context),
-          )
-        ]
-      )
+      listWrapper: true,
+      body: _buildBlog(context),
     );
   }
 

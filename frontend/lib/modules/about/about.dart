@@ -40,7 +40,8 @@ class _AboutState extends State<About> {
       "## Get Involved \n\n" +
       "Click **Events** and **Own** to post the first events and shared items in your neighborhood!\n\n";;
     return AppScaffoldComponent(
-      body: ListView(
+      listWrapper: true,
+      body: Column(
         children: [
           SizedBox(height: 30),
           MarkdownBody(

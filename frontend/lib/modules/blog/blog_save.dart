@@ -111,72 +111,63 @@ class _BlogSaveState extends State<BlogSave> {
     //var selectOptsTag = [];
 
     return AppScaffoldComponent(
-      body: ListView(
-        children: <Widget> [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 900,
-              padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
-              child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    ImageSaveComponent(formVals: formVals, formValsKey: 'imageUrl', multiple: false,
-                      label: 'Image', imageUploadSimple: true, maxImageSize: 1200),
-                    SizedBox(height: 10),
-                    _inputFields.inputText(formVals, 'imageCredit', label: 'Image Credit', required: false),
-                    SizedBox(height: 20),
-                    _inputFields.inputText(formVals, 'title', label: 'Title', required: true),
-                    SizedBox(height: 10),
-                    //_inputFields.inputMultiSelectCreate(selectOptsTag, getTags, formVals, 'tags', label: 'Tags' ),
-                    //SizedBox(height: 10),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: _inputFields.inputText(formVals, 'text', label: 'Text (use Markdown for formatting)',
-                            required: true, minLines: 50, maxLines: 50, debounceChange: 1000, onChange: (String text) {
-                            setState(() {
-                              _textPreview = formVals['text'];
-                            });
-                          }),
-                        ),
-                        SizedBox(width: 20),
-                        Expanded(
-                          flex: 1,
-                          child: MarkdownBody(
-                            data: _textPreview,
-                            selectable: true,
-                            onTapLink: (text, href, title) {
-                              launch(href!);
-                            },
-                            styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                              h1: Theme.of(context).textTheme.displayLarge,
-                              h2: Theme.of(context).textTheme.displayMedium,
-                              h3: Theme.of(context).textTheme.displaySmall,
-                              h4: Theme.of(context).textTheme.headlineMedium,
-                              h5: Theme.of(context).textTheme.headlineSmall,
-                              h6: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ),
-                        )
-                      ]
-                    ),
-                    SizedBox(height: 10),
-                    _buildSubmit(context),
-                    _buildMessage(context),
-                    SizedBox(height: 50),
-                  ]
+      listWrapper: true,
+      innerWidth: 900,
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ImageSaveComponent(formVals: formVals, formValsKey: 'imageUrl', multiple: false,
+              label: 'Image', imageUploadSimple: true, maxImageSize: 1200),
+            SizedBox(height: 10),
+            _inputFields.inputText(formVals, 'imageCredit', label: 'Image Credit', required: false),
+            SizedBox(height: 20),
+            _inputFields.inputText(formVals, 'title', label: 'Title', required: true),
+            SizedBox(height: 10),
+            //_inputFields.inputMultiSelectCreate(selectOptsTag, getTags, formVals, 'tags', label: 'Tags' ),
+            //SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: _inputFields.inputText(formVals, 'text', label: 'Text (use Markdown for formatting)',
+                    required: true, minLines: 50, maxLines: 50, debounceChange: 1000, onChange: (String text) {
+                    setState(() {
+                      _textPreview = formVals['text'];
+                    });
+                  }),
                 ),
-              ),
+                SizedBox(width: 20),
+                Expanded(
+                  flex: 1,
+                  child: MarkdownBody(
+                    data: _textPreview,
+                    selectable: true,
+                    onTapLink: (text, href, title) {
+                      launch(href!);
+                    },
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                      h1: Theme.of(context).textTheme.displayLarge,
+                      h2: Theme.of(context).textTheme.displayMedium,
+                      h3: Theme.of(context).textTheme.displaySmall,
+                      h4: Theme.of(context).textTheme.headlineMedium,
+                      h5: Theme.of(context).textTheme.headlineSmall,
+                      h6: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                )
+              ]
             ),
-          )
-        ]
-      )
+            SizedBox(height: 10),
+            _buildSubmit(context),
+            _buildMessage(context),
+            SizedBox(height: 50),
+          ]
+        ),
+      ),
     );
   }
 

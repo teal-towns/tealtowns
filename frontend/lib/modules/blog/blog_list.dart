@@ -225,53 +225,44 @@ class _BlogListState extends State<BlogList> {
     }
 
     return AppScaffoldComponent(
-      body: ListView(
-        children: <Widget> [
+      listWrapper: true,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          ...columnsCreate,
           Align(
             alignment: Alignment.center,
-            child: Container(
-              padding: EdgeInsets.only(top: 20, bottom: 30, left: 10, right: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                alignment: WrapAlignment.center,
                 children: <Widget>[
-                  ...columnsCreate,
-                  Align(
-                    alignment: Alignment.center,
-                    child: Form(
-                      key: _formKey,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      child: Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        alignment: WrapAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 200,
-                            child: _inputFields.inputText(filters, 'title', hint: 'title',
-                              label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
-                              _getBlogs();
-                            }),
-                          ),
-                          //SizedBox(width: 10),
-                          //SizedBox(width: 200,
-                          //  child: _inputFields.inputText(filters, 'tags', hint: 'tag',
-                          //    label: 'Filter by Tag', debounceChange: 1000, onChange: (String val) {
-                          //    _getBlogs();
-                          //  }),
-                          //),
-                          //_buildSubmit(context),
-                        ]
-                      ),
-                    ),
+                  SizedBox(
+                    width: 200,
+                    child: _inputFields.inputText(filters, 'title', hint: 'title',
+                      label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
+                      _getBlogs();
+                    }),
                   ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: _buildBlogResults(context, currentUserState),
-                  ),
+                  //SizedBox(width: 10),
+                  //SizedBox(width: 200,
+                  //  child: _inputFields.inputText(filters, 'tags', hint: 'tag',
+                  //    label: 'Filter by Tag', debounceChange: 1000, onChange: (String val) {
+                  //    _getBlogs();
+                  //  }),
+                  //),
+                  //_buildSubmit(context),
                 ]
-              )
+              ),
             ),
-          )
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: _buildBlogResults(context, currentUserState),
+          ),
         ]
       )
     );

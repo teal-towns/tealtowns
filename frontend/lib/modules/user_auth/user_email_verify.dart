@@ -94,29 +94,20 @@ class _UserEmailVerifyState extends State<UserEmailVerifyComponent> {
   @override
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
-      body: ListView(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 600,
-              padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
-              child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    _inputFields.inputEmail(formVals, 'email'),
-                    _inputFields.inputText(formVals, 'emailVerificationKey', minLen: 2, label: 'Verification Key'),
-                    _buildSubmit(context),
-                    _buildMessage(context),
-                  ]
-                ),
-              ),
-            ),
-          )
-        ]
+      listWrapper: true,
+      innerWidth: 600,
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _inputFields.inputEmail(formVals, 'email'),
+            _inputFields.inputText(formVals, 'emailVerificationKey', minLen: 2, label: 'Verification Key'),
+            _buildSubmit(context),
+            _buildMessage(context),
+          ]
+        ),
       )
     );
   }

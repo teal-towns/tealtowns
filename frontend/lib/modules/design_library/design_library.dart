@@ -91,7 +91,8 @@ class _DesignLibraryState extends State<DesignLibrary> {
     }
 
     return AppScaffoldComponent(
-      body: ListView(
+      listWrapper: true,
+      body: Column(
         children: [
           _style.Text1('Design Library', size: 'xlarge'),
           _style.SpacingH('medium'),

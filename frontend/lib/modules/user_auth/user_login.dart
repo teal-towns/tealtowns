@@ -134,36 +134,27 @@ class _UserLoginState extends State<UserLoginComponent> {
   @override
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
-      body: ListView(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 600,
-              padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
-              child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    _inputFields.inputEmail(formVals, 'email', fieldKey: _formFieldKeyEmail),
-                    _inputFields.inputPassword(formVals, 'password', minLen: 6),
-                    _buildSubmitButtons(context),
-                    _buildMessage(context),
-                    TextButton(
-                      onPressed: () {
-                        context.go(Routes.signup);
-                      },
-                      child: Text('No account? Sign up.'),
-                    ),
-                  ]
-                ),
-              ),
+      listWrapper: true,
+      innerWidth: 600,
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _inputFields.inputEmail(formVals, 'email', fieldKey: _formFieldKeyEmail),
+            _inputFields.inputPassword(formVals, 'password', minLen: 6),
+            _buildSubmitButtons(context),
+            _buildMessage(context),
+            TextButton(
+              onPressed: () {
+                context.go(Routes.signup);
+              },
+              child: Text('No account? Sign up.'),
             ),
-          )
-        ]
-      )
+          ]
+        ),
+      ),
     );
   }
 

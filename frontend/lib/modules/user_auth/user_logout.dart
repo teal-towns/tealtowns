@@ -49,25 +49,16 @@ class _UserLogoutState extends State<UserLogoutComponent> {
   @override
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
-      body: ListView(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 600,
-              padding: EdgeInsets.only(top: 20, left: 10, right: 10),
-              child: Column(
-                children: <Widget> [
-                  Text('Logging out'),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: LinearProgressIndicator(
-                    ),
-                  ),
-                ]
-              )
+      listWrapper: true,
+      innerWidth: 600,
+      body: Column(
+        children: <Widget> [
+          Text('Logging out'),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: LinearProgressIndicator(
             ),
-          )
+          ),
         ]
       )
     );

@@ -190,29 +190,20 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
     CheckFirstLoad();
 
     return AppScaffoldComponent(
-      body: ListView(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 500,
-              padding: EdgeInsets.only(top: 20, left: 10, right: 10),
-              child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SharedItemInfo(_sharedItem),
-                    SizedBox(height: 10),
-                    SharedItemOwnerContent(currentUserState),
-                    SizedBox(height: 50),
-                  ]
-                )
-              )
-            )
-          )
-        ]
+      listWrapper: true,
+      innerWidth: 500,
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SharedItemInfo(_sharedItem),
+            SizedBox(height: 10),
+            SharedItemOwnerContent(currentUserState),
+            SizedBox(height: 50),
+          ]
+        )
       )
     );
   }
