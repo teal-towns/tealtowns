@@ -152,7 +152,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         listWrapper: true,
         body: Padding(
           padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: LinearProgressIndicator(),
+          child: Column( children: [ LinearProgressIndicator() ] ),
         )
       );
     }
