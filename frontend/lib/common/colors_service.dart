@@ -14,6 +14,7 @@ Map<String, List<double>> _colorMap = {
   'text': [90, 90, 90],
   'error': [169, 46, 97],
   'warning': [220, 145, 110],
+  'transparent': [0,0,0,0],
 
   // 'magentaTransparent': [200, 100, 240, 0.4],
   // 'magenta': [200, 100, 240],

@@ -24,44 +24,13 @@ class _HomeComponentState extends State<HomeComponent> {
 
   @override
   Widget build(BuildContext context) {
-    Color white = Colors.white;
-    Color primary = _colors.colors['primary'];
-    double tileHeight = 100;
-    double tileTextWidth = 75;
-    Widget tiles = Column(
-      children: [
-        Row(
-          children: [
-            Expanded(flex: 1, child: Container(color: primary, height: tileHeight, child: InkWell(
-              onTap: () { context.go('/weekly-events'); },
-              child: Align(alignment: Alignment.center, child: Text('Neighborhood Events', style: TextStyle(color: white))),
-            ))),
-            Expanded(flex: 1, child: Image.asset('assets/images/food-1.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
-            Expanded(flex: 1, child: Container(color: primary, height: tileHeight, child: InkWell(
-              onTap: () { context.go('/own'); },
-              child: Align(alignment: Alignment.center, child: Text('Shared Items', style: TextStyle(color: white))),
-            ))),
-          ]
-        ),
-        Row(
-          children: [
-            Expanded(flex: 1, child: Image.asset('assets/images/photo-party-1.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
-            Expanded(flex: 1, child: Container(color: primary, height: tileHeight, child: InkWell(
-              onTap: () { context.go('/eat'); },
-              child: Align(alignment: Alignment.center, child: Text('Meals With Friends', style: TextStyle(color: white))),
-            ))),
-            Expanded(flex: 1, child: Image.asset('assets/images/neighborhood-court-birds-eye.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
-          ]
-        )
-      ]
-    );
 
     Widget topLeft = Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _style.SpacingH('medium'),
-          _style.Text1('TealTowns', size: 'xlarge', colorKey: 'white', fontWeight: FontWeight.bold),
+          _style.Text1('TealTowns', size: 'xxlarge', colorKey: 'white', fontWeight: FontWeight.bold),
           _style.SpacingH('medium'),
           _style.Text1('Friendship at the Heart of Sustainable Living', colorKey: 'white',),
           _style.SpacingH('medium'),
@@ -79,11 +48,12 @@ class _HomeComponentState extends State<HomeComponent> {
               alignment: Alignment.bottomCenter,
               // width: 300,
               // height: 300,
-              child: Image.asset('assets/images/food-dish.jpg', width: 400, height: 400),
+              child: Image.asset('assets/images/food-dish.jpg', width: 450, height: 450),
             ),
           ),
-          Container(
+          Align(alignment: Alignment.center, child: Container(
             // color: Colors.white,
+            width: 600,
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -109,7 +79,7 @@ class _HomeComponentState extends State<HomeComponent> {
                 SizedBox(height: 20),
               ],
             ),
-          )
+          ))
         ]
       )
     );
@@ -119,7 +89,7 @@ class _HomeComponentState extends State<HomeComponent> {
       width: 1200,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth < 600) {
+          if (constraints.maxWidth < 800) {
             return Column(
               children: [
                 Container(
@@ -134,7 +104,7 @@ class _HomeComponentState extends State<HomeComponent> {
                   ),
                   child: topLeft,
                 ),
-                tiles,
+                BuildTiles(),
                 SizedBox(height: 30),
                 content,
                 // SizedBox(height: 20),
@@ -148,6 +118,7 @@ class _HomeComponentState extends State<HomeComponent> {
               children: [
                 Container(
                   width: double.infinity,
+                  height: 400,
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     image: DecorationImage(
@@ -156,9 +127,28 @@ class _HomeComponentState extends State<HomeComponent> {
                       // colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.8), BlendMode.dstATop),
                     ),
                   ),
-                  child: topLeft,
+                  child: Row(
+                    children: [
+                      Expanded(flex: 1, child: Container()),
+                      Column(
+                        children: [
+                          Expanded(flex: 1, child: Container()),
+                          topLeft,
+                          Expanded(flex: 1, child: Container()),
+                        ]
+                      ),
+                      Expanded(flex: 3, child: Container()),
+                      Column(
+                        children: [
+                          Expanded(flex: 1, child: Container()),
+                          BuildTiles(backgroundColorKey: 'transparent', width: 400),
+                          Expanded(flex: 1, child: Container()),
+                        ]
+                      ),
+                      Expanded(flex: 1, child: Container()),
+                    ]
+                  )
                 ),
-                tiles,
                 SizedBox(height: 30),
                 content,
                 // SizedBox(height: 20),
@@ -171,5 +161,41 @@ class _HomeComponentState extends State<HomeComponent> {
         }
       )
     );
+  }
+
+  Widget BuildTiles({ String backgroundColorKey = 'primary', double width = double.infinity }) {
+    Color white = Colors.white;
+    Color background = _colors.colors[backgroundColorKey];
+    Color border = _colors.colors['white'];
+    double tileHeight = 100;
+    double tileTextWidth = 75;
+    Widget tiles = Container(width: width, child: Column(
+      children: [
+        Row(
+          children: [
+            Expanded(flex: 1, child: Container(decoration: BoxDecoration(border: Border.all(color: border), color: background), padding: EdgeInsets.all(10), height: tileHeight, child: InkWell(
+              onTap: () { context.go('/weekly-events'); },
+              child: Align(alignment: Alignment.center, child: Text('Neighborhood Events', style: TextStyle(color: white), textAlign: TextAlign.center)),
+            ))),
+            Expanded(flex: 1, child: Image.asset('assets/images/food-1.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
+            Expanded(flex: 1, child: Container(decoration: BoxDecoration(border: Border.all(color: border), color: background), padding: EdgeInsets.all(10), height: tileHeight, child: InkWell(
+              onTap: () { context.go('/own'); },
+              child: Align(alignment: Alignment.center, child: Text('Shared Items', style: TextStyle(color: white), textAlign: TextAlign.center)),
+            ))),
+          ]
+        ),
+        Row(
+          children: [
+            Expanded(flex: 1, child: Image.asset('assets/images/photo-party-1.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
+            Expanded(flex: 1, child: Container(decoration: BoxDecoration(border: Border.all(color: border), color: background), padding: EdgeInsets.all(10), height: tileHeight, child: InkWell(
+              onTap: () { context.go('/eat'); },
+              child: Align(alignment: Alignment.center, child: Text('Meals With Friends', style: TextStyle(color: white), textAlign: TextAlign.center)),
+            ))),
+            Expanded(flex: 1, child: Image.asset('assets/images/neighborhood-court-birds-eye.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
+          ]
+        )
+      ]
+    ));
+    return tiles;
   }
 }
