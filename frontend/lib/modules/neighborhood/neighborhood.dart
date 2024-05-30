@@ -119,7 +119,11 @@ class _NeighborhoodState extends State<Neighborhood> {
     if (_loading) {
       return AppScaffoldComponent(
         listWrapper: true,
-        body: LinearProgressIndicator(),
+        body: Column(
+          children: [
+            LinearProgressIndicator(),
+          ]
+        )
       );
     }
 

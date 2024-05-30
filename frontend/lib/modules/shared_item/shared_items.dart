@@ -169,61 +169,52 @@ class _SharedItemsState extends State<SharedItems> {
     // }
 
     return AppScaffoldComponent(
-      width: 1500,
-      body: ListView(
+      listWrapper: true,
+      innerWidth: 1500,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ...columnsCreate,
           Align(
             alignment: Alignment.center,
-            child: Container(
-              padding: EdgeInsets.only(top: 20, bottom: 30, left: 10, right: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...columnsCreate,
-                  Align(
-                    alignment: Alignment.center,
-                    child: Form(
-                      key: _formKey,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      child: _layoutService.WrapWidth([
-                        _inputFields.inputSelect(_selectOptsMyType, _filters, 'myType',
-                            label: 'Type', onChanged: (String val) {
-                            _searchSharedItems();
-                          }),
-                        InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
-                          _searchSharedItems();
-                          }),
-                        _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
-                            label: 'Range', onChanged: (String val) {
-                            _searchSharedItems();
-                          }),
-                        _inputFields.inputText(_filters, 'title', hint: 'title',
-                            label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
-                            _searchSharedItems();
-                          }),
-                        _inputFields.inputSelect(_selectOptsInvestor, _filters, 'fundingRequired_min',
-                            label: 'Needs Investment', onChanged: (String val) {
-                            _searchSharedItems();
-                          }),
-                        // _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
-                        //     label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
-                        //     _searchSharedItems();
-                        //   }),
-                        // _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
-                        //     label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
-                        //     _searchSharedItems();
-                        //   }),
-                      ], width: 225),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: _buildSharedItemResults(context, currentUserState),
-                  ),
-                ]
-              )
-            )
-          )
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: _layoutService.WrapWidth([
+                _inputFields.inputSelect(_selectOptsMyType, _filters, 'myType',
+                    label: 'Type', onChanged: (String val) {
+                    _searchSharedItems();
+                  }),
+                InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
+                  _searchSharedItems();
+                  }),
+                _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
+                    label: 'Range', onChanged: (String val) {
+                    _searchSharedItems();
+                  }),
+                _inputFields.inputText(_filters, 'title', hint: 'title',
+                    label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
+                    _searchSharedItems();
+                  }),
+                _inputFields.inputSelect(_selectOptsInvestor, _filters, 'fundingRequired_min',
+                    label: 'Needs Investment', onChanged: (String val) {
+                    _searchSharedItems();
+                  }),
+                // _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
+                //     label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                //     _searchSharedItems();
+                //   }),
+                // _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
+                //     label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                //     _searchSharedItems();
+                //   }),
+              ], width: 225),
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: _buildSharedItemResults(context, currentUserState),
+          ),
         ]
       )
     );

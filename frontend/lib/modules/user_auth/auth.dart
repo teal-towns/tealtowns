@@ -52,18 +52,9 @@ class _AuthState extends State<Auth> {
 
     if (!currentUserState?.isLoggedIn) {
       return AppScaffoldComponent(
-        body: ListView(
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                width: 600,
-                padding: EdgeInsets.only(top: 20, left: 10, right: 10),
-                child: Text('Loading..'),
-              )
-            )
-          ]
-        )
+        listWrapper: true,
+        innerWidth: 600,
+        body: Text('Loading..'),
       );
     }
 

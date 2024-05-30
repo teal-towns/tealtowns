@@ -5,6 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 
+import '../third_party/custom_icon_icons.dart';
+// import './common/buttons.dart';
+import './common/colors_service.dart';
+import './common/link_service.dart';
 import './modules/user_auth/current_user_state.dart';
 import './modules/neighborhood/neighborhood_state.dart';
 import './routes.dart';
@@ -33,6 +37,10 @@ class AppScaffoldComponent extends StatefulWidget {
 }
 
 class _AppScaffoldState extends State<AppScaffoldComponent> {
+  // Buttons _buttons = Buttons();
+  ColorsService _colors = ColorsService();
+  LinkService _linkService = LinkService();
+
   Widget _buildLinkButton(BuildContext context, String routePath, String label) {
     return Container(
       decoration: BoxDecoration(
@@ -289,7 +297,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     );
   }
 
-  Widget _buildBody(BuildContext context, var currentUserState, { bool header = false }) {
+  Widget _buildBody(BuildContext context, var currentUserState, { bool header = false, String size = 'small' }) {
     Widget bodyContent = widget.body!;
     if (widget.listWrapper) {
       bodyContent = ListView(
@@ -299,9 +307,14 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
             child: Container(
               width: widget.innerWidth,
               padding: EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
-              child: widget.body!,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: 600),
+                child: widget.body!,
+              )
             )
-          )
+          ),
+          SizedBox(height: 20),
+          BuildFooter(context, size: size),
         ]
       );
     }
@@ -342,10 +355,63 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     );
   }
 
+  Widget BuildFooter(BuildContext context, {String size = 'small'}) {
+    String email = 'team@tealtowns.org';
+    List<Map<String, dynamic>> links = [
+      { 'url': '/about', 'text': 'About' },
+      { 'url': '/blog', 'text': 'Blog' },
+    ];
+    Color footerColor = _colors.colors['white'];
+    // if (size == 'small') {
+      return Container(
+        color: _colors.colors['primary'],
+        child: Column(
+          children: [
+            SizedBox(height: 30),
+            Image.asset('assets/images/logo-white.png', width: 50, height: 50),
+            SizedBox(height: 20),
+            Text(email, style: TextStyle(color: footerColor)),
+            SizedBox(height: 10),
+            Divider(color: footerColor, indent: 20, endIndent: 20, thickness: 1,),
+            SizedBox(height: 10),
+            RichText( textAlign: TextAlign.center, text: TextSpan(
+              children: [
+                ...links.map((link) => TextSpan(
+                  text: ' ${link['text']} ',
+                  style: TextStyle(color: footerColor),
+                  recognizer: TapGestureRecognizer()..onTap = () {
+                    context.go(link['url']);
+                  },
+                )).toList(),
+              ]
+            )),
+            SizedBox(height: 10),
+            Text('2024 TealTowns', style: TextStyle(color: footerColor)),
+            // SizedBox(height: 10),
+            Text('All Rights Reserved', style: TextStyle(color: footerColor)),
+            SizedBox(height: 10),
+            IconButton(
+              iconSize: 25,
+              icon: Icon(CustomIcon.linkedin, color: footerColor),
+              onPressed: () {
+                _linkService.LaunchURL('https://www.linkedin.com/company/101358571');
+              },
+            ),
+            SizedBox(height: 10),
+          ],
+        )
+      );
+    // }
+    // return Container(
+    //   color: _colors.colors['primary'],
+    //   child: Text('todo'),
+    // );
+  }
+
   Widget _buildSmall(BuildContext context, var currentUserState) {
     Widget content = Scaffold(
       endDrawer: _buildDrawer(context, currentUserState),
-      body: _buildBody(context, currentUserState, header: true),
+      body: _buildBody(context, currentUserState, header: true, size: 'small'),
     );
     if (widget.selectableText) {
       return SelectionArea(
@@ -388,7 +454,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
         ],
       ),
       endDrawer: _buildDrawer(context, currentUserState),
-      body: _buildBody(context, currentUserState),
+      body: _buildBody(context, currentUserState, size: 'medium'),
     );
     if (widget.selectableText) {
       return SelectionArea(

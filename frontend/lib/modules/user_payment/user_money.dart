@@ -66,7 +66,10 @@ class _UserMoneyState extends State<UserMoney> {
   @override
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
-      body: ListView(
+      listWrapper: true,
+      innerWidth: 900,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('${_currency.Format(_availableUSD, 'USD')} available'),
           // TODO - display (pending) payments
