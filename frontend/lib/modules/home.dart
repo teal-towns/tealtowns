@@ -32,7 +32,7 @@ class _HomeComponentState extends State<HomeComponent> {
           _style.SpacingH('medium'),
           _style.Text1('TealTowns', size: 'xxlarge', colorKey: 'white', fontWeight: FontWeight.bold),
           _style.SpacingH('medium'),
-          _style.Text1('Friendship at the Heart of Sustainable Living', colorKey: 'white',),
+          _style.Text1('Friendship at the Heart of Sustainable Living', colorKey: 'white', size: 'large'),
           _style.SpacingH('medium'),
         ]
       ),
@@ -57,6 +57,7 @@ class _HomeComponentState extends State<HomeComponent> {
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(20)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.5),
@@ -69,14 +70,15 @@ class _HomeComponentState extends State<HomeComponent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _style.SpacingH('medium'),
                 _style.Text1('Find your TealTown and share your first meal!', size: 'large', colorKey: 'primary'),
-                // _style.SpacingH('medium'),
+                _style.SpacingH('medium'),
                 _style.Text1('We believe that communities and a healthier planet go hand-in-hand. TealTowns paves the way for vibrant, resilient living by encouraging neighbors to meet, make friends, and plan events together. By fostering local connections, TealTowns create an environment where everyone feels connected and empowered - one neighbor at a time.'),
                 _style.SpacingH('large'),
                 Align(alignment: Alignment.center,
                   child: _buttons.LinkElevated(context, 'Join or Create Your TealTown', '/neighborhoods'),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 30),
               ],
             ),
           ))
@@ -86,10 +88,13 @@ class _HomeComponentState extends State<HomeComponent> {
 
     return AppScaffoldComponent(
       listWrapper: true,
-      width: 1200,
+      width: 2000,
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingTop: 0,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth < 800) {
+          if (constraints.maxWidth < 900) {
             return Column(
               children: [
                 Container(
@@ -108,7 +113,7 @@ class _HomeComponentState extends State<HomeComponent> {
                 SizedBox(height: 30),
                 content,
                 // SizedBox(height: 20),
-                Neighborhoods(),
+                Container(padding: EdgeInsets.only(left: 20, right: 20), child: Neighborhoods() ),
                 // Extra height for neighborhoods input location overlay.
                 SizedBox(height: 100),
               ]
@@ -152,7 +157,7 @@ class _HomeComponentState extends State<HomeComponent> {
                 SizedBox(height: 30),
                 content,
                 // SizedBox(height: 20),
-                Neighborhoods(),
+                Container(padding: EdgeInsets.only(left: 20, right: 20), child: Neighborhoods() ),
                 // Extra height for neighborhoods input location overlay.
                 SizedBox(height: 100),
               ]

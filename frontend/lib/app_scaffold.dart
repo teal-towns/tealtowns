@@ -28,9 +28,12 @@ class AppScaffoldComponent extends StatefulWidget {
   bool listWrapper;
   double innerWidth;
   bool selectableText;
+  double paddingLeft;
+  double paddingRight;
+  double paddingTop;
 
   AppScaffoldComponent({this.body, this.width = 1200, this.listWrapper = false, this.innerWidth = double.infinity,
-    this.selectableText = true,});
+    this.selectableText = true, this.paddingLeft = 10, this.paddingRight = 10, this.paddingTop = 20,});
 
   @override
   _AppScaffoldState createState() => _AppScaffoldState();
@@ -298,60 +301,65 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildBody(BuildContext context, var currentUserState, { bool header = false, String size = 'small' }) {
-    Widget bodyContent = widget.body!;
-    if (widget.listWrapper) {
-      bodyContent = ListView(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: widget.innerWidth,
-              padding: EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: 600),
-                child: widget.body!,
-              )
-            )
-          ),
-          SizedBox(height: 20),
-          BuildFooter(context, size: size),
-        ]
-      );
+    List<Widget> colsHeader = [];
+    if (header) {
+      colsHeader = [
+        _buildHeader(context, currentUserState),
+        // For drop shadow, otherwise it is cut off.
+        // SizedBox(height: 5),
+      ];
     }
 
-    if (header) {
+    if (widget.listWrapper) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _buildHeader(context, currentUserState),
-          // For drop shadow, otherwise it is cut off.
-          // SizedBox(height: 5),
-          Expanded(
-            child: Container(
-              color: Colors.white,
-              child: Align(
-                alignment: Alignment.center,
-                child: Container(
-                  width: widget.width,
-                  child: bodyContent,
-                  color: Colors.white,
-                )
-              )
+          ...colsHeader,
+          Expanded(flex: 1,
+            child: ListView(
+              children: [
+                Container(color: Colors.white,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: widget.width,
+                    color: Colors.white,
+                    child: Container(
+                      width: widget.innerWidth,
+                      padding: EdgeInsets.only(top: widget.paddingTop, left: widget.paddingLeft, right: widget.paddingRight, bottom: 20),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: 600),
+                        child: widget.body!,
+                      ),
+                    ),
+                  )
+                )),
+                Container(color: Colors.white, height: 20),
+                BuildFooter(context, size: size),
+              ]
             )
-          ),
+          )
         ]
       );
     }
-    return Container(
-      color: Colors.white,
-      child: Align(
-        alignment: Alignment.center,
-        child: Container(
-          width: widget.width,
-          child: bodyContent,
-          color: Colors.white,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        ...colsHeader,
+        Expanded(flex: 1,
+          child: Container(
+            color: Colors.white,
+            child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                width: widget.width,
+                color: Colors.white,
+                child: widget.body!,
+              )
+            )
+          )
         )
-      )
+      ]
     );
   }
 
