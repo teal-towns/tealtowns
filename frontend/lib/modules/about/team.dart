@@ -20,42 +20,38 @@ class _TeamState extends State<Team> {
   
   // List of headshots, names, and roles
   final List<ImageData> imagesData = [
-    // ImageData(
-    //   imagePath: 'assets/images/claire-adair-headshot.jpg',
-    //   name: 'Claire Adair',
-    //   role: 'Customer Acquisition',
-    // ),
     ImageData(
-      imagePath: 'assets/images/team/angeline-neo.jpg',
-      name: 'Angeline Neo',
-      role: 'Product Designer',
+      imagePath: 'assets/images/team/eloah-ramalho.jpeg',
+      name: 'Eloah Ramalho',
+      role: '',
     ),
     ImageData(
-      imagePath: 'assets/images/team/jacob-russo-headshot.jpg',
-      name: 'Jacob Russo',
-      role: 'Product Engineer',
+      imagePath: 'assets/images/team/kelvin-wilson.jpeg',
+      name: 'Kelvin Wilson',
+      role: '',
     ),
     ImageData(
-      imagePath: 'assets/images/team/luke-madera-headshot.jpg',
-      name: 'Luke Madera',
-      role: 'Product Engineer',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/layla-tadjpour-headshot.jpg',
+      imagePath: 'assets/images/team/layla-tadjpour.jpg',
       name: 'Layla Tadjpour',
-      role: 'Product Engineer',
+      role: '',
     ),
     ImageData(
-      imagePath: 'assets/images/team/tolu-garcia.jpg',
-      name: 'Tolu Garcia',
-      role: 'Product Designer',
+      imagePath: 'assets/images/team/lora-madera.jpeg',
+      name: 'Lora Madera',
+      role: '',
     ),
     ImageData(
-      imagePath: 'assets/images/team/vishad-tomar.jpg',
-      name: 'Vishad Tomar',
-      role: 'Product Designer',
+      imagePath: 'assets/images/team/luke-madera.jpg',
+      name: 'Luke Madera',
+      role: '',
+    ),
+    ImageData(
+      imagePath: 'assets/images/team/natasha-bustos.jpeg',
+      name: 'Natasha Bustos',
+      role: '',
     ),
   ];
+  double _imageSize = 200.0;
 
   // Function to dynamically create columns with images and text
   Widget buildImageColumn(ImageData imageData) {
@@ -64,8 +60,8 @@ class _TeamState extends State<Team> {
         // Headshots
         Image.asset(
           imageData.imagePath, 
-          width: 150, 
-          height: 150, 
+          width: _imageSize, 
+          height: _imageSize, 
           fit: BoxFit.cover, 
         ),
         SizedBox(height: 5),
@@ -97,6 +93,7 @@ class _TeamState extends State<Team> {
   @override
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
+      listWrapper: true,
       width: 750,
       body: Column(
         children: [
