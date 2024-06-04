@@ -67,7 +67,7 @@ class _UserMoneyState extends State<UserMoney> {
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: 900,
+      width: 900,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

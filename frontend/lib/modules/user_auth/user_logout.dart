@@ -50,7 +50,7 @@ class _UserLogoutState extends State<UserLogoutComponent> {
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: 600,
+      width: 600,
       body: Column(
         children: <Widget> [
           Text('Logging out'),

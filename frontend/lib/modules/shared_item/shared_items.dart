@@ -170,7 +170,7 @@ class _SharedItemsState extends State<SharedItems> {
 
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: 1500,
+      width: 1500,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -53,7 +53,7 @@ class _AuthState extends State<Auth> {
     if (!currentUserState?.isLoggedIn) {
       return AppScaffoldComponent(
         listWrapper: true,
-        innerWidth: 600,
+        width: 600,
         body: Text('Loading..'),
       );
     }

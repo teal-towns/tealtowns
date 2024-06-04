@@ -112,7 +112,7 @@ class _BlogSaveState extends State<BlogSave> {
 
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: 900,
+      width: 900,
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
