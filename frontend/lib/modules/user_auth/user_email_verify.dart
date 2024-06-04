@@ -95,7 +95,7 @@ class _UserEmailVerifyState extends State<UserEmailVerifyComponent> {
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: 600,
+      width: 600,
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,

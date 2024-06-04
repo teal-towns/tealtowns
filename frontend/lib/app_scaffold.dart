@@ -26,13 +26,12 @@ class AppScaffoldComponent extends StatefulWidget {
   Widget? body;
   double width;
   bool listWrapper;
-  double innerWidth;
   bool selectableText;
   double paddingLeft;
   double paddingRight;
   double paddingTop;
 
-  AppScaffoldComponent({this.body, this.width = 1200, this.listWrapper = false, this.innerWidth = double.infinity,
+  AppScaffoldComponent({this.body, this.width = 1200, this.listWrapper = false,
     this.selectableText = true, this.paddingLeft = 10, this.paddingRight = 10, this.paddingTop = 20,});
 
   @override
@@ -324,13 +323,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
                   child: Container(
                     width: widget.width,
                     color: Colors.white,
-                    child: Container(
-                      width: widget.innerWidth,
-                      padding: EdgeInsets.only(top: widget.paddingTop, left: widget.paddingLeft, right: widget.paddingRight, bottom: 20),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: 600),
-                        child: widget.body!,
-                      ),
+                    padding: EdgeInsets.only(top: widget.paddingTop, left: widget.paddingLeft, right: widget.paddingRight, bottom: 20),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 600),
+                      child: widget.body!,
                     ),
                   )
                 )),

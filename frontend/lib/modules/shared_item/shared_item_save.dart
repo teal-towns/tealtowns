@@ -88,7 +88,7 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     double fieldWidth = 300;
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: fieldWidth,
+      width: fieldWidth,
       body: FormSave(formVals: SharedItemClass.fromJson(_formValsDefault).toJson(), dataName: 'sharedItem',
         routeGet: 'getSharedItemById', routeSave: 'saveSharedItem', id: widget.id, fieldWidth: fieldWidth,
         formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, loggedOutRedirect: '/own',

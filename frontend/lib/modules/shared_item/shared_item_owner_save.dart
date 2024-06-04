@@ -191,7 +191,7 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
 
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: 500,
+      width: 500,
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,

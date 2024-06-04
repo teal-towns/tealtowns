@@ -135,7 +135,7 @@ class _UserLoginState extends State<UserLoginComponent> {
   Widget build(BuildContext context) {
     return AppScaffoldComponent(
       listWrapper: true,
-      innerWidth: 600,
+      width: 600,
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
