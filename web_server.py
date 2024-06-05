@@ -41,6 +41,7 @@ _migrations.RunAll()
 httpRoutesFunc = []
 from blog import blog_routes as _blog_routes
 from common import common_routes as _common_routes
+from event import event_insight_routes as _event_insight_routes
 from event import event_routes as _event_routes
 from event import event_feedback_routes as _event_feedback_routes
 from event import user_event_routes as _user_event_routes

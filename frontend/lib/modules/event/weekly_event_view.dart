@@ -14,6 +14,7 @@ import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './event_class.dart';
+import './event_insight_class.dart';
 import './event_feedback.dart';
 import './user_event_class.dart';
 import './user_weekly_event_save.dart';
@@ -46,6 +47,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   WeeklyEventClass _weeklyEvent = WeeklyEventClass.fromJson({});
   EventClass _event = EventClass.fromJson({});
   EventClass _nextEvent = EventClass.fromJson({});
+  EventInsightClass _eventInsight = EventInsightClass.fromJson({});
   int _rsvpDeadlinePassed = 0;
   int _attendeesCount = 0;
   int _nonHostAttendeesWaitingCount = 0;
@@ -62,31 +64,37 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       if (data['valid'] == 1) {
         if (data.containsKey('weeklyEvent')) {
           _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
-          setState(() { _weeklyEvent = _weeklyEvent; });
           if (data.containsKey('event')) {
             _event = EventClass.fromJson(data['event']);
-            setState(() { _event = _event; });
           }
           if (data.containsKey('nextEvent')) {
             _nextEvent = EventClass.fromJson(data['nextEvent']);
-            setState(() { _nextEvent = _nextEvent; });
           }
           if (data.containsKey('rsvpDeadlinePassed')) {
             _rsvpDeadlinePassed = data['rsvpDeadlinePassed'];
-            setState(() { _rsvpDeadlinePassed = _rsvpDeadlinePassed; });
           }
           if (data.containsKey('attendeesCount')) {
             _attendeesCount = data['attendeesCount'];
-            setState(() { _attendeesCount = _attendeesCount; });
           }
           if (data.containsKey('nonHostAttendeesWaitingCount')) {
             _nonHostAttendeesWaitingCount = data['nonHostAttendeesWaitingCount'];
-            setState(() { _nonHostAttendeesWaitingCount = _nonHostAttendeesWaitingCount; });
           }
           if (data.containsKey('userEvent')) {
             _userEvent = UserEventClass.fromJson(data['userEvent']);
-            setState(() { _userEvent = _userEvent; });
           }
+          if (data.containsKey('eventInsight')) {
+            _eventInsight = EventInsightClass.fromJson(data['eventInsight']);
+          }
+          setState(() {
+            _weeklyEvent = _weeklyEvent;
+            _event = _event;
+            _nextEvent = _nextEvent;
+            _rsvpDeadlinePassed = _rsvpDeadlinePassed;
+            _attendeesCount = _attendeesCount;
+            _nonHostAttendeesWaitingCount = _nonHostAttendeesWaitingCount;
+            _userEvent = _userEvent;
+            _eventInsight = _eventInsight;
+          });
         } else {
           _message = 'Error.';
         }
@@ -143,6 +151,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         'withEvent': 1,
         'withUserEvents': 1,
         'withUserId': currentUserState.isLoggedIn ? currentUserState.currentUser.id : '',
+        'withEventInsight': 1,
       };
       _socketService.emit('getWeeklyEventById', data);
     }
@@ -425,6 +434,14 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       )
     ];
 
+    List<Widget> colsInsights = [];
+    if (_eventInsight.viewsAt.length > 0) {
+      colsInsights += [
+        Text('${_eventInsight.viewsAt.length} views'),
+        SizedBox(height: 10),
+      ];
+    }
+
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -467,6 +484,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
             ...buttons,
           ]
         ),
+        ...colsInsights,
         SizedBox(height: 10),
       ]
     );

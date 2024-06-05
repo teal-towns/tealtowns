@@ -5,6 +5,7 @@ from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
 from event import event as _event
+from event import event_insight as _event_insight
 from event import event_payment as _event_payment
 from event import user_event as _user_event
 from event import user_weekly_event as _user_weekly_event
@@ -62,7 +63,7 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
     return ret
 
 def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUserEvents: int = 0,
-    withUserId: str = '', weeklyEventUName: str = ''):
+    withUserId: str = '', weeklyEventUName: str = '', withEventInsight: int = 0):
     ret = _mongo_db_crud.GetById('weeklyEvent', weeklyEventId, uName = weeklyEventUName)
     if not ret['valid'] or '_id' not in ret['weeklyEvent']:
         return ret
@@ -95,6 +96,8 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
             ret['attendeesWaitingCount'] = retStats['attendeesWaitingCount']
             ret['nonHostAttendeesWaitingCount'] = retStats['nonHostAttendeesWaitingCount']
             ret['userEvent'] = retStats['userEvent']
+        if withEventInsight:
+            ret['eventInsight'] = _event_insight.GetByEvent(ret['event']['_id'], addEventView = 1)['eventInsight']
 
     return ret
 

@@ -348,5 +348,12 @@
         "totalFreeEventUsersCount": "{Int}",
         "totalPaidEventUsersCount": "{Int}",
         "totalCutUSD": "{Float}"
+    },
+    "eventInsight": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "eventId": "{String}",
+        "viewsAt": [ "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]" ]
     }
 }
