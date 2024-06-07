@@ -40,11 +40,11 @@ Note, may have to replace all `pip` with `pip3` and `python` with `python3`. Typ
   - Use Google Play to upload app bundle & submit for review
 
 ## Git Flow (Writting and Pushing Code)
-`git checkout main && git pull origin main`
-`git checkout -b MY-BRANCH`
-[Write your code]
-`git commit -am 'SUMMARY OF MY CODE CHANGES'`
-`git checkout main && git pull origin main && git checkout MY-BRANCH && git rebase main`
-`git push origin MY-BRANCH`
-Open a pull request on github.com. Make sure tests pass, then ask for a code review. Once approved, merge it on github.com. This will automatically deploy your code.
-`git checkout main && git pull origin main && git branch -d MY-BRANCH`
+- `git checkout main && git pull origin main`
+- `git checkout -b MY-BRANCH`
+- [Write your code]
+- `git commit -am 'SUMMARY OF MY CODE CHANGES'`
+- `git checkout main && git pull origin main && git checkout MY-BRANCH && git rebase main`
+- `git push origin MY-BRANCH`
+- Open a pull request on github.com. Make sure tests pass, then ask for a code review. Once approved, merge it on github.com This will automatically deploy your code.
+- `git checkout main && git pull origin main && git branch -d MY-BRANCH`
