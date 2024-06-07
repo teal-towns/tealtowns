@@ -8,6 +8,7 @@ Python (with sockets) + MongoDB + Flutter
 - Download and install Python 3.11, Flutter, VS Code (or other code editor)
 - (Set up Github SSH key and) `git clone git@github.com:teal-towns/tealtowns.git` then `cd tealtowns` into the code repository and run all commands from here.
 
+Note, may have to replace all `pip` with `pip3` and `python` with `python3`. Type `python -V` to see your version of python. If it is not 3.11, try `python3 -V` instead.
 - `pip install -r ./requirements.txt`
   - For Mac: `pip install tensorflow-macos tensorflow-metal`
 - Download and copy over `config.yml` and `frontend/.env`
