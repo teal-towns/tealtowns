@@ -411,9 +411,9 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     String format = 'yMMdTHHmmss';
-    String start1 = _dateTime.Format(_event.start, format);
+    String start1 = _dateTime.Format(_event.start, format, local: false);
     String end1 = _event.end.length > 0 ? _event.end : _event.start;
-    end1 = _dateTime.Format(end1, format);
+    end1 = _dateTime.Format(end1, format, local: false);
     String timezone = _weeklyEvent.timezone;
     String details = Uri.encodeComponent(shareUrl);
     String title = Uri.encodeComponent(_weeklyEvent.title);
