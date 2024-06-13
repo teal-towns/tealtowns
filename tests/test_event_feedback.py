@@ -10,6 +10,7 @@ def test_EventFeedbackVotes():
     eventFeedback = {
         'eventId': 'event1',
         'feedbackVotes': [],
+        'positiveVotes': [],
         'notificationSent': 0,
     }
     ret = _mongo_db_crud.Save('eventFeedback', eventFeedback)
@@ -28,7 +29,7 @@ def test_EventFeedbackVotes():
             assert feedbackVote['feedback'] == feedbackVoteGreat['feedback']
 
     # User 2 votes for same feedback
-    _event_feedback.AddFeedbackUserVote(eventFeedback['_id'], feedbackVoteGreat['id'], 'user2')
+    _event_feedback.AddUserFeedbackVote(eventFeedback['_id'], 'user2', feedbackVoteGreat['id'])
     item = mongo_db.find_one('eventFeedback', {'_id': eventFeedback['_id']})['item']
     assert len(item['feedbackVotes']) == 1
     for feedbackVote in item['feedbackVotes']:
@@ -37,7 +38,7 @@ def test_EventFeedbackVotes():
             assert feedbackVote['feedback'] == feedbackVoteGreat['feedback']
     
     # User 1 tries to duplicate vote (blocked).
-    _event_feedback.AddFeedbackUserVote(eventFeedback['_id'], feedbackVoteGreat['id'], 'user1')
+    _event_feedback.AddUserFeedbackVote(eventFeedback['_id'], 'user1', feedbackVoteGreat['id'])
     item = mongo_db.find_one('eventFeedback', {'_id': eventFeedback['_id']})['item']
     assert len(item['feedbackVotes']) == 1
     for feedbackVote in item['feedbackVotes']:

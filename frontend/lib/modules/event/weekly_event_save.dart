@@ -75,7 +75,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _formValsDefault['startTime'] = '17:00';
       _formValsDefault['endTime'] = '18:30';
 
-      _formFields['priceUSD']!['min'] = 5;
+      // _formFields['priceUSD']!['min'] = 5;
 
       _formMode = 'step';
 

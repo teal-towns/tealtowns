@@ -35,6 +35,7 @@ import './modules/neighborhood/neighborhoods_page.dart';
 import './modules/neighborhood/neighborhood_save.dart';
 import './modules/neighborhood/neighborhood_group.dart';
 import './modules/neighborhood/neighborhood_group_save.dart';
+import './modules/neighborhood/neighborhood_insights.dart';
 import './modules/neighborhood/neighborhood_journey_page.dart';
 import './modules/neighborhood/neighborhood_stats.dart';
 
@@ -82,6 +83,7 @@ class Routes {
   static const neighborhoodSave = '/neighborhood-save';
   static const neighborhoodView = '/n/:uName';
   static const neighborhoods = '/neighborhoods';
+  static const neighborhoodInsights = '/neighborhood-insights';
   static const neighborhoodGroupSave = '/neighborhood-group-save';
   static const neighborhoodGroup = '/neighborhood-group/:uName';
   static const neighborhoodJourney = '/neighborhood-journey';
@@ -241,6 +243,10 @@ class AppGoRouter {
         builder: (BuildContext context, GoRouterState state) => NeighborhoodGroupSave(
           uName: state.uri.queryParameters['uName'] ?? '',
         )
+      ),
+      GoRoute(
+        path: Routes.neighborhoodInsights,
+        builder: (context, state) => NeighborhoodInsights(),
       ),
       GoRoute(
         path: Routes.neighborhoodStats,

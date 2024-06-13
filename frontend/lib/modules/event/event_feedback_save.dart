@@ -32,6 +32,8 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
   Map<String, dynamic> _formValsEventFeedback = {
     'feedbackVoteIds': [''],
     'feedback': '',
+    'positiveVoteIds': [''],
+    'positiveFeedback': '',
   };
   Map<String, dynamic> _formValsUserFeedback = {
     // 'forType': 'event',
@@ -40,6 +42,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     'invitesString': '',
   };
   List<Map<String, dynamic>> _optsFeedbackVotes = [];
+  List<Map<String, dynamic>> _optsPositiveVotes = [];
   List<Map<String, dynamic>> _optsWillJoinNextWeek = [
     {'value': 'yes', 'label': 'Yes'},
     {'value': 'no', 'label': 'No'},
@@ -86,6 +89,19 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     }));
 
     _routeIds.add(_socketService.onRoute('AddEventFeedbackVote', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _formValsEventFeedback['feedback'] = '';
+        setState(() { _formValsEventFeedback = _formValsEventFeedback; });
+        if (data.containsKey('eventFeedback')) {
+          setState(() { _eventFeedback = data['eventFeedback']; });
+          SetFeedbackOpts(_eventFeedback);
+        }
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('AddEventPositiveVote', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
@@ -154,13 +170,20 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
       return Text('No event id');
     }
     if (!_eventFeedback.containsKey('_id') || _event.id.length < 1 || _event.start.length < 1) {
-      return LinearProgressIndicator();
+      return Column(children: [ LinearProgressIndicator() ]);
     }
 
     List<Widget> colsFeedback = [];
     if (_optsFeedbackVotes.length > 0) {
       colsFeedback = [
         _inputFields.inputMultiSelectButtons(_optsFeedbackVotes, _formValsEventFeedback, 'feedbackVoteIds',),
+        SizedBox(height: 10,),
+      ];
+    }
+    List<Widget> colsPositiveFeedback = [];
+    if (_optsPositiveVotes.length > 0) {
+      colsPositiveFeedback = [
+        _inputFields.inputMultiSelectButtons(_optsPositiveVotes, _formValsEventFeedback, 'positiveVoteIds',),
         SizedBox(height: 10,),
       ];
     }
@@ -219,6 +242,22 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
           }
         },),
         SizedBox(height: 10,),
+        Text('What did you gain or enjoy?'),
+        SizedBox(height: 10,),
+        ...colsPositiveFeedback,
+        _inputFields.inputText(_formValsEventFeedback, 'positiveFeedback', label: 'Write what you enjoyed or gained',),
+        SizedBox(height: 10,),
+        TextButton(child: Text('Add Positive Feedback'), onPressed: () {
+          if (_formValsEventFeedback['positiveFeedback'].length > 2) {
+            var positiveVote = {
+              'feedback': _formValsEventFeedback['positiveFeedback'],
+              'userIds': [ Provider.of<CurrentUserState>(context, listen: false).currentUser.id ]
+            };
+            var data = { 'eventFeedbackId': _eventFeedback['_id'], 'positiveVote': positiveVote };
+            _socketService.emit('AddEventPositiveVote', data);
+          }
+        },),
+        SizedBox(height: 10,),
         ...colsNextEvent,
         ...colsSubmit,
         SizedBox(height: 50,),
@@ -236,16 +275,27 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
         _formValsEventFeedback['feedbackVoteIds'].add(eventFeedback['feedbackVotes'][i]['id']);
       }
     }
-    setState(() { _optsFeedbackVotes = _optsFeedbackVotes; });
+    _optsPositiveVotes = [];
+    for (var i = 0; i < eventFeedback['positiveVotes'].length; i++) {
+      String label = '(${eventFeedback['positiveVotes'][i]['userIds'].length}) ${eventFeedback['positiveVotes'][i]['feedback']}';
+      _optsPositiveVotes.add({'value': eventFeedback['positiveVotes'][i]['id'], 'label': label });
+      if (_userId.length > 0 && eventFeedback['positiveVotes'][i]['userIds'].contains(_userId) &&
+        !_formValsEventFeedback['positiveVoteIds'].contains(eventFeedback['positiveVotes'][i]['id'])) {
+        _formValsEventFeedback['positiveVoteIds'].add(eventFeedback['positiveVotes'][i]['id']);
+      }
+    }
+    setState(() { _optsFeedbackVotes = _optsFeedbackVotes; _optsPositiveVotes = _optsPositiveVotes; });
   }
 
   void Save() {
     var userId = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
     var data = {};
-    if (_formValsEventFeedback['feedbackVoteIds'].length > 0) {
+    if (_formValsEventFeedback['feedbackVoteIds'].length > 0 ||
+      _formValsEventFeedback['positiveVoteIds'].length > 0) {
       data = {
         'eventFeedbackId': _eventFeedback['_id'],
         'feedbackVoteIds': _formValsEventFeedback['feedbackVoteIds'],
+        'positiveVoteIds': _formValsEventFeedback['positiveVoteIds'],
         'userId': userId,
       };
       _socketService.emit('AddEventFeedbackUserVotes', data);

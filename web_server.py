@@ -81,7 +81,7 @@ thread3.start()
 async def websocket_handler(request):
 
     # print ('websocket_handler', request)
-    websocket = web.WebSocketResponse(max_msg_size = 25 * 1024 * 1024)
+    websocket = web.WebSocketResponse(max_msg_size = 100 * 1024 * 1024)
     await websocket.prepare(request)
 
     async for msg in websocket:

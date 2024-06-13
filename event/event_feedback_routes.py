@@ -31,10 +31,11 @@ def AddRoutesAsync():
     _socket.add_route('AddEventFeedbackVote', AddFeedbackVote, 'async')
 
     async def AddUserVotes(data, auth, websocket):
-        ret = _event_feedback.AddFeedbackUserVotes(data['eventFeedbackId'], data['feedbackVoteIds'],
-            data['userId'])
+        ret = _event_feedback.AddUserFeedbackVotes(data['eventFeedbackId'], data['userId'], data['feedbackVoteIds'],
+            data['positiveVoteIds'])
         groupName = 'eventFeedback_' + ret['eventFeedback']['eventId']
-        dataSend = { 'route': 'OnEventFeedback', 'auth': auth, 'data': { 'valid': 1, 'message': '', 'eventFeedback': ret['eventFeedback'] } }
+        dataSend = { 'route': 'OnEventFeedback', 'auth': auth, 'data': { 'valid': 1, 'message': '',
+            'eventFeedback': ret['eventFeedback'] } }
         await _websocket_clients.SendToGroupsJson(dataSend, [groupName])
         # return ret
         await _socket.sendAsync(websocket, 'AddEventFeedbackUserVotes', ret, auth)
@@ -49,6 +50,16 @@ def AddRoutesAsync():
     #     # return ret
     #     await _socket.sendAsync(websocket, 'RemoveEventFeedbackUserVotes', ret, auth)
     # _socket.add_route('RemoveEventFeedbackUserVotes', RemoveUserVotes, 'async')
+
+    async def AddPositiveVote(data, auth, websocket):
+        ret = _event_feedback.AddPositiveVote(data['eventFeedbackId'], data['positiveVote'])
+        groupName = 'eventFeedback_' + ret['eventFeedback']['eventId']
+        dataSend = { 'route': 'OnEventFeedback', 'auth': auth, 'data': { 'valid': 1, 'message': '',
+            'eventFeedback': ret['eventFeedback'] } }
+        await _websocket_clients.SendToGroupsJson(dataSend, [groupName])
+        # return ret
+        await _socket.sendAsync(websocket, 'AddEventPositiveVote', ret, auth)
+    _socket.add_route('AddEventPositiveVote', AddPositiveVote, 'async')
 
 AddRoutes()
 AddRoutesAsync()
