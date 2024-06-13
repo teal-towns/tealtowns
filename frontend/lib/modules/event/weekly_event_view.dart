@@ -203,12 +203,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     List<Widget> thisWeekEvent = [];
     if (_event.start.length > 0) {
       String startDate = _dateTime.Format(_event.start, 'EEEE M/d/y');
+      String startTime = _dateTime.Format(_event.start, 'HH:mm');
+      String endTime = _dateTime.Format(_event.end, 'HH:mm');
       thisWeekEvent = [
         // Text('This week\'s event starts at ${_event.start}'),
         // SizedBox(height: 10),
         _style.Text1('${startDate}', left: Icon(Icons.calendar_today)),
         SizedBox(height: 10),
-        _style.Text1('${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}', left: Icon(Icons.schedule)),
+        // _style.Text1('${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}', left: Icon(Icons.schedule)),
+        _style.Text1('${startTime} - ${endTime}', left: Icon(Icons.schedule)),
         SizedBox(height: 10),
       ];
     }
