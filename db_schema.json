@@ -312,6 +312,13 @@
                 "userIds": [ "{String}" ]
             }
         ],
+        "positiveVotes": [
+            {
+                "id": "{String}",
+                "feedback": "{String}",
+                "userIds": [ "{String}" ]
+            }
+        ],
         "notificationSent": "{Int} 0|1"
     },
     "userFeedback": {

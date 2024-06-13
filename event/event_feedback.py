@@ -17,7 +17,8 @@ def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0, wit
     ret = { "valid": 1, "message": "", 'userFeedbacks': [], }
     ret['eventFeedback'] = mongo_db.find_one('eventFeedback', { "eventId": eventId })['item']
     if ret['eventFeedback'] is None and autoCreate:
-        eventFeedback = { "eventId": eventId, "feedbackVotes": [], "notificationSent": notificationSent, }
+        eventFeedback = { "eventId": eventId, "feedbackVotes": [], "positiveVotes": [],
+            "notificationSent": notificationSent, }
         ret = _mongo_db_crud.Save('eventFeedback', eventFeedback)
     if ret['eventFeedback'] is None:
         ret['valid'] = 0
@@ -45,7 +46,20 @@ def AddFeedbackVote(eventFeedbackId: str, feedbackVote: dict):
     ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
     return ret
 
-def AddFeedbackUserVote(eventFeedbackId: str, feedbackVoteId: str, userId: str):
+def AddPositiveVote(eventFeedbackId: str, positiveVote: dict):
+    ret = { "valid": 1, "message": "", }
+    query = { "_id": mongo_db.to_object_id(eventFeedbackId) }
+    if 'id' not in positiveVote:
+        positiveVote['id'] = mongo_db.newObjectIdString()
+    if 'userIds' not in positiveVote:
+        positiveVote['userIds'] = []
+    ret['positiveVote'] = positiveVote
+    mutation = { "$push": { "positiveVotes": positiveVote } }
+    mongo_db.update_one('eventFeedback', query, mutation)
+    ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
+    return ret
+
+def AddUserFeedbackVote(eventFeedbackId: str, userId: str, feedbackVoteId: str):
     ret = { "valid": 1, "message": "" }
     query = { "_id": mongo_db.to_object_id(eventFeedbackId),
         "feedbackVotes": { "$elemMatch": { "id": feedbackVoteId } } }
@@ -55,10 +69,23 @@ def AddFeedbackUserVote(eventFeedbackId: str, feedbackVoteId: str, userId: str):
     ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
     return ret
 
-def AddFeedbackUserVotes(eventFeedbackId: str, feedbackVoteIds: list, userId: str):
+def AddUserPositiveVote(eventFeedbackId: str, userId: str, positiveVoteId: str):
+    ret = { "valid": 1, "message": "" }
+    query = { "_id": mongo_db.to_object_id(eventFeedbackId),
+        "positiveVotes": { "$elemMatch": { "id": positiveVoteId } } }
+    # addToSet avoids duplicates (push does not, so could have duplicates).
+    mutation = { "$addToSet": { "positiveVotes.$.userIds": userId } }
+    mongo_db.update_one('eventFeedback', query, mutation)
+    ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
+    return ret
+
+def AddUserFeedbackVotes(eventFeedbackId: str, userId: str, feedbackVoteIds: list = [],
+    positiveVoteIds: list = []):
     ret = { "valid": 1, "message": "" }
     for feedbackVoteId in feedbackVoteIds:
-        AddFeedbackUserVote(eventFeedbackId, feedbackVoteId, userId)
+        AddUserFeedbackVote(eventFeedbackId, userId, feedbackVoteId)
+    for positiveVoteId in positiveVoteIds:
+        AddUserPositiveVote(eventFeedbackId, userId, positiveVoteId)
     ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
     return ret
 
@@ -78,6 +105,22 @@ def RemoveFeedbackUserVotes(eventFeedbackId: str, feedbackVoteIds: list, userId:
     ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
     return ret
 
+def RemovePositiveUserVote(eventFeedbackId: str, positiveVoteId: str, userId: str):
+    ret = { "valid": 1, "message": "" }
+    query = { "_id": mongo_db.to_object_id(eventFeedbackId),
+        "positiveVotes": { "$elemMatch": { "id": positiveVoteId } } }
+    mutation = { "$pull": { "positiveVotes.$.userIds": userId } }
+    mongo_db.update_one('eventFeedback', query, mutation)
+    ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
+    return ret
+
+def RemovePositiveUserVotes(eventFeedbackId: str, positiveVoteIds: list, userId: str):
+    ret = { "valid": 1, "message": "" }
+    for positiveVoteId in positiveVoteIds:
+        RemovePositiveUserVote(eventFeedbackId, positiveVoteId, userId)
+    ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
+    return ret
+
 def GetEventFeedback(eventFeedbackId: str):
     return mongo_db.find_one('eventFeedback', { "_id": mongo_db.to_object_id(eventFeedbackId) })['item']
 
@@ -85,7 +128,7 @@ def GetByWeeklyEvent(weeklyEventId: str, withUserFeedback: int = 0):
     ret = { "valid": 1, "message": "", 'eventFeedback': {}, 'userFeedbacks': [] }
     retPastEvent = _event.GetMostRecentPastEvent(weeklyEventId)
     if '_id' in retPastEvent['event']:
-        retFeedback = GetByEvent(retPastEvent['event']['_id'], autoCreate = 0)
+        retFeedback = GetByEvent(retPastEvent['event']['_id'], withUserFeedback = withUserFeedback, autoCreate = 0)
         ret['eventFeedback'] = retFeedback['eventFeedback']
         ret['event'] = retPastEvent['event']
         if withUserFeedback:
@@ -117,7 +160,8 @@ def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterE
             smsContent = 'Thanks for attending! What did you think of this event? ' + GetUrl(event['_id'])
             retNotify = _user_event.NotifyUsers(event['_id'], smsContent, minAttendeeCount = 1)
             ret['notifyByEvent'][event['_id']] = { 'notifyUserIds': retNotify['notifyUserIds'] }
-            eventFeedback = { "eventId": event['_id'], "feedbackVotes": [], "notificationSent": 1, }
+            eventFeedback = { "eventId": event['_id'], "feedbackVotes": [], "positiveVotes": [],
+                "notificationSent": 1, }
             if event['_id'] in eventFeedbackByEventId:
                 eventFeedback['_id'] = eventFeedbackByEventId[event['_id']]['_id']
             retOne = _mongo_db_crud.Save('eventFeedback', eventFeedback)

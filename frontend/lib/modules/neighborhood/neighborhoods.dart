@@ -148,6 +148,8 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         SizedBox(height: 10),
         ...content,
         SizedBox(height: 50),
+        _buttons.LinkInline(context, 'See All Neighborhoods', '/neighborhood-insights', checkLoggedIn: true),
+        SizedBox(height: 50),
       ]
     );
   }

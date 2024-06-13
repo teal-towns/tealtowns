@@ -1,6 +1,7 @@
 import threading
 import time
 
+from common import mongo_db_crud as _mongo_db_crud
 import date_time
 import log
 import mongo_db
@@ -66,3 +67,14 @@ def ComputeNeighborhoodStatsLoop(timeoutMinutes = 60 * 24):
             thread.start()
         time.sleep(timeoutMinutes * 60)
     return None
+
+def SearchInsights(sortKeys: str = "", limit: int = 100, skip: int = 0, now = None):
+    now = now if now is not None else date_time.now()
+    thisMonth = date_time.create(now.year, now.month, 1, 0, 0)
+    # If 1st of the month, compute for last month.
+    if now.day == 1:
+        thisMonth = date_time.previousMonth(thisMonth)
+    start = date_time.string(thisMonth)
+    equalsKeyVals = { 'start': start }
+    return _mongo_db_crud.Search('neighborhoodStatsMonthlyCache', equalsKeyVals = equalsKeyVals,
+        sortKeys = sortKeys, limit = limit, skip = skip,)

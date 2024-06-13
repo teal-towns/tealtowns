@@ -25,6 +25,7 @@ class _EventFeedbackState extends State<EventFeedback> {
   EventClass _event = EventClass.fromJson({});
   List<UserFeedbackClass> _userFeedbacks = [];
   List<String> _feedbackVoteStrings = [];
+  List<String> _positiveVoteStrings = [];
   Map<String, dynamic> _willJoinNextWeekStats = {
     'yes': 0,
     'no': 0,
@@ -73,6 +74,11 @@ class _EventFeedbackState extends State<EventFeedback> {
       _feedbackVoteStrings.add('(${count}) ${_eventFeedback.feedbackVotes[i].feedback}');
     }
     _feedbackVoteStrings.sort((b, a) => a.compareTo(b));
+    for (int i = 0; i < _eventFeedback.positiveVotes.length; i++) {
+      int count = _eventFeedback.positiveVotes[i].userIds.length;
+      _positiveVoteStrings.add('(${count}) ${_eventFeedback.positiveVotes[i].feedback}');
+    }
+    _positiveVoteStrings.sort((b, a) => a.compareTo(b));
     _userFeedbacks = [];
     _willJoinNextWeekStats = {
       'yes': 0,
@@ -98,6 +104,7 @@ class _EventFeedbackState extends State<EventFeedback> {
       _event = _event;
       _eventFeedback = _eventFeedback;
       _feedbackVoteStrings = _feedbackVoteStrings;
+      _positiveVoteStrings = _positiveVoteStrings;
       _userFeedbacks = _userFeedbacks;
       _willJoinNextWeekStats = _willJoinNextWeekStats;
       _willInviteStats = _willInviteStats;
@@ -122,10 +129,20 @@ class _EventFeedbackState extends State<EventFeedback> {
       children: [
         Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
         SizedBox(height: 10),
+        Text('Improvements:'),
+        SizedBox(height: 10),
         Wrap(
           spacing: 10,
           runSpacing: 10,
           children: _feedbackVoteStrings.map((feedback) => Text(feedback)).toList(),
+        ),
+        SizedBox(height: 10),
+        Text('Enjoyed:'),
+        SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: _positiveVoteStrings.map((feedback) => Text(feedback)).toList(),
         ),
         SizedBox(height: 10),
         Text('Will Join Next Week: ${_willJoinNextWeekStats['yes']} yes, ${_willJoinNextWeekStats['no']} no, ${_willJoinNextWeekStats['futureWeek']} future week'),
