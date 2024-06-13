@@ -7,6 +7,7 @@ import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
+import '../event/event_feedback.dart';
 import './neighborhood_stats_class.dart';
 
 class NeighborhoodStats extends StatefulWidget {
@@ -29,6 +30,7 @@ class _NeighborhoodStatsState extends State<NeighborhoodStats> {
   Map<String, dynamic> _neighborhoodStats = {};
   Map<String, dynamic> _previousNeighborhoodStats = {};
   bool _showEvents = false;
+  Map<String, bool> _showEventIds = {};
 
   @override
   void initState() {
@@ -113,12 +115,43 @@ class _NeighborhoodStatsState extends State<NeighborhoodStats> {
       _neighborhoodStats['eventInfos'].sort((a, b) => a["start"].toString().compareTo(b["start"].toString()));
       for (int i = 0; i < _neighborhoodStats['eventInfos'].length; i++) {
         String start = _dateTime.Format(_neighborhoodStats['eventInfos'][i]['start'], 'M/d/y');
-        String link = '/event-feedback?eventId=${_neighborhoodStats['eventInfos'][i]['id']}';
+        String eventId = _neighborhoodStats['eventInfos'][i]['id'];
+        // String link = '/event-feedback?eventId=${eventId}';
         colsEvents += [
           // _style.Text1('${start}', size: 'large'),
-          _buttons.Link(context, '${start} (${_neighborhoodStats['eventInfos'][i]['attendeeCount']} attendees)', link),
+          // _buttons.Link(context, '${start} (${_neighborhoodStats['eventInfos'][i]['attendeeCount']} attendees)', link),
+          TextButton(child: Text('${start} (${_neighborhoodStats['eventInfos'][i]['attendeeCount']} attendees)'),
+            onPressed: () {
+              if (!_showEventIds.containsKey(eventId)) {
+                _showEventIds[eventId] = true;
+              } else {
+                _showEventIds[eventId] = !_showEventIds[eventId]!;
+              }
+              setState(() { _showEventIds = _showEventIds; });
+            },
+          ),
           _style.SpacingH('medium'),
         ];
+        if (_showEventIds.containsKey(eventId) && _showEventIds[eventId]!) {
+          String weeklyEventUName = '';
+          if (_neighborhoodStats['eventInfos'][i].containsKey('weeklyEventUName')) {
+            weeklyEventUName = _neighborhoodStats['eventInfos'][i]['weeklyEventUName'];
+          }
+          if (weeklyEventUName.length > 0) {
+            String link = '/we/${weeklyEventUName}';
+            colsEvents += [
+              _buttons.Link(context, 'View Event', link),
+              _style.SpacingH('medium'),
+            ];
+          }
+          colsEvents += [
+            Container(
+              padding: EdgeInsets.only(left: 20,),
+              child: EventFeedback(eventId: eventId,),
+            ),
+            _style.SpacingH('medium'),
+          ];
+        }
       }
     }
 

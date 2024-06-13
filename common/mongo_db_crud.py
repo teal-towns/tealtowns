@@ -88,7 +88,8 @@ def Save(collection: str, obj, db1 = None, uNameRegex: str = '[^a-zA-Z0-9]'):
         ret["insert"] = 1
         result = mongo_db.insert_one(collection, obj, db1 = db1)
         if result["valid"] == 1:
-            ret[collection]["_id"] = mongo_db.from_object_id(result["item"]["_id"])
+            # ret[collection]["_id"] = mongo_db.from_object_id(result["item"]["_id"])
+            ret[collection] = result["item"]
         else:
             ret["valid"] = 0
             ret["message"] = result["message"]

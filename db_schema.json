@@ -346,7 +346,9 @@
             {
                 "id": "{String}",
                 "start": "{String}",
-                "attendeeCount": "{Int}"
+                "attendeeCount": "{Int}",
+                "weeklyEventId":"{String}",
+                "weeklyEventUName": "{String}"
             }
         ],
         "freeEventsCount": "{Int}",

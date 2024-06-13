@@ -33,10 +33,13 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
         ret['weeklyEvents'] = items[slice(0, weeklyEventsCount)] if len(items) > weeklyEventsCount else items
         if withUniqueEventUsersCount:
             weeklyEventIds = []
+            weeklyEventsById = {}
             for item in items:
                 weeklyEventIds.append(item['_id'])
+                weeklyEventsById[item['_id']] = item
             retAttending = _event.GetUsersAttending(weeklyEventIds = weeklyEventIds, minDateString = minDateString,
-                maxDateString = maxDateString, withFreePaidStats = withFreePaidStats)
+                maxDateString = maxDateString, withFreePaidStats = withFreePaidStats,
+                weeklyEventsById = weeklyEventsById)
             ret['uniqueEventUsersCount'] = retAttending['uniqueUsersCount']
             ret['eventInfos'] = retAttending['eventInfos']
             if withFreePaidStats:

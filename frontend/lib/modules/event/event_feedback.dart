@@ -44,7 +44,8 @@ class _EventFeedbackState extends State<EventFeedback> {
     _routeIds.add(_socketService.onRoute('GetEventFeedbackByWeeklyEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
-      if (data['valid'] == 1 && data.containsKey('eventFeedback') && data.containsKey('event')) {
+      if (data['valid'] == 1 && data.containsKey('eventFeedback') && data.containsKey('event') &&
+        data['event']['weeklyEventId'] == widget.weeklyEventId) {
         SetData(data);
       }
     }));
@@ -52,7 +53,8 @@ class _EventFeedbackState extends State<EventFeedback> {
     _routeIds.add(_socketService.onRoute('GetEventFeedbackByEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
-      if (data['valid'] == 1 && data.containsKey('eventFeedback') && data.containsKey('event')) {
+      if (data['valid'] == 1 && data.containsKey('eventFeedback') && data.containsKey('event') &&
+        data['event']['_id'] == widget.eventId) {
         SetData(data);
       }
     }));
@@ -124,11 +126,9 @@ class _EventFeedbackState extends State<EventFeedback> {
     }
     String peopleCount = _userFeedbacks.length == 1 ? '1 person' : '${_userFeedbacks.length} people';
     String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
-        SizedBox(height: 10),
+    List<Widget> colsImprove = [];
+    if (_feedbackVoteStrings.length > 0) {
+      colsImprove = [
         Text('Improvements:'),
         SizedBox(height: 10),
         Wrap(
@@ -137,6 +137,11 @@ class _EventFeedbackState extends State<EventFeedback> {
           children: _feedbackVoteStrings.map((feedback) => Text(feedback)).toList(),
         ),
         SizedBox(height: 10),
+      ];
+    }
+    List<Widget> colsEnjoyed = [];
+    if (_positiveVoteStrings.length > 0) {
+      colsEnjoyed = [
         Text('Enjoyed:'),
         SizedBox(height: 10),
         Wrap(
@@ -145,10 +150,32 @@ class _EventFeedbackState extends State<EventFeedback> {
           children: _positiveVoteStrings.map((feedback) => Text(feedback)).toList(),
         ),
         SizedBox(height: 10),
+      ];
+    }
+    List<Widget> colsWillJoin = [];
+    if (_willJoinNextWeekStats['yes'] > 0 || _willJoinNextWeekStats['no'] > 0 || _willJoinNextWeekStats['futureWeek'] > 0) {
+      colsWillJoin = [
         Text('Will Join Next Week: ${_willJoinNextWeekStats['yes']} yes, ${_willJoinNextWeekStats['no']} no, ${_willJoinNextWeekStats['futureWeek']} future week'),
         SizedBox(height: 10),
+      ];
+    }
+    List<Widget> colsWillInvite = [];
+    if (_willInviteStats['invites'] > 0 || _willInviteStats['willMeetNewNeighbor'] > 0 || _willInviteStats['no'] > 0) {
+      colsWillInvite = [
         Text('Will Invite: ${_willInviteStats['invites']} invites, ${_willInviteStats['willMeetNewNeighbor']} will meet new neighbor, ${_willInviteStats['no']} no'),
         SizedBox(height: 10),
+      ];
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
+        SizedBox(height: 10),
+        ...colsImprove,
+        ...colsEnjoyed,
+        ...colsWillJoin,
+        ...colsWillInvite,
       ],
     );
   }

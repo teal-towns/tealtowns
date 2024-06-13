@@ -177,7 +177,8 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, n
     return ret
 
 def GetUsersAttending(daysPast: int = 7, weeklyEventIds = None, now = None,
-    minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False, limit: int = 100000):
+    minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False, limit: int = 100000,
+    weeklyEventsById = {}):
     ret = { 'valid': 1, 'message': '', 'eventsCount': 0, 'uniqueUsersCount': 0, 'eventInfos': [], 
         'totalEventUsersCount': 0, 'freeEventsCount': 0, 'paidEventsCount': 0,
         'totalPaidEventUsersCount': 0, 'totalFreeEventUsersCount': 0, 'totalCutUSD': 0, }
@@ -199,7 +200,9 @@ def GetUsersAttending(daysPast: int = 7, weeklyEventIds = None, now = None,
         eventIds = []
         for index, event in enumerate(events):
             eventIds.append(event['_id'])
-            ret['eventInfos'].append({ 'id': event['_id'], 'start': event['start'], 'attendeeCount': 0, })
+            weeklyEventUName = weeklyEventsById[event['weeklyEventId']]['uName'] if event['weeklyEventId'] in weeklyEventsById else ''
+            ret['eventInfos'].append({ 'id': event['_id'], 'start': event['start'], 'attendeeCount': 0,
+                'weeklyEventId': event['weeklyEventId'], 'weeklyEventUName': weeklyEventUName, })
             eventInfosMap[event['_id']] = index
         query = { 'eventId': { '$in': eventIds }, 'attendeeCount': { '$gte': 1 } }
         userIds = mongo_db.findDistinct('userEvent', 'userId', query)['values']

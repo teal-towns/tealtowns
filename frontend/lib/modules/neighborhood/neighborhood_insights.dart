@@ -65,6 +65,7 @@ class _NeighborhoodInsightsState extends State<NeighborhoodInsights> {
                 Expanded(flex: 1, child: Text('Users')),
                 Expanded(flex: 1, child: Text('Unique Event Users')),
                 Expanded(flex: 1, child: Text('Total Event Users')),
+                Expanded(flex: 1, child: Text('Stats')),
               ]
             ),
             ..._neighborhoodInsights.map((item) => BuildNeighborhoodInsight(item, context) ).toList(),
@@ -82,6 +83,7 @@ class _NeighborhoodInsightsState extends State<NeighborhoodInsights> {
           Expanded(flex: 1, child: Text('${neighborhoodInsight.usersCount}')),
           Expanded(flex: 1, child: Text('${neighborhoodInsight.uniqueEventUsersCount}')),
           Expanded(flex: 1, child: Text('${neighborhoodInsight.totalEventUsersCount}')),
+          Expanded(flex: 1, child: _buttons.LinkInline(context, 'Insights', '/neighborhood-stats/${neighborhoodInsight.neighborhoodUName}')),
         ]
       )
     );
