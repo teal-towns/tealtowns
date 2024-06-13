@@ -15,4 +15,12 @@ class DateTimeService {
     }
     return DateFormat(format).format(dateValue);
   }
+
+  String TZ(var dateTime, { bool local = true }) {
+    var dateValue = DateTime.parse(dateTime);
+    if (local) {
+      dateValue = dateValue.toUtc().toLocal();
+    }
+    return dateValue.timeZoneName;
+  }
 }
