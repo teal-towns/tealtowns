@@ -34,7 +34,7 @@ def dictStringFields(object1, fields=[], format = '%Y-%m-%d %H:%M:%S %z'):
             newObject[key] = object1[key]
     return newObject
 
-def create(year, month, day, hour, minute, second = 0, microsecond = 0, tz = 'UTC'):
+def create(year, month, day, hour = 0, minute = 0, second = 0, microsecond = 0, tz = 'UTC'):
     return datetime.datetime(year, month, day, hour, minute, second, microsecond, tzinfo = ZoneInfo(tz))
 
 def string(datetime1, format = '%Y-%m-%d %H:%M:%S %z'):

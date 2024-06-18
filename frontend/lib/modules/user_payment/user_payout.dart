@@ -28,10 +28,20 @@ class _UserPayoutState extends State<UserPayout> {
   Map<String, dynamic> _userStripeAccount = {};
   bool _loading = true;
   String _message = '';
+  double _credits = 0;
 
   @override
   void initState() {
     super.initState();
+
+    _routeIds.add(_socketService.onRoute('GetUserCredits', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _credits = data['credits'];
+        setState(() { _credits = _credits; });
+      }
+    }));
 
     _routeIds.add(_socketService.onRoute('GetUserStripeAccount', callback: (String resString) {
       var res = jsonDecode(resString);
@@ -155,6 +165,8 @@ class _UserPayoutState extends State<UserPayout> {
       children: [
         ...cols,
         SizedBox(height: 10),
+        Text('Credits available: ${_credits}'),
+        SizedBox(height: 10),
         Text(_message),
       ]
     );
@@ -162,6 +174,11 @@ class _UserPayoutState extends State<UserPayout> {
 
   void _init() async {
     GetUserStripeAccount();
+    var data = {
+      'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
+      'minPrice': 5,
+    };
+    _socketService.emit('GetUserCredits', data);
   }
 
   void GetUserStripeAccount() {

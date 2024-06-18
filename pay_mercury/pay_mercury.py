@@ -6,6 +6,12 @@ import log
 import ml_config
 _config = ml_config.get_config()
 
+_testMode = 0
+
+def SetTestMode(testMode: int):
+    global _testMode
+    _testMode = testMode
+
 def MakeRequest(method: str, urlPath: str, params: dict = {}, maxRetries: int = 0, retryCount: int = 0):
     headers = {
         "Authorization": "Bearer " + _config['mercury']['api_token'],
@@ -117,6 +123,9 @@ def GetRecipientByKey(key: str):
 
 def MakeTransaction(accountKey: str, recipientKey: str, amountUSD: float, transactionKey: str):
     ret = { 'valid': 0, 'message': '', 'transaction': {}, }
+    if _testMode or ('test_mode' in _config['mercury'] and _config['mercury']['test_mode']):
+        ret['valid'] = 1
+        return ret
     retAccount = GetAccountByKey(accountKey)
     retReipient = GetRecipientByKey(recipientKey)
     if 'id' in retAccount['account'] and 'id' in retReipient['recipient']:

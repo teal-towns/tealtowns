@@ -318,6 +318,7 @@ class _UserEventSaveState extends State<UserEventSave> {
         'userId': currentUserState.currentUser.id,
         'title': title,
         'forId': _event.id!,
+        'quantity': _formVals['attendeeCountAsk'],
         'forType': 'event',
       };
       _socketService.emit('StripeGetPaymentLink', data);

@@ -34,3 +34,9 @@ def test_GetPayInfo():
 
     ret = { 'eventFunds': 183 }
     assert _event_payment.GetPayInfo(10000, 52) == ret
+
+def test_GetRevenue():
+    assert _event_payment.GetRevenue(39, 5, 'month', quantity = 1) == 15.58
+    assert _event_payment.GetRevenue(39 * 2, 5, 'month', quantity = 2) == 31.47
+    assert _event_payment.GetRevenue(390, 5, 'year', quantity = 1) == 115.26
+    assert _event_payment.GetRevenue(390 * 3, 5, 'year', quantity = 3) == 346.41

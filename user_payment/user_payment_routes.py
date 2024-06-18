@@ -1,5 +1,6 @@
 from common import mongo_db_crud as _mongo_db_crud
 from common import socket as _socket
+from event import user_event as _user_event
 import lodash
 from user_payment import user_payment as _user_payment
 
@@ -37,5 +38,17 @@ def addRoutes():
             ret['userPaymentSubscriptions'] = _user_payment.AddForLinks(ret['userPaymentSubscriptions'])
         return ret
     _socket.add_route('SearchUserPaymentSubscriptions', SearchUserPaymentSubscriptions)
+
+    def GetUserCredits(data, auth, websocket):
+        data = lodash.extend_object({
+            'minPrice': 5,
+        }, data)
+        credits = _user_event.GetUserEventCredits(data['userId'], minPrice = data['minPrice'])
+        return { 'valid': 1, 'message': '', 'credits': credits }
+    _socket.add_route('GetUserCredits', GetUserCredits)
+
+    def CancelSubscription(data, auth, websocket):
+        return _user_payment.CancelSubscription(data['userPaymentSubscriptionId'])
+    _socket.add_route('CancelUserPaymentSubscription', CancelSubscription)
 
 addRoutes()

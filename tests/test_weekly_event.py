@@ -113,8 +113,10 @@ def test_WeeklyEventFlow():
         'recurringIntervalCount': 1,
         'forType': 'weeklyEvent',
         'forId': weeklyEvent['_id'],
+        'quantity': 1,
         'status': 'complete',
-        'stripeId': 'testStripeId',
+        'stripeIds': { 'checkoutSession': 'testCSStripeId' },
+        'credits': 0,
     }
     _mongo_db_crud.Save('userPaymentSubscription', user2PaymentSubscription)
     user2WeeklyEvent = {
@@ -138,6 +140,7 @@ def test_WeeklyEventFlow():
         'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event1['_id'],
+        'quantity': 1,
         'status': 'complete',
     }
     _mongo_db_crud.Save('userPayment', user3Payment)
@@ -165,8 +168,10 @@ def test_WeeklyEventFlow():
         'recurringIntervalCount': 1,
         'forType': 'weeklyEvent',
         'forId': weeklyEvent['_id'],
+        'quantity': attendeeCountAsk,
         'status': 'complete',
-        'stripeId': 'testStripeId',
+        'stripeIds': { 'checkoutSession': 'testCSStripeId' },
+        'credits': 0,
     }
     _mongo_db_crud.Save('userPaymentSubscription', user4PaymentSubscription)
     user4WeeklyEvent = {
@@ -306,6 +311,7 @@ def test_WeeklyEventFlow():
         'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event2['_id'],
+        'quantity': 1,
         'status': 'complete',
     }
     _mongo_db_crud.Save('userPayment', user5Payment)
@@ -331,8 +337,10 @@ def test_WeeklyEventFlow():
         'recurringIntervalCount': 1,
         'forType': 'weeklyEvent',
         'forId': weeklyEvent['_id'],
+        'quantity': 1,
         'status': 'complete',
-        'stripeId': 'testStripeId',
+        'stripeIds': { 'checkoutSession': 'testCSStripeId' },
+        'credits': 0,
     }
     _mongo_db_crud.Save('userPaymentSubscription', user6PaymentSubscription)
     user6WeeklyEvent = {
@@ -398,6 +406,7 @@ def test_WeeklyEventFlow():
         'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event3['_id'],
+        'quantity': 1,
         'status': 'complete',
     }
     _mongo_db_crud.Save('userPayment', user7Payment)
@@ -425,6 +434,7 @@ def test_WeeklyEventFlow():
         'amountUSDPreFee': -1 * weeklyEvent['priceUSD'],
         'forType': 'event',
         'forId': event3['_id'],
+        'quantity': 1,
         'status': 'complete',
     }
     _mongo_db_crud.Save('userPayment', user3Payment)
@@ -479,6 +489,7 @@ def test_WeeklyEventFlow():
         'amountUSDPreFee': -1 * weeklyEvent['priceUSD'] * attendeeCountAsk,
         'forType': 'event',
         'forId': event3['_id'],
+        'quantity': attendeeCountAsk,
         'status': 'complete',
     }
     _mongo_db_crud.Save('userPayment', user8Payment)

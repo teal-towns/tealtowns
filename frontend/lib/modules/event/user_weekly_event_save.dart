@@ -360,6 +360,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       'title': title,
       'forId': _weeklyEvent.id!,
       'forType': 'weeklyEvent',
+      'quantity': _formVals['attendeeCountAsk'],
       'recurringInterval': _formValsPay['subscription'],
     };
     _socketService.emit('StripeGetPaymentLink', data);

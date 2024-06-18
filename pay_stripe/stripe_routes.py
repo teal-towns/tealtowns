@@ -5,6 +5,7 @@ import stripe
 import ml_config
 _config = ml_config.get_config()
 
+import lodash
 from common import mongo_db_crud as _mongo_db_crud
 from common import socket as _socket
 import websocket_clients as _websocket_clients
@@ -16,6 +17,13 @@ from user_payment import user_payment as _user_payment
 def Routes(app, cors):
     resource = cors.add(app.router.add_resource('/web/stripe-webhooks'))
     cors.add(resource.add_route('POST', StripeWebhook))
+
+# Stripe events on creating payment link with recurring (subscription):
+# invoice: .created, .updated, .finalized, .paid .payment_suceeded, customer.subscription: .created, .updated, checkout.session.completed + more..
+# Stripe events on recurring subscription payment:
+# invoice: .created, .updated, .finalized, .paid .payment_suceeded, customer.subscription: .updated
+# Stripe events for single payment:
+# payment_intent: .created, .succeeded, charge: .succeeded, checkout.session.completed
 
 # https://stripe.com/docs/testing
 # https://stripe.com/docs/webhooks
@@ -41,6 +49,8 @@ async def StripeWebhook(request):
                 data1 = {}
                 for key in data['metadata']:
                     data1[key] = data['metadata'][key]
+                    if key in ['quantity', 'recurringIntervalCount']:
+                        data1[key] = int(data1[key])
 
                 amount = data['amount_total'] / 100
                 if 'forId' in data1 and 'forType' in data1:
@@ -49,16 +59,21 @@ async def StripeWebhook(request):
                             'userId': data1['userId'],
                             'amountUSD': amount,
                             'recurringInterval': data1['recurringInterval'],
-                            'recurringIntervalCount': data1['recurringIntervalCount'],
+                            'recurringIntervalCount': int(data1['recurringIntervalCount']),
                             'forType': data1['forType'],
                             'forId': data1['forId'],
+                            'quantity': data1['quantity'],
                             'status': 'complete',
-                            'stripeId': data['id'],
+                            'stripeIds': {
+                                'checkoutSession': data['id'],
+                                'subscription': data['subscription'],
+                            },
+                            'credits': 0,
                         }
                         _user_payment.AddPaymentSubscription(userPaymentSubscription)
                     else:
                         _user_payment.AddPayment(data1['userId'], amount, data1['forType'],
-                            data1['forId'], 'complete')
+                            data1['forId'], 'complete', quantity = data1['quantity'])
                 else:
                     withoutPayFee = _shared_item_payment_math.RemoveFee(amount, withCut = False)
                     withoutFees = _shared_item_payment_math.RemoveFee(amount)
@@ -76,6 +91,23 @@ async def StripeWebhook(request):
         data = event.data.object
         print ('checkout.session.async_payment_failed', data)
         # TODO
+
+    elif event.type == 'invoice.paid':
+        data = event.data.object
+        if data['status'] == 'paid':
+            if 'subscription_details' in data and 'metadata' in data['subscription_details'] and \
+                'userId' in data['subscription_details']['metadata']:
+                # Need to extract from stripe object json format..
+                metadata = {}
+                for key in data['subscription_details']['metadata']:
+                    metadata[key] = data['subscription_details']['metadata'][key]
+                    if key in ['quantity', 'recurringIntervalCount']:
+                        metadata[key] = int(metadata[key])
+                # Make negative to pass in as we only take revenue on payments from a user, which are negative amounts,
+                # but subscriptions are always stored as positive.
+                amountUSDPreFee = -1 * data['amount_paid'] / 100
+                _user_payment.CheckMoveRevenueToBank(amountUSDPreFee, metadata['forType'], metadata['forId'],
+                    metadata['recurringInterval'], metadata['recurringIntervalCount'], metadata['quantity'])
 
     # https://stripe.com/docs/api/payment_intents/object
     elif event.type == 'payment_intent.succeeded':
@@ -121,11 +153,14 @@ async def StripeWebhook(request):
 
 def addRoutes():
     def GetPaymentLink(data, auth, websocket):
-        recurringInterval = data['recurringInterval'] if 'recurringInterval' in data else ''
-        recurringIntervalCount = data['recurringIntervalCount'] if 'recurringIntervalCount' in data else 1
+        data = lodash.extend_object({
+            'recurringInterval': '',
+            'recurringIntervalCount': 1,
+            'quantity': 1,
+        }, data)
         return _pay_stripe.StripePaymentLink(data['amountUSD'], data['userId'], data['title'],
-            data['forId'], data['forType'], recurringInterval=recurringInterval,
-            recurringIntervalCount=recurringIntervalCount)
+            data['forId'], data['forType'], recurringInterval=data['recurringInterval'],
+            recurringIntervalCount=data['recurringIntervalCount'], quantity = data['quantity'])
     _socket.add_route('StripeGetPaymentLink', GetPaymentLink)
 
     def GetAccountLink(data, auth, websocket):

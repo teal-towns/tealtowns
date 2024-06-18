@@ -68,6 +68,14 @@ class ParseService {
     return data;
   }
 
+  Map<String, dynamic> parseMapStringDynamic(Map<String, dynamic> jsonData) {
+    Map<String, dynamic> data = {};
+    jsonData.forEach((key, val) {
+      data[key] = val;
+    });
+    return data;
+  }
+
   List<Map<String, dynamic>> parseListMapStringDynamic(List<dynamic> jsonData) {
     List<Map<String, dynamic>> data = [];
     for (int ii = 0; ii < jsonData.length; ii++) {

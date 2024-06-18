@@ -3,7 +3,7 @@ import json
 import mongo_mock as _mongo_mock
 
 def test_Debug():
-    _mongo_mock.InitAllCollections()
+    # _mongo_mock.InitAllCollections()
     # _mongo_mock.InitLive()
     # from notifications_all import sms_twilio as _sms_twilio
     # ret = _sms_twilio.Send("Here's your first text!", "+19252869131")
@@ -37,4 +37,10 @@ def test_Debug():
     # print (json.dumps(_pay_mercury.GetAccounts(), indent = 2))
     # ret = _pay_mercury.MakeTransaction('MainTemp', 'MercuryUserRevenue', 0.11, 'testOne')
     # print ('ret', ret)
+
+    # import mongo_db
+    # user = mongo_db.find_one('user', { 'email': 'luke.madera@gmail.com' })['item']
+    # print ('user', user)
+    # subscription = mongo_db.find_one('userPaymentSubscription', { 'userId': user['_id']} )['item']
+    # print ('subscription', subscription)
     pass

@@ -7,6 +7,7 @@ import notifications
 
 from notifications_all import email_sendgrid as _email_sendgrid
 from notifications_all import sms_twilio as _sms_twilio
+from pay_mercury import pay_mercury as _pay_mercury
 
 from stubs import stubs_event as _stubs_event
 from stubs import stubs_shared_item as _stubs_shared_item
@@ -68,6 +69,7 @@ def InitAllCollections():
 
         _sms_twilio.SetTestMode(1)
         _email_sendgrid.SetTestMode(1)
+        _pay_mercury.SetTestMode(1)
 
         _inited = 1
 

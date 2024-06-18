@@ -13,19 +13,19 @@ from shared_item import shared_item_payment_math as _shared_item_payment_math
 def test_shared_item_get_payments():
     payments = _shared_item_payment_math.GetPayments(1000, 1*12, 10, 50)
     assert(payments['downPerPerson'] == 100)
-    assert(payments['downPerPersonWithFee'] == 106)
+    assert(payments['downPerPersonWithFee'] == 107)
     assert(payments['monthlyPayment'] == 10)
     assert(payments['monthlyPaymentWithFee'] == 13)
     assert(payments['monthsToPayBack'] == 1)
     payments = _shared_item_payment_math.GetPayments(5000, 1*12, 20, 100)
     assert(payments['downPerPerson'] == 100)
-    assert(payments['downPerPersonWithFee'] == 106)
+    assert(payments['downPerPersonWithFee'] == 107)
     assert(payments['monthlyPayment'] == 15)
     assert(payments['monthlyPaymentWithFee'] == 18)
     assert(payments['monthsToPayBack'] == 1*12)
     payments = _shared_item_payment_math.GetPayments(10000, 1*12, 100, 500)
     assert(payments['downPerPerson'] == 100)
-    assert(payments['downPerPersonWithFee'] == 106)
+    assert(payments['downPerPersonWithFee'] == 107)
     assert(payments['monthlyPayment'] == 10)
     assert(payments['monthlyPaymentWithFee'] == 13)
     assert(payments['monthsToPayBack'] == 1)
@@ -39,11 +39,11 @@ def test_shared_item_get_payments():
     assert(payments['downPerPerson'] == 2145)
     assert(payments['downPerPersonWithFee'] == 2247)
     assert(payments['monthlyPayment'] == 130)
-    assert(payments['monthlyPaymentWithFee'] == 138)
+    assert(payments['monthlyPaymentWithFee'] == 139)
     assert(payments['monthsToPayBack'] == 3*12)
     payments = _shared_item_payment_math.GetPayments(50000, 5*12, 1, 1000)
     assert(payments['downPerPerson'] == 3750)
-    assert(payments['downPerPersonWithFee'] == 3927)
+    assert(payments['downPerPersonWithFee'] == 3928)
     assert(payments['monthlyPayment'] == 1271)
     assert(payments['monthlyPaymentWithFee'] == 1332)
     assert(payments['monthsToPayBack'] == 5*12)
@@ -57,13 +57,13 @@ def test_shared_item_get_payments():
     assert(payments['downPerPerson'] == 10000)
     assert(payments['downPerPersonWithFee'] == 10471)
     assert(payments['monthlyPayment'] == 3834)
-    assert(payments['monthlyPaymentWithFee'] == 4015)
+    assert(payments['monthlyPaymentWithFee'] == 4016)
     assert(payments['monthsToPayBack'] == 5*12)
     payments = _shared_item_payment_math.GetPayments(700000, 12*12, 1, 14000)
     assert(payments['downPerPerson'] == 11862)
-    assert(payments['downPerPersonWithFee'] == 12420)
+    assert(payments['downPerPersonWithFee'] == 12421)
     assert(payments['monthlyPayment'] == 11779)
-    assert(payments['monthlyPaymentWithFee'] == 12333)
+    assert(payments['monthlyPaymentWithFee'] == 12334)
     assert(payments['monthsToPayBack'] == 12*12)
 
     payments = _shared_item_payment_math.GetPayments(500, 1*12, 10, 50)
@@ -75,9 +75,15 @@ def test_shared_item_get_payments():
 
 def test_add_remove_fee():
     assert(_shared_item_payment_math.AddFee(100, withPayFee = False) == 101)
-    assert(_shared_item_payment_math.AddFee(100, withCut = False) == 105)
-    assert(_shared_item_payment_math.AddFee(100) == 106)
-    assert(_shared_item_payment_math.RemoveFee(106) == 100)
+    assert(_shared_item_payment_math.AddFee(100, withCut = False) == 106)
+    assert(_shared_item_payment_math.AddFee(100) == 107)
+    assert(_shared_item_payment_math.RemoveFee(108) == 100)
     assert(_shared_item_payment_math.RemoveFee(105, withPayFee = False) == 104)
-    assert(_shared_item_payment_math.RemoveFee(106, withCut = False) == 101)
+    assert(_shared_item_payment_math.RemoveFee(106, withCut = False) == 100)
     assert(_shared_item_payment_math.AddFee(1000) == 1048)
+
+def test_GetRevenue():
+    assert _shared_item_payment_math.GetRevenue(10) == 2.33
+    assert _shared_item_payment_math.GetRevenue(100) == 2.99
+    assert _shared_item_payment_math.GetRevenue(400) == 4.89
+    assert _shared_item_payment_math.GetRevenue(1000) == 10.69
