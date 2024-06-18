@@ -9,6 +9,7 @@ from event import event_insight as _event_insight
 from event import event_payment as _event_payment
 from event import user_event as _user_event
 from event import user_weekly_event as _user_weekly_event
+from user_payment import user_payment as _user_payment
 import lodash
 import log
 import mongo_db
@@ -133,8 +134,14 @@ def Remove(weeklyEventId: str):
     # mongo_db.delete_many('userEvent', { 'eventId': { '$in': eventIds } })
 
     # mongo_db.delete_many('event', { 'weeklyEventId': weeklyEventId })
-    # TODO - end stripe subscription
-    # mongo_db.delete_many('userWeeklyEvent', { 'weeklyEventId': weeklyEventId })
+
+    # End stripe subscription
+    query = { 'forId': weeklyEventId, 'forType': 'weeklyEvent' }
+    userPaymentSubscriptions = mongo_db.find('userPaymentSubscription', query)['items']
+    for userPaymentSubscription in userPaymentSubscriptions:
+        _user_payment.CancelSubscription(userPaymentSubscription['_id'])
+    # Already done individually IF were paid events.
+    mongo_db.delete_many('userWeeklyEvent', { 'weeklyEventId': weeklyEventId })
     # return _mongo_db_crud.RemoveById('weeklyEvent', weeklyEventId)
     mutation = { '$set': { 'archived': 1 } }
     query = { '_id': mongo_db.to_object_id(weeklyEventId) }

@@ -16,6 +16,7 @@ class SharedItemService {
   double _maintenancePerPersonPerYearMin = 5;
   double _investmentReturnPerYearFactor = 0.1;
   double _payFeeFactor = 0.029 + 0.008;
+  double _payFeeFixed = 0.3;
   double _cutFactor = 0.01;
   double _lowFeeAmount = 300;
   double _downPerPersonMinFactor = 0.05;
@@ -78,8 +79,11 @@ class SharedItemService {
   }
 
   double AddFee(double amount, {bool withCut = true, bool withPayFee = true}) {
+    if (amount <= 0) {
+      return 0.0;
+    }
     double cut = withCut ? (amount * _cutFactor).ceil().toDouble() : 0;
-    double payFee = withPayFee ? (amount * _payFeeFactor).ceil().toDouble() : 0;
+    double payFee = withPayFee ? (amount * _payFeeFactor + _payFeeFixed).ceil().toDouble() : 0;
     if (amount < _lowFeeAmount && amount >= 1) {
       payFee += 1;
     }

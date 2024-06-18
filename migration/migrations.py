@@ -5,6 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
+    PayQuantityAndStripeIds()
     # AddPositiveVotes()
     # AddNeighborhoodUName()
     # WeeklyEventArchived()
@@ -15,6 +16,41 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def PayQuantityAndStripeIds():
+    collections = ['userPayment', 'userPaymentSubscription']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'quantity': { '$exists': 0 } }
+            fields = {}
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('PayQuantityAndStripeIds', collection, len(items))
+            for item in items:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mutation = {
+                    '$set': {
+                        'quantity': 1,
+                    }
+                }
+                if collection == 'userPaymentSubscription':
+                    mutation['$unset'] = {'stripeId': ''}
+                    mutation['$set']['stripeIds'] = { 'checkoutSession': item['stripeId'] }
+                    mutation['$set']['credits'] = 0
+
+                # print (collection, query, mutation)
+                mongo_db.update_one(collection, query, mutation)
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def AddPositiveVotes():
     collection = 'eventFeedback'

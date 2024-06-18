@@ -9,7 +9,7 @@ import ml_config
 _config = ml_config.get_config()
 
 def StripePaymentLink(amountUSD: float, userId: str, title: str, forId: str, forType: str,
-    recurringInterval: str = '', recurringIntervalCount: int = 1):
+    recurringInterval: str = '', recurringIntervalCount: int = 1, quantity: int = 1):
     ret = { 'valid': 1, 'message': '', 'url': '', 'priceId': '', }
     # title = GetPaymentName(title, '')
     stripe.api_key = _config['stripe']['secret']
@@ -40,19 +40,28 @@ def StripePaymentLink(amountUSD: float, userId: str, title: str, forId: str, for
     metadata = {
         'forId': forId,
         'forType': forType,
+        'quantity': quantity,
         'userId': userId,
         'stripePriceId': priceId,
     }
     if recurring:
         metadata['recurringInterval'] = recurringInterval
         metadata['recurringIntervalCount'] = recurringIntervalCount
+        res = stripe.PaymentLink.create(
+            line_items=[
+                {"price": priceId, "quantity": 1}
+            ],
+            metadata = metadata,
+            subscription_data={"metadata": metadata},
+        )
+    else:
+        res = stripe.PaymentLink.create(
+            line_items=[
+                {"price": priceId, "quantity": 1}
+            ],
+            metadata = metadata,
+        )
 
-    res = stripe.PaymentLink.create(
-        line_items=[
-            {"price": priceId, "quantity": 1}
-        ],
-        metadata = metadata,
-    )
     ret['url'] = res['url']
 
     return ret
@@ -112,6 +121,15 @@ def StripeAccountLink(userId: str):
         _mongo_db_crud.Save('userStripeAccount', userStripeAccount)
 
     ret['url'] = res['url']
+    return ret
+
+def StripeCancelSubscription(subscriptionId: str):
+    ret = { 'valid': 1, 'message': '', }
+    stripe.api_key = _config['stripe']['secret']
+    res = stripe.Subscription.cancel(subscriptionId)
+    if res['status'] != 'canceled':
+        ret['valid'] = 0
+        ret['message'] = 'Failed to cancel subscription.'
     return ret
 
 def StripePayUser(userId: str, amountUSD: float):
