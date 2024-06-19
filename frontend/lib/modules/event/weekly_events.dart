@@ -7,6 +7,7 @@ import 'package:universal_html/html.dart' as html;
 
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
+import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/form_input/input_location.dart';
 import '../../common/layout_service.dart';
@@ -15,6 +16,7 @@ import '../../common/location_service.dart';
 import '../../common/socket_service.dart';
 import '../about/welcome_about.dart';
 import './weekly_event_class.dart';
+import '../neighborhood/neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
 
 class WeeklyEvents extends StatefulWidget {
@@ -36,6 +38,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Buttons _buttons = Buttons();
+  DateTimeService _dateTime = DateTimeService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
   LinkService _linkService = LinkService();
@@ -68,6 +71,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   void initState() {
     super.initState();
 
+    var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+
     _routeIds.add(_socketService.onRoute('searchWeeklyEvents', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
@@ -75,7 +80,17 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         if (data.containsKey('weeklyEvents')) {
           _weeklyEvents = [];
           for (var item in data['weeklyEvents']) {
-            _weeklyEvents.add(WeeklyEventClass.fromJson(item));
+            WeeklyEventClass weeklyEvent = WeeklyEventClass.fromJson(item);
+            if (neighborhoodState.defaultUserNeighborhood != null &&
+              neighborhoodState.defaultUserNeighborhood.neighborhood.timezone.length > 0 &&
+              neighborhoodState.defaultUserNeighborhood.neighborhood.timezone != weeklyEvent.timezone) {
+              Map<String, dynamic> ret = _dateTime.WeekdayTimezone(weeklyEvent.dayOfWeek, weeklyEvent.startTime,
+                weeklyEvent.timezone, neighborhoodState.defaultUserNeighborhood.neighborhood.timezone);
+              weeklyEvent.timezone = neighborhoodState.defaultUserNeighborhood.neighborhood.timezone;
+              weeklyEvent.dayOfWeek = ret['dayOfWeek'];
+              weeklyEvent.startTime = ret['startTime'];
+            }
+            _weeklyEvents.add(weeklyEvent);
           }
           if (_weeklyEvents.length == 0) {
             _message = 'No results found.';

@@ -239,6 +239,7 @@
             "type": "Point [https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb]",
             "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         },
+        "timezone": "{String} America/Los_Angeles",
         "title": "{String}"
     },
     "userNeighborhood": {

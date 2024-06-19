@@ -29,6 +29,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     {'value': 5, 'label': 'Saturday'},
     {'value': 6, 'label': 'Sunday'},
   ];
+  List<Map<String, dynamic>> _optsNeighborhood = [];
   Map<String, Map<String, dynamic>> _formFields = {
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'location': { 'type': 'location', 'nestedCoordinates': true },
@@ -59,6 +60,15 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
     if (neighborhoodState.defaultUserNeighborhood != null) {
       _formValsDefault['neighborhoodUName'] = neighborhoodState.defaultUserNeighborhood!.neighborhood.uName;
+
+      if (neighborhoodState.userNeighborhoods.length > 1) {
+        _optsNeighborhood = [];
+        for (int i = 0; i < neighborhoodState.userNeighborhoods.length; i++) {
+          String uName = neighborhoodState.userNeighborhoods[i].neighborhood.uName;
+          _optsNeighborhood.add({'value': uName, 'label': uName, });
+        }
+        _formFields['neighborhoodUName'] = { 'type': 'select', 'options': _optsNeighborhood, 'label': 'Neighborhood', };
+      }
     } else {
       Timer(Duration(milliseconds: 200), () {
         context.go('/neighborhoods');

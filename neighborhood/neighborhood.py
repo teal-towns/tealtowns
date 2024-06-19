@@ -1,3 +1,4 @@
+import date_time
 import mongo_db
 from common import mongo_db_crud as _mongo_db_crud
 from event import event as _event
@@ -77,3 +78,8 @@ def SearchNear(stringKeyVals: dict = {}, locationKeyVals: dict = {}, limit: int 
                     break
 
     return ret
+
+def Save(neighborhood: dict):
+    if ('timezone' not in neighborhood or neighborhood['timezone'] == '') and 'location' in neighborhood:
+        neighborhood['timezone'] = date_time.GetTimezoneFromLngLat(neighborhood['location']['coordinates'])
+    return _mongo_db_crud.Save('neighborhood', neighborhood)
