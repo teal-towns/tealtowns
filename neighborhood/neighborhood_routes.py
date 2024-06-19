@@ -24,7 +24,7 @@ def addRoutes():
     def Save(data, auth, websocket):
         regex = re.compile('[^a-zA-Z0-9]')
         data['neighborhood']['uName'] = regex.sub('', data['neighborhood']['uName'].lower())
-        return _mongo_db_crud.Save('neighborhood', data['neighborhood'])
+        return _neighborhood.Save(data['neighborhood'])
     _socket.add_route('SaveNeighborhood', Save)
 
     def Remove(data, auth, websocket):

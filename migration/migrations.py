@@ -5,7 +5,8 @@ import lodash
 import mongo_db
 
 def RunAll():
-    PayQuantityAndStripeIds()
+    AddTimezoneToNeighborhood()
+    # PayQuantityAndStripeIds()
     # AddPositiveVotes()
     # AddNeighborhoodUName()
     # WeeklyEventArchived()
@@ -16,6 +17,36 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def AddTimezoneToNeighborhood():
+    collection = 'neighborhood'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'timezone': { '$exists': 0 } }
+        fields = { '_id': 1, 'location': 1,}
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('AddTimezoneToNeighborhood', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'timezone': date_time.GetTimezoneFromLngLat(item['location']['coordinates']),
+                }
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
 
 def PayQuantityAndStripeIds():
     collections = ['userPayment', 'userPaymentSubscription']
