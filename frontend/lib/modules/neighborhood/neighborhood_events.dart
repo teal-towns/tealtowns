@@ -74,7 +74,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       body: Column(
         children: [
           WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
-            showFilters: 0, pageWrapper: 0, updateUrl: 0,),
+            showFilters: 0, pageWrapper: 0, updateUrl: 0, updateLngLat: 0,),
           _style.SpacingH('medium'),
           _style.Text1('Share with your neighbors', size: 'large'),
           _style.SpacingH('medium'),

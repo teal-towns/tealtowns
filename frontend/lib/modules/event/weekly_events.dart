@@ -28,9 +28,10 @@ class WeeklyEvents extends StatefulWidget {
   final int showFilters;
   final int pageWrapper;
   final int updateUrl;
+  final int updateLngLat;
 
   WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
-    this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateUrl = 1, });
+    this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateUrl = 1, this.updateLngLat = 1, });
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -225,7 +226,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
 
   void _init() async {
-    if (!_skipCurrentLocation || widget.showFilters <= 0) {
+    if ((!_skipCurrentLocation || widget.showFilters <= 0) && widget.updateLngLat > 0) {
       if (_locationService.LocationValid(_filters['lngLat'])) {
         _search();
       }
