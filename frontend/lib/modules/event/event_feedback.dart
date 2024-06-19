@@ -10,7 +10,8 @@ import './user_feedback_class.dart';
 class EventFeedback extends StatefulWidget {
   String weeklyEventId;
   String eventId;
-  EventFeedback({ this.weeklyEventId = '', this.eventId = '',});
+  int showDetails;
+  EventFeedback({ this.weeklyEventId = '', this.eventId = '', this.showDetails = 1,});
 
   @override
   _EventFeedbackState createState() => _EventFeedbackState();
@@ -36,6 +37,7 @@ class _EventFeedbackState extends State<EventFeedback> {
     'willMeetNewNeighbor': 0,
     'invites': 0,
   };
+  bool _show = true;
 
   @override
   void initState() {
@@ -65,6 +67,10 @@ class _EventFeedbackState extends State<EventFeedback> {
     } else if (widget.weeklyEventId.length > 0) {
       _socketService.emit('GetEventFeedbackByWeeklyEvent',
         {'weeklyEventId': widget.weeklyEventId, 'withUserFeedback': 1});
+    }
+
+    if (widget.showDetails < 1) {
+      _show = false;
     }
   }
 
@@ -126,6 +132,24 @@ class _EventFeedbackState extends State<EventFeedback> {
     }
     String peopleCount = _userFeedbacks.length == 1 ? '1 person' : '${_userFeedbacks.length} people';
     String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
+    List<Widget> colsTitle = [
+      Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
+      SizedBox(height: 10),
+    ];
+    if (!_show && _userFeedbacks.length > 0) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextButton(child: Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
+            onPressed: () {
+              setState(() { _show = true; });
+            }
+          ),
+          SizedBox(height: 10),
+        ],
+      );
+    }
+
     List<Widget> colsImprove = [];
     if (_feedbackVoteStrings.length > 0) {
       colsImprove = [
@@ -170,8 +194,7 @@ class _EventFeedbackState extends State<EventFeedback> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
-        SizedBox(height: 10),
+        ...colsTitle,
         ...colsImprove,
         ...colsEnjoyed,
         ...colsWillJoin,
