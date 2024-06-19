@@ -61,33 +61,35 @@ class _NeighborhoodState extends State<Neighborhood> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        _neighborhood = NeighborhoodClass.fromJson(data['neighborhood']);
-        _weeklyEventsCount = data['weeklyEventsCount'];
-        _sharedItemsCount = data['sharedItemsCount'];
-        _usersCount = data['usersCount'];
-        _uniqueEventUsersCount = data['uniqueEventUsersCount'];
-        _weeklyEvents = [];
-        for (var i = 0; i < data['weeklyEvents'].length; i++) {
-          _weeklyEvents.add(WeeklyEventClass.fromJson(data['weeklyEvents'][i]));
+        if (data.containsKey('weeklyEvents')) {
+          _neighborhood = NeighborhoodClass.fromJson(data['neighborhood']);
+          _weeklyEventsCount = data['weeklyEventsCount'];
+          _sharedItemsCount = data['sharedItemsCount'];
+          _usersCount = data['usersCount'];
+          _uniqueEventUsersCount = data['uniqueEventUsersCount'];
+          _weeklyEvents = [];
+          for (var i = 0; i < data['weeklyEvents'].length; i++) {
+            _weeklyEvents.add(WeeklyEventClass.fromJson(data['weeklyEvents'][i]));
+          }
+          _sharedItems = [];
+          for (var i = 0; i < data['sharedItems'].length; i++) {
+            _sharedItems.add(SharedItemClass.fromJson(data['sharedItems'][i]));
+          }
+          _belongingSteps = _neighborhoodJourneyService.BelongingStepsWithComplete(_uniqueEventUsersCount, _weeklyEventsCount, _sharedItemsCount);
+          _sustainableSteps = _neighborhoodJourneyService.SustainableSteps();
+          setState(() {
+            _neighborhood = _neighborhood;
+            _weeklyEventsCount = _weeklyEventsCount;
+            _sharedItemsCount = _sharedItemsCount;
+            _usersCount = _usersCount;
+            _uniqueEventUsersCount = _uniqueEventUsersCount;
+            _weeklyEvents = _weeklyEvents;
+            _sharedItems = _sharedItems;
+            _belongingSteps = _belongingSteps;
+            _sustainableSteps = _sustainableSteps;
+            _loading = false;
+          });
         }
-        _sharedItems = [];
-        for (var i = 0; i < data['sharedItems'].length; i++) {
-          _sharedItems.add(SharedItemClass.fromJson(data['sharedItems'][i]));
-        }
-        _belongingSteps = _neighborhoodJourneyService.BelongingStepsWithComplete(_uniqueEventUsersCount, _weeklyEventsCount, _sharedItemsCount);
-        _sustainableSteps = _neighborhoodJourneyService.SustainableSteps();
-        setState(() {
-          _neighborhood = _neighborhood;
-          _weeklyEventsCount = _weeklyEventsCount;
-          _sharedItemsCount = _sharedItemsCount;
-          _usersCount = _usersCount;
-          _uniqueEventUsersCount = _uniqueEventUsersCount;
-          _weeklyEvents = _weeklyEvents;
-          _sharedItems = _sharedItems;
-          _belongingSteps = _belongingSteps;
-          _sustainableSteps = _sustainableSteps;
-          _loading = false;
-        });
       } else {
         context.go('/neighborhoods');
       }
@@ -152,7 +154,7 @@ class _NeighborhoodState extends State<Neighborhood> {
       colsWeeklyEvents = [
         _layoutService.WrapWidth(elements, width: 300),
         SizedBox(height: 10),
-        _buttons.LinkElevated(context, 'View All Events', '/weekly-events?lng=${lng}&lat=${lat}'),
+        _buttons.LinkElevated(context, 'View All Events', '/ne/${_neighborhood.uName}'),
       ];
     } else {
       colsWeeklyEvents = [

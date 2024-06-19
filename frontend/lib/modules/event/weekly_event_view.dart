@@ -169,19 +169,19 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     List<Widget> buttons = [];
     if (currentUserState.isLoggedIn && _weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
       buttons = [
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             _linkService.Go('/weekly-event-save?id=${_weeklyEvent.id}', context, currentUserState: currentUserState);
           },
           child: Text('Edit'),
         ),
         SizedBox(width: 10),
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             _socketService.emit('removeWeeklyEvent', { 'id': _weeklyEvent.id });
           },
           child: Text('Delete'),
-          style: ElevatedButton.styleFrom(
+          style: TextButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.error,
           ),
         ),
@@ -326,7 +326,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       attendeeInfo += [
         // Text('This is a free event, no RSVP required!'),
         // SizedBox(height: 10),
-        ...colsShare,
+        // ...colsShare,
       ];
     } else {
       if (_userEvent.id.length > 0) {
@@ -379,19 +379,19 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         //     ];
         //   }
         // }
-        if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
-          String text1 = '';
-          if (_userEvent.creditsEarned > 0) {
-            text1 += '${_userEvent.creditsEarned} credits earned. ';
-          }
-          if (_userEvent.creditsRedeemed > 0) {
-            text1 += '${_userEvent.creditsRedeemed} credits redeemed. ';
-          }
-          attendeeInfo += [
-            Text(text1),
-            SizedBox(height: 10),
-          ];
-        }
+        // if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
+        //   String text1 = '';
+        //   if (_userEvent.creditsEarned > 0) {
+        //     text1 += '${_userEvent.creditsEarned} credits earned. ';
+        //   }
+        //   if (_userEvent.creditsRedeemed > 0) {
+        //     text1 += '${_userEvent.creditsRedeemed} credits redeemed. ';
+        //   }
+        //   attendeeInfo += [
+        //     Text(text1),
+        //     SizedBox(height: 10),
+        //   ];
+        // }
       }
     }
     if (!alreadySignedUp) {
@@ -462,7 +462,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         ...thisWeekEvent,
         ...attendeeInfo,
         SizedBox(height: 10),
-        EventFeedback(weeklyEventId: _weeklyEvent.id),
+        EventFeedback(weeklyEventId: _weeklyEvent.id, showDetails: 0,),
         SizedBox(height: 10),
       ]
     );
@@ -482,12 +482,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         Text('Share this event with your neighbors:'),
         SizedBox(height: 10),
         ...colsShareQR,
+        _buttons.LinkElevated(context, 'View All Events', '/ne/${_weeklyEvent.neighborhoodUName}'),
+        SizedBox(height: 10),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...buttons,
           ]
         ),
+        SizedBox(height: 10),
         ...colsInsights,
         SizedBox(height: 10),
       ]

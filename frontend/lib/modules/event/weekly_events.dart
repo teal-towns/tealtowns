@@ -26,9 +26,11 @@ class WeeklyEvents extends StatefulWidget {
   final String type;
   final String routePath;
   final int showFilters;
+  final int pageWrapper;
+  final int updateUrl;
 
   WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
-    this.routePath = 'weekly-events', this.showFilters = 1 });
+    this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateUrl = 1, });
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -183,29 +185,35 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       ], width: 225);
     }
 
+    Widget body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // WelcomeAbout(),
+        // SizedBox(height: 10),
+        ...columnsCreate,
+        Align(
+          alignment: Alignment.center,
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: widgetFilters,
+          ),
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: _buildResults(context, currentUserState),
+        ),
+      ]
+    );
+
+    if (widget.pageWrapper < 1) {
+      return body;
+    }
+
     return AppScaffoldComponent(
       listWrapper: true,
       width: 1500,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // WelcomeAbout(),
-          // SizedBox(height: 10),
-          ...columnsCreate,
-          Align(
-            alignment: Alignment.center,
-            child: Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: widgetFilters,
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: _buildResults(context, currentUserState),
-          ),
-        ]
-      ),
+      body: body,
     );
   }
 
@@ -394,7 +402,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
   
   void _UpdateUrl() {
-    if(kIsWeb) {
+    if(kIsWeb && widget.updateUrl > 0) {
       String? lng = _filters['lngLat'][0]?.toString();
       String? lat = _filters['lngLat'][1]?.toString();
       String? maxMeters = _filters['maxMeters']?.toString();
