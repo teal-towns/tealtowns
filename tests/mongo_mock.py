@@ -31,6 +31,7 @@ _collectionNames = ['user', 'image', 'blog',
     'userMessage',
     'eventFeedback', 'userFeedback',
     'neighborhoodStatsMonthlyCache', 'eventInsight',
+    'icebreaker',
 ]
 
 def InitLive():

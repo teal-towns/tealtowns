@@ -26,6 +26,12 @@ def Allowed(route, auth, data):
         "removeBlog",
         "saveBlog",
     ]
+
+    byRoute = {
+        'SaveUserRole': { 'roles': ['editUser'] },
+        'SaveIcebreaker': { 'roles': ['tealtownsTeam'] },
+    }
+
     if route in perms or route in userIdRequired or route in admin:
         if len(auth['userId']) == 0:
             ret['valid'] = 0
@@ -54,5 +60,18 @@ def Allowed(route, auth, data):
             ret['valid'] = 0
             ret['message'] = "Admin privileges required"
             return ret
+    
+    if route in byRoute:
+        if len(auth['userId']) == 0 or "_" in auth['userId'] or \
+            not permission_user.LoggedIn(auth['userId'], auth['sessionId']):
+            ret['valid'] = 0
+            ret['message'] = "Permission denied"
+            return ret
+        if 'roles' in byRoute[route]:
+            for role in byRoute[route]['roles']:
+                if not permission_user.HasRole(auth['userId'], role):
+                    ret['valid'] = 0
+                    ret['message'] = role + " user role required"
+                    return ret
 
     return ret

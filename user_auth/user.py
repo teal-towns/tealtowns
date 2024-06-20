@@ -8,17 +8,22 @@ import ml_config
 
 _config = ml_config.get_config()
 
-def SaveUser(user):
+def SaveUser(user, keys: list = ['first_name', 'last_name', 'lngLat']):
     ret = { 'valid': 0, 'message': '' } 
     query = {
         '_id': mongo_db.to_object_id(user['_id'])
     }
-    saveVals = lodash.pick(user, ['first_name', 'last_name', 'lngLat'])
+    saveVals = lodash.pick(user, keys)
+    if 'roles' in saveVals:
+        if not isinstance(saveVals['roles'], list):
+            saveVals['roles'] = saveVals['roles'].split(',')
+            saveVals['roles'] = [x.strip() for x in saveVals['roles']]
     if len(saveVals) > 0:
         mutation = {
             '$set': saveVals
         }
         result = mongo_db.update_one('user', query, mutation)
+        ret['valid'] = 1
     return ret
 
 def GetPhone(userId: str, requireVerified: int = 0):

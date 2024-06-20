@@ -27,6 +27,8 @@ def addRoutes():
     _socket.add_route('forgotPassword', ForgotPassword)
 
     def GetUserById(data, auth, websocket):
+        if 'id' in data:
+            data['userId'] = data['id']
         user = _user_auth.getById(data['userId'])
         ret = { 'valid': 1, 'message': '', 'user': user }
         ret = _route_parse.formatRet(data, ret)

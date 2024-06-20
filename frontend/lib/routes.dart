@@ -11,6 +11,8 @@ import './modules/user_auth/user_password_reset.dart';
 import './modules/user_auth/user_signup.dart';
 import './modules/user_auth/user.dart';
 
+import './modules/user_auth/users_save.dart';
+
 import './modules/design_library/design_library.dart';
 
 import './modules/about/about.dart';
@@ -26,6 +28,9 @@ import './modules/event/weekly_event_save.dart';
 import './modules/event/weekly_event_view.dart';
 import './modules/event/event_feedback_save_page.dart';
 import './modules/event/event_feedback_page.dart';
+
+import './modules/icebreaker/icebreakers.dart';
+import './modules/icebreaker/icebreaker_save.dart';
 
 import './modules/land/land_page.dart';
 
@@ -57,6 +62,8 @@ class Routes {
   static const passwordReset = '/password-reset';
   static const signup = '/signup';
 
+  static const usersSave = '/users-save';
+
   static const designLibrary = '/design-library';
 
   static const user = '/user';
@@ -77,6 +84,9 @@ class Routes {
   static const eat = '/eat';
   static const eventFeedbackSave = '/event-feedback-save';
   static const eventFeedback = '/event-feedback';
+
+  static const icebreakers = '/icebreakers';
+  static const icebreakerSave = '/icebreaker-save';
 
   static const land = '/land';
 
@@ -152,6 +162,11 @@ class AppGoRouter {
       ),
 
       GoRoute(
+        path: Routes.usersSave,
+        builder: (context, state) => UsersSave(),
+      ),
+
+      GoRoute(
         path: Routes.about,
         builder: (BuildContext context, GoRouterState state) => About(),
       ),
@@ -191,6 +206,17 @@ class AppGoRouter {
           }
           return BlogList();
         },
+      ),
+
+      GoRoute(
+        path: Routes.icebreakers,
+        builder: (context, state) => Icebreakers(),
+      ),
+      GoRoute(
+        path: Routes.icebreakerSave,
+        builder: (BuildContext context, GoRouterState state) => IcebreakerSave(
+          id: state.uri.queryParameters['id'] ?? '',
+        ),
       ),
 
       GoRoute(

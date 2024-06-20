@@ -20,6 +20,7 @@ import './user_event_class.dart';
 import './user_weekly_event_save.dart';
 import './user_event_save.dart';
 import './weekly_event_class.dart';
+import '../icebreaker/icebreaker_class.dart';
 import '../user_auth/current_user_state.dart';
 
 class WeeklyEventView extends StatefulWidget {
@@ -53,6 +54,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   int _nonHostAttendeesWaitingCount = 0;
   UserEventClass _userEvent = UserEventClass.fromJson({});
   List<UserEventClass> _userEvents = [];
+  List<IcebreakerClass> _icebreakers = [];
 
   @override
   void initState() {
@@ -131,6 +133,20 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         setState(() { _userEvents = _userEvents; });
       }
     }));
+
+    _routeIds.add(_socketService.onRoute('GetRandomIcebreakers', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _icebreakers = [];
+        for (var i = 0; i < data['icebreakers'].length; i++) {
+          _icebreakers.add(IcebreakerClass.fromJson(data['icebreakers'][i]));
+        }
+        setState(() { _icebreakers = _icebreakers; });
+      }
+    }));
+
+    _socketService.emit('GetRandomIcebreakers', {'count': 1});
   }
 
   @override
@@ -446,6 +462,14 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
+    List<Widget> colsIcebreakers = [];
+    if (_icebreakers.length > 0) {
+      colsIcebreakers += [
+        Text('Icebreaker: ${_icebreakers[0].icebreaker}'),
+        SizedBox(height: 10),
+      ];
+    }
+
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -464,6 +488,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         SizedBox(height: 10),
         EventFeedback(weeklyEventId: _weeklyEvent.id, showDetails: 0,),
         SizedBox(height: 10),
+        ...colsIcebreakers,
       ]
     );
 
