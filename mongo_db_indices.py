@@ -76,3 +76,5 @@ def create_all_indices(db):
     db['neighborhoodStatsMonthlyCache'].create_index([('end', 1)], unique=False)
 
     db['eventInsight'].create_index([('eventId', 1)], unique=True)
+
+    db['icebreaker'].create_index([('icebreaker', 1)], unique=True)

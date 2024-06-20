@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
+import './form_input/image_save.dart';
 import './form_input/input_fields.dart';
+import './form_input/input_location.dart';
 import './layout_service.dart';
 import './socket_service.dart';
 
@@ -14,10 +16,12 @@ class Paging extends StatefulWidget {
   String sortKeys;
   Map<String, dynamic> dataDefault;
   List<Map<String, dynamic>> sortOpts;
+  Map<String, Map<String, dynamic>>? filterFields;
+  double filterWidth;
 
   Paging({Key? key, required this.body, this.dataName= '', this.routeGet = '', this.onGet = null,
     this.itemsPerPage = 5, this.sortKeys = '-createdAt', this.dataDefault = const {},
-    this.sortOpts = const [], }) : super(key: key);
+    this.sortOpts = const [], this.filterFields = null, this.filterWidth = 300, }) : super(key: key);
 
   @override
   _PagingState createState() => _PagingState();
@@ -109,15 +113,21 @@ class _PagingState extends State<Paging> {
       ];
     }
     List<Widget> colsFilters = [];
+    if (widget.filterFields != null) {
+      for (var keyVal in widget.filterFields!.entries) {
+        colsFilters.add(FormField(keyVal.key, keyVal.value));
+      }
+    }
     if (widget.sortOpts.length > 0) {
+      colsFilters.add(_inputFields.inputSelect(widget.sortOpts, _filters, 'sortKeys', label: 'Sort', onChanged: (String newVal) {
+        widget.sortKeys = newVal;
+        GetItems(pageNumber: 1);
+      }));
+    }
+    if (colsFilters.length > 0) {
       colsFilters = [
-        _layoutService.WrapWidth([
-          _inputFields.inputSelect(widget.sortOpts, _filters, 'sortKeys', label: 'Sort', onChanged: (String newVal) {
-            widget.sortKeys = newVal;
-            GetItems(pageNumber: 1);
-          }),
-        ]),
-        SizedBox(height: 10),
+        _layoutService.WrapWidth(colsFilters, width: widget.filterWidth,),
+        SizedBox(height: 20),
       ];
     }
     return (
@@ -158,5 +168,47 @@ class _PagingState extends State<Paging> {
       data[key] = widget.dataDefault[key];
     }
     _socketService.emit(widget.routeGet, data);
+  }
+
+  // Copied / adapted from form_save - abstract this (pull out _filters?)
+  Widget FormField(key, value) {
+    Widget input = SizedBox.shrink();
+    String label = '';
+    String helpText = value.containsKey('helpText') ? value['helpText'] : '';
+    if (value.containsKey('label')) {
+      label = value['label'];
+    } else {
+      label = key.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match[0]}');
+      label = label[0].toUpperCase() + label.substring(1);
+    }
+    bool required = value.containsKey('required') ? value['required'] : true;
+    if (value['type'] == 'location') {
+      bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
+      input = InputLocation(formVals: _filters, formValsKey: key, label: label, helpText: helpText,
+        nestedCoordinates: nestedCoordinates);
+    } else if (value['type'] == 'select') {
+      input = _inputFields.inputSelect(value['options'], _filters, key, label: label, helpText: helpText,);
+    } else if (value['type'] == 'selectButtons') {
+      input = _inputFields.inputSelectButtons(value['options'], _filters, key, label: label, helpText: helpText,);
+    } else if (value['type'] == 'multiSelectButtons') {
+      input = _inputFields.inputMultiSelectButtons(value['options'], _filters, key, label: label, helpText: helpText,);
+    } else if (value['type'] == 'time') {
+      input = _inputFields.inputTime(_filters, key, label: label, required: required, helpText: helpText,);
+    } else if (value['type'] == 'number') {
+      double? min = value.containsKey('min') ? value['min'] : null;
+      double? max = value.containsKey('max') ? value['max'] : null;
+      input = _inputFields.inputNumber(_filters, key, label: label, required: required, min: min, max: max,
+        helpText: helpText,);
+    } else if (value['type'] == 'image') {
+      bool multiple = value.containsKey('multiple') ? value['multiple'] : false;
+      int maxImageSize = value.containsKey('maxImageSize') ? value['maxImageSize'] : 1200;
+      input = ImageSaveComponent(formVals: _filters, formValsKey: key, multiple: multiple,
+        label: label, imageUploadSimple: true, maxImageSize: maxImageSize,);
+    } else {
+      int minLines = value.containsKey('minLines') ? value['minLines'] : 1;
+      input = _inputFields.inputText(_filters, key, label: label, required: required, minLines: minLines,
+        helpText: helpText,);
+    }
+    return input;
   }
 }

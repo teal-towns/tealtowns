@@ -234,6 +234,16 @@ def findDistinct(collectionName: str, distinctField: str, query: dict, db1 = Non
         'values': values,
     }
 
+def FindRandom(collectionName: str, count: int = 1, db1 = None):
+    db = db_default(db1)
+    collection = get_collection(collectionName, db)
+    results = collection.aggregate([
+        { "$sample": { "size": count } }
+    ])
+    return {
+        'items': list(map(map_object_id_to_string, results))
+    }
+
 def delete_one(collection_name, query, db1 = None):
     db = db_default(db1)
     collection = get_collection(collection_name, db)
