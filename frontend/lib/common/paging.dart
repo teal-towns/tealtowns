@@ -167,6 +167,11 @@ class _PagingState extends State<Paging> {
     for (var key in widget.dataDefault.keys) {
       data[key] = widget.dataDefault[key];
     }
+    for (var keyVal in widget.filterFields!.entries) {
+      if (_filters.containsKey(keyVal.key)) {
+        data[keyVal.key] = _filters[keyVal.key];
+      }
+    }
     _socketService.emit(widget.routeGet, data);
   }
 
@@ -182,33 +187,39 @@ class _PagingState extends State<Paging> {
       label = label[0].toUpperCase() + label.substring(1);
     }
     bool required = value.containsKey('required') ? value['required'] : true;
-    if (value['type'] == 'location') {
-      bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
-      input = InputLocation(formVals: _filters, formValsKey: key, label: label, helpText: helpText,
-        nestedCoordinates: nestedCoordinates);
-    } else if (value['type'] == 'select') {
-      input = _inputFields.inputSelect(value['options'], _filters, key, label: label, helpText: helpText,);
-    } else if (value['type'] == 'selectButtons') {
-      input = _inputFields.inputSelectButtons(value['options'], _filters, key, label: label, helpText: helpText,);
-    } else if (value['type'] == 'multiSelectButtons') {
-      input = _inputFields.inputMultiSelectButtons(value['options'], _filters, key, label: label, helpText: helpText,);
-    } else if (value['type'] == 'time') {
-      input = _inputFields.inputTime(_filters, key, label: label, required: required, helpText: helpText,);
-    } else if (value['type'] == 'number') {
-      double? min = value.containsKey('min') ? value['min'] : null;
-      double? max = value.containsKey('max') ? value['max'] : null;
-      input = _inputFields.inputNumber(_filters, key, label: label, required: required, min: min, max: max,
-        helpText: helpText,);
-    } else if (value['type'] == 'image') {
-      bool multiple = value.containsKey('multiple') ? value['multiple'] : false;
-      int maxImageSize = value.containsKey('maxImageSize') ? value['maxImageSize'] : 1200;
-      input = ImageSaveComponent(formVals: _filters, formValsKey: key, multiple: multiple,
-        label: label, imageUploadSimple: true, maxImageSize: maxImageSize,);
+    // if (value['type'] == 'location') {
+    //   bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
+    //   input = InputLocation(formVals: _filters, formValsKey: key, label: label, helpText: helpText,
+    //     nestedCoordinates: nestedCoordinates);
+    // } else if (value['type'] == 'select') {
+    if (value['type'] == 'select') {
+      input = _inputFields.inputSelect(value['options'], _filters, key, label: label, helpText: helpText,
+        onChanged: (String newVal) { OnChanged(); }, );
+    // } else if (value['type'] == 'selectButtons') {
+    //   input = _inputFields.inputSelectButtons(value['options'], _filters, key, label: label, helpText: helpText,);
+    // } else if (value['type'] == 'multiSelectButtons') {
+    //   input = _inputFields.inputMultiSelectButtons(value['options'], _filters, key, label: label, helpText: helpText,);
+    // } else if (value['type'] == 'time') {
+    //   input = _inputFields.inputTime(_filters, key, label: label, required: required, helpText: helpText,);
+    // } else if (value['type'] == 'number') {
+    //   double? min = value.containsKey('min') ? value['min'] : null;
+    //   double? max = value.containsKey('max') ? value['max'] : null;
+    //   input = _inputFields.inputNumber(_filters, key, label: label, required: required, min: min, max: max,
+    //     helpText: helpText,);
+    // } else if (value['type'] == 'image') {
+    //   bool multiple = value.containsKey('multiple') ? value['multiple'] : false;
+    //   int maxImageSize = value.containsKey('maxImageSize') ? value['maxImageSize'] : 1200;
+    //   input = ImageSaveComponent(formVals: _filters, formValsKey: key, multiple: multiple,
+    //     label: label, imageUploadSimple: true, maxImageSize: maxImageSize,);
     } else {
       int minLines = value.containsKey('minLines') ? value['minLines'] : 1;
       input = _inputFields.inputText(_filters, key, label: label, required: required, minLines: minLines,
-        helpText: helpText,);
+        helpText: helpText, onChange: (String newVal) { OnChanged(); },);
     }
     return input;
+  }
+
+  void OnChanged() {
+    GetItems(pageNumber: 1);
   }
 }
