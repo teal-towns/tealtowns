@@ -1,5 +1,7 @@
 from common import mongo_db_crud as _mongo_db_crud
+import date_time
 import mongo_db
+from insight import user_insight as _user_insight
 
 def SetAllStatus(userId: str, status: str = ''):
     mongo_db.update_many('userNeighborhood', {'userId': userId}, {'$set': {'status': status}})
@@ -31,4 +33,6 @@ def Save(userNeighborhood: dict):
     item = mongo_db.find_one('userNeighborhood', query)['item']
     if item is not None and '_id' in item:
         userNeighborhood['_id'] = item['_id']
-    return _mongo_db_crud.Save('userNeighborhood', userNeighborhood)
+    ret = _mongo_db_crud.Save('userNeighborhood', userNeighborhood)
+    _user_insight.Save({ 'userId': userNeighborhood['userId'], 'firstNeighborhoodJoinAt': date_time.now_string() })
+    return ret

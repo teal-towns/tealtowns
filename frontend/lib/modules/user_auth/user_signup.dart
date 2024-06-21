@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/ip_service.dart';
 import '../../common/socket_service.dart';
 import './user_class.dart';
 import '../../common/form_input/input_fields.dart';
@@ -19,6 +20,7 @@ class _UserSignupState extends State<UserSignupComponent> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
+  IPService _ipService = IPService();
 
   final _formKey = GlobalKey<FormState>();
   var formVals = {};
@@ -56,6 +58,13 @@ class _UserSignupState extends State<UserSignupComponent> {
       }
       setState(() { _loading = false; });
     }));
+
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    var data = {
+      'fieldKey': 'signUpUniqueViewsAt',
+      'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
+    };
+    _socketService.emit('AddAppInsightView', data);
   }
 
   Widget _buildSubmit(BuildContext context) {

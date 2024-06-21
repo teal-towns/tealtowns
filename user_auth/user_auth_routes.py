@@ -1,5 +1,5 @@
 # from fastapi import APIRouter
-
+import date_time
 from common import route_parse as _route_parse
 from common import socket as _socket
 from user_auth import user_auth as _user_auth
@@ -7,6 +7,7 @@ from user_auth import user as _user
 
 from neighborhood import user_neighborhood as _user_neighborhood
 from event import user_feedback as _user_feedback
+from insight import user_insight as _user_insight
 
 # router = APIRouter()
 
@@ -50,6 +51,7 @@ def addRoutes():
                 ret['user']['roles'] = ",".join(ret['user']['roles'])
             if 'withCheckUserFeedback' in data and data['withCheckUserFeedback']:
                 ret['checkUserFeedback'] = _user_feedback.CheckAskForFeedback(data['userId'])
+            _user_insight.Save({ 'userId': data['userId'], 'lastActiveAt': date_time.now_string() })
         return ret
     _socket.add_route('getUserSession', GetUserSession)
 

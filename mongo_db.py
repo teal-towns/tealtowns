@@ -268,6 +268,14 @@ def aggregate(collection_name, query, db1 = None):
         'items': list(map(map_object_id_to_string, results))
     }
 
+def Count(collection_name, query = {}, db1 = None):
+    db = db_default(db1)
+    collection = get_collection(collection_name, db)
+    count = collection.estimated_document_count()
+    return {
+        'count': count,
+    }
+
 def CheckGetSchema():
     global _dbSchema
     if _dbSchema is None:
@@ -297,7 +305,7 @@ def Validate(collectionName: str, item: dict, allowPartial: int = 0,
                     else:
                         ret['valid'] = 0
                         ret['message'] = 'Field ' + field + ' is required'
-                        print ('invalid', collectionName, ret['message'])
+                        print ('mongo_db.Validate invalid', collectionName, ret['message'])
                         return ret
                 elif isinstance(_dbSchema[collectionName][field], dict):
                     pass
@@ -308,12 +316,12 @@ def Validate(collectionName: str, item: dict, allowPartial: int = 0,
                     else:
                         ret['valid'] = 0
                         ret['message'] = 'Field ' + field + ' is required'
-                        print ('invalid', collectionName, ret['message'])
+                        print ('mongo_db.Validate invalid', collectionName, ret['message'])
                         return ret
 
     ret = ValidatePartial(_dbSchema[collectionName], item)
     if not ret['valid']:
-        print ('invalid', collectionName, ret['message'])
+        print ('mongo_db.Validate invalid', collectionName, ret['message'])
     return ret
 
 def ValidatePartial(schema: dict, item: dict, parentField: str = ''):
@@ -330,7 +338,7 @@ def ValidatePartial(schema: dict, item: dict, parentField: str = ''):
     elif isinstance(schema, dict):
         for index, field in reversed(list(enumerate(item))):
             if field not in schema:
-                print ('field', field, 'item', item[field])
+                print ('mongo_db.ValidatePartial field', field, 'item', item[field])
                 del item[field]
                 ret['removedFields'].append(field)
             else:

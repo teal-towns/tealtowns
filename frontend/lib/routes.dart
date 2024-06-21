@@ -32,6 +32,8 @@ import './modules/event/event_feedback_page.dart';
 import './modules/icebreaker/icebreakers.dart';
 import './modules/icebreaker/icebreaker_save.dart';
 
+import './modules/insight/app_insights.dart';
+
 import './modules/land/land_page.dart';
 
 import './modules/neighborhood/belonging_survey.dart';
@@ -87,6 +89,8 @@ class Routes {
 
   static const icebreakers = '/icebreakers';
   static const icebreakerSave = '/icebreaker-save';
+
+  static const appInsights = '/app-insights';
 
   static const land = '/land';
 
@@ -206,6 +210,11 @@ class AppGoRouter {
           }
           return BlogList();
         },
+      ),
+
+      GoRoute(
+        path: Routes.appInsights,
+        builder: (context, state) => AppInsights(),
       ),
 
       GoRoute(

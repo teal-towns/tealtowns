@@ -78,3 +78,9 @@ def create_all_indices(db):
     db['eventInsight'].create_index([('eventId', 1)], unique=True)
 
     db['icebreaker'].create_index([('icebreaker', 1)], unique=True)
+
+    db['appInsight'].create_index([('start', 1), ('end', 1)], unique=True)
+
+    db['userInsight'].create_index([('userId', 1)], unique=True)
+    db['userInsight'].create_index([('lastActiveAt', 1), ('firstEventSignUpAt', 1), \
+        ('firstNeighborhoodJoinAt', 1)], unique=False)

@@ -136,15 +136,14 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       );
     }
 
+    List<Widget> colsPhone = [];
     if (currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
-          SizedBox(height: 10),
-          UserPhone(),
-        ]
-      );
+      colsPhone = [
+        Text('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
+        SizedBox(height: 10),
+        UserPhone(),
+        SizedBox(height: 30),
+      ];
     }
 
     if (!_inited && widget.weeklyEventId.length > 0) {
@@ -227,6 +226,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        ...colsPhone,
         ...colsSubsription,
         widgetForm,
       ]

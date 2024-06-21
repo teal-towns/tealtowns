@@ -8,7 +8,7 @@ def AddRoutes():
     _socket.add_route('GetEventInsightByEvent', GetByEvent)
 
     def AddView(data, auth, websocket):
-        return _event_insight.AddEventView(data['eventId'])
+        return _event_insight.AddEventView(data['eventId'], userOrIP = data['userOrIP'])
     _socket.add_route('AddEventInsightView', AddView)
 
 AddRoutes()
