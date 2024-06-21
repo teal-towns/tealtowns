@@ -26,6 +26,7 @@ class _UserSignupState extends State<UserSignupComponent> {
   var formVals = {};
   bool _loading = false;
   String _message = '';
+  bool _loadingIP = true;
 
   @override
   void initState() {
@@ -59,12 +60,9 @@ class _UserSignupState extends State<UserSignupComponent> {
       setState(() { _loading = false; });
     }));
 
-    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    var data = {
-      'fieldKey': 'signUpUniqueViewsAt',
-      'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
-    };
-    _socketService.emit('AddAppInsightView', data);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
   }
 
   Widget _buildSubmit(BuildContext context) {
@@ -103,8 +101,23 @@ class _UserSignupState extends State<UserSignupComponent> {
     return Container();
   }
 
+  void _init() async {
+    await _ipService.GetIPAddress();
+    setState(() { _loadingIP = false; });
+  }
+
   @override
   Widget build(BuildContext context) {
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (_ipService.IsLoaded() || currentUserState.isLoggedIn) {
+      _loadingIP = false;
+      var data = {
+        'fieldKey': 'signUpUniqueViewsAt',
+        'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
+      };
+      _socketService.emit('AddAppInsightView', data);
+    }
+
     return AppScaffoldComponent(
       listWrapper: true,
       width: 600,

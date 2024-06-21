@@ -8,22 +8,32 @@ class IPService {
   }
 
   String _ipAddress = '0-0-0-0';
+  bool _ipLoaded = false;
 
   String IP({prefix = 'ip_'}) {
     return prefix + _ipAddress.replaceAll('.', '-');
   }
 
+  bool IsLoaded() {
+    return _ipLoaded;
+  }
+
   Future<String> GetIPAddress() async {
+    if (_ipLoaded) {
+      return IP();
+    }
     try {
       var ipAddress = IpAddress(type: RequestType.json);
       dynamic data = await ipAddress.getIpAddress();
       print(data.toString());
       _ipAddress = data['ip'].toString().replaceAll('.', '-');
-      return _ipAddress;
+      _ipLoaded = true;
+      return IP();
     } on IpAddressException catch (exception) {
       print(exception.message);
     }
-    return _ipAddress;
+    _ipLoaded = true;
+    return IP();
   }
 
 }

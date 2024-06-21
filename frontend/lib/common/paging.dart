@@ -21,7 +21,7 @@ class Paging extends StatefulWidget {
 
   Paging({Key? key, required this.body, this.dataName= '', this.routeGet = '', this.onGet = null,
     this.itemsPerPage = 5, this.sortKeys = '-createdAt', this.dataDefault = const {},
-    this.sortOpts = const [], this.filterFields = null, this.filterWidth = 300, }) : super(key: key);
+    this.sortOpts = const [], this.filterFields = const {}, this.filterWidth = 300, }) : super(key: key);
 
   @override
   _PagingState createState() => _PagingState();
@@ -113,7 +113,7 @@ class _PagingState extends State<Paging> {
       ];
     }
     List<Widget> colsFilters = [];
-    if (widget.filterFields != null) {
+    if (widget.filterFields!.entries.length > 0) {
       for (var keyVal in widget.filterFields!.entries) {
         colsFilters.add(FormField(keyVal.key, keyVal.value));
       }
