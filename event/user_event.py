@@ -7,6 +7,7 @@ import mongo_db
 from common import mongo_db_crud as _mongo_db_crud
 from event import event as _event
 from event import weekly_event as _weekly_event
+from insight import user_insight as _user_insight
 from notifications_all import sms_twilio as _sms_twilio
 from user_auth import user as _user
 from user_payment import user_payment as _user_payment
@@ -74,6 +75,7 @@ def Save(userEvent: dict, payType: str):
         userEvent['attendeeStatus'] = 'complete'
 
     ret = _mongo_db_crud.Save('userEvent', userEvent)
+    _user_insight.Save({ 'userId': userEvent['userId'], 'firstEventSignUpAt': date_time.now_string() })
     if checkPay:
         ret['spotsPaidFor'] = retPay['spotsPaidFor']
         ret['availableUSD'] = retPay['availableUSD']

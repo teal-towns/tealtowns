@@ -13,10 +13,11 @@ def addRoutes():
             'withEventInsight': 0,
             'id': '',
             'uName': '',
+            'userOrIP': '',
         }, data)
         return _weekly_event.GetById(data['id'], data['withAdmins'], data['withEvent'],
             data['withUserEvents'], data['withUserId'], weeklyEventUName = data['uName'],
-            withEventInsight = data['withEventInsight'])
+            withEventInsight = data['withEventInsight'], userOrIP = data['userOrIP'])
     _socket.add_route('getWeeklyEventById', GetById)
 
     def Save(data, auth, websocket):

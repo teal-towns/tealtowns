@@ -9,6 +9,7 @@ import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/date_time_service.dart';
+import '../../common/ip_service.dart';
 import '../../common/link_service.dart';
 import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
@@ -37,6 +38,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   Buttons _buttons = Buttons();
   ConfigService _configService = ConfigService();
   DateTimeService _dateTime = DateTimeService();
+  IPService _ipService = IPService();
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
   Style _style = Style();
@@ -168,6 +170,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         'withUserEvents': 1,
         'withUserId': currentUserState.isLoggedIn ? currentUserState.currentUser.id : '',
         'withEventInsight': 1,
+        'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
       };
       _socketService.emit('getWeeklyEventById', data);
     }
@@ -455,9 +458,9 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     ];
 
     List<Widget> colsInsights = [];
-    if (_eventInsight.viewsAt.length > 0) {
+    if (_eventInsight.uniqueViewsAt.length > 0) {
       colsInsights += [
-        Text('${_eventInsight.viewsAt.length} views'),
+        Text('${_eventInsight.uniqueViewsAt.length} unique views'),
         SizedBox(height: 10),
       ];
     }

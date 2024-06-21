@@ -27,11 +27,10 @@ class WeeklyEvents extends StatefulWidget {
   final String routePath;
   final int showFilters;
   final int pageWrapper;
-  final int updateUrl;
-  final int updateLngLat;
+  final int updateLngLatOnInit;
 
   WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
-    this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateUrl = 1, this.updateLngLat = 1, });
+    this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateLngLatOnInit = 1, });
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -221,12 +220,13 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   void CheckFirstLoad() {
     if (!_firstLoadDone && _locationLoaded) {
       _firstLoadDone = true;
-      _search();
+      bool updateUrl = widget.updateLngLatOnInit > 0;
+      _search(updateUrl: updateUrl);
     }
   }
 
   void _init() async {
-    if ((!_skipCurrentLocation || widget.showFilters <= 0) && widget.updateLngLat > 0) {
+    if ((!_skipCurrentLocation || widget.showFilters <= 0) && widget.updateLngLatOnInit > 0) {
       if (_locationService.LocationValid(_filters['lngLat'])) {
         _search();
       }
@@ -376,7 +376,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     );
   }
 
-  void _search({int lastPageNumber = 0}) {
+  void _search({int lastPageNumber = 0, bool updateUrl = true}) {
     if (mounted && _locationService.LocationValid(_filters['lngLat'])) {
       setState(() {
         _loading = true;
@@ -398,12 +398,14 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         'type': widget.type,
       };
       _socketService.emit('searchWeeklyEvents', data);
-      _UpdateUrl();
+      if (updateUrl) {
+        _UpdateUrl();
+      }
     }
   }
   
   void _UpdateUrl() {
-    if(kIsWeb && widget.updateUrl > 0) {
+    if(kIsWeb) {
       String? lng = _filters['lngLat'][0]?.toString();
       String? lat = _filters['lngLat'][1]?.toString();
       String? maxMeters = _filters['maxMeters']?.toString();
