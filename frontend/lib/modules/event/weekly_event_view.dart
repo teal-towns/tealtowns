@@ -45,6 +45,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
   bool _loading = true;
   String _message = '';
+  bool _loadingIP = true;
 
   bool _inited = false;
   WeeklyEventClass _weeklyEvent = WeeklyEventClass.fromJson({});
@@ -149,6 +150,10 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }));
 
     _socketService.emit('GetRandomIcebreakers', {'count': 1});
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
   }
 
   @override
@@ -157,10 +162,18 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     super.dispose();
   }
 
+  void _init() async {
+    await _ipService.GetIPAddress();
+    setState(() { _loadingIP = false; });
+  }
+
   @override
   Widget build(BuildContext context) {
     var currentUserState = context.watch<CurrentUserState>();
-    if (!_inited) {
+    if (_ipService.IsLoaded() || currentUserState.isLoggedIn) {
+      _loadingIP = false;
+    }
+    if (!_inited && !_loadingIP) {
       _inited = true;
       var data = {
         // 'id': widget.id,
@@ -175,7 +188,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       _socketService.emit('getWeeklyEventById', data);
     }
 
-    if (_loading) {
+    if (_loading || _loadingIP) {
       return AppScaffoldComponent(
         listWrapper: true,
         body: Padding(

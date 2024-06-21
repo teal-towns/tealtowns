@@ -10,7 +10,6 @@ import 'package:universal_html/html.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 import './common/config_service.dart';
-import './common/ip_service.dart';
 import './common/localstorage_service.dart';
 import './common/socket_service.dart';
 import './modules/user_auth/current_user_state.dart';
@@ -25,9 +24,6 @@ main() async {
   await dotenv.load(fileName: '.env');
   ConfigService _configService = ConfigService();
   _configService.SetConfig(dotenv.env);
-
-  IPService _ipService = IPService();
-  await _ipService.GetIPAddress();
 
   if (kIsWeb) {
     // Check for redirect.
