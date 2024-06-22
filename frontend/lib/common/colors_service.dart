@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 
 // Note: Must also update custom_theme.dart to match
 Map<String, List<double>> _colorMap = {
-  'primary': [0, 181, 181],
-  'primaryLight': [0, 210, 210],
-  'primaryDark': [0, 93, 93],
-  'primaryTransparent': [0, 181, 181, 0.4],
-  'accent': [0, 164, 203],
-  'accentDark': [0, 100, 120, 0.5],
-  'accentTransparent': [0, 164, 203, 0.4],
-  // 'secondary': [1, 142, 211],
-  'secondary': [143, 229, 142],
-  'text': [90, 90, 90],
-  'error': [169, 46, 97],
+  'primary': [16, 91, 87],
+  'primaryLight': [111, 188, 169],
+  'primaryDark': [0, 45, 40],
+  'primaryTransparent': [16, 91, 87, 0.4],
+  'accent': [143, 229, 142],
+  'accentDark': [143, 229, 142],
+  'accentTransparent': [143, 229, 142, 0.4],
+  'secondary': [200, 182, 23],
+  // 'secondary': [143, 229, 142],
+  'text': [124, 124, 124],
+  'error': [234, 84, 85],
   'warning': [220, 145, 110],
   'transparent': [0,0,0,0],
 
