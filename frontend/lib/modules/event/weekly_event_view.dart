@@ -272,16 +272,19 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     if (_nonHostAttendeesWaitingCount > 0) {
       text1 += ', ${_nonHostAttendeesWaitingCount} waiting';
     }
-    List<Widget> attendeeInfo = [
-      // Text(text1),
-      TextButton(
-        onPressed: () {
-          _socketService.emit('GetUserEventUsers', { 'eventId': _event.id });
-        },
-        child: Text(text1),
-      ),
-      SizedBox(height: 10),
-    ];
+    List<Widget> attendeeInfo = [];
+    if (_attendeesCount > 0 || _nonHostAttendeesWaitingCount > 0) {
+      attendeeInfo = [
+        // Text(text1),
+        TextButton(
+          onPressed: () {
+            _socketService.emit('GetUserEventUsers', { 'eventId': _event.id });
+          },
+          child: Text(text1),
+        ),
+        SizedBox(height: 10),
+      ];
+    }
     if (_userEvents.length > 0) {
       List<String> hostTexts = [];
       List<String> attendeeTexts = [];
@@ -479,7 +482,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     List<Widget> colsIcebreakers = [];
-    if (_icebreakers.length > 0) {
+    if (_icebreakers.length > 0 && alreadySignedUp) {
       colsIcebreakers += [
         Text('Icebreaker: ${_icebreakers[0].icebreaker}'),
         SizedBox(height: 10),

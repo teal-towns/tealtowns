@@ -40,7 +40,16 @@ def test_Debug():
 
     # import mongo_db
     # user = mongo_db.find_one('user', { 'email': 'luke.madera@gmail.com' })['item']
-    # print ('user', user)
-    # subscription = mongo_db.find_one('userPaymentSubscription', { 'userId': user['_id']} )['item']
-    # print ('subscription', subscription)
+    # print ('\nuser', user)
+    # # subscription = mongo_db.find_one('userPaymentSubscription', { 'userId': user['_id']} )['item']
+    # # print ('subscription', subscription)
+    # weeklyEvent = mongo_db.find_one('weeklyEvent', { 'uName': 'qhozm' })['item']
+    # print ('\nweeklyEvent', weeklyEvent)
+    # events = mongo_db.find('event', { 'weeklyEventId': weeklyEvent['_id'] })['items']
+    # print ('\nevents', events)
+    # eventIds = [ event['_id'] for event in events ]
+    # userEvents = mongo_db.find('userEvent', { 'userId': user['_id'], 'eventId': { '$in': eventIds} })['items']
+    # print ('\nuserEvents', userEvents)
+    # userEvent = mongo_db.find_one('userEvent', { 'eventId': events[0]['_id'], 'userId': user['_id'] })['item']
+    # print ('\nuserEvent', userEvent)
     pass
