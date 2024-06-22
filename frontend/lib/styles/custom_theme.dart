@@ -3,19 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CustomTheme {
   static ThemeData get lightTheme {
-    Color primary = Color.fromRGBO(0, 181, 181, 1);
-    Color primaryDark = Color.fromRGBO(0, 93, 93, 1);
-    Color secondary = Color.fromRGBO(143, 229, 142, 1);
-    Color accent = Color.fromRGBO(0, 164, 203, 1);
-    Color accentDark = Color.fromRGBO(0, 100, 120, 1);
-    Color text = Color.fromRGBO(90, 90, 90, 1);
+    Color primary = Color.fromRGBO(16, 91, 87, 1);
+    Color primaryDark = Color.fromRGBO(0, 45, 40, 1);
+    Color secondary = Color.fromRGBO(200, 182, 23, 1);
+    Color accent = Color.fromRGBO(143, 229, 142, 1);
+    Color accentDark = Color.fromRGBO(143, 229, 142, 1);
+    Color text = Color.fromRGBO(125, 125, 125, 1);
     Color grey = Colors.grey;
     Color white = Colors.white;
-    Color error = Color.fromRGBO(169, 46, 97, 1);
+    Color error = Color.fromRGBO(234, 84, 85, 1);
     return ThemeData(
       // https://paletton.com/#uid=53i0u0kDJDJiVIJpYEuFjqdJVjp
       primaryColor: primary,
-      textTheme: GoogleFonts.ptSansTextTheme().copyWith(
+      textTheme: GoogleFonts.montserratTextTheme().copyWith(
         displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w300),
         displayMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.w300),
         displaySmall: TextStyle(fontSize: 21, fontWeight: FontWeight.w300),
