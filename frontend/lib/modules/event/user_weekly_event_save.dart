@@ -59,6 +59,8 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
   void initState() {
     super.initState();
 
+    _formVals['attendeeCountAsk'] = 1;
+
     _routeIds.add(_socketService.onRoute('GetUserWeeklyEvent', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
@@ -67,6 +69,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
         if (_formVals['_id'].length < 1) {
           _formVals['weeklyEventId'] = widget.weeklyEventId;
           _formVals['userId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+          _formVals['attendeeCountAsk'] = 1;
         }
         setState(() { _formVals = _formVals; });
         if (data.containsKey('weeklyEvent')) {
@@ -176,7 +179,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     }
 
     if (_formVals['_id'].length > 1) {
-      return Text('You are already subscribed to this weekly event!');
+      return Text('You are already subscribed to this weekly event. The RSVP deadline has passed for this week, but you will be signed up for next week!');
     }
 
     List<Widget> colsSubsription = [];
@@ -200,8 +203,10 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
           children: [
             _layoutService.WrapWidth([
               _inputFields.inputNumber(_formVals, 'attendeeCountAsk', required: true,
-                label: 'How many spots (including yourself)?', onChange: (double? val)  {
-                  setState(() { _formVals = _formVals;});
+                label: 'How many spots (including yourself)?', min: 1, onChange: (double? val)  {
+                  if (val != null && val! >= 1) {
+                    setState(() { _formVals = _formVals;});
+                  }
                 }),
               ], width: fieldWidth),
             SizedBox(height: 10),

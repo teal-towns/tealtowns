@@ -71,7 +71,7 @@ def GetEventWithWeekly(eventId: str):
             # ret['nextEvent'] = retNext['event']
     return ret
 
-def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 24, now = None, autoCreate: int = 1,
+def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now = None, autoCreate: int = 1,
     weeklyEvent: dict = None):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 0, 'message': '', 'event': {} }
@@ -137,7 +137,7 @@ def GetMostRecentPastEvent(weeklyEventId: str, now = None):
         ret['event'] = {}
     return ret
 
-def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 24, now = None):
+def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 0, now = None):
     ret = { 'valid': 1, 'message': '', 'nextStart': '', 'rsvpDeadlinePassed': 0, 'thisWeekStart': '',
         'nextEnd': '', 'thisWeekEnd': '', }
     now = now if now is not None else date_time.now()
