@@ -13,9 +13,9 @@ def addRoutes():
         slug = data['slug'] if 'slug' in data else ''
         limit = data['limit'] if 'limit' in data else 25
         skip = data['skip'] if 'skip' in data else 0
-        sortKey = data['sortKey'] if 'sortKey' in data else ''
+        sortKeys = data['sortKeys'] if 'sortKeys' in data else ''
         ret = _blog.Get(title, tags, userIdCreator, slug, limit = limit, skip = skip,
-            sortKey = sortKey)
+            sortKeys = sortKeys)
         return ret
     _socket.add_route('getBlogs', GetBlogs)
 
