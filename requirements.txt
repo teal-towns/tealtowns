@@ -4,7 +4,6 @@ dateparser~=1.1.8
 dnspython~=2.4.2
 # fastapi~=0.103.2
 geopandas~=0.12.2
-loggly-python-handler~=1.0.1
 kml2geojson~=5.1.0
 mailchimp-marketing~=3.0.80
 mapbox-vector-tile~=2.0.1

@@ -145,7 +145,7 @@ def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterE
     events = mongo_db.find('event', query, fields = fields)['items']
     eventIds = [ event['_id'] for event in events ]
     query = { 'eventId': { '$in': eventIds } }
-    fields = { '_id': 1, 'eventId': 1, }
+    fields = { '_id': 1, 'eventId': 1, 'notificationSent': 1, }
     eventFeedbacksExisting = mongo_db.find('eventFeedback', query, fields = fields)['items']
     eventIdsDoneMap = {}
     eventFeedbackByEventId = {}

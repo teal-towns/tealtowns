@@ -40,7 +40,6 @@ notifications:
     sendgrid:
       api_key: YOUR-SENDGRID-API-KEY-HERE
 logging: yes
-1logging_config_file: YOUR-LOGGLY-ETC-CONFIG-FILE-HERE.conf
 debug: yes
 log_level: 20
 log_tracker:

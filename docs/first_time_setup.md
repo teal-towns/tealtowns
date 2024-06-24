@@ -14,7 +14,6 @@ For (Ubuntu) script, see `server-setup.sh`
   - For Mac: `pip install tensorflow-macos tensorflow-metal`
 - set up configs (these vary per environment and contains access keys so are NOT checked into version control)
   - `cp config.sample.yml config.yml` then edit `config.yml` as necessary.
-  - `cp configloggly.sample.conf config-loggly.conf` and edit `config-loggly.conf` as needed.
   - `cp frontend/.sample-env frontend/.env` and edit `.env` as needed.
 - frontend `cd frontend && flutter build web` (for frontend)
 - setup config (see configuration section in `server-setup.sh`)
@@ -39,7 +38,7 @@ Create accounts and add api keys in configs for each:
 - CircleCI
   - (Create and) add SSH key to circleci.com project settings (and ensure added to server)
 - email: free tier on mailchimp or sendgrid
-- logging: free tier on loggly
+- logging: free tier on NewRelic
 - Stripe
 
 

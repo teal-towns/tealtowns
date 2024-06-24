@@ -102,7 +102,8 @@ class _UserEventSaveState extends State<UserEventSave> {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        context.go('/weekly-events');
+        // context.go('/weekly-events');
+        GetUserEvent();
       }
     }));
   }
