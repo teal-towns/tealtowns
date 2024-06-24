@@ -8,7 +8,7 @@ def LoggedIn(userId, sessionId):
     return False
 
 def IsAdmin(userId):
-    return HasRole('admin')
+    return HasRole(userId, 'admin')
 
 def HasRole(userId, role):
     user = user_auth.getById(userId)

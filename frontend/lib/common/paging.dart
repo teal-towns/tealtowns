@@ -20,7 +20,7 @@ class Paging extends StatefulWidget {
   double filterWidth;
 
   Paging({Key? key, required this.body, this.dataName= '', this.routeGet = '', this.onGet = null,
-    this.itemsPerPage = 5, this.sortKeys = '-createdAt', this.dataDefault = const {},
+    this.itemsPerPage = 10, this.sortKeys = '-createdAt', this.dataDefault = const {},
     this.sortOpts = const [], this.filterFields = const {}, this.filterWidth = 300, }) : super(key: key);
 
   @override
