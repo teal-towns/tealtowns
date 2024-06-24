@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -7,10 +8,14 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
 import '../../common/image_service.dart';
+import '../../common/layout_service.dart';
+import '../../common/link_service.dart';
+import '../../common/paging.dart';
 import '../../common/socket_service.dart';
-import '../../common/form_input/input_fields.dart';
+import '../../common/style.dart';
 import './blog_class.dart';
 import './blog_state.dart';
 import '../user_auth/current_user_state.dart';
@@ -21,86 +26,100 @@ class BlogList extends StatefulWidget {
 }
 
 class _BlogListState extends State<BlogList> {
-  List<String> _routeIds = [];
-  SocketService _socketService = SocketService();
+  Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
   ImageService _imageService = ImageService();
-  InputFields _inputFields = InputFields();
-
-  final _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false;
-  var filters = {
-    'title': '',
-    'tags': '',
-  };
-  bool _loading = false;
-  String _message = '';
-  bool _canLoadMore = false;
-  int _lastPageNumber = 1;
-  int _itemsPerPage = 100;
+  LayoutService _layoutService = LayoutService();
+  LinkService _linkService = LinkService();
+  List<String> _routeIds = [];
+  SocketService _socketService = SocketService();
+  Style _style = Style();
 
   List<BlogClass> _blogs = [];
-  bool _firstLoadDone = false;
+  Map<String, dynamic> _dataDefault = {};
+  Map<String, Map<String, dynamic>> _filterFields = {
+    'title': {},
+  };
+
+  bool _loading = false;
 
   @override
   void initState() {
     super.initState();
 
-    _routeIds.add(_socketService.onRoute('getBlogs', callback: (String resString) {
-      var res = jsonDecode(resString);
-      var data = res['data'];
-      if (data['valid'] == 1) {
-        if (data.containsKey('blogs')) {
-          _blogs = [];
-          for (var blog in data['blogs']) {
-            _blogs.add(BlogClass.fromJson(blog));
-          }
-          if (_blogs.length == 0) {
-            _message = 'No results found.';
-          }
-        } else {
-          _message = 'Error.';
-        }
-      } else {
-        _message = data['message'].length > 0 ? data['message'] : 'Error.';
-      }
-      setState(() {
-        _loading = false;
-        _message = _message;
-        _blogs = _blogs;
-      });
-    }));
-
     _routeIds.add(_socketService.onRoute('removeBlog', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        _getBlogs();
-      } else {
-        _message = data['message'].length > 0 ? data['message'] : 'Error.';
+        setState(() { _loading = false; });
       }
-      setState(() {
-        _loading = false;
-        _message = _message;
-      });
     }));
   }
 
-  Widget _buildMessage(BuildContext context) {
-    if (_message.length > 0) {
-      return Container(
-        padding: EdgeInsets.only(top: 20, bottom: 20, left: 10, right: 10),
-        child: Text(_message),
-      );
-    }
-    return SizedBox.shrink();
+  @override
+  void dispose() {
+    _socketService.offRouteIds(_routeIds);
+    super.dispose();
   }
 
-  _buildBlog(BlogClass blog, BuildContext context, var currentUserState) {
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Column(children: [ LinearProgressIndicator() ]);
+    }
+
+    var currentUserState = context.watch<CurrentUserState>();
+
+    List<Widget> columnsCreate = [];
+    if (currentUserState.hasRole('admin')) {
+      columnsCreate = [
+        Align(
+          alignment: Alignment.topRight,
+          child: ElevatedButton(
+            onPressed: () {
+              Provider.of<BlogState>(context, listen: false).clearBlog();
+              context.go('/blog-save');
+            },
+            child: Text('Create New Blog'),
+          ),
+        ),
+        SizedBox(height: 10),
+      ];
+    }
+
+    return AppScaffoldComponent(
+      listWrapper: true,
+      body: Column(
+        children: [
+          // _style.Text1('Blog', size: 'large'),
+          // SizedBox(height: 10,),
+          ...columnsCreate,
+          Paging(dataName: 'blogs', routeGet: 'getBlogs',
+            dataDefault: _dataDefault, filterFields: _filterFields,
+            onGet: (dynamic blogs) {
+              _blogs = [];
+              for (var item in blogs) {
+                _blogs.add(BlogClass.fromJson(item));
+              }
+              setState(() { _blogs = _blogs; });
+            },
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _layoutService.WrapWidth(_blogs.map((item) => OneBlog(item, context, currentUserState)).toList(), width: 300),
+              ]
+            ),
+          )
+        ]
+      ) 
+    );
+  }
+
+  Widget OneBlog(BlogClass blog, BuildContext context, var currentUserState) {
     var buttons = [];
     if (currentUserState.hasRole('admin')) {
       buttons = [
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             Provider.of<BlogState>(context, listen: false).setBlog(blog);
             context.go('/blog-save');
@@ -108,12 +127,13 @@ class _BlogListState extends State<BlogList> {
           child: Text('Edit'),
         ),
         SizedBox(width: 10),
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             _socketService.emit('removeBlog', { 'id': blog.id });
+            setState(() { _loading = true; });
           },
           child: Text('Delete'),
-          style: ElevatedButton.styleFrom(
+          style: TextButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.error,
           ),
         ),
@@ -176,128 +196,5 @@ class _BlogListState extends State<BlogList> {
         ]
       )
     );
-  }
-
-  _buildBlogResults(BuildContext context, var currentUserState) {
-    if (_blogs.length > 0) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(height: 20),
-          Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            alignment: WrapAlignment.center,
-            children: <Widget> [
-              ..._blogs.map((blog) => _buildBlog(blog, context, currentUserState) ).toList(),
-            ]
-          ),
-        ]
-      );
-    }
-    return _buildMessage(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_firstLoadDone) {
-      _firstLoadDone = true;
-      _getBlogs();
-    }
-
-    var currentUserState = context.watch<CurrentUserState>();
-
-    var columnsCreate = [];
-    if (currentUserState.hasRole('admin')) {
-      columnsCreate = [
-        Align(
-          alignment: Alignment.topRight,
-          child: ElevatedButton(
-            onPressed: () {
-              Provider.of<BlogState>(context, listen: false).clearBlog();
-              context.go('/blog-save');
-            },
-            child: Text('Create New Blog'),
-          ),
-        ),
-        SizedBox(height: 10),
-      ];
-    }
-
-    return AppScaffoldComponent(
-      listWrapper: true,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          ...columnsCreate,
-          Align(
-            alignment: Alignment.center,
-            child: Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                alignment: WrapAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    width: 200,
-                    child: _inputFields.inputText(filters, 'title', hint: 'title',
-                      label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
-                      _getBlogs();
-                    }),
-                  ),
-                  //SizedBox(width: 10),
-                  //SizedBox(width: 200,
-                  //  child: _inputFields.inputText(filters, 'tags', hint: 'tag',
-                  //    label: 'Filter by Tag', debounceChange: 1000, onChange: (String val) {
-                  //    _getBlogs();
-                  //  }),
-                  //),
-                  //_buildSubmit(context),
-                ]
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: _buildBlogResults(context, currentUserState),
-          ),
-        ]
-      )
-    );
-  }
-
-  @override
-  void dispose() {
-    _socketService.offRouteIds(_routeIds);
-    super.dispose();
-  }
-
-  void _getBlogs({int lastPageNumber = 0}) {
-    setState(() {
-      _loading = true;
-      _message = '';
-      _canLoadMore = false;
-    });
-    if (lastPageNumber != 0) {
-      _lastPageNumber = lastPageNumber;
-    } else {
-      _lastPageNumber = 1;
-    }
-    var data = {
-      //'page': _lastPageNumber,
-      'skip': (_lastPageNumber - 1) * _itemsPerPage,
-      'limit': _itemsPerPage,
-      'sortKey': '-createdAt',
-      'tags': [],
-    };
-    if (filters['title'] != '') {
-      data['title'] = filters['title']!;
-    }
-    if (filters['tags'] != '') {
-      data['tags'] = [ filters['tags'] ];
-    }
-    _socketService.emit('getBlogs', data);
   }
 }

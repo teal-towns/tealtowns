@@ -68,7 +68,7 @@ def GetSlug(title, maxChars = 40):
     slug = title.lower().strip()
     regex = re.compile('\s')
     slug = regex.sub('-', slug)
-    regex = re.compile('[^a-zA-Z-]')
+    regex = re.compile('[^a-zA-Z0-9-]')
     slug = regex.sub('', slug)
     if len(slug) > maxChars:
         slug = slug[slice(0, maxChars)]
