@@ -2,7 +2,7 @@ import mongo_db
 import re
 
 def Get(title = '', tags = [], userIdCreator = '', slug = '', limit = 25, skip = 0,
-    sortKey = ''):
+    sortKeys = ''):
     ret = { 'valid': 1, 'message': '', 'blogs': [] }
     query = {}
     if len(tags) > 0:
@@ -14,13 +14,14 @@ def Get(title = '', tags = [], userIdCreator = '', slug = '', limit = 25, skip =
     if len(userIdCreator) > 0:
         query['userIdCreator'] = userIdCreator
     sort = None
-    if len(sortKey) > 0:
-        sortVal = 1
-        if sortKey[0] == '-':
-            sortVal = -1
-            sortKey = sortKey[(slice(1, len(sortKey)))]
+    if len(sortKeys) > 0:
         sort = {}
-        sort[sortKey] = sortVal
+        for sortKey in sortKeys.split(","):
+            sortVal = 1
+            if sortKey[0] == "-":
+                sortVal = -1
+                sortKey = sortKey[(slice(1, len(sortKey)))]
+            sort[sortKey] = sortVal
     ret['blogs'] = mongo_db.find('blog', query, limit = limit, skip = skip, sort_obj = sort)['items']
     return ret
 
