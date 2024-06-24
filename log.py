@@ -1,7 +1,6 @@
 import datetime
 import logging
 import logging.config
-import loggly.handlers
 import os
 import simplejson as json
 

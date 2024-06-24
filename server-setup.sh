@@ -13,7 +13,6 @@ git clone https://$GITHUB_TOKEN@github.com/teal-towns/tealtowns.git && \
 
 # Update configs and copy prod version to server.
     # `config.yml` - e.g. set port to 443 (for SSL), enable SSL, add paths to SSL cert files.
-    # `config-loggly.conf`
     # `frontend/.env`
 
     # Note: Flutter may fail to install (gets corrupted) without >1 GB RAM.

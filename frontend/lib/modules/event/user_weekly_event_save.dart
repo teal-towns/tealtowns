@@ -116,7 +116,8 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        context.go('/weekly-events');
+        GetUserWeeklyEvent();
+        // context.go('/weekly-events');
       }
     }));
   }

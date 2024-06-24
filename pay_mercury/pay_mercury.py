@@ -27,7 +27,6 @@ def MakeRequest(method: str, urlPath: str, params: dict = {}, maxRetries: int = 
     elif method == 'delete':
         response = requests.delete(url, headers=headers, data=json.dumps(params), auth=auth)
 
-    print ('response', response)
     valid = 1
     responseData = {}
     if not str(response.status_code).startswith('2'):
@@ -139,4 +138,7 @@ def MakeTransaction(accountKey: str, recipientKey: str, amountUSD: float, transa
         if retOne['valid']:
             ret['valid'] = 1
             ret['transaction'] = retOne['data']
+    else:
+        ret['message'] = 'account or recipient not found'
+        log.log('error', 'pay_mercury.MakeTransaction error', ret['message'], accountKey, recipientKey)
     return ret

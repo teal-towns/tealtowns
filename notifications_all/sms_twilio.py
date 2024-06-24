@@ -14,7 +14,7 @@ def SetTestMode(testMode: int):
 def Send(body: str, toNumber: str, fromNumber: str = ''):
     ret = { 'valid': 1, 'message': '', 'sid': '', }
     if 'twilio' not in _config or 'account_sid' not in _config['twilio'] or 'auth_token' not in _config['twilio']:
-        log.log('info', 'sms_twilio.Send', 'no twilio config')
+        log.log('info', 'sms_twilio.Send', 'no twilio config, skipping')
         ret['valid'] = 0
         ret['message'] = 'no twilio config'
         return ret
@@ -34,7 +34,7 @@ def Send(body: str, toNumber: str, fromNumber: str = ''):
         print ('sms_twilio.Send error:', e)
         ret['valid'] = 0
         ret['message'] = 'Twilio send error'
-        log.log('warn', 'sms_twilio.Send error', str(e))
+        log.log('error', 'sms_twilio.Send error', str(e), 'toNumber', toNumber, 'body', body, 'fromNumber', fromNumber)
     return ret
 
 def SendToUsers(body: str, userIds: list, fromNumber: str = ''):

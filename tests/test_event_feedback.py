@@ -92,5 +92,10 @@ def test_CheckAndCreateForEndingEvents():
             assert ret['notifyByEvent'][eventId]['notifyUserIds']['sms'] == [ users[1]['_id'] ]
         elif eventId == events[2]['_id']:
             assert ret['notifyByEvent'][eventId]['notifyUserIds']['sms'] == []
+    
+    # Should NOT send twice.
+    now = date_time.from_string('2024-03-01T17:55:00-07:00')
+    ret = _event_feedback.CheckAndCreateForEndingEvents(now = now)
+    assert len(ret['newFeedbackEventIds']) == 0
 
     _mongo_mock.CleanUp()
