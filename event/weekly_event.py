@@ -91,15 +91,19 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
         ret['event'] = retEvents['nextWeekEvent'] if retEvents['rsvpDeadlinePassed'] else retEvents['thisWeekEvent']
         ret['rsvpDeadlinePassed'] = retEvents['rsvpDeadlinePassed']
         ret['nextEvent'] = retEvents['nextWeekEvent']
-        if withUserEvents:
+        if withUserEvents and '_id' in ret['event']:
             retStats = _user_event.GetStats(ret['event']['_id'], withUserId = withUserId)
             ret['attendeesCount'] = retStats['attendeesCount']
             ret['attendeesWaitingCount'] = retStats['attendeesWaitingCount']
             ret['nonHostAttendeesWaitingCount'] = retStats['nonHostAttendeesWaitingCount']
             ret['userEvent'] = retStats['userEvent']
-        if withEventInsight:
+        else:
+            ret['userEvent'] = {}
+        if withEventInsight and '_id' in ret['event']:
             ret['eventInsight'] = _event_insight.GetByEvent(ret['event']['_id'], addEventView = 1,
                 userOrIP = userOrIP)['eventInsight']
+        else:
+            ret['eventInsight'] = {}
 
     return ret
 

@@ -67,7 +67,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        if (data.containsKey('weeklyEvent')) {
+        if (data.containsKey('weeklyEvent') && data['weeklyEvent'].containsKey('_id') &&
+          data['event'].containsKey('_id') && data['nextEvent'].containsKey('_id')) {
           _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
           if (data.containsKey('event')) {
             _event = EventClass.fromJson(data['event']);
@@ -99,17 +100,19 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
             _nonHostAttendeesWaitingCount = _nonHostAttendeesWaitingCount;
             _userEvent = _userEvent;
             _eventInsight = _eventInsight;
+            _loading = false;
           });
         } else {
-          _message = 'Error.';
+          _message = data['message'].length > 0 ? data['message'] : 'Error.';
+          context.go('/weekly-events');
         }
       } else {
         _message = data['message'].length > 0 ? data['message'] : 'Error.';
         context.go('/weekly-events');
       }
-      setState(() {
-        _loading = false;
-      });
+      // setState(() {
+      //   _loading = false;
+      // });
     }));
 
     _routeIds.add(_socketService.onRoute('removeWeeklyEvent', callback: (String resString) {
