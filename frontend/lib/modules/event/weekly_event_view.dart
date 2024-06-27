@@ -68,7 +68,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       var data = res['data'];
       if (data['valid'] == 1) {
         if (data.containsKey('weeklyEvent') && data['weeklyEvent'].containsKey('_id') &&
-          data['event'].containsKey('_id') && data['nextEvent'].containsKey('_id')) {
+          data.containsKey('event') &&data['event'].containsKey('_id') &&
+          data.containsKey('nextEvent') && data['nextEvent'].containsKey('_id')) {
           _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
           if (data.containsKey('event')) {
             _event = EventClass.fromJson(data['event']);
