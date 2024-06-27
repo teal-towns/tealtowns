@@ -4,7 +4,7 @@ import lodash
 from event import weekly_event as _weekly_event
 
 def addRoutes():
-    def GetById(data, auth, websocket):
+    def GetByIdWithData(data, auth, websocket):
         data = lodash.extend_object({
             'withAdmins': 0,
             'withEvent': 0,
@@ -18,6 +18,16 @@ def addRoutes():
         return _weekly_event.GetById(data['id'], data['withAdmins'], data['withEvent'],
             data['withUserEvents'], data['withUserId'], weeklyEventUName = data['uName'],
             withEventInsight = data['withEventInsight'], userOrIP = data['userOrIP'])
+    _socket.add_route('GetWeeklyEventByIdWithData', GetByIdWithData)
+
+    def GetById(data, auth, websocket):
+        data = lodash.extend_object({
+            'id': '',
+            'uName': '',
+            'userOrIP': '',
+        }, data)
+        return _weekly_event.GetById(data['id'], weeklyEventUName = data['uName'],
+            userOrIP = data['userOrIP'])
     _socket.add_route('getWeeklyEventById', GetById)
 
     def Save(data, auth, websocket):

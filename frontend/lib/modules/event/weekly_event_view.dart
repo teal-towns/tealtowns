@@ -63,7 +63,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   void initState() {
     super.initState();
 
-    _routeIds.add(_socketService.onRoute('getWeeklyEventById', callback: (String resString) {
+    _routeIds.add(_socketService.onRoute('GetWeeklyEventByIdWithData', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
@@ -189,7 +189,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         'withEventInsight': 1,
         'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
       };
-      _socketService.emit('getWeeklyEventById', data);
+      _socketService.emit('GetWeeklyEventByIdWithData', data);
     }
 
     if (_loading || _loadingIP) {
