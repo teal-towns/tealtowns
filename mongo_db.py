@@ -86,7 +86,8 @@ def get_collection(collection_name, db1 = None):
     return db[collection_name]
 
 # CRUD helpers
-def insert_one(collection_name, obj1, db1 = None, validate: int = 1, allowPartial: int = 0):
+def insert_one(collection_name, obj1, db1 = None, validate: int = 1, allowPartial: int = 0, now = None):
+    now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'item': {}, }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
@@ -99,10 +100,10 @@ def insert_one(collection_name, obj1, db1 = None, validate: int = 1, allowPartia
             return ret
 
     # Add timestamp
-    obj1['createdAt'] = date_time.now_string()
-    obj1['updatedAt'] = date_time.now_string()
+    obj1['createdAt'] = date_time.string(now)
+    obj1['updatedAt'] = date_time.string(now)
     # obj = lodash.extend_object({
-    #     'createdAt': date_time.now_string()
+    #     'createdAt': date_time.string(now)
     # }, obj1);
 
     inserted_id = from_object_id(collection.insert_one(obj1).inserted_id)
@@ -111,7 +112,8 @@ def insert_one(collection_name, obj1, db1 = None, validate: int = 1, allowPartia
     })
     return ret
 
-def insert_many(collection_name, objects, db1 = None, validate: int = 1, allowPartial: int = 0):
+def insert_many(collection_name, objects, db1 = None, validate: int = 1, allowPartial: int = 0, now = None):
+    now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'items': [], }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
@@ -126,8 +128,8 @@ def insert_many(collection_name, objects, db1 = None, validate: int = 1, allowPa
 
     # Add timestamp
     for index, obj1 in enumerate(objects):
-        objects[index]['createdAt'] = date_time.now_string()
-        objects[index]['updatedAt'] = date_time.now_string()
+        objects[index]['createdAt'] = date_time.string(now)
+        objects[index]['updatedAt'] = date_time.string(now)
 
     inserted_ids = collection.insert_many(objects).inserted_ids
     for index, obj1 in enumerate(objects):
@@ -135,7 +137,8 @@ def insert_many(collection_name, objects, db1 = None, validate: int = 1, allowPa
     ret['items'] = objects
     return ret
 
-def update_one(collection_name, query, mutation, upsert = False, db1 = None, validate: int = 1, allowPartial: int = 1):
+def update_one(collection_name, query, mutation, upsert = False, db1 = None, validate: int = 1, allowPartial: int = 1, now = None):
+    now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'acknowledged': 0, 'matched_count': 0, 'modified_count': 0, 'upserted_id': '', }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
@@ -148,12 +151,12 @@ def update_one(collection_name, query, mutation, upsert = False, db1 = None, val
             return ret
 
     # Add timestamp
-    now_string = date_time.now_string()
+    now_string = date_time.string(now)
     if '$set' in mutation:
         mutation['$set']['updatedAt'] = now_string
     if '$setOnInsert' not in mutation:
         mutation['$setOnInsert'] = {}
-    mutation['$setOnInsert']['createdAt'] = date_time.now_string()
+    mutation['$setOnInsert']['createdAt'] = now_string
 
     # Unclear on result - modified_count can be 0 if matched and no changes?
     # So need to just check acknowledged for success? Or a combination of matched count
@@ -166,14 +169,15 @@ def update_one(collection_name, query, mutation, upsert = False, db1 = None, val
     return ret
     # TODO - find and return full updated object?
 
-def update_many(collection_name, query, mutation, db1 = None, validate: int = 1, allowPartial: int = 1):
+def update_many(collection_name, query, mutation, db1 = None, validate: int = 1, allowPartial: int = 1, now = None):
+    now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'modified_count': 0, }
     db = db_default(db1)
     collection = get_collection(collection_name, db)
 
     # TODO - Add timestamp
     # for index, obj1 in enumerate(objects):
-    #     objects[index]['updatedAt'] = date_time.now_string()
+    #     objects[index]['updatedAt'] = date_time.string(now)
 
     if validate and '$set' in mutation:
         retCheck = Validate(collection_name, mutation['$set'], allowPartial = allowPartial)
