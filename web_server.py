@@ -79,6 +79,9 @@ thread2.start()
 from neighborhood import neighborhood_stats as _neighborhood_stats
 thread3 = threading.Thread(target = _neighborhood_stats.ComputeNeighborhoodStatsLoop, args=())
 thread3.start()
+from pay_mercury import pay_mercury as _pay_mercury
+thread4 = threading.Thread(target = _pay_mercury.CheckDoTransactionsLoop, args=())
+thread4.start()
 
 # Regular websocket
 async def websocket_handler(request):

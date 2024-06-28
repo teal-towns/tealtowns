@@ -1,8 +1,14 @@
+import datetime
 import json
+import re
 import requests
+import threading
 import time
 
+import date_time
+import lodash
 import log
+import mongo_db
 import ml_config
 _config = ml_config.get_config()
 
@@ -83,7 +89,7 @@ def GetAndAddRecipients():
                         }
                     }
                     retCreate = MakeRequest('post', 'recipients', params)
-                    print ('retCreate', retCreate)
+                    # print ('retCreate', retCreate)
                     if retCreate['valid']:
                         ret['recipientsCreated'] += 1
                         ret['recipients'].append(retCreate['data'])
@@ -142,3 +148,68 @@ def MakeTransaction(accountKey: str, recipientKey: str, amountUSD: float, transa
         ret['message'] = 'account or recipient not found'
         log.log('error', 'pay_mercury.MakeTransaction error', ret['message'], accountKey, recipientKey)
     return ret
+
+def QueueTransaction(accountKey: str, recipientKey: str, amountUSD: float, forId: str, forType: str, now = None):
+    now = now if now is not None else date_time.now()
+    ret = { 'valid': 1, 'message': '', 'mercuryPayOut': {}, }
+    mercuryPayOut = {
+        'accountKey': accountKey,
+        'recipientKey': recipientKey,
+        'amountUSD': amountUSD,
+        'forId': forId,
+        'forType': forType,
+        'paidOut': 0,
+    }
+    retOne = mongo_db.insert_one('mercuryPayOut', mercuryPayOut, now = now)
+    ret['mercuryPayOut'] = retOne['item']
+    return ret
+
+def CheckDoQueuedTransactions(daysDelay: int = 7, now = None):
+    now = now if now is not None else date_time.now()
+    ret = { 'valid': 1, 'message': '', 'paidOutIds': [], 'amountUSDByKey': {}, }
+    maxDateString = date_time.string(now - datetime.timedelta(days = daysDelay))
+    query = { 'paidOut': 0, 'createdAt': { '$lte': maxDateString } }
+    # log.log('info', 'pay_mercury.CheckDoQueuedTransactions maxDate ' + maxDateString)
+    items = mongo_db.find('mercuryPayOut', query)['items']
+    objIdsByKeys = {}
+    idsByKeys = {}
+    amountUSDSumsByKeys = {}
+    for item in items:
+        key = item['accountKey'] + '_' + item['recipientKey']
+        if key not in amountUSDSumsByKeys:
+            amountUSDSumsByKeys[key] = 0
+        amountUSDSumsByKeys[key] += item['amountUSD']
+        if key not in objIdsByKeys:
+            objIdsByKeys[key] = []
+        objIdsByKeys[key].append(mongo_db.to_object_id(item['_id']))
+        if key not in idsByKeys:
+            idsByKeys[key] = []
+        idsByKeys[key].append(item['_id'])
+    for key in amountUSDSumsByKeys:
+        amountUSD = amountUSDSumsByKeys[key]
+        if amountUSD > 0:
+            # Only should be 1 per day (per account and recipient key) so use date as key.
+            nowString = date_time.string(now).split('+')[0]
+            transactionKey = 'queuedPayOut_' + key + '_' + nowString
+            regex = re.compile('[^a-zA-Z0-9_]')
+            transactionKey = regex.sub('', transactionKey)
+            retOne = MakeTransaction(key.split('_')[0], key.split('_')[1], amountUSD, transactionKey)
+            if retOne['valid']:
+                mutation = { '$set': { 'paidOut': 1 } }
+                mongo_db.update_many('mercuryPayOut', { '_id': { '$in': objIdsByKeys[key] } }, mutation)
+                ret['paidOutIds'] += idsByKeys[key]
+                ret['amountUSDByKey'][key] = amountUSD
+            else:
+                ret['message'] = 'pay out failed'
+                log.log('error', 'pay_mercury.CheckDoQueuedTransactions error. key ' + key + ' amountUSD ' + str(amountUSD))
+    return ret
+
+def CheckDoTransactionsLoop(timeoutMinutes = 60 * 24):
+    log.log('info', 'pay_mercury.CheckDoTransactionsLoop starting')
+    thread = None
+    while 1:
+        if thread is None or not thread.is_alive():
+            thread = threading.Thread(target=CheckDoQueuedTransactions, args=())
+            thread.start()
+        time.sleep(timeoutMinutes * 60)
+    return None

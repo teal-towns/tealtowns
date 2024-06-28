@@ -230,6 +230,17 @@
         "stripeConnectedAccountId": "{String}",
         "status": "{String} pending|complete"
     },
+    "mercuryPayOut": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "accountKey": "{String}",
+        "recipientKey": "{String}",
+        "amountUSD": "{Float}",
+        "forId": "{String}",
+        "forType": "{String}",
+        "paidOut": "{Int} 0|1"
+    },
     "neighborhood": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
