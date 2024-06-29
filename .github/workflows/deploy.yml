@@ -62,6 +62,12 @@ jobs:
       - name: 'Build Flutter app'
         run: cd ./frontend && flutter build web --web-renderer canvaskit
       - name: 'Upload Flutter app'
-        run: scp -r ./frontend/build/web/* root@tealtowns.org:/var/www/tealtowns/frontend
+        # run: |
+        #   mkdir -p ~/.ssh
+        #   echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        #   chmod 700 ~/.ssh/id_rsa
+        #   ssh-keyscan -H tealtowns.org >> ~/.ssh/known_hosts
+        #   scp -oStrictHostKeyChecking=no -r ./frontend/build/web/* root@tealtowns.org:/var/www/tealtowns/frontend
+        run: scp -oStrictHostKeyChecking=no -r ./frontend/build/web/* root@tealtowns.org:/var/www/tealtowns/frontend
       - name: Run SSH Command
         run: ssh -oStrictHostKeyChecking=no root@tealtowns.org 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && systemctl restart systemd_web_server_tealtowns.service'
