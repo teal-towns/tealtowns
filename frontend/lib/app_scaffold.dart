@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 
 import '../third_party/custom_icon_icons.dart';
-// import './common/buttons.dart';
+import './common/buttons.dart';
 import './common/colors_service.dart';
 import './common/link_service.dart';
 import './modules/user_auth/current_user_state.dart';
@@ -39,7 +39,7 @@ class AppScaffoldComponent extends StatefulWidget {
 }
 
 class _AppScaffoldState extends State<AppScaffoldComponent> {
-  // Buttons _buttons = Buttons();
+  Buttons _buttons = Buttons();
   ColorsService _colors = ColorsService();
   LinkService _linkService = LinkService();
 
@@ -309,11 +309,28 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       ];
     }
 
+    List<Widget> colsBelowHeader = [];
+    if (currentUserState.appData.containsKey('eventFeedbackSave')) {
+      String link = '/event-feedback-save?eventId=' + currentUserState.appData['eventFeedbackSave']['eventId'];
+      colsBelowHeader = [
+        Container(color: _colors.colors['primary'], height: 50,
+          child: Row(
+            children: [
+              Expanded(flex: 1, child: Text('')),
+              _buttons.Link(context, 'Add Your Event Feedback', link, colorBackground: 'white'),
+              Expanded(flex: 1, child: Text('')),
+            ]
+          )
+        ),
+      ];
+    }
+
     if (widget.listWrapper) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ...colsHeader,
+          ...colsBelowHeader,
           Expanded(flex: 1,
             child: ListView(
               children: [
@@ -342,6 +359,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ...colsHeader,
+        ...colsBelowHeader,
         Expanded(flex: 1,
           child: Container(
             color: Colors.white,

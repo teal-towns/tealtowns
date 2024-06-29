@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
@@ -253,6 +255,11 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     bool alreadySignedUp = false;
+    if (_userEvent.id.length > 0) {
+      if (_userEvent.attendeeCountAsk > 0) {
+        alreadySignedUp = true;
+      }
+    }
 
     Map<String, dynamic> config = _configService.GetConfig();
 
@@ -361,78 +368,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       }
       attendeeInfo += [ SizedBox(height: 10) ];
     }
-    if (_weeklyEvent.priceUSD == 0) {
-      attendeeInfo += [
-        // Text('This is a free event, no RSVP required!'),
-        // SizedBox(height: 10),
-        // ...colsShare,
-      ];
-    } else {
-      if (_userEvent.id.length > 0) {
-        if (_userEvent.attendeeCountAsk > 0) {
-          alreadySignedUp = true;
-        }
-        // This is already shown in UserEventSave
-        // if (_userEvent.hostGroupSizeMax > 0) {
-        //   if (_userEvent.hostGroupSize == _userEvent.hostGroupSizeMax) {
-        //     attendeeInfo += [
-        //       Text('You are hosting ${_userEvent.hostGroupSize} people.'),
-        //       SizedBox(height: 10),
-        //     ];
-        //   } else {
-        //     int diff = _userEvent.hostGroupSizeMax - _userEvent.hostGroupSize;
-        //     attendeeInfo += [
-        //       Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
-        //       SizedBox(height: 10),
-        //       Text('Share this event with your neighbors to fill your spots:'),
-        //       SizedBox(height: 10),
-        //       ...colsShare,
-        //     ];
-        //   }
-        // }
-        // if (_userEvent.attendeeCountAsk > 0) {
-        //   if (_userEvent.attendeeCount > 0) {
-        //     int guestsGoing = _userEvent.attendeeCount - 1;
-        //     int guestsWaiting = _userEvent.attendeeCountAsk - _userEvent.attendeeCount - 1;
-        //     String text1 = 'You are going';
-        //     if (guestsGoing > 0) {
-        //       text1 += ', with ${guestsGoing} guests';
-        //     }
-        //     if (guestsWaiting > 0) {
-        //       text1 += ', waiting on ${guestsWaiting} more spots';
-        //     }
-        //     attendeeInfo += [
-        //       Text(text1),
-        //       SizedBox(height: 10),
-        //       Text('Share this event with your neighbors:'),
-        //       SizedBox(height: 10),
-        //       ...colsShare,
-        //     ];
-        //   } else {
-        //     attendeeInfo += [
-        //       Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
-        //       SizedBox(height: 10),
-        //       Text('Share this event with your neighbors to get another host so you can join:'),
-        //       SizedBox(height: 10),
-        //       ...colsShare,
-        //     ];
-        //   }
-        // }
-        // if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
-        //   String text1 = '';
-        //   if (_userEvent.creditsEarned > 0) {
-        //     text1 += '${_userEvent.creditsEarned} credits earned. ';
-        //   }
-        //   if (_userEvent.creditsRedeemed > 0) {
-        //     text1 += '${_userEvent.creditsRedeemed} credits redeemed. ';
-        //   }
-        //   attendeeInfo += [
-        //     Text(text1),
-        //     SizedBox(height: 10),
-        //   ];
-        // }
-      }
-    }
+
     if (!alreadySignedUp) {
       String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
       String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
@@ -502,7 +438,22 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           Image.asset('assets/images/shared-meal.jpg', height: 300, width: double.infinity, fit: BoxFit.cover,)
             : Image.network(_weeklyEvent.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
         SizedBox(height: 10),
-        Text(_weeklyEvent.description),
+        // Text(_weeklyEvent.description),
+        MarkdownBody(
+          selectable: true,
+          data: _weeklyEvent.description!,
+          onTapLink: (text, href, title) {
+            launch(href!);
+          },
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+            h1: Theme.of(context).textTheme.displayLarge,
+            h2: Theme.of(context).textTheme.displayMedium,
+            h3: Theme.of(context).textTheme.displaySmall,
+            h4: Theme.of(context).textTheme.headlineMedium,
+            h5: Theme.of(context).textTheme.headlineSmall,
+            h6: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
         SizedBox(height: 10),
         // _style.Text1('${_weeklyEvent.xDay}s ${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}',
         //     left: Icon(Icons.calendar_today)),

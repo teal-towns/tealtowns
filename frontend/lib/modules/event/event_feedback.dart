@@ -27,6 +27,11 @@ class _EventFeedbackState extends State<EventFeedback> {
   List<UserFeedbackClass> _userFeedbacks = [];
   List<String> _feedbackVoteStrings = [];
   List<String> _positiveVoteStrings = [];
+  Map<String, dynamic> _attendedStats = {
+    'yes': 0,
+    'no': 0,
+  };
+  double _starsAverage = 0.0;
   Map<String, dynamic> _willJoinNextWeekStats = {
     'yes': 0,
     'no': 0,
@@ -88,6 +93,12 @@ class _EventFeedbackState extends State<EventFeedback> {
     }
     _positiveVoteStrings.sort((b, a) => a.compareTo(b));
     _userFeedbacks = [];
+    _attendedStats = {
+      'yes': 0,
+      'no': 0,
+    };
+    _starsAverage = 0.0;
+    double starsSum = 0;
     _willJoinNextWeekStats = {
       'yes': 0,
       'no': 0,
@@ -101,6 +112,8 @@ class _EventFeedbackState extends State<EventFeedback> {
     if (data.containsKey('userFeedbacks')) {
       for (var userFeedback in data['userFeedbacks']) {
         _userFeedbacks.add(UserFeedbackClass.fromJson(userFeedback));
+        _attendedStats[userFeedback['attended']] += 1;
+        starsSum += userFeedback['stars'];
         _willJoinNextWeekStats[userFeedback['willJoinNextWeek']] += 1;
         if (userFeedback['willInvite'].length > 0) {
           _willInviteStats[userFeedback['willInvite']] += 1;
@@ -114,6 +127,8 @@ class _EventFeedbackState extends State<EventFeedback> {
       _feedbackVoteStrings = _feedbackVoteStrings;
       _positiveVoteStrings = _positiveVoteStrings;
       _userFeedbacks = _userFeedbacks;
+      _attendedStats = _attendedStats;
+      _starsAverage = _attendedStats['yes'] > 0 ? starsSum / _attendedStats['yes'] : 0;
       _willJoinNextWeekStats = _willJoinNextWeekStats;
       _willInviteStats = _willInviteStats;
     });
@@ -176,6 +191,13 @@ class _EventFeedbackState extends State<EventFeedback> {
         SizedBox(height: 10),
       ];
     }
+    List<Widget> colsStarsAttended = [];
+    if (_attendedStats['yes'] > 0) {
+      colsStarsAttended = [
+        Text('${_starsAverage.toStringAsFixed(1)} stars, ${_attendedStats['yes']} attended'),
+        SizedBox(height: 10),
+      ];
+    }
     List<Widget> colsWillJoin = [];
     if (_willJoinNextWeekStats['yes'] > 0 || _willJoinNextWeekStats['no'] > 0 || _willJoinNextWeekStats['futureWeek'] > 0) {
       colsWillJoin = [
@@ -195,6 +217,7 @@ class _EventFeedbackState extends State<EventFeedback> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...colsTitle,
+        ...colsStarsAttended,
         ...colsImprove,
         ...colsEnjoyed,
         ...colsWillJoin,

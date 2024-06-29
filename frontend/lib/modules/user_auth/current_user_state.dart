@@ -20,6 +20,7 @@ class CurrentUserState extends ChangeNotifier {
   String _redirectUrl = '';
   String _routerRedirectUrl = '';
   var _routerRedirectTimeout = null;
+  Map<String, dynamic> _appData = {};
 
   get isLoggedIn => _isLoggedIn;
 
@@ -30,6 +31,8 @@ class CurrentUserState extends ChangeNotifier {
   get redirectUrl => _redirectUrl;
 
   get routerRedirectUrl => _routerRedirectUrl;
+
+  get appData => _appData;
 
   void init() {
     if (_routeIds.length == 0) {
@@ -45,7 +48,9 @@ class CurrentUserState extends ChangeNotifier {
             // if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0 &&
             //   (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
             if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0) {
-              _routerRedirectUrl = '/event-feedback-save?eventId=' + data['checkUserFeedback']['missingFeedbackEventIds'][0];
+              // _routerRedirectUrl = '/event-feedback-save?eventId=' + data['checkUserFeedback']['missingFeedbackEventIds'][0];
+              SetAppData({'eventFeedbackSave': { 'eventId': data['checkUserFeedback']['missingFeedbackEventIds'][0] }});
+
               // print ('routerRedirectUrl ${_routerRedirectUrl}');
               // _routerRedirectTimeout = DateTime.now().add(const Duration(seconds: 5));
               // print ('timeouts ${_routerRedirectTimeout}');
@@ -70,6 +75,16 @@ class CurrentUserState extends ChangeNotifier {
       init();
       _localstorage = _localstorageService.localstorage;
     }
+  }
+
+  void SetAppData(Map<String, dynamic> appData) {
+    _appData = appData;
+    notifyListeners();
+  }
+
+  void ClearAppData() {
+    _appData = {};
+    notifyListeners();
   }
 
   void setCurrentUser(UserClass user, {bool skipSession = false}) {

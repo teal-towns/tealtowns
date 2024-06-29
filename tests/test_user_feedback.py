@@ -32,6 +32,8 @@ def test_Save():
         'forType': 'event',
         'forId': events[0]['_id'],
         'willJoinNextWeek': 'yes',
+        'attended': 'yes',
+        'stars': 3,
         'willInvite': '',
         'invites': ['Joe S', '1-555-123-4567', 'yes@email.com', '1.382.385.2385'],
     }
@@ -79,7 +81,7 @@ def test_CheckAskForFeedback():
 
     # Already gave feedback
     userFeedback = { 'userId': users[0]['_id'], 'forType': 'event', 'forId': events[3]['_id'],
-        'willJoinNextWeek': 'yes', }
+        'attended': 'yes', 'stars': 4, 'willJoinNextWeek': 'yes', }
     ret = _mongo_db_crud.Save('userFeedback', userFeedback)
     now = date_time.from_string('2024-03-09T18:30:00-07:00')
     ret = _user_feedback.CheckAskForFeedback(users[0]['_id'], eventId = events[3]['_id'], now = now)

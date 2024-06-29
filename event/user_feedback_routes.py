@@ -21,6 +21,16 @@ def addRoutes():
         return _user_feedback.Save(data['userFeedback'])
     _socket.add_route('SaveUserFeedback', Save)
 
+    def Get(data, auth, websocket):
+        data = lodash.extend_object({
+            'userId': '',
+            'forType': '',
+            'forId': '',
+        }, data)
+        query = { 'forType': data['forType'], 'forId': data['forId'], 'userId': data['userId'] }
+        return _mongo_db_crud.Get('userFeedback', query)
+    _socket.add_route('GetUserFeedback', Get)
+
     def GetByEvent(data, auth, websocket):
         return _mongo_db_crud.Get('userFeedback', { 'forType': 'event', 'forId': data['eventId'] })
     _socket.add_route('GetUserFeedbackByEvent', GetByEvent)
