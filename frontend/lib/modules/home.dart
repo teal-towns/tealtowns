@@ -30,7 +30,7 @@ class _HomeComponentState extends State<HomeComponent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _style.SpacingH('medium'),
-          _style.Text1('TealTowns1', size: 'xxlarge', colorKey: 'white', fontWeight: FontWeight.bold),
+          _style.Text1('TealTowns', size: 'xxlarge', colorKey: 'white', fontWeight: FontWeight.bold),
           _style.SpacingH('medium'),
           _style.Text1('Friendship at the Heart of Sustainable Living', colorKey: 'white', size: 'large'),
           _style.SpacingH('medium'),
