@@ -346,6 +346,8 @@
         "userId": "{String}",
         "forType":"{String} event",
         "forId":"{String} [eventId]",
+        "attended": "{String} yes|no",
+        "stars": "{Int} 1-5",
         "willJoinNextWeek": "{String} yes|no|futureWeek",
         "willInvite": "{String} @optional no|willMeetNewNeighbor",
         "invites": [ "{String} @optional" ]

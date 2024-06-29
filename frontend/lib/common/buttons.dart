@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import './colors_service.dart';
 import './link_service.dart';
 
 class Buttons {
@@ -10,13 +11,19 @@ class Buttons {
     return _instance;
   }
 
+  ColorsService _colors = ColorsService();
   LinkService _linkService = LinkService();
 
-  Widget Link(BuildContext context, String text, String url, {bool checkLoggedIn = false, bool launchUrl = false}) {
+  Widget Link(BuildContext context, String text, String url, {bool checkLoggedIn = false, bool launchUrl = false,
+    String colorBackground = 'transparent', String colorText = 'primary'}) {
     return TextButton(
       onPressed: () {
         OnPress(context, url, checkLoggedIn: checkLoggedIn, launchUrl: launchUrl);
       },
+      style: TextButton.styleFrom(
+        backgroundColor: _colors.colors[colorBackground],
+        foregroundColor: _colors.colors[colorText],
+      ),
       child: Text(text),
     );
   }

@@ -5,6 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
+    FeedbackStarsAttended()
     # EventViewsAt()
     # AddTimezoneToNeighborhood()
     # PayQuantityAndStripeIds()
@@ -18,6 +19,37 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def FeedbackStarsAttended():
+    collection = 'userFeedback'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'stars': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('FeedbackStarsAttended', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'stars': 3,
+                    'attended': 'yes',
+                }
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
 
 def EventViewsAt():
     collection = 'eventInsight'
