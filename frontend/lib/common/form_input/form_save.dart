@@ -359,8 +359,9 @@ class _FormSaveState extends State<FormSave> {
     bool required = value.containsKey('required') ? value['required'] : true;
     if (value['type'] == 'location') {
       bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
+      bool guessLocation = value.containsKey('guessLocation') ? value['guessLocation'] : true;
       input = InputLocation(formVals: _formVals, formValsKey: key, label: label, helpText: helpText,
-        nestedCoordinates: nestedCoordinates);
+        nestedCoordinates: nestedCoordinates, guessLocation: guessLocation,);
     } else if (value['type'] == 'select') {
       input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText,);
     } else if (value['type'] == 'selectButtons') {

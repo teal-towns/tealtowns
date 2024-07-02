@@ -32,7 +32,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   List<Map<String, dynamic>> _optsNeighborhood = [];
   Map<String, Map<String, dynamic>> _formFields = {
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
-    'location': { 'type': 'location', 'nestedCoordinates': true },
+    'location': { 'type': 'location', 'nestedCoordinates': true, 'guessLocation': false },
     'title': {},
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
     'dayOfWeek': { 'type': 'select' },

@@ -14,10 +14,12 @@ def addRoutes():
             'id': '',
             'uName': '',
             'userOrIP': '',
+            'addEventView': 0,
         }, data)
         return _weekly_event.GetById(data['id'], data['withAdmins'], data['withEvent'],
             data['withUserEvents'], data['withUserId'], weeklyEventUName = data['uName'],
-            withEventInsight = data['withEventInsight'], userOrIP = data['userOrIP'])
+            withEventInsight = data['withEventInsight'], userOrIP = data['userOrIP'],
+            addEventView = data['addEventView'])
     _socket.add_route('GetWeeklyEventByIdWithData', GetByIdWithData)
 
     def GetById(data, auth, websocket):
@@ -25,9 +27,10 @@ def addRoutes():
             'id': '',
             'uName': '',
             'userOrIP': '',
+            'addEventView': 0,
         }, data)
         return _weekly_event.GetById(data['id'], weeklyEventUName = data['uName'],
-            userOrIP = data['userOrIP'])
+            userOrIP = data['userOrIP'], addEventView = data['addEventView'])
     _socket.add_route('getWeeklyEventById', GetById)
 
     def Save(data, auth, websocket):

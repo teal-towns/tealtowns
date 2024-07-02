@@ -48,6 +48,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   bool _loading = true;
   String _message = '';
   bool _loadingIP = true;
+  bool _initedIP = false;
 
   bool _inited = false;
   WeeklyEventClass _weeklyEvent = WeeklyEventClass.fromJson({});
@@ -179,7 +180,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     if (_ipService.IsLoaded() || currentUserState.isLoggedIn) {
       _loadingIP = false;
     }
-    if (!_inited && !_loadingIP) {
+    if (!_inited) {
       _inited = true;
       var data = {
         // 'id': widget.id,
@@ -189,12 +190,21 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         'withUserEvents': 1,
         'withUserId': currentUserState.isLoggedIn ? currentUserState.currentUser.id : '',
         'withEventInsight': 1,
-        'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
+        // 'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
+        'addEventView': 0,
       };
       _socketService.emit('GetWeeklyEventByIdWithData', data);
     }
+    if (!_initedIP && !_loadingIP && _event.id.length > 0) {
+      _initedIP = true;
+      var data = {
+        'eventId': _event.id,
+        'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
+      };
+      _socketService.emit('AddEventInsightView', data);
+    }
 
-    if (_loading || _loadingIP) {
+    if (_loading) {
       return AppScaffoldComponent(
         listWrapper: true,
         body: Padding(
