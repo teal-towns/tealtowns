@@ -141,13 +141,15 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     _routeIds.add(_socketService.onRoute('GetUserFeedback', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
-      if (data['valid'] == 1) {
+      if (data['valid'] == 1 && data['userFeedback'].containsKey('_id')) {
         _userFeedbackId = data['userFeedback']['_id'];
         _formValsUserFeedback['attended'] = data['userFeedback']['attended'];
         _formValsUserFeedback['stars'] = data['userFeedback']['stars'];
         _formValsUserFeedback['willJoinNextWeek'] = data['userFeedback']['willJoinNextWeek'];
         _formValsUserFeedback['willInvite'] = data['userFeedback']['willInvite'];
         setState(() { _formValsUserFeedback = _formValsUserFeedback; _userFeedbackId = _userFeedbackId; _loading = false; });
+      } else {
+        setState(() { _loading = false; });
       }
     }));
 

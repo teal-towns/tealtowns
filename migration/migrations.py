@@ -5,7 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
-    FeedbackStarsAttended()
+    # FeedbackStarsAttended()
     # EventViewsAt()
     # AddTimezoneToNeighborhood()
     # PayQuantityAndStripeIds()
@@ -38,7 +38,7 @@ def FeedbackStarsAttended():
             }
             mutation = {
                 '$set': {
-                    'stars': 3,
+                    'stars': 5,
                     'attended': 'yes',
                 }
             }
