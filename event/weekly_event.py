@@ -64,7 +64,8 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
     return ret
 
 def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUserEvents: int = 0,
-    withUserId: str = '', weeklyEventUName: str = '', withEventInsight: int = 0, userOrIP: str = ''):
+    withUserId: str = '', weeklyEventUName: str = '', withEventInsight: int = 0, userOrIP: str = '',
+    addEventView: int = 1):
     ret = _mongo_db_crud.GetById('weeklyEvent', weeklyEventId, uName = weeklyEventUName)
     if not ret['valid'] or '_id' not in ret['weeklyEvent']:
         return ret
@@ -100,7 +101,7 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
         else:
             ret['userEvent'] = {}
         if withEventInsight and '_id' in ret['event']:
-            ret['eventInsight'] = _event_insight.GetByEvent(ret['event']['_id'], addEventView = 1,
+            ret['eventInsight'] = _event_insight.GetByEvent(ret['event']['_id'], addEventView = addEventView,
                 userOrIP = userOrIP)['eventInsight']
         else:
             ret['eventInsight'] = {}

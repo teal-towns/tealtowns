@@ -27,6 +27,7 @@ class _UserSignupState extends State<UserSignupComponent> {
   bool _loading = false;
   String _message = '';
   bool _loadingIP = true;
+  bool _initedIP = false;
 
   @override
   void initState() {
@@ -109,7 +110,8 @@ class _UserSignupState extends State<UserSignupComponent> {
   @override
   Widget build(BuildContext context) {
     var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    if (_ipService.IsLoaded() || currentUserState.isLoggedIn) {
+    if (!_initedIP && (_ipService.IsLoaded() || currentUserState.isLoggedIn)) {
+      _initedIP = true;
       _loadingIP = false;
       var data = {
         'fieldKey': 'signUpUniqueViewsAt',
