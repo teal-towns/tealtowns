@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 // Note: Must also update custom_theme.dart to match
 Map<String, List<double>> _colorMap = {
   'primary': [16, 91, 87],
-  'primaryLight': [111, 188, 169],
+  'primaryLight': [44, 163, 134],
   'primaryDark': [0, 45, 40],
   'primaryTransparent': [16, 91, 87, 0.4],
   'accent': [143, 229, 142],
   'accentDark': [143, 229, 142],
   'accentTransparent': [143, 229, 142, 0.4],
-  'secondary': [200, 182, 23],
+  'secondary': [253, 224, 72],
   // 'secondary': [143, 229, 142],
   'text': [124, 124, 124],
   'error': [234, 84, 85],

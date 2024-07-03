@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
@@ -44,8 +45,9 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
   Map<String, dynamic>_formVals = {
     'rows': 1,
     'columns': 1,
+    'showImage': 1,
     'showMap': 0,
-    'showQrCode': 0,
+    'showQrCode': 1,
     'showNeighborhoodEvents': 1,
     'userMessage': '',
   };
@@ -131,7 +133,11 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
             _inputFields.inputNumber(_formVals, 'rows', label: 'Rows', min: 1, max: 10, onChange: (val) {
               setState(() { _formVals = _formVals; });
             }),
-            _inputFields.inputNumber(_formVals, 'columns', label: 'Columns', min: 1, max: 10, onChange: (val) {
+            _inputFields.inputNumber(_formVals, 'columns', label: 'Columns', min: 1, max: 5, onChange: (val) {
+              setState(() { _formVals = _formVals; });
+            }),
+            _inputFields.inputSelect(_optsYesNo, _formVals, 'showImage', label: 'Show Image?', onChanged: (val) {
+              _formVals['showImage'] = int.parse(val);
               setState(() { _formVals = _formVals; });
             }),
             // _inputFields.inputSelect(_optsYesNo, _formVals, 'showMap', label: 'Show Map?', onChanged: (val) {
@@ -194,12 +200,23 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         SizedBox(height: 10),
       ];
     }
+
+    List<Widget> colsImage = [];
+    if (_formVals['showImage'] == 1) {
+      colsImage += [
+        _weeklyEvent.imageUrls.length <= 0 ?
+          Image.asset('assets/images/shared-meal.jpg', height: imageHeight, width: double.infinity, fit: BoxFit.cover,)
+          : Image.network(_weeklyEvent.imageUrls![0], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
+        SizedBox(height: 10),
+      ];
+    }
+
     List<Widget> colsUserMessage = [];
     if (_formVals['userMessage'].length > 0) {
       colsUserMessage += [
-        _style.Text1('Message From Host', size: 'large', colorKey: 'primary'),
-        SizedBox(height: 10),
-        Text(_formVals['userMessage']),
+        // _style.Text1('Message From Host', size: 'large', colorKey: 'primaryLight'),
+        // SizedBox(height: 10),
+        Text(_formVals['userMessage'], style: GoogleFonts.dancingScript(fontSize: 20),),
         SizedBox(height: 10),
       ];
     }
@@ -216,8 +233,8 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     if (_formVals['showNeighborhoodEvents'] == 1) {
       String url = '${config['SERVER_URL']}/ne/${_weeklyEvent.neighborhoodUName}';
       colsNeighborhoodEvents += [
-        _style.Text1('Other Neighborhood Events', size: 'large', colorKey: 'primary'),
-        SizedBox(height: 10),
+        // _style.Text1('Other Neighborhood Events', size: 'large', colorKey: 'primaryLight'),
+        // SizedBox(height: 10),
         _style.Text1('${url}', left: Icon(Icons.link)),
         SizedBox(height: 10),
       ];
@@ -247,43 +264,53 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       ];
     }
 
+    List<Widget> colsDetails = [
+      _style.Text1('${startDate}', left: Icon(Icons.calendar_month)),
+      SizedBox(height: 10),
+      ...admins,
+      _style.Text1('${shareUrl}', left: Icon(Icons.link)),
+      SizedBox(height: 10),
+      ...colsNeighborhoodEvents,
+    ];
+    List<Widget> colsDetailsQR = [
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 1, child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...colsDetails,
+            ]
+          )),
+          Expanded(flex: 1, child: Column(
+            children: [
+              ...colsQrCode,
+            ]
+          )),
+        ]
+      )
+    ];
+    if (_formVals['columns'] > 2) {
+      colsDetailsQR = [
+        ...colsDetails,
+        ...colsQrCode,
+      ];
+    }
+
     return Container(padding: EdgeInsets.all(10), child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _weeklyEvent.imageUrls.length <= 0 ?
-          Image.asset('assets/images/shared-meal.jpg', height: imageHeight, width: double.infinity, fit: BoxFit.cover,)
-          : Image.network(_weeklyEvent.imageUrls![0], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
-        SizedBox(height: 10),
-        _style.Text1('${_weeklyEvent.title}', size: 'xlarge', colorKey: 'primary'),
+        ...colsImage,
+        _style.Text1('${_weeklyEvent.title}', size: 'large', colorKey: 'primaryLight'),
         SizedBox(height: 10),
         ...colsUserMessage,
-        _style.Text1('Description', size: 'large', colorKey: 'primary'),
-        SizedBox(height: 10),
+        // _style.Text1('Description', size: 'large', colorKey: 'primaryLight'),
+        // SizedBox(height: 10),
         Text(_weeklyEvent.description),
         SizedBox(height: 10),
-        _style.Text1('Event Details', size: 'large', colorKey: 'primary'),
-        SizedBox(height: 10),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(flex: 1, child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _style.Text1('${startDate}', left: Icon(Icons.calendar_month)),
-                SizedBox(height: 10),
-                ...admins,
-                _style.Text1('${shareUrl}', left: Icon(Icons.link)),
-                SizedBox(height: 10),
-              ]
-            )),
-            Expanded(flex: 1, child: Column(
-              children: [
-                ...colsQrCode,
-              ]
-            )),
-          ]
-        ),
-        ...colsNeighborhoodEvents,
+        // _style.Text1('Event Details', size: 'large', colorKey: 'primaryLight'),
+        // SizedBox(height: 10),
+        ...colsDetailsQR,
         // ...colsMap,
       ]
     ));

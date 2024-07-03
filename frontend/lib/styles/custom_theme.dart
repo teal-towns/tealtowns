@@ -5,7 +5,7 @@ class CustomTheme {
   static ThemeData get lightTheme {
     Color primary = Color.fromRGBO(16, 91, 87, 1);
     Color primaryDark = Color.fromRGBO(0, 45, 40, 1);
-    Color secondary = Color.fromRGBO(200, 182, 23, 1);
+    Color secondary = Color.fromRGBO(253, 224, 72, 1);
     Color accent = Color.fromRGBO(143, 229, 142, 1);
     Color accentDark = Color.fromRGBO(143, 229, 142, 1);
     Color text = Color.fromRGBO(125, 125, 125, 1);
