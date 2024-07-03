@@ -155,6 +155,15 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           //   setState(() { _formVals = _formVals; });
           // }),
           SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              _screenshotController.capture().then((Uint8List? image) {
+                SaveImage(image!);
+              });
+            },
+            child: Text('Save Image to Print'),
+          ),
+          SizedBox(height: 10),
           Row(
             children: [
               Expanded(flex: 1, child: SizedBox.shrink()),
@@ -167,14 +176,6 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
             ],
           ),
           SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              _screenshotController.capture().then((Uint8List? image) {
-                SaveImage(image!);
-              });
-            },
-            child: Text('Print'),
-          ),
         ]
       )
     );
