@@ -444,13 +444,14 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _style.Text1('${_weeklyEvent.title}', size: 'xlarge'),
-        SizedBox(height: 10),
         _weeklyEvent.imageUrls.length <= 0 ?
           Image.asset('assets/images/shared-meal.jpg', height: 300, width: double.infinity, fit: BoxFit.cover,)
             : Image.network(_weeklyEvent.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
         SizedBox(height: 10),
-        // Text(_weeklyEvent.description),
+        _style.Text1('${_weeklyEvent.title}', size: 'xlarge', colorKey: 'primaryLight'),
+        SizedBox(height: 10),
+        _style.Text1('Description', size: 'large', colorKey: 'primaryLight'),
+        SizedBox(height: 10),
         MarkdownBody(
           selectable: true,
           data: _weeklyEvent.description!,
@@ -466,6 +467,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
             h6: Theme.of(context).textTheme.titleLarge,
           ),
         ),
+        SizedBox(height: 10),
+        _style.Text1('Event Details', size: 'large', colorKey: 'primaryLight'),
         SizedBox(height: 10),
         // _style.Text1('${_weeklyEvent.xDay}s ${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}',
         //     left: Icon(Icons.calendar_today)),

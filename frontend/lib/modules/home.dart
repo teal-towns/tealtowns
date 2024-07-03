@@ -24,18 +24,47 @@ class _HomeComponentState extends State<HomeComponent> {
 
   @override
   Widget build(BuildContext context) {
+    return AppScaffoldComponent(
+      listWrapper: true,
+      width: 2000,
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingTop: 0,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 900) {
+            return BuildBody();
+          } else {
+            return BuildBody(topHeight: 300, titleSize: 75);
+          }
+        }
+      )
+    );
+  }
 
-    Widget topLeft = Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget BuildBody({double topHeight = 200, double titleSize = 50}) {
+    Widget top = Container(
+      child: Row(
         children: [
-          _style.SpacingH('medium'),
-          _style.Text1('TealTowns', size: 'xxlarge', colorKey: 'white', fontWeight: FontWeight.bold),
-          _style.SpacingH('medium'),
-          _style.Text1('Friendship at the Heart of Sustainable Living', colorKey: 'white', size: 'large'),
-          _style.SpacingH('medium'),
+          Expanded(flex: 1, child: Container()),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _style.SpacingH('medium'),
+              Row(
+                children: [
+                  _style.Text1('TealTowns', fontSize: titleSize, colorKey: 'white', fontWeight: FontWeight.bold),
+                  Image.asset('assets/images/logo-white.png', width: titleSize, height: titleSize),
+                ]
+              ),
+              _style.SpacingH('medium'),
+              _style.Text1('Friendship at the Heart of Sustainable Living', colorKey: 'white', size: 'large'),
+              _style.SpacingH('medium'),
+            ]
+          ),
+          Expanded(flex: 1, child: Container()),
         ]
-      ),
+      )
     );
 
     Widget content = Container(
@@ -48,7 +77,7 @@ class _HomeComponentState extends State<HomeComponent> {
               alignment: Alignment.bottomCenter,
               // width: 300,
               // height: 300,
-              child: Image.asset('assets/images/food-dish.jpg', width: 450, height: 450),
+              child: Image.asset('assets/images/food-dish.png', width: 450, height: 450),
             ),
           ),
           Align(alignment: Alignment.center, child: Container(
@@ -57,7 +86,6 @@ class _HomeComponentState extends State<HomeComponent> {
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(20)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.5),
@@ -86,121 +114,38 @@ class _HomeComponentState extends State<HomeComponent> {
       )
     );
 
-    return AppScaffoldComponent(
-      listWrapper: true,
-      width: 2000,
-      paddingLeft: 0,
-      paddingRight: 0,
-      paddingTop: 0,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 900) {
-            return Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/green-leaf-background.jpg"),
-                      fit: BoxFit.cover,
-                      // colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.8), BlendMode.dstATop),
-                    ),
-                  ),
-                  child: topLeft,
-                ),
-                BuildTiles(),
-                SizedBox(height: 30),
-                content,
-                // SizedBox(height: 20),
-                Container(padding: EdgeInsets.only(left: 20, right: 20), child: Neighborhoods() ),
-                // Extra height for neighborhoods input location overlay.
-                SizedBox(height: 100),
-              ]
-            );
-          } else {
-            return Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: 400,
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/green-leaf-background.jpg"),
-                      fit: BoxFit.cover,
-                      // colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.8), BlendMode.dstATop),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(flex: 1, child: Container()),
-                      Column(
-                        children: [
-                          Expanded(flex: 1, child: Container()),
-                          topLeft,
-                          Expanded(flex: 1, child: Container()),
-                        ]
-                      ),
-                      Expanded(flex: 3, child: Container()),
-                      Column(
-                        children: [
-                          Expanded(flex: 1, child: Container()),
-                          BuildTiles(backgroundColorKey: 'transparent', width: 400),
-                          Expanded(flex: 1, child: Container()),
-                        ]
-                      ),
-                      Expanded(flex: 1, child: Container()),
-                    ]
-                  )
-                ),
-                SizedBox(height: 30),
-                content,
-                // SizedBox(height: 20),
-                Container(padding: EdgeInsets.only(left: 20, right: 20), child: Neighborhoods() ),
-                // Extra height for neighborhoods input location overlay.
-                SizedBox(height: 100),
-              ]
-            );
-          }
-        }
-      )
-    );
-  }
+    List<Widget> colsBottom = [
+      SizedBox(height: 30),
+      content,
+      // SizedBox(height: 20),
+      Container(padding: EdgeInsets.only(left: 20, right: 20), child: Neighborhoods() ),
+      // Extra height for neighborhoods input location overlay.
+      SizedBox(height: 100),
+    ];
 
-  Widget BuildTiles({ String backgroundColorKey = 'primary', double width = double.infinity }) {
-    Color white = Colors.white;
-    Color background = _colors.colors[backgroundColorKey];
-    Color border = _colors.colors['white'];
-    double tileHeight = 100;
-    double tileTextWidth = 75;
-    Widget tiles = Container(width: width, child: Column(
+    return Column(
       children: [
-        Row(
-          children: [
-            Expanded(flex: 1, child: Container(decoration: BoxDecoration(border: Border.all(color: border), color: background), padding: EdgeInsets.all(10), height: tileHeight, child: InkWell(
-              onTap: () { context.go('/weekly-events'); },
-              child: Align(alignment: Alignment.center, child: Text('Neighborhood Events', style: TextStyle(color: white), textAlign: TextAlign.center)),
-            ))),
-            Expanded(flex: 1, child: Image.asset('assets/images/food-1.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
-            Expanded(flex: 1, child: Container(decoration: BoxDecoration(border: Border.all(color: border), color: background), padding: EdgeInsets.all(10), height: tileHeight, child: InkWell(
-              onTap: () { context.go('/own'); },
-              child: Align(alignment: Alignment.center, child: Text('Shared Items', style: TextStyle(color: white), textAlign: TextAlign.center)),
-            ))),
-          ]
+        Container(
+          width: double.infinity,
+          height: topHeight,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/green-town.png"),
+              fit: BoxFit.cover,
+              // colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.8), BlendMode.dstATop),
+            ),
+          ),
+          child: Column(
+            children: [
+              Expanded(flex: 1, child: Container()),
+              top,
+              Expanded(flex: 1, child: Container()),
+            ]
+          ),
         ),
-        Row(
-          children: [
-            Expanded(flex: 1, child: Image.asset('assets/images/photo-party-1.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
-            Expanded(flex: 1, child: Container(decoration: BoxDecoration(border: Border.all(color: border), color: background), padding: EdgeInsets.all(10), height: tileHeight, child: InkWell(
-              onTap: () { context.go('/eat'); },
-              child: Align(alignment: Alignment.center, child: Text('Meals With Friends', style: TextStyle(color: white), textAlign: TextAlign.center)),
-            ))),
-            Expanded(flex: 1, child: Image.asset('assets/images/neighborhood-court-birds-eye.jpg', width: double.infinity, height: tileHeight, fit: BoxFit.cover),),
-          ]
-        )
+        ...colsBottom,
       ]
-    ));
-    return tiles;
+    );
   }
 }
