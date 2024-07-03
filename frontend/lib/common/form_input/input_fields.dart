@@ -199,31 +199,33 @@ class InputFields {
       //initialValue: initialVal,
       controller: controller,
       onSaved: (value) {
+        double? val = ForceMinMax(_parseService.toDouble(value, allowNull: true), min, max);
         if (formValsKey == null) {
-          formVals = _parseService.toDouble(value, allowNull: true);
+          formVals = val;
         } else {
-          formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
+          formVals[formValsKey] = val;
         }
       },
       onChanged: (value) {
+        double? val = ForceMinMax(_parseService.toDouble(value, allowNull: true), min, max);
         if (formValsKey == null) {
-          formVals = _parseService.toDouble(value, allowNull: true);
+          formVals = val;
         } else {
-          formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
+          formVals[formValsKey] = val;
         }
         if (onChange != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
             debounce = Timer(Duration(milliseconds: debounceChange), () {
               if (formValsKey == null) {
-                formVals = _parseService.toDouble(value, allowNull: true);
+                formVals = val;
               } else {
-                formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
+                formVals[formValsKey] = val;
               }
-              onChange(_parseService.toDouble(value, allowNull: true));
+              onChange(val);
             });
           } else {
-            onChange(_parseService.toDouble(value, allowNull: true));
+            onChange(val);
           }
         }
       },
@@ -756,4 +758,16 @@ String? validateMinMax(double value, double? min, double? max) {
     return 'Must be less than ${max}';
   }
   return null;
+}
+
+double? ForceMinMax(double? value, double? min, double? max) {
+  if (value == null) {
+    return value;
+  }
+  if (min != null && value < min) {
+    return min;
+  } else if (max != null && value > max) {
+    return max;
+  }
+  return value;
 }

@@ -71,7 +71,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       var data = res['data'];
       if (data['valid'] == 1) {
         if (data.containsKey('weeklyEvent') && data['weeklyEvent'].containsKey('_id') &&
-          data.containsKey('event') &&data['event'].containsKey('_id') &&
+          data.containsKey('event') && data['event'].containsKey('_id') &&
           data.containsKey('nextEvent') && data['nextEvent'].containsKey('_id')) {
           _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
           if (data.containsKey('event')) {
@@ -282,6 +282,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ),
       SizedBox(height: 10),
       Text(shareUrl),
+      SizedBox(height: 10),
+      _buttons.Link(context, 'Print Flyer', '/wep/${_weeklyEvent.uName}'),
       SizedBox(height: 10),
     ];
     List<Widget> colsShare = [

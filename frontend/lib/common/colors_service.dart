@@ -81,6 +81,16 @@ class ColorsService {
     }
   }
 
+  List<double> GetRGB(String key) {
+    if (!_inited) {
+      Init();
+    }
+    if (!_colorMap.containsKey(key)) {
+      return [0, 0, 0];
+    }
+    return _colorMap[key]!;
+  }
+
   Map<String, Color> GetColors() {
     if (!_inited) {
       Init();

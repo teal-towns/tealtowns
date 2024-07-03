@@ -26,6 +26,7 @@ import './modules/blog/blog_view.dart';
 import './modules/event/weekly_events.dart';
 import './modules/event/weekly_event_save.dart';
 import './modules/event/weekly_event_view.dart';
+import './modules/event/weekly_event_print.dart';
 import './modules/event/event_feedback_save_page.dart';
 import './modules/event/event_feedback_page.dart';
 
@@ -83,6 +84,7 @@ class Routes {
   static const weeklyEvents = '/weekly-events';
   static const weeklyEventSave = '/weekly-event-save';
   static const weeklyEventView = '/we/:uName';
+  static const weeklyEventPrint = '/wep/:uName';
   static const eat = '/eat';
   static const eventFeedbackSave = '/event-feedback-save';
   static const eventFeedback = '/event-feedback';
@@ -367,6 +369,16 @@ class AppGoRouter {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
             return WeeklyEventView(uName: uName);
+          }
+          return WeeklyEvents();
+        },
+      ),
+      GoRoute(
+        path: Routes.weeklyEventPrint,
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters["uName"];
+          if (uName != null) {
+            return WeeklyEventPrint(uName: uName);
           }
           return WeeklyEvents();
         },
