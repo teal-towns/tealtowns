@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/date_time_service.dart';
+import '../../common/form_input/image_save.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
@@ -34,6 +35,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     'feedback': '',
     'positiveVoteIds': [''],
     'positiveFeedback': '',
+    'imageUrls': [],
   };
   String _userFeedbackId = '';
   Map<String, dynamic> _formValsUserFeedback = {
@@ -291,6 +293,9 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
           }
         },),
         SizedBox(height: 10,),
+        ImageSaveComponent(formVals: _formValsEventFeedback, formValsKey: 'imageUrls', multiple: true,
+          label: 'Have any event photos?', imageUploadSimple: true,),
+        SizedBox(height: 10,),
       ];
     }
 
@@ -345,6 +350,13 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
         'userId': userId,
       };
       _socketService.emit('AddEventFeedbackUserVotes', data);
+    }
+    if (_formValsEventFeedback['imageUrls'].length > 0) {
+      data = {
+        'eventFeedbackId': _eventFeedback['_id'],
+        'imageUrls': _formValsEventFeedback['imageUrls'],
+      };
+      _socketService.emit('AddEventFeedbackImages', data);
     }
 
     List<String> invites = [];

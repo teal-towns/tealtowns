@@ -337,7 +337,8 @@
                 "userIds": [ "{String}" ]
             }
         ],
-        "notificationSent": "{Int} 0|1"
+        "notificationSent": "{Int} 0|1",
+        "imageUrls": [ "{String} @optional" ]
     },
     "userFeedback": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

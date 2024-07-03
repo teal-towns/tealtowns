@@ -33,11 +33,13 @@ class FormSave extends StatefulWidget {
   String loggedOutRedirect;
   String title;
   String saveText;
+  bool requireLoggedIn;
 
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
     this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.align = 'center', this.id = '',
     this.uName = '', this.formFields = null,
-    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', this.saveText = 'Save', });
+    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', this.saveText = 'Save',
+    this.requireLoggedIn = true,});
 
   @override
   _FormSaveState createState() => _FormSaveState();
@@ -66,7 +68,7 @@ class _FormSaveState extends State<FormSave> {
   void initState() {
     super.initState();
 
-    if (!Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
+    if (widget.requireLoggedIn && !Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
       Timer(Duration(milliseconds: 500), () {
         context.go(widget.loggedOutRedirect);
       });

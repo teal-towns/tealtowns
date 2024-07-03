@@ -18,7 +18,7 @@ def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0, wit
     ret['eventFeedback'] = mongo_db.find_one('eventFeedback', { "eventId": eventId })['item']
     if ret['eventFeedback'] is None and autoCreate:
         eventFeedback = { "eventId": eventId, "feedbackVotes": [], "positiveVotes": [],
-            "notificationSent": notificationSent, }
+            "notificationSent": notificationSent, "imageUrls": [], }
         ret = _mongo_db_crud.Save('eventFeedback', eventFeedback)
     if ret['eventFeedback'] is None:
         ret['valid'] = 0
@@ -118,6 +118,14 @@ def RemovePositiveUserVotes(eventFeedbackId: str, positiveVoteIds: list, userId:
     ret = { "valid": 1, "message": "" }
     for positiveVoteId in positiveVoteIds:
         RemovePositiveUserVote(eventFeedbackId, positiveVoteId, userId)
+    ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
+    return ret
+
+def AddImages(eventFeedbackId: str, imageUrls: list):
+    ret = { "valid": 1, "message": "" }
+    query = { "_id": mongo_db.to_object_id(eventFeedbackId) }
+    mutation = { "$push": { "imageUrls": { "$each": imageUrls } } }
+    mongo_db.update_one('eventFeedback', query, mutation)
     ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
     return ret
 

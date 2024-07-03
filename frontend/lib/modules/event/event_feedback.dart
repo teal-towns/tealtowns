@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../common/date_time_service.dart';
+import '../../common/layout_service.dart';
 import '../../common/socket_service.dart';
 import './event_class.dart';
 import './event_feedback_class.dart';
@@ -19,6 +20,7 @@ class EventFeedback extends StatefulWidget {
 
 class _EventFeedbackState extends State<EventFeedback> {
   DateTimeService _dateTime = DateTimeService();
+  LayoutService _layoutService = LayoutService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
 
@@ -213,6 +215,16 @@ class _EventFeedbackState extends State<EventFeedback> {
       ];
     }
 
+    List<Widget> images = [];
+    if (_eventFeedback.imageUrls.length > 0) {
+      for (int i = 0; i < _eventFeedback.imageUrls.length; i++) {
+        String url = _eventFeedback.imageUrls[i];
+        images.add(
+          Image.network(url, height: 100, width: 100, fit: BoxFit.cover),
+        );
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -222,6 +234,7 @@ class _EventFeedbackState extends State<EventFeedback> {
         ...colsEnjoyed,
         ...colsWillJoin,
         ...colsWillInvite,
+        _layoutService.WrapWidth(images, width: 100,)
       ],
     );
   }
