@@ -8,6 +8,7 @@ import '../../common/ip_service.dart';
 import '../../common/socket_service.dart';
 import './user_class.dart';
 import '../../common/form_input/input_fields.dart';
+import '../../common/style.dart';
 import './current_user_state.dart';
 import '../../routes.dart';
 
@@ -21,6 +22,7 @@ class _UserSignupState extends State<UserSignupComponent> {
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
   IPService _ipService = IPService();
+  Style _style = Style();
 
   final _formKey = GlobalKey<FormState>();
   var formVals = {};
@@ -90,7 +92,7 @@ class _UserSignupState extends State<UserSignupComponent> {
             setState(() { _loading = false; });
           }
         },
-        child: Text('Sign Up'),
+        child: Text('Start my TealTown!'),
       ),
     );
   }
@@ -129,6 +131,13 @@ class _UserSignupState extends State<UserSignupComponent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Row(
+              children: [
+                Image.asset('assets/images/logo.png', width: 30, height: 30),
+                SizedBox(width: 10),
+                _style.Text1('Registration', size: 'large', colorKey: 'primary'),
+              ]
+            ),
             _inputFields.inputEmail(formVals, 'email'),
             _inputFields.inputPassword(formVals, 'password', minLen: 6),
             _inputFields.inputText(formVals, 'firstName', minLen: 2, label: 'First Name'),

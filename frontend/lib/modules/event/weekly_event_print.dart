@@ -214,7 +214,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     List<Widget> colsUserMessage = [];
     if (_formVals['userMessage'].length > 0) {
       colsUserMessage += [
-        // _style.Text1('Message From Host', size: 'large', colorKey: 'primaryLight'),
+        // _style.Text1('Message From Host', size: 'large', colorKey: 'primary'),
         // SizedBox(height: 10),
         Text(_formVals['userMessage'], style: GoogleFonts.dancingScript(fontSize: 20),),
         SizedBox(height: 10),
@@ -233,7 +233,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     if (_formVals['showNeighborhoodEvents'] == 1) {
       String url = '${config['SERVER_URL']}/ne/${_weeklyEvent.neighborhoodUName}';
       colsNeighborhoodEvents += [
-        // _style.Text1('Other Neighborhood Events', size: 'large', colorKey: 'primaryLight'),
+        // _style.Text1('Other Neighborhood Events', size: 'large', colorKey: 'primary'),
         // SizedBox(height: 10),
         _style.Text1('${url}', left: Icon(Icons.link)),
         SizedBox(height: 10),
@@ -301,14 +301,14 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...colsImage,
-        _style.Text1('${_weeklyEvent.title}', size: 'large', colorKey: 'primaryLight'),
+        _style.Text1('${_weeklyEvent.title}', size: 'large', colorKey: 'primary'),
         SizedBox(height: 10),
         ...colsUserMessage,
-        // _style.Text1('Description', size: 'large', colorKey: 'primaryLight'),
+        // _style.Text1('Description', size: 'large', colorKey: 'primary'),
         // SizedBox(height: 10),
         Text(_weeklyEvent.description),
         SizedBox(height: 10),
-        // _style.Text1('Event Details', size: 'large', colorKey: 'primaryLight'),
+        // _style.Text1('Event Details', size: 'large', colorKey: 'primary'),
         // SizedBox(height: 10),
         ...colsDetailsQR,
         // ...colsMap,

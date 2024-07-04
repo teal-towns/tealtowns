@@ -83,7 +83,7 @@ class _HomeComponentState extends State<HomeComponent> {
           Align(alignment: Alignment.center, child: Container(
             // color: Colors.white,
             width: 600,
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.only(top: 50, bottom: 50, left: 50, right: 50),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [

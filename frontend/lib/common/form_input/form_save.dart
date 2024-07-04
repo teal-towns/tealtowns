@@ -124,7 +124,7 @@ class _FormSaveState extends State<FormSave> {
     List<Widget> cols = [];
     if (widget.title.length > 0) {
       cols += [
-        _style.Text1(widget.title, size: 'xlarge'),
+        _style.Text1(widget.title, size: 'xlarge', colorKey: 'primary'),
         _style.Spacing(height: 'medium'),
       ];
     }

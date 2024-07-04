@@ -448,9 +448,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           Image.asset('assets/images/shared-meal.jpg', height: 300, width: double.infinity, fit: BoxFit.cover,)
             : Image.network(_weeklyEvent.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
         SizedBox(height: 10),
-        _style.Text1('${_weeklyEvent.title}', size: 'xlarge', colorKey: 'primaryLight'),
-        SizedBox(height: 10),
-        _style.Text1('Description', size: 'large', colorKey: 'primaryLight'),
+        _style.Text1('${_weeklyEvent.title}', size: 'xlarge', colorKey: 'primary'),
+        SizedBox(height: 30),
+        Row(
+          children: [
+            Image.asset('assets/images/logo.png', width: 30, height: 30),
+            SizedBox(width: 10),
+            _style.Text1('Description', size: 'large', colorKey: 'primary'),
+          ]
+        ),
         SizedBox(height: 10),
         MarkdownBody(
           selectable: true,
@@ -467,8 +473,14 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
             h6: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        SizedBox(height: 10),
-        _style.Text1('Event Details', size: 'large', colorKey: 'primaryLight'),
+        SizedBox(height: 30),
+        Row(
+          children: [
+            Image.asset('assets/images/logo.png', width: 30, height: 30),
+            SizedBox(width: 10),
+            _style.Text1('Event Details', size: 'large', colorKey: 'primary'),
+          ]
+        ),
         SizedBox(height: 10),
         // _style.Text1('${_weeklyEvent.xDay}s ${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}',
         //     left: Icon(Icons.calendar_today)),

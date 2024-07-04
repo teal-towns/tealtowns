@@ -386,7 +386,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     Color footerColor = _colors.colors['white'];
     // if (size == 'small') {
       return Container(
-        color: _colors.colors['primary'],
+        color: _colors.colors['primaryDark'],
         child: Column(
           children: [
             SizedBox(height: 30),

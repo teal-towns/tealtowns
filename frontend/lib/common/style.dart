@@ -23,7 +23,8 @@ class Style {
     'small': 5,
     'medium': 10,
     'large': 20,
-    'xlarge': 30,
+    'xlarge': 40,
+    'xxlarge': 80,
   };
 
   Map<String, double> GetFontSizes() {
