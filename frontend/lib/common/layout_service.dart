@@ -11,7 +11,7 @@ class LayoutService {
 
   get headerHeight => _headerHeight;
 
-  Widget WrapWidth(List<Widget> children, {double width = 250, double spacing = 10, String align = 'center'}) {
+  Widget WrapWidth(List<Widget> children, {double width = 250, double spacing = 20, String align = 'center'}) {
     WrapAlignment wrapAlignment = align == 'center' ? WrapAlignment.center : WrapAlignment.start;
     return Wrap(
       spacing: spacing,

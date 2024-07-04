@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // Note: Must also update custom_theme.dart to match
 Map<String, List<double>> _colorMap = {
-  'primary': [16, 91, 87],
+  'primary': [44, 163, 134],
   'primaryLight': [44, 163, 134],
   'primaryDark': [0, 45, 40],
   'primaryTransparent': [16, 91, 87, 0.4],
@@ -25,6 +25,7 @@ Map<String, List<double>> _colorMap = {
   'greyTransparent': [125, 125, 125, 0.4],
   'greyDark': [50, 50, 50],
   'white': [255, 255, 255],
+  'brown': [72, 43, 8],
 };
 List<double> primary = [0, 167, 0];
 List<double> secondary = [15, 69, 194];

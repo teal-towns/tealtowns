@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CustomTheme {
   static ThemeData get lightTheme {
-    Color primary = Color.fromRGBO(16, 91, 87, 1);
-    Color primaryDark = Color.fromRGBO(0, 45, 40, 1);
+    Color primary = Color.fromRGBO(44, 163, 134, 1);
+    Color primaryDark = Color.fromRGBO(16, 91, 87, 1);
     Color secondary = Color.fromRGBO(253, 224, 72, 1);
     Color accent = Color.fromRGBO(143, 229, 142, 1);
     Color accentDark = Color.fromRGBO(143, 229, 142, 1);
@@ -12,6 +12,7 @@ class CustomTheme {
     Color grey = Colors.grey;
     Color white = Colors.white;
     Color error = Color.fromRGBO(234, 84, 85, 1);
+    Color brown = Color.fromRGBO(72, 43, 8, 1);
     return ThemeData(
       // https://paletton.com/#uid=53i0u0kDJDJiVIJpYEuFjqdJVjp
       primaryColor: primary,
@@ -41,8 +42,8 @@ class CustomTheme {
           // textStyle: TextStyle(
           //   letterSpacing: 1.05,
           // ),
-          foregroundColor: white,
-          backgroundColor: primary,
+          foregroundColor: brown,
+          backgroundColor: secondary,
         )
       ),
       pageTransitionsTheme: PageTransitionsTheme(builders: {

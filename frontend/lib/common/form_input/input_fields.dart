@@ -160,6 +160,8 @@ class InputFields {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        focusColor: _colors.colors['primary'],
+        hoverColor: _colors.colors['primary'],
       ),
       validator: (value) {
         if (required && value?.isEmpty == true) {
@@ -393,6 +395,7 @@ class InputFields {
         isExpanded: true,
         key: fieldKey,
         value: value,
+        dropdownColor: Colors.white,
         onSaved: (value) {
           if (formValsKey == null) {
             formVals = value;
@@ -444,8 +447,9 @@ class InputFields {
     }
     return InputWrapper(SelectButtonsFormField(
       options: options,
-      colorSelected: _colors.colors['primary'],
+      colorSelected: _colors.colors['secondary'],
       color: _colors.colors['greyLight'],
+      colorText: _colors.colors['brown'],
       label: label,
       initialValue: value,
       onSaved: (value) {
@@ -484,8 +488,9 @@ class InputFields {
     }
     return InputWrapper(MultiSelectButtonsFormField(
       options: options,
-      colorSelected: _colors.colors['primary'],
+      colorSelected: _colors.colors['secondary'],
       color: _colors.colors['greyLight'],
+      colorText: _colors.colors['brown'],
       label: label,
       initialValue: values,
       onSaved: (values) {
