@@ -1,6 +1,7 @@
 import threading
 import time
 
+from common import location as _location
 from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
@@ -126,6 +127,10 @@ def Save(weeklyEvent: dict):
             weeklyEvent['priceUSD'] = weeklyEventExisting['priceUSD']
     if 'timezone' not in weeklyEvent or weeklyEvent['timezone'] == '':
         weeklyEvent['timezone'] = date_time.GetTimezoneFromLngLat(weeklyEvent['location']['coordinates'])
+    if 'locationAddress' not in weeklyEvent or len(weeklyEvent['locationAddress']) < 1 or \
+        'street' not in weeklyEvent['locationAddress'] or len(weeklyEvent['locationAddress']['street']) < 1:
+        weeklyEvent['locationAddress'] = _location.LngLatToAddress(weeklyEvent['location']['coordinates'][0],
+            weeklyEvent['location']['coordinates'][1])['address']
     payInfo = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
     weeklyEvent['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
     return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)

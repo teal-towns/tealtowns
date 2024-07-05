@@ -60,6 +60,7 @@ class _FormSaveState extends State<FormSave> {
   bool _firstLoadDone = false;
   bool _loading = false;
   String _message = '';
+  Map<String, dynamic> _formValsLocal = {};
 
   int _step = 0;
   int _firstStepIndex = 0;
@@ -360,10 +361,13 @@ class _FormSaveState extends State<FormSave> {
     }
     bool required = value.containsKey('required') ? value['required'] : true;
     if (value['type'] == 'location') {
+      _formValsLocal[key] = ToInputLocation(key, _formVals);
       bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
       bool guessLocation = value.containsKey('guessLocation') ? value['guessLocation'] : true;
-      input = InputLocation(formVals: _formVals, formValsKey: key, label: label, helpText: helpText,
-        nestedCoordinates: nestedCoordinates, guessLocation: guessLocation,);
+      input = InputLocation(formVals: _formValsLocal, formValsKey: key, label: label, helpText: helpText,
+        nestedCoordinates: nestedCoordinates, guessLocation: guessLocation, onChange: (Map<String, dynamic> val) {
+          FromInputLocation(key, val);
+        });
     } else if (value['type'] == 'select') {
       input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText,);
     } else if (value['type'] == 'selectButtons') {
@@ -388,6 +392,32 @@ class _FormSaveState extends State<FormSave> {
         helpText: helpText,);
     }
     return input;
+  }
+
+  Map<String, dynamic> ToInputLocation(String key, Map<String, dynamic> formVals) {
+    if (widget.formFields![key]!.containsKey('nestedAddress') &&
+      widget.formFields![key]!['nestedAddress']) {
+      return formVals[key];
+    }
+    Map<String, dynamic> address = {};
+    if (widget.formFields![key]!.containsKey('addressField') &&
+      formVals.containsKey(widget.formFields![key]!['addressField'])) {
+      address = formVals[widget.formFields![key]!['addressField']];
+    }
+    return { 'lngLat': formVals[key], 'address': address };
+  }
+
+  void FromInputLocation(String key, Map<String, dynamic> locationVal) {
+    if (widget.formFields![key]!.containsKey('nestedAddress') &&
+      widget.formFields![key]!['nestedAddress']) {
+      _formVals[key] = { 'lngLat': locationVal['lngLat'], 'address': locationVal['address'] };
+    } else {
+      _formVals[key] = locationVal['lngLat'];
+      if (widget.formFields![key]!.containsKey('addressField') &&
+        _formVals.containsKey(widget.formFields![key]!['addressField'])) {
+        _formVals[widget.formFields![key]!['addressField']] = locationVal['address'];
+      }
+    }
   }
 
   bool formValid() {

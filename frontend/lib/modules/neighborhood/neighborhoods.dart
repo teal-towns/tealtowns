@@ -38,7 +38,9 @@ class _NeighborhoodsState extends State<Neighborhoods> {
   List<NeighborhoodClass> _neighborhoods = [];
   String _message = '';
   bool _loading = false;
-  Map<String, dynamic> _formVals = {};
+  Map<String, dynamic> _formVals = {
+    'inputLocation': {},
+  };
 
   @override
   void initState() {
@@ -67,7 +69,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       }
     }));
 
-    _formVals['location'] = [widget.lng, widget.lat];
+    _formVals['inputLocation']['lngLat'] = [widget.lng, widget.lat];
 
     // Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods(notify: false);
 
@@ -94,7 +96,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
     }
     Map<String, dynamic> config = _config.GetConfig();
     List<Widget> content = [];
-    if (!_locationService.LocationValid(_formVals['location'])) {
+    if (!_locationService.LocationValid(_formVals['inputLocation']['lngLat'])) {
       content = [ Text('Enter your location to see neighborhoods near you.') ];
     } else {
       if (_neighborhoods.length <= 0) {
@@ -139,8 +141,8 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         ),
         _style.SpacingH('medium'),
         _layoutService.WrapWidth([
-          InputLocation(formVals: _formVals, formValsKey: 'location', nestedCoordinates: false,
-            onChange: (List<double?> lngLat) {
+          InputLocation(formVals: _formVals, formValsKey: 'inputLocation', nestedCoordinates: false,
+            onChange: (Map<String, dynamic> lngLat) {
               SearchNeighborhoods();
           })],
         width: 300),
@@ -159,7 +161,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
-      'location': { 'lngLat': _formVals['location'], 'maxMeters': widget.maxMeters, },
+      'location': { 'lngLat': _formVals['inputLocation']['lngLat'], 'maxMeters': widget.maxMeters, },
       'withLocationDistance': 1,
       'userId': userId,
     };
