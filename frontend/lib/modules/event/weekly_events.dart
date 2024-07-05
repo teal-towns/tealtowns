@@ -49,7 +49,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic?> _filters = {
     'maxMeters': 1500,
-    'lngLat': [0, 0],
+    'inputLocation': { 'lngLat': [0, 0], 'address': {} },
   };
   bool _loading = true;
   String _message = '';
@@ -120,13 +120,10 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     }));
 
     if (widget.lat != 0 && widget.lng != 0) {
-      _filters['lngLat'] = [widget.lng, widget.lat];
+      _filters['inputLocation']['lngLat'] = [widget.lng, widget.lat];
       _skipCurrentLocation = true;
     } else {
-      _filters['lngLat'] = _locationService.GetLngLat();
-      // if (_locationService.LocationValid(_filters['lngLat'])) {
-      //   _skipCurrentLocation = true;
-      // }
+      _filters['inputLocation']['lngLat'] = _locationService.GetLngLat();
     }
     for (int ii = 0; ii < _selectOptsMaxMeters.length; ii++) {
       if (_selectOptsMaxMeters[ii]['value'] == widget.maxMeters) {
@@ -175,7 +172,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     Widget widgetFilters = SizedBox.shrink();
     if (widget.showFilters > 0) {
       widgetFilters = _layoutService.WrapWidth([
-        InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
+        InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (Map<String, dynamic> val) {
           _search();
           }),
         _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
@@ -227,15 +224,15 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
 
   void _init() async {
     if ((!_skipCurrentLocation || widget.showFilters <= 0) && widget.updateLngLatOnInit > 0) {
-      if (_locationService.LocationValid(_filters['lngLat'])) {
+      if (_locationService.LocationValid(_filters['inputLocation']['lngLat'])) {
         _search();
       }
       List<double> lngLat = await _locationService.GetLocation(context);
       // Since async, could have changed pages and will thus get an error.
       if(mounted) {
-        if (_locationService.IsDifferent(lngLat, _filters['lngLat'])) {
+        if (_locationService.IsDifferent(lngLat, _filters['inputLocation']['lngLat'])) {
           setState(() {
-            _filters['lngLat'] = lngLat;
+            _filters['inputLocation']['lngLat'] = lngLat;
           });
           if (widget.showFilters <= 0) {
             _search();
@@ -377,7 +374,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
 
   void _search({int lastPageNumber = 0, bool updateUrl = true}) {
-    if (mounted && _locationService.LocationValid(_filters['lngLat'])) {
+    if (mounted && _locationService.LocationValid(_filters['inputLocation']['lngLat'])) {
       setState(() {
         _loading = true;
         _message = '';
@@ -392,7 +389,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       var data = {
         'skip': (_lastPageNumber - 1) * _itemsPerPage,
         'limit': _itemsPerPage,
-        'lngLat': _filters['lngLat'],
+        'lngLat': _filters['inputLocation']['lngLat'],
         'maxMeters': _filters['maxMeters'],
         'withAdmins': 0,
         'type': widget.type,
@@ -406,8 +403,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   
   void _UpdateUrl() {
     if(kIsWeb) {
-      String? lng = _filters['lngLat'][0]?.toString();
-      String? lat = _filters['lngLat'][1]?.toString();
+      String? lng = _filters['inputLocation']['lngLat'][0]?.toString();
+      String? lat = _filters['inputLocation']['lngLat'][1]?.toString();
       String? maxMeters = _filters['maxMeters']?.toString();
       html.window.history.pushState({}, '', '/${widget.routePath}?lng=${lng}&lat=${lat}&range=${maxMeters}');
     }

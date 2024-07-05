@@ -34,4 +34,6 @@ def GetByEvent(eventId: str, addEventView: int = 0, userOrIP: str = ''):
         ret = AddEventView(eventId, withEventInsight = 1, userOrIP = userOrIP)
     ret = { "valid": 1, "message": "", "eventInsight": {}, }
     ret['eventInsight'] = mongo_db.find_one('eventInsight', { "eventId": eventId })['item']
+    if ret['eventInsight'] is None:
+        ret['eventInsight'] = {}
     return ret

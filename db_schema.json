@@ -65,6 +65,13 @@
             "type": "Point",
             "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         },
+        "locationAddress": {
+            "street": "{String}",
+            "city": "{String}",
+            "state": "{String}",
+            "zip": "{String}",
+            "country": "{String}"
+        },
         "adminUserIds": [ "{String}" ],
         "hostGroupSizeDefault": "{Int} [(minimum) People per each host. This will also be used to calculate credits per event type.]",
         "hostMoneyPerPersonUSD": "{Float}",

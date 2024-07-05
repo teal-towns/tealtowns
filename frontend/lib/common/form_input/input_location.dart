@@ -5,11 +5,16 @@ import './input_fields.dart';
 import '../location_service.dart';
 import '../parse_service.dart';
 
+// class InputLocationClass {
+//   List<double?> lngLat = [0,0];
+//   Map<String, dynamic> address = {};
+// }
+
 class InputLocation extends StatefulWidget {
   var formVals;
   String formValsKey;
   String label;
-  Function(List<double?>)? onChange;
+  Function(Map<String, dynamic>)? onChange;
   bool nestedCoordinates;
   bool guessLocation;
   bool useUserLocation;
@@ -33,8 +38,9 @@ class _InputLocationState extends State<InputLocation> {
   final OverlayPortalController _overlayController = OverlayPortalController();
 
   final _link = LayerLink();
-  Map<String, String> _formVals = {
+  Map<String, dynamic> _formVals = {
     'lngLatString': '',
+    'address': {},
   };
   String _formValsKey = 'lngLatString';
 
@@ -52,10 +58,11 @@ class _InputLocationState extends State<InputLocation> {
   @override
   Widget build(BuildContext context) {
     if (widget.nestedCoordinates) {
-      _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey]['coordinates'][0]}, ${widget.formVals[widget.formValsKey]['coordinates'][1]}';
+      _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey]['lngLat']['coordinates'][0]}, ${widget.formVals[widget.formValsKey]['lngLat']['coordinates'][1]}';
     } else {
-      _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey][0]}, ${widget.formVals[widget.formValsKey][1]}';
+      _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey]['lngLat'][0]}, ${widget.formVals[widget.formValsKey]['lngLat'][1]}';
     }
+    _formVals['address'] = widget.formVals[widget.formValsKey]['address'];
     return CompositedTransformTarget(
       link: _link,
       child: OverlayPortal(
@@ -95,18 +102,22 @@ class _InputLocationState extends State<InputLocation> {
     }
   }
 
-  List<double> UpdateLngLat(double lng, double lat) {
+  List<double> UpdateLngLat(double lng, double lat, {Map<String, dynamic> address = const {}}) {
     List<double> lngLat = [_parseService.Precision(lng, 5), _parseService.Precision(lat, 5)];
     if (widget.updateCachedLocation) {
       _locationService.SetLngLat(lngLat);
     }
     if (widget.nestedCoordinates) {
-      widget.formVals[widget.formValsKey]['coordinates'] = lngLat;
+      widget.formVals[widget.formValsKey]['lngLat']['coordinates'] = lngLat;
     } else {
-      widget.formVals[widget.formValsKey] = lngLat;
+      widget.formVals[widget.formValsKey]['lngLat'] = lngLat;
     }
+    widget.formVals[widget.formValsKey]['address'] = address;
     if (widget.onChange != null) {
-      widget.onChange!(widget.formVals[widget.formValsKey]);
+      // widget.onChange!(widget.formVals[widget.formValsKey]);
+      Map<String, dynamic> locationVal = { 'lngLat': widget.formVals[widget.formValsKey]['lngLat'],
+        'address': address };
+      widget.onChange!(locationVal);
     }
     return lngLat;
   }
@@ -120,11 +131,11 @@ class _InputLocationState extends State<InputLocation> {
     double lng;
     double lat;
     if (widget.nestedCoordinates) {
-      lng = widget.formVals[widget.formValsKey]['coordinates'][0];
-      lat = widget.formVals[widget.formValsKey]['coordinates'][1];
+      lng = widget.formVals[widget.formValsKey]['lngLat']['coordinates'][0];
+      lat = widget.formVals[widget.formValsKey]['lngLat']['coordinates'][1];
     } else {
-      lng = widget.formVals[widget.formValsKey][0];
-      lat = widget.formVals[widget.formValsKey][1];
+      lng = widget.formVals[widget.formValsKey]['lngLat'][0];
+      lat = widget.formVals[widget.formValsKey]['lngLat'][1];
     }
     LatLong latLong = LatLong(lat, lng);
     bool trackMyPosition = _locationService.LocationValid([lng, lat]) ? false : true;
@@ -140,7 +151,9 @@ class _InputLocationState extends State<InputLocation> {
         trackMyPosition: trackMyPosition,
         selectLocationButtonText: 'Select Location',
         onPicked: (pickedData) {
-          List<double> lngLat = UpdateLngLat(pickedData.latLong.longitude, pickedData.latLong.latitude);
+          Map<String, dynamic> address = ParseAddress(pickedData.addressData);
+          List<double> lngLat = UpdateLngLat(pickedData.latLong.longitude, pickedData.latLong.latitude,
+            address: address);
           setState(() {
             _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
           });
@@ -156,4 +169,30 @@ class _InputLocationState extends State<InputLocation> {
   //     _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
   //   });
   // }
+
+  Map<String, dynamic> ParseAddress(Map<String, dynamic> addressIn) {
+    Map<String, dynamic> address = {};
+    if (addressIn != null) {
+      if (addressIn.containsKey('house_number') || addressIn.containsKey('road')) {
+        String houseNumber = addressIn.containsKey('house_number') ? addressIn['house_number'] : '';
+        String road = addressIn.containsKey('road') ? addressIn['road'] : '';
+        address['street'] = '${houseNumber} ${road}';
+      }
+      if (addressIn.containsKey('town')) {
+        address['city'] = addressIn['town'];
+      } else if (addressIn.containsKey('city')) {
+        address['city'] = addressIn['city'];
+      }
+      if (addressIn.containsKey('state')) {
+        address['state'] = addressIn['state'];
+      }
+      if (addressIn.containsKey('postcode')) {
+        address['zip'] = addressIn['postcode'];
+      }
+      if (addressIn.containsKey('country')) {
+        address['country'] = addressIn['country'];
+      }
+    }
+    return address;
+  }
 }

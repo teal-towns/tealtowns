@@ -13,6 +13,7 @@ import '../../common/config_service.dart';
 import '../../common/date_time_service.dart';
 import '../../common/ip_service.dart';
 import '../../common/link_service.dart';
+import '../../common/location_service.dart';
 import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -41,6 +42,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   ConfigService _configService = ConfigService();
   DateTimeService _dateTime = DateTimeService();
   IPService _ipService = IPService();
+  LocationService _locationService = LocationService();
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
   Style _style = Style();
@@ -92,7 +94,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           if (data.containsKey('userEvent')) {
             _userEvent = UserEventClass.fromJson(data['userEvent']);
           }
-          if (data.containsKey('eventInsight')) {
+          if (data.containsKey('eventInsight') && data['eventInsight'] != null &&
+            data['eventInsight'].containsKey('_id')) {
             _eventInsight = EventInsightClass.fromJson(data['eventInsight']);
           }
           setState(() {
@@ -441,6 +444,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
+    List<Widget> colsAddress = [];
+    String address = _locationService.JoinAddress(_weeklyEvent.locationAddress);
+    if (address.length > 0) {
+      colsAddress += [
+        Text(address),
+        SizedBox(height: 10),
+      ];
+    }
+
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -501,6 +513,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           zoom: 17, markerLngLat: [_weeklyEvent.location.coordinates[0], _weeklyEvent.location.coordinates[1]],
         ),
         SizedBox(height: 10),
+        ...colsAddress,
         ...admins,
         SizedBox(height: 10),
         ...colsCalendar,

@@ -36,7 +36,8 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   ];
   List<Map<String, dynamic>> _optsNeighborhood = [];
   Map<String, Map<String, dynamic>> _formFields = {
-    'location': { 'type': 'location', 'nestedCoordinates': true, 'guessLocation': false },
+    'location': { 'type': 'location', 'nestedCoordinates': true, 'guessLocation': true,
+      'addressField': 'locationAddress', },
     'title': {},
     'dayOfWeek': { 'type': 'select' },
     'startTime': { 'type': 'time' },
@@ -111,6 +112,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     if (widget.id != null && widget.id!.length > 0) {
       _formFields.remove('hostGroupSizeDefault');
       _formFields.remove('priceUSD');
+      _formFields['location']!['guessLocation'] = false;
     }
   }
 

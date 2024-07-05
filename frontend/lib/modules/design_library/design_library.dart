@@ -43,7 +43,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
     'ranges': { 'type': 'multiSelectButtons', 'label': 'Choose multiple', },
   };
   Map<String, dynamic>_formVals = {
-    'location': { 'coordinates': [0,0] },
+    'location': { 'lngLat':  { 'coordinates': [0,0] }, 'address': {} },
     'range': 2,
   };
 

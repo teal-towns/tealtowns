@@ -187,11 +187,6 @@ class _PagingState extends State<Paging> {
       label = label[0].toUpperCase() + label.substring(1);
     }
     bool required = value.containsKey('required') ? value['required'] : true;
-    // if (value['type'] == 'location') {
-    //   bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
-    //   input = InputLocation(formVals: _filters, formValsKey: key, label: label, helpText: helpText,
-    //     nestedCoordinates: nestedCoordinates);
-    // } else if (value['type'] == 'select') {
     if (value['type'] == 'select') {
       input = _inputFields.inputSelect(value['options'], _filters, key, label: label, helpText: helpText,
         onChanged: (String newVal) { OnChanged(); }, );
