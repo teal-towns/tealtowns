@@ -218,7 +218,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     List<Widget> buttons = [];
-    if (currentUserState.isLoggedIn && _weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
+    if (currentUserState.isLoggedIn && (_weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)
+      || currentUserState.hasRole('admin'))) {
       buttons = [
         TextButton(
           onPressed: () {
