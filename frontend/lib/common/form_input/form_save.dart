@@ -362,10 +362,12 @@ class _FormSaveState extends State<FormSave> {
     bool required = value.containsKey('required') ? value['required'] : true;
     if (value['type'] == 'location') {
       _formValsLocal[key] = ToInputLocation(key, _formVals);
+      bool fullScreen = value.containsKey('fullScreen') ? value['fullScreen'] : true;
       bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
       bool guessLocation = value.containsKey('guessLocation') ? value['guessLocation'] : true;
       input = InputLocation(formVals: _formValsLocal, formValsKey: key, label: label, helpText: helpText,
-        nestedCoordinates: nestedCoordinates, guessLocation: guessLocation, onChange: (Map<String, dynamic> val) {
+        nestedCoordinates: nestedCoordinates, guessLocation: guessLocation, fullScreen: fullScreen,
+        onChange: (Map<String, dynamic> val) {
           FromInputLocation(key, val);
         });
     } else if (value['type'] == 'select') {

@@ -389,6 +389,17 @@ class InputFields {
     if (options.length < 1) {
       // print ('No options for inputSelect ${formValsKey} ${value}');
       return SizedBox.shrink();
+    } else {
+      bool found = false;
+      for (int i = 0; i < options.length; i++) {
+        if (options[i]['value'].toString() == value) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        value = null;
+      }
     }
     return InputWrapper(Container(
       child: DropdownButtonFormField(

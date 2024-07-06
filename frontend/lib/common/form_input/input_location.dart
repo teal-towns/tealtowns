@@ -6,7 +6,7 @@ import '../location_service.dart';
 import '../parse_service.dart';
 
 // class InputLocationClass {
-//   List<double?> lngLat = [0,0];
+//   List<double?> lngLat = [0.0,0.0];
 //   Map<String, dynamic> address = {};
 // }
 
@@ -20,11 +20,12 @@ class InputLocation extends StatefulWidget {
   bool useUserLocation;
   bool updateCachedLocation;
   String helpText;
+  bool fullScreen;
 
   InputLocation({Key? key, this.formVals = null, this.formValsKey = '',
     this.label = '', this.onChange = null, this.nestedCoordinates = false,
     this.guessLocation = true, this.useUserLocation = false,
-    this.updateCachedLocation = true, this.helpText = '',}) : super(key: key);
+    this.updateCachedLocation = true, this.helpText = '', this.fullScreen = true}) : super(key: key);
 
   @override
   _InputLocationState createState() => _InputLocationState();
@@ -63,6 +64,16 @@ class _InputLocationState extends State<InputLocation> {
       _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey]['lngLat'][0]}, ${widget.formVals[widget.formValsKey]['lngLat'][1]}';
     }
     _formVals['address'] = widget.formVals[widget.formValsKey]['address'];
+    if (widget.fullScreen) {
+      return _inputFields.inputText(_formVals, _formValsKey, label: widget.label, helpText: widget.helpText,
+        onTap: ToggleFullScreen, onChange: (String val) {
+        List<String> lngLatString = val.split(',');
+        double lng = _parseService.toDoubleNoNull(lngLatString[0]);
+        double lat = _parseService.toDoubleNoNull(lngLatString[1]);
+        UpdateLngLat(lng, lat);
+      });
+    }
+
     return CompositedTransformTarget(
       link: _link,
       child: OverlayPortal(
@@ -78,13 +89,43 @@ class _InputLocationState extends State<InputLocation> {
           );
         },
         child: _inputFields.inputText(_formVals, _formValsKey, label: widget.label, helpText: widget.helpText,
-          onTap: onTap, onChange: (String val) {
+          onTap: ToggleDropdown, onChange: (String val) {
           List<String> lngLatString = val.split(',');
           double lng = _parseService.toDoubleNoNull(lngLatString[0]);
           double lat = _parseService.toDoubleNoNull(lngLatString[1]);
           UpdateLngLat(lng, lat);
         }),
       ),
+    );
+  }
+
+  void ToggleFullScreen() {
+    showGeneralDialog(
+      context: context,
+      // barrierColor: Colors.black12.withOpacity(0.6),
+      barrierColor: Colors.white,
+      // Not working..
+      // barrierDismissible: true,
+      // barrierLabel: 'Select Location',
+      // transitionDuration: Duration(milliseconds: 400),
+      pageBuilder: (context, __, ___) {
+        double screenHeight = MediaQuery.of(context).size.height;
+        return Card(child: Column(
+          children: [
+            Container(height: 50,
+              child: Row(
+                children: [
+                  Expanded(flex: 1, child: Container()),
+                  Text('Select Location'),
+                  Expanded(flex: 1, child: Container()),
+                  IconButton(onPressed: () { Navigator.of(context).pop(); }, icon: Icon(Icons.close)),
+                ],
+              ),
+            ),
+            DropdownWidget(width: double.infinity, height: screenHeight - 50 - 10),
+          ]
+        ));
+      },
     );
   }
 
@@ -122,7 +163,7 @@ class _InputLocationState extends State<InputLocation> {
     return lngLat;
   }
 
-  void onTap() {
+  void ToggleDropdown() {
     _dropdownWidth = context.size?.width;
     _overlayController.toggle();
   }
@@ -157,7 +198,11 @@ class _InputLocationState extends State<InputLocation> {
           setState(() {
             _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
           });
-          _overlayController.toggle();
+          if (widget.fullScreen) {
+            Navigator.pop(context);
+          } else {
+            _overlayController.toggle();
+          }
         }
       )
     );

@@ -33,7 +33,8 @@ class _DesignLibraryState extends State<DesignLibrary> {
   ];
   Map<String, Map<String, dynamic>> _formFields = {
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
-    'location': { 'type': 'location', 'nestedCoordinates': true },
+    'location': { 'type': 'location', 'nestedCoordinates': true, 'fullScreen': false, },
+    'locationFullScreen': { 'type': 'location', 'nestedCoordinates': true },
     'title': {},
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
     'dayOfWeek': { 'type': 'select' },
@@ -43,7 +44,8 @@ class _DesignLibraryState extends State<DesignLibrary> {
     'ranges': { 'type': 'multiSelectButtons', 'label': 'Choose multiple', },
   };
   Map<String, dynamic>_formVals = {
-    'location': { 'lngLat':  { 'coordinates': [0,0] }, 'address': {} },
+    'location': { 'coordinates': [0.0,0.0] },
+    'locationFullScreen': { 'coordinates': [0.0,0.0] },
     'range': 2,
   };
 
