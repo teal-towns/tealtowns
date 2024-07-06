@@ -159,6 +159,10 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
+        if (data.containsKey('missingFeedbackEventIds')) {
+          var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+          currentUserState.SetAppData({'eventFeedbackMissingIds': data['missingFeedbackEventIds']});
+        }
         String route = '/home';
         if (_weeklyEvent.uName.length > 0) {
           route = '/we/' + _weeklyEvent.uName;
@@ -377,6 +381,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
         'willInvite': _formValsUserFeedback['willInvite'],
         'invites': invites,
       },
+      'withCheckAskForFeedback': 1,
     };
     if (_userFeedbackId.length > 0) {
       data['userFeedback']['_id'] = _userFeedbackId;
