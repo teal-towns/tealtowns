@@ -18,7 +18,10 @@ def addRoutes():
     _socket.add_route('SearchEvents', Search)
 
     def Save(data, auth, websocket):
-        return _user_feedback.Save(data['userFeedback'])
+        data = lodash.extend_object({
+            'withCheckAskForFeedback': 0,
+        }, data)
+        return _user_feedback.Save(data['userFeedback'], withCheckAskForFeedback = data['withCheckAskForFeedback'])
     _socket.add_route('SaveUserFeedback', Save)
 
     def Get(data, auth, websocket):

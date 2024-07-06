@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
 import '../../common/layout_service.dart';
 import '../../common/socket_service.dart';
 import './event_class.dart';
 import './event_feedback_class.dart';
 import './user_feedback_class.dart';
+import '../user_auth/current_user_state.dart';
 
 class EventFeedback extends StatefulWidget {
   String weeklyEventId;
@@ -19,6 +22,7 @@ class EventFeedback extends StatefulWidget {
 }
 
 class _EventFeedbackState extends State<EventFeedback> {
+  Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
   LayoutService _layoutService = LayoutService();
   List<String> _routeIds = [];
@@ -45,6 +49,7 @@ class _EventFeedbackState extends State<EventFeedback> {
     'invites': 0,
   };
   bool _show = true;
+  bool _missingUserFeedback = false;
 
   @override
   void initState() {
@@ -68,12 +73,14 @@ class _EventFeedbackState extends State<EventFeedback> {
       }
     }));
 
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    String userId = currentUserState.isLoggedIn ? currentUserState.currentUser.id : '';
     if (widget.eventId.length > 0) {
       _socketService.emit('GetEventFeedbackByEvent',
-        {'eventId': widget.eventId, 'withUserFeedback': 1, 'withEvent': 1});
+        {'eventId': widget.eventId, 'withUserFeedback': 1, 'withEvent': 1, 'withCheckAskForFeedbackUserId': userId});
     } else if (widget.weeklyEventId.length > 0) {
       _socketService.emit('GetEventFeedbackByWeeklyEvent',
-        {'weeklyEventId': widget.weeklyEventId, 'withUserFeedback': 1});
+        {'weeklyEventId': widget.weeklyEventId, 'withUserFeedback': 1, 'withCheckAskForFeedbackUserId': userId});
     }
 
     if (widget.showDetails < 1) {
@@ -84,6 +91,14 @@ class _EventFeedbackState extends State<EventFeedback> {
   void SetData(var data) {
     _eventFeedback = EventFeedbackClass.fromJson(data['eventFeedback']);
     _event = EventClass.fromJson(data['event']);
+    if (data.containsKey('missingFeedbackEventIds')) {
+      for (int i = 0; i < data['missingFeedbackEventIds'].length; i++) {
+        if (data['missingFeedbackEventIds'][i] == _eventFeedback.eventId) {
+          _missingUserFeedback = true;
+          break;
+        }
+      }
+    }
     for (int i = 0; i < _eventFeedback.feedbackVotes.length; i++) {
       int count = _eventFeedback.feedbackVotes[i].userIds.length;
       _feedbackVoteStrings.add('(${count}) ${_eventFeedback.feedbackVotes[i].feedback}');
@@ -133,6 +148,7 @@ class _EventFeedbackState extends State<EventFeedback> {
       _starsAverage = _attendedStats['yes'] > 0 ? starsSum / _attendedStats['yes'] : 0;
       _willJoinNextWeekStats = _willJoinNextWeekStats;
       _willInviteStats = _willInviteStats;
+      _missingUserFeedback = _missingUserFeedback;
     });
   }
 
@@ -149,9 +165,19 @@ class _EventFeedbackState extends State<EventFeedback> {
     }
     String peopleCount = _userFeedbacks.length == 1 ? '1 person' : '${_userFeedbacks.length} people';
     String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
+
+    List<Widget> colsMissingUserFeedback = [];
+    if (_missingUserFeedback) {
+      colsMissingUserFeedback = [
+        _buttons.LinkElevated(context, 'Add Your Feedback', '/event-feedback-save?eventId=${_eventFeedback.eventId}'),
+        SizedBox(height: 10),
+      ];
+    }
+
     List<Widget> colsTitle = [
       Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
       SizedBox(height: 10),
+      ...colsMissingUserFeedback,
     ];
     if (!_show && _userFeedbacks.length > 0) {
       return Column(
@@ -163,6 +189,7 @@ class _EventFeedbackState extends State<EventFeedback> {
             }
           ),
           SizedBox(height: 10),
+          ...colsMissingUserFeedback,
         ],
       );
     }

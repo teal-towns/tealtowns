@@ -46,6 +46,7 @@ class _InputLocationState extends State<InputLocation> {
   String _formValsKey = 'lngLatString';
 
   double? _dropdownWidth;
+  String _fullScreenOverride = '';
 
   @override
   void initState() {
@@ -64,7 +65,7 @@ class _InputLocationState extends State<InputLocation> {
       _formVals['lngLatString'] = '${widget.formVals[widget.formValsKey]['lngLat'][0]}, ${widget.formVals[widget.formValsKey]['lngLat'][1]}';
     }
     _formVals['address'] = widget.formVals[widget.formValsKey]['address'];
-    if (widget.fullScreen) {
+    if (widget.fullScreen && _fullScreenOverride != 'inline') {
       return _inputFields.inputText(_formVals, _formValsKey, label: widget.label, helpText: widget.helpText,
         onTap: ToggleFullScreen, onChange: (String val) {
         List<String> lngLatString = val.split(',');
@@ -118,6 +119,13 @@ class _InputLocationState extends State<InputLocation> {
                   Expanded(flex: 1, child: Container()),
                   Text('Select Location'),
                   Expanded(flex: 1, child: Container()),
+                  IconButton(onPressed: () {
+                    _fullScreenOverride = 'inline';
+                    setState(() { _fullScreenOverride = _fullScreenOverride; });
+                    ToggleDropdown();
+                    Navigator.of(context).pop();
+                  }, icon: Icon(Icons.remove)),
+                  SizedBox(width: 10),
                   IconButton(onPressed: () { Navigator.of(context).pop(); }, icon: Icon(Icons.close)),
                 ],
               ),
@@ -198,7 +206,7 @@ class _InputLocationState extends State<InputLocation> {
           setState(() {
             _formVals['lngLatString'] = '${lngLat[0]}, ${lngLat[1]}';
           });
-          if (widget.fullScreen) {
+          if (widget.fullScreen && _fullScreenOverride != 'inline') {
             Navigator.pop(context);
           } else {
             _overlayController.toggle();

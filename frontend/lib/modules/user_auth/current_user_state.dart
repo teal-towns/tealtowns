@@ -49,6 +49,7 @@ class CurrentUserState extends ChangeNotifier {
             //   (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
             if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0) {
               // _routerRedirectUrl = '/event-feedback-save?eventId=' + data['checkUserFeedback']['missingFeedbackEventIds'][0];
+              // SetAppData({ 'eventFeedbackMissingIds': data['checkUserFeedback']['missingFeedbackEventIds'] });
               // Removing for now.
               // SetAppData({'eventFeedbackSave': { 'eventId': data['checkUserFeedback']['missingFeedbackEventIds'][0] }});
 
@@ -79,7 +80,9 @@ class CurrentUserState extends ChangeNotifier {
   }
 
   void SetAppData(Map<String, dynamic> appData) {
-    _appData = appData;
+    for (String key in appData.keys) {
+      _appData[key] = appData[key];
+    }
     notifyListeners();
   }
 

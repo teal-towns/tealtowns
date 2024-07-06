@@ -8,7 +8,7 @@ from event import weekly_event as _weekly_event
 from notifications_all import sms_twilio as _sms_twilio
 from notifications_all import email_sendgrid as _email_sendgrid
 
-def Save(userFeedback: dict):
+def Save(userFeedback: dict, withCheckAskForFeedback: int = 0):
     ret = _mongo_db_crud.Save('userFeedback', userFeedback)
     ret['smsAttemptCount'] = 0
     ret['emailAttemptCount'] = 0
@@ -33,6 +33,9 @@ def Save(userFeedback: dict):
             elif contactType == 'email':
                 _email_sendgrid.Send(user['firstName'] + ' invited you to an event!', body, invite)
                 ret['emailAttemptCount'] += 1
+    if withCheckAskForFeedback:
+        ret1 = CheckAskForFeedback(userFeedback['userId'], userFeedback['forId'])
+        ret['missingFeedbackEventIds'] = ret1['missingFeedbackEventIds']
     return ret
 
 def GuessContactType(contactText: str):
