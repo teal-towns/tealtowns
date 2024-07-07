@@ -17,7 +17,7 @@ def Search(stringKeyVals: dict = {}, limit: int = 250, skip: int = 0, withNeighb
         userIdIndexMap = {}
         for index, userNeighborhood in enumerate(ret['userNeighborhoods']):
             if withNeighborhoods:
-                neighborhoodUNames.append(mongo_db.to_object_id(userNeighborhood['neighborhoodUName']))
+                neighborhoodUNames.append(userNeighborhood['neighborhoodUName'])
                 uNameIndexMap[userNeighborhood['neighborhoodUName']] = index
             if withUsers:
                 userObjectIds.append(mongo_db.to_object_id(userNeighborhood['userId']))
@@ -48,8 +48,13 @@ def Save(userNeighborhood: dict):
     item = mongo_db.find_one('userNeighborhood', query)['item']
     if item is not None and '_id' in item:
         userNeighborhood['_id'] = item['_id']
-    elif 'roles' not in userNeighborhood:
-        userNeighborhood['roles'] = []
+    else:
+        if 'roles' not in userNeighborhood:
+            userNeighborhood['roles'] = []
+        if 'motivations' not in userNeighborhood:
+            userNeighborhood['motivations'] = []
+        if 'vision' not in userNeighborhood:
+            userNeighborhood['vision'] = ''
     ret = _mongo_db_crud.Save('userNeighborhood', userNeighborhood)
     _user_insight.Save({ 'userId': userNeighborhood['userId'], 'firstNeighborhoodJoinAt': date_time.now_string() })
     return ret

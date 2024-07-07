@@ -26,4 +26,8 @@ def addRoutes():
             withNeighborhoods = data['withNeighborhoods'], withUsers = data['withUsers'])
     _socket.add_route('SearchUserNeighborhoods', Search)
 
+    def GetById(data, auth, websocket):
+        return _mongo_db_crud.GetById('userNeighborhood', data['id'])
+    _socket.add_route('GetUserNeighborhoodById', GetById)
+
 addRoutes()

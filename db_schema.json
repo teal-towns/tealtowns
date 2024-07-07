@@ -268,8 +268,21 @@
         "neighborhoodUName": "{String}",
         "status": "{String} default|''",
         "roles": [
-            "{String} [empty or one of 'creator', 'steward', 'eventCreator']"
-        ]
+            "{String} [empty or one of 'creator', 'ambassador', 'eventCreator']"
+        ],
+        "vision": "{String} @optional",
+        "motivations": [ "{String}" ]
+    },
+    "userNeighborhoodWeeklyUpdate": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "userId": "{String}",
+        "neighborhoodUName": "{String}",
+        "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "end": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Used for partial updates] 2023-06-13 15:30:00 -0700",
+        "inviteCount": "{Int}",
+        "attendedCount": "{Int} @optional"
     },
     "neighborhoodGroup": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -378,6 +391,7 @@
                 "id": "{String}",
                 "start": "{String}",
                 "attendeeCount": "{Int}",
+                "firstEventAttendeeCount": "{Int}",
                 "weeklyEventId":"{String}",
                 "weeklyEventUName": "{String}"
             }

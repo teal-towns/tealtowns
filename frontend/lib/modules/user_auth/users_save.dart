@@ -80,7 +80,7 @@ class _UsersSaveState extends State<UsersSave> {
           formFields: _formFields,
           parseData: (dynamic data) => UserClass.fromJson(data).toJson(),
           preSave: (dynamic data) {
-            data = UserClass.fromJson(data).toJson();
+            data['user'] = UserClass.fromJson(data['user']).toJson();
             return data;
           // }, onSave: (dynamic data) {
           },

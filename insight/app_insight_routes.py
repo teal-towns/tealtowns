@@ -11,4 +11,8 @@ def addRoutes():
         return _app_insight.AddView(data['fieldKey'], userOrIP = data['userOrIP'])
     _socket.add_route('AddAppInsightView', AddView)
 
+    def GetCoreMetrics(data, auth, websocket):
+        return _app_insight.GetCoreMetrics(pastWeeksCount = data['pastWeeksCount'])
+    _socket.add_route('GetCoreMetrics', GetCoreMetrics)
+
 addRoutes()

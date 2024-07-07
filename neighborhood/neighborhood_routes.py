@@ -22,9 +22,12 @@ def addRoutes():
     _socket.add_route('SearchNeighborhoods', Search)
 
     def Save(data, auth, websocket):
+        data = lodash.extend_object({
+            'userId': '',
+        }, data)
         regex = re.compile('[^a-zA-Z0-9]')
         data['neighborhood']['uName'] = regex.sub('', data['neighborhood']['uName'].lower())
-        return _neighborhood.Save(data['neighborhood'])
+        return _neighborhood.Save(data['neighborhood'], data['userId'])
     _socket.add_route('SaveNeighborhood', Save)
 
     def Remove(data, auth, websocket):

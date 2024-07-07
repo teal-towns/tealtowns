@@ -371,11 +371,11 @@ class _FormSaveState extends State<FormSave> {
           FromInputLocation(key, val);
         });
     } else if (value['type'] == 'select') {
-      input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText,);
+      input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'selectButtons') {
-      input = _inputFields.inputSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText,);
+      input = _inputFields.inputSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'multiSelectButtons') {
-      input = _inputFields.inputMultiSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText,);
+      input = _inputFields.inputMultiSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'time') {
       input = _inputFields.inputTime(_formVals, key, label: label, required: required, helpText: helpText,);
     } else if (value['type'] == 'number') {
@@ -447,7 +447,7 @@ class _FormSaveState extends State<FormSave> {
     var data = {};
     data[widget.dataName] = _formVals;
     if (widget.preSave != null) {
-      data[widget.dataName] = widget.preSave!(data[widget.dataName]);
+      data = widget.preSave!(data);
     }
     saveData(data);
   }

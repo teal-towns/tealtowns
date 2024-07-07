@@ -106,3 +106,59 @@ def AddView(fieldKey: str, userOrIP: str = '', now = None,):
         mutation['$push'][key] = nowString
         mongo_db.update_one('appInsight', query, mutation, validate = 0)
     return ret
+
+def GetCoreMetrics(now = None, weekdayStart = 3, pastWeeksCount = 1):
+    now = now if now is not None else date_time.now()
+    ret = { 'valid': 1, 'message': '', 'coreMetricsWeeks': [] }
+    limit = 100000
+    thisWeek = date_time.create(now.year, now.month, now.day, 0, 0)
+    if thisWeek.weekday() != weekdayStart:
+        days = thisWeek.weekday() - weekdayStart
+        thisWeek = thisWeek - datetime.timedelta(days = days)
+    for i in range(pastWeeksCount):
+        start = date_time.string(thisWeek)
+        end = date_time.string(thisWeek + datetime.timedelta(days = 7))
+        ret['coreMetricsWeeks'].append({ 'newNeighborhoods': 0, 'newInvites': 0, 'newEventAttendees': 0,
+            'uniqueEventInviters': 0, 'uniqueEventAttendees': 0, 'totalAmbassadors': 0, 'activeAmbassadors': 0,
+            'start': start, 'end': end, })
+
+        # New neighborhoods
+        query = { 'createdAt': { '$gte': start, '$lte': end } }
+        neighborhoods = mongo_db.find('neighborhood', query, fields = { '_id': 1 }, limit = limit)['items']
+        ret['coreMetricsWeeks'][i]['newNeighborhoods'] = len(neighborhoods)
+
+        # New invites
+        query = { 'inviteCount': { '$gt': 0 }, 'start': { '$gte': start, '$lte': end } }
+        fields = { 'inviteCount': 1, 'attendedCount': 1, }
+        userNeighborhoodWeeklyUpdates = mongo_db.find('userNeighborhoodWeeklyUpdate', query,
+            fields = fields, limit = limit)['items']
+        for userNeighborhoodWeeklyUpdate in userNeighborhoodWeeklyUpdates:
+            ret['coreMetricsWeeks'][i]['newInvites'] += userNeighborhoodWeeklyUpdate['inviteCount']
+
+        # New event attendees
+        query = { 'firstEventSignUpAt': { '$gte': start, '$lte': end } }
+        userInsights = mongo_db.find('userInsight', query, fields = { '_id': 1 }, limit = limit)['items']
+        ret['coreMetricsWeeks'][i]['newEventAttendees'] = len(userInsights)
+
+        # Unique event inviters
+        # https://stackoverflow.com/a/15224544
+        query = { 'invites.0': { '$exists': 1 }, 'createdAt': { '$gte': start, '$lte': end } }
+        userFeedbacks = mongo_db.find('userFeedback', query, fields = { '_id': 1 }, limit = limit)['items']
+        ret['coreMetricsWeeks'][i]['uniqueEventInviters'] += len(userFeedbacks)
+        # Also add in ambassador invites.
+        ret['coreMetricsWeeks'][i]['uniqueEventInviters'] += len(userNeighborhoodWeeklyUpdates)
+
+        # Unique event attendees
+        query = { 'attendeeCount': { '$gte': 1 }, 'createdAt': { '$gte': start, '$lte': end } }
+        userIds = mongo_db.findDistinct('userEvent', 'userId', query)['values']
+        ret['coreMetricsWeeks'][i]['uniqueEventAttendees'] = len(userIds)
+
+        # Ambassadors
+        ret['coreMetricsWeeks'][i]['totalAmbassadors'] = mongo_db.Count('neighborhood')['count']
+        query = { 'start': { '$gte': start, '$lte': end } }
+        neighborhoodUNames = mongo_db.findDistinct('userNeighborhoodWeeklyUpdate', 'neighborhoodUName', query)['values']
+        ret['coreMetricsWeeks'][i]['activeAmbassadors'] = len(neighborhoodUNames)
+
+        thisWeek = thisWeek - datetime.timedelta(days = 7)
+
+    return ret

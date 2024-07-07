@@ -5,6 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
+    UserNeighborhoodVision()
     UserNeighborhoodToUName()
     UserNeighborhoodRoles()
     # WeeklyEventLocationAddress()
@@ -23,6 +24,37 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def UserNeighborhoodVision():
+    collection = 'userNeighborhood'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'vision': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('userNeighborhoodVision', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'vision': '',
+                    'motivations': [],
+                },
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
 
 def UserNeighborhoodToUName():
     collection = 'userNeighborhood'
@@ -76,7 +108,7 @@ def UserNeighborhoodRoles():
             }
             mutation = {
                 '$set': {
-                    'roles': ['creator', 'steward'],
+                    'roles': ['creator', 'ambassador'],
                 }
             }
 

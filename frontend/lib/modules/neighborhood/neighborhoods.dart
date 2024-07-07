@@ -66,6 +66,12 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       var data = res['data'];
       if (data['valid'] == 1) {
         SearchNeighborhoods();
+        String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+          Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+        if (userId.length > 0) {
+          var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+          neighborhoodState.CheckAndGet(userId);
+        }
       }
     }));
 

@@ -50,8 +50,10 @@ def create_all_indices(db):
     db['neighborhood'].create_index([('location', '2dsphere')])
     db['neighborhood'].create_index([('title', 1)], unique=False)
 
-    db['userNeighborhood'].drop_indexes()
+    # db['userNeighborhood'].drop_indexes()
     db['userNeighborhood'].create_index([('userId', 1), ('neighborhoodUName', 1)], unique=True)
+
+    db['userNeighborhoodWeeklyUpdate'].create_index([('userId', 1), ('neighborhoodUName', 1), ('start', 1)], unique=True)
 
     db['neighborhoodGroup'].create_index([('uName', 1)], unique=True)
 

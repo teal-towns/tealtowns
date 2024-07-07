@@ -4,14 +4,14 @@ from neighborhood import user_neighborhood as _user_neighborhood
 
 def test_Save():
     _mongo_mock.InitAllCollections()
-    userNeighborhood = { 'userId': 'user1', 'neighborhoodUName': 'neighborhood1', 'status': 'default' }
+    userNeighborhood = { 'userId': 'user1', 'neighborhoodUName': 'neighborhood1', 'status': 'default', 'motivations': [], }
     _user_neighborhood.Save(userNeighborhood)
     userNeighborhoods = mongo_db.find('userNeighborhood', {'userId': 'user1'})['items']
     assert len(userNeighborhoods) == 1
     assert userNeighborhoods[0]['status'] == 'default'
 
     # Add second neighborhood
-    userNeighborhood = { 'userId': 'user1', 'neighborhoodUName': 'neighborhood2', 'status': 'default' }
+    userNeighborhood = { 'userId': 'user1', 'neighborhoodUName': 'neighborhood2', 'status': 'default', 'motivations': [], }
     _user_neighborhood.Save(userNeighborhood)
     userNeighborhoods = mongo_db.find('userNeighborhood', {'userId': 'user1'})['items']
     assert len(userNeighborhoods) == 2
@@ -22,7 +22,7 @@ def test_Save():
             assert item['status'] == 'default'
     
     # Re-make neighborhood 1 default.
-    userNeighborhood = { 'userId': 'user1', 'neighborhoodUName': 'neighborhood1', 'status': 'default' }
+    userNeighborhood = { 'userId': 'user1', 'neighborhoodUName': 'neighborhood1', 'status': 'default', 'motivations': [], }
     _user_neighborhood.Save(userNeighborhood)
     userNeighborhoods = mongo_db.find('userNeighborhood', {'userId': 'user1'})['items']
     assert len(userNeighborhoods) == 2

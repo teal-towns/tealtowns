@@ -127,10 +127,12 @@ class _NeighborhoodStatsState extends State<NeighborhoodStats> {
         String start = _dateTime.Format(_neighborhoodStats['eventInfos'][i]['start'], 'M/d/y');
         String eventId = _neighborhoodStats['eventInfos'][i]['id'];
         // String link = '/event-feedback?eventId=${eventId}';
+        int newAttendeeCount = _neighborhoodStats['eventInfos'][i].containsKey('firstEventAttendeeCount') ?
+          _neighborhoodStats['eventInfos'][i]['firstEventAttendeeCount'] : 0;
         colsEvents += [
           // _style.Text1('${start}', size: 'large'),
           // _buttons.Link(context, '${start} (${_neighborhoodStats['eventInfos'][i]['attendeeCount']} attendees)', link),
-          TextButton(child: Text('${start} (${_neighborhoodStats['eventInfos'][i]['attendeeCount']} attendees)'),
+          TextButton(child: Text('${start} (${_neighborhoodStats['eventInfos'][i]['attendeeCount']} attendees, ${newAttendeeCount} new)'),
             onPressed: () {
               if (!_showEventIds.containsKey(eventId)) {
                 _showEventIds[eventId] = true;

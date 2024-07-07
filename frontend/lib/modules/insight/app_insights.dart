@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
+import '../../common/date_time_service.dart';
 import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -12,6 +13,7 @@ class AppInsights extends StatefulWidget {
 }
 
 class _AppInsightsState extends State<AppInsights> {
+  DateTimeService _dateTime = DateTimeService();
   ParseService _parseService = ParseService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -27,6 +29,7 @@ class _AppInsightsState extends State<AppInsights> {
     'eventSignUp': -1.0,
     'neighborhoodJoin': -1.0,
   };
+  List<Map<String, dynamic>> _coreMetricsWeeks = [];
 
   @override
   void initState() {
@@ -48,7 +51,16 @@ class _AppInsightsState extends State<AppInsights> {
       }
     }));
 
+    _routeIds.add(_socketService.onRoute('GetCoreMetrics', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        setState(() { _coreMetricsWeeks = _parseService.parseListMapStringDynamic(data['coreMetricsWeeks']); });
+      }
+    }));
+
     _socketService.emit('GetAppInsights', {});
+    _socketService.emit('GetCoreMetrics', {'pastWeeksCount': 3});
   }
 
   @override
@@ -88,6 +100,38 @@ class _AppInsightsState extends State<AppInsights> {
           _style.Text1('Event Sign Up: ${_hoursToFirstAction['eventSignUp']!.toStringAsFixed(2)}'),
           _style.SpacingH('medium'),
           _style.Text1('Neighborhood Join: ${_hoursToFirstAction['neighborhoodJoin']!.toStringAsFixed(2)}'),
+          _style.SpacingH('xlarge'),
+          _style.Text1('Core Metrics', size: 'large'),
+          _style.SpacingH('medium'),
+          Row(
+            children: [
+              Expanded(flex: 1, child: Text('Week Start')),
+              Expanded(flex: 1, child: Text('New Neighborhoods')),
+              Expanded(flex: 1, child: Text('Active Ambassadors')),
+              Expanded(flex: 1, child: Text('New Invites')),
+              Expanded(flex: 1, child: Text('New Joiner')),
+              Expanded(flex: 1, child: Text('Bring a Friend')),
+            ]
+          ),
+          ..._coreMetricsWeeks.map((Map<String, dynamic> coreMetricsWeek) {
+            String newJoinPercent = coreMetricsWeek['newInvites'] > 0 ?
+              (coreMetricsWeek['newEventAttendees'] / coreMetricsWeek['newInvites'] * 100).toStringAsFixed(1) : '?';
+            String bringAFriendPercent = coreMetricsWeek['uniqueEventInviters'] > 0 ?
+              (coreMetricsWeek['uniqueEventAttendees'] / coreMetricsWeek['uniqueEventInviters'] * 100).toStringAsFixed(1) : '?';
+            String activeAmbassadorsPercent = coreMetricsWeek['totalAmbassadors'] > 0 ?
+              (coreMetricsWeek['activeAmbassadors'] / coreMetricsWeek['totalAmbassadors'] * 100).toStringAsFixed(1) : '?';
+            String start = _dateTime.Format(coreMetricsWeek['start'], 'yyyy-MM-dd');
+            return Row(
+              children: [
+                Expanded(flex: 1, child: Text('${start}')),
+                Expanded(flex: 1, child: Text('${coreMetricsWeek['newNeighborhoods']}')),
+                Expanded(flex: 1, child: Text('${activeAmbassadorsPercent}% (${coreMetricsWeek['activeAmbassadors']} / ${ coreMetricsWeek['totalAmbassadors']})')),
+                Expanded(flex: 1, child: Text('${coreMetricsWeek['newInvites']}')),
+                Expanded(flex: 1, child: Text('${newJoinPercent}% (${coreMetricsWeek['newEventAttendees']})')),
+                Expanded(flex: 1, child: Text('${bringAFriendPercent}% (${coreMetricsWeek['uniqueEventAttendees']} / ${coreMetricsWeek['uniqueEventInviters']})')),
+              ]
+            );
+          })
         ]
       ) 
     );

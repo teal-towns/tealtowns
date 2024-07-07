@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../app_scaffold.dart';
 import '../../common/form_input/form_save.dart';
 import './neighborhood_class.dart';
+import './neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
 
 class NeighborhoodSave extends StatefulWidget {
@@ -46,12 +47,22 @@ class _NeighborhoodSaveState extends State<NeighborhoodSave> {
       formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, title: _title,
       parseData: (dynamic data) => NeighborhoodClass.fromJson(data).toJson(),
       preSave: (dynamic data) {
-        data = NeighborhoodClass.fromJson(data).toJson();
+        data['neighborhood'] = NeighborhoodClass.fromJson(data['neighborhood']).toJson();
+        String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+          Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+        if (userId.length > 0) {
+          data['userId'] = userId;
+        }
         return data;
       },
       onSave: (dynamic data) {
+        String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+          Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+        if (userId.length > 0) {
+          var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+          neighborhoodState.CheckAndGet(userId);
+        }
         String uName = data['neighborhood']['uName'];
-        // var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
         context.go('/n/${uName}');
       }
     );
