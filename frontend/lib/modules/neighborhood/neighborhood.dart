@@ -100,6 +100,12 @@ class _NeighborhoodState extends State<Neighborhood> {
       var data = res['data'];
       if (data['valid'] == 1) {
         GetNeighborhood();
+        String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+          Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+        if (userId.length > 0) {
+          var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+          neighborhoodState.CheckAndGet(userId);
+        }
       }
     }));
   }
@@ -210,11 +216,18 @@ class _NeighborhoodState extends State<Neighborhood> {
             if (!currentUserState.isLoggedIn) {
               _linkService.Go('/n/${_neighborhood.uName}', context, currentUserState: currentUserState);
             } else {
-              SaveUserNeighborhood(_neighborhood.id);
+              SaveUserNeighborhood(_neighborhood.uName);
             }
           },
           child: Text('Join Neighborhood'),
         ),
+        SizedBox(height: 10),
+      ];
+    }
+    if (currentUserState.isLoggedIn && _neighborhood.userNeighborhood.containsKey('roles') &&
+      _neighborhood.userNeighborhood['roles'].contains('ambassador')) {
+      colsJoin += [
+        _buttons.LinkElevated(context, 'Ambassador Updates', '/user-neighborhood-weekly-updates?neighborhoodUName=${_neighborhood.uName}',),
         SizedBox(height: 10),
       ];
     }
@@ -305,12 +318,12 @@ class _NeighborhoodState extends State<Neighborhood> {
     _socketService.emit('GetNeighborhoodByUName', data);
   }
 
-  void SaveUserNeighborhood(String neighborhoodId) {
+  void SaveUserNeighborhood(String neighborhoodUName) {
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
       'userNeighborhood': {
-        'neighborhoodId': neighborhoodId,
+        'neighborhoodUName': neighborhoodUName,
         'userId': userId,
         'status': 'default',
       },

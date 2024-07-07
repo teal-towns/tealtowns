@@ -47,6 +47,9 @@ import './modules/neighborhood/neighborhood_group_save.dart';
 import './modules/neighborhood/neighborhood_insights.dart';
 import './modules/neighborhood/neighborhood_journey_page.dart';
 import './modules/neighborhood/neighborhood_stats.dart';
+import './modules/neighborhood/user_neighborhood_save.dart';
+import './modules/neighborhood/user_neighborhood_weekly_update_save.dart';
+import './modules/neighborhood/user_neighborhood_weekly_updates.dart';
 
 import './modules/shared_item/shared_items.dart';
 import './modules/shared_item/shared_item_save.dart';
@@ -106,6 +109,9 @@ class Routes {
   static const neighborhoodGroup = '/neighborhood-group/:uName';
   static const neighborhoodJourney = '/neighborhood-journey';
   static const neighborhoodStats = '/neighborhood-stats/:uName';
+  static const userNeighborhoodSave = '/user-neighborhood-save';
+  static const userNeighborhoodWeeklyUpdates = '/user-neighborhood-weekly-updates';
+  static const userNeighborhoodWeeklyUpdateSave = '/user-neighborhood-weekly-update-save';
 
   static const sharedItems = '/own';
   static const sharedItemSave = '/shared-item-save';
@@ -308,6 +314,27 @@ class AppGoRouter {
           return NeighborhoodsPage();
         },
       ),
+      GoRoute(
+        path: Routes.userNeighborhoodSave,
+        builder: (BuildContext context, GoRouterState state) => UserNeighborhoodSave(
+          id: state.uri.queryParameters['id'] ?? '',
+          neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
+        )
+      ),
+      GoRoute(
+        path: Routes.userNeighborhoodWeeklyUpdateSave,
+        builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdateSave(
+          id: state.uri.queryParameters['id'] ?? '',
+          neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
+        )
+      ),
+      GoRoute(
+        path: Routes.userNeighborhoodWeeklyUpdates,
+        builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdates(
+          neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
+        )
+      ),
+
       GoRoute(
         path: Routes.neighborhoodJourney,
         builder: (context, state) => NeighborhoodJourneyPage(),

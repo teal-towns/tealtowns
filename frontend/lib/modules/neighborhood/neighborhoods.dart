@@ -66,6 +66,12 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       var data = res['data'];
       if (data['valid'] == 1) {
         SearchNeighborhoods();
+        String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+          Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+        if (userId.length > 0) {
+          var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+          neighborhoodState.CheckAndGet(userId);
+        }
       }
     }));
 
@@ -111,7 +117,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
             colsDefault = [
               ElevatedButton(
                 onPressed: () {
-                  SaveUserNeighborhood(_neighborhoods[i].id);
+                  SaveUserNeighborhood(_neighborhoods[i].uName);
                 },
                 child: Text('Make Default'),
               ),
@@ -168,12 +174,12 @@ class _NeighborhoodsState extends State<Neighborhoods> {
     _socketService.emit('SearchNeighborhoods', data);
   }
 
-  void SaveUserNeighborhood(String neighborhoodId) {
+  void SaveUserNeighborhood(String neighborhoodUName) {
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
       'userNeighborhood': {
-        'neighborhoodId': neighborhoodId,
+        'neighborhoodUName': neighborhoodUName,
         'userId': userId,
         'status': 'default',
       },

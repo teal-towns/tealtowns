@@ -12,15 +12,22 @@ def addRoutes():
     def Search(data, auth, websocket):
         data = lodash.extend_object({
             'userId': '',
+            'neighborhoodUName': '',
             'status': '',
             'limit': 25,
             'skip': 0,
             'withNeighborhoods': 0,
+            'withUsers': 0,
         }, data)
         return _user_neighborhood.Search(
-            stringKeyVals = { 'userId': data['userId'], 'status': data['status'], },
+            stringKeyVals = { 'userId': data['userId'], 'neighborhoodUName': data['neighborhoodUName'],
+                'status': data['status'], },
             limit = data['limit'], skip = data['skip'],
-            withNeighborhoods = data['withNeighborhoods'])
+            withNeighborhoods = data['withNeighborhoods'], withUsers = data['withUsers'])
     _socket.add_route('SearchUserNeighborhoods', Search)
+
+    def GetById(data, auth, websocket):
+        return _mongo_db_crud.GetById('userNeighborhood', data['id'])
+    _socket.add_route('GetUserNeighborhoodById', GetById)
 
 addRoutes()

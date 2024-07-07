@@ -55,6 +55,7 @@ from neighborhood import neighborhood_routes as _neighborhood_routes
 from neighborhood import neighborhood_group_routes as _neighborhood_group_routes
 from neighborhood import neighborhood_stats_routes as _neighborhood_stats_routes
 from neighborhood import user_neighborhood_routes as _user_neighborhood_routes
+from neighborhood import user_neighborhood_weekly_update_routes as _user_neighborhood_weekly_update_routes
 from shared_item import shared_item_routes as _shared_item_routes
 from shared_item import shared_item_owner_routes as _shared_item_owner_routes
 from pay_stripe import stripe_routes as _stripe_routes

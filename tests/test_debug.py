@@ -1,6 +1,7 @@
 import json
 
 import mongo_mock as _mongo_mock
+import mongo_db
 
 def test_Debug():
     # _mongo_mock.InitAllCollections()

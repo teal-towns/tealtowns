@@ -185,14 +185,14 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
           formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, saveText: 'Save Event',
           parseData: (dynamic data) => WeeklyEventClass.fromJson(data).toJson(),
           preSave: (dynamic data) {
-            data = WeeklyEventClass.fromJson(data).toJson();
-            if (data['adminUserIds'] == null) {
-              data['adminUserIds'] = [];
+            data['weeklyEvent'] = WeeklyEventClass.fromJson(data['weeklyEvent']).toJson();
+            if (data['weeklyEvent']['adminUserIds'] == null) {
+              data['weeklyEvent']['adminUserIds'] = [];
             }
-            if (data['adminUserIds'].length == 0) {
+            if (data['weeklyEvent']['adminUserIds'].length == 0) {
               var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
               if (currentUser != null) {
-                data['adminUserIds'].add(currentUser.id);
+                data['weeklyEvent']['adminUserIds'].add(currentUser.id);
               }
             }
             return data;

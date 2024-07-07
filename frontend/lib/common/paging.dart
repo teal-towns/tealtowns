@@ -56,6 +56,7 @@ class _PagingState extends State<Paging> {
     _routeIds.add(_socketService.onRoute(widget.routeGet, callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
+      print ('data ${data}');
       if (data['valid'] == 1) {
         if (data[widget.dataName].length < widget.itemsPerPage) {
           _canLoadMore = false;
@@ -130,12 +131,20 @@ class _PagingState extends State<Paging> {
         SizedBox(height: 20),
       ];
     }
+    List<Widget> colsNoResults = [];
+    if (_items.length < 1 && !_loading) {
+      colsNoResults = [
+        Text('No results found'),
+        SizedBox(height: 10),
+      ];
+    }
     return (
       Column(
         children: [
           ...colsFilters,
           widget.body,
           SizedBox(height: 10),
+          ...colsNoResults,
           ...colsFooter,
         ]
       )

@@ -481,6 +481,9 @@ class InputFields {
         }
       },
       validator: (value) {
+        if (required && value?.isEmpty == true) {
+          return 'Please select one';
+        }
         return null;
       },
     ), helpText: helpText);
@@ -522,6 +525,9 @@ class InputFields {
         }
       },
       validator: (values) {
+        if (required && values!.length < 1) {
+          return 'Please select at least one';
+        }
         return null;
       },
     ), helpText: helpText);
