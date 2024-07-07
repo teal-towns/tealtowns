@@ -15,12 +15,11 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
         ret['message'] = 'Neighborhood not found for ' + uName
         return ret
 
-    neighborhoodId = ret['neighborhood']['_id']
     neighborhoodUName = ret['neighborhood']['uName']
     if userId:
         userNeighborhoods = _mongo_db_crud.Search('userNeighborhood', stringKeyVals = {'userId': userId})['userNeighborhoods']
         for userNeighborhood in userNeighborhoods:
-            if neighborhoodId == userNeighborhood['neighborhoodId']:
+            if neighborhoodUName == userNeighborhood['neighborhoodUName']:
                 ret['neighborhood']['userNeighborhood'] = userNeighborhood
 
     lngLat = ret['neighborhood']['location']['coordinates']
@@ -51,7 +50,7 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
                 ret['totalCutUSD'] = retAttending['totalCutUSD']
                 ret['totalEventUsersCount'] = retAttending['totalEventUsersCount']
     if withUsersCount:
-        items = mongo_db.find('userNeighborhood', {'neighborhoodId': neighborhoodId})['items']
+        items = mongo_db.find('userNeighborhood', {'neighborhoodUName': neighborhoodUName})['items']
         ret['usersCount'] = len(items)
     if withSharedItems:
         items = []
@@ -71,9 +70,9 @@ def SearchNear(stringKeyVals: dict = {}, locationKeyVals: dict = {}, limit: int 
     if userId:
         userNeighborhoods = _mongo_db_crud.Search('userNeighborhood', stringKeyVals = {'userId': userId})['userNeighborhoods']
         for index, neighborhood in enumerate(ret['neighborhoods']):
-            neighborhoodId = neighborhood['_id']
+            neighborhoodUName = neighborhood['uName']
             for userNeighborhood in userNeighborhoods:
-                if neighborhoodId == userNeighborhood['neighborhoodId']:
+                if neighborhoodUName == userNeighborhood['neighborhoodUName']:
                     ret['neighborhoods'][index]['userNeighborhood'] = userNeighborhood
                     break
 

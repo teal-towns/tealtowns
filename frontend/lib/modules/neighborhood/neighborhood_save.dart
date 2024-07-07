@@ -51,6 +51,7 @@ class _NeighborhoodSaveState extends State<NeighborhoodSave> {
       },
       onSave: (dynamic data) {
         String uName = data['neighborhood']['uName'];
+        // var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
         context.go('/n/${uName}');
       }
     );

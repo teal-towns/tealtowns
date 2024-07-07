@@ -9,6 +9,7 @@ import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../event/event_feedback.dart';
 import './neighborhood_stats_class.dart';
+import './user_neighborhoods.dart';
 
 class NeighborhoodStats extends StatefulWidget {
   String uName;
@@ -30,6 +31,7 @@ class _NeighborhoodStatsState extends State<NeighborhoodStats> {
   Map<String, dynamic> _neighborhoodStats = {};
   Map<String, dynamic> _previousNeighborhoodStats = {};
   bool _showEvents = false;
+  bool _showNeighbors = false;
   Map<String, bool> _showEventIds = {};
 
   @override
@@ -110,6 +112,14 @@ class _NeighborhoodStatsState extends State<NeighborhoodStats> {
       ];
     }
 
+    List<Widget> colsNeighbors = [];
+    if (_showNeighbors) {
+      colsNeighbors = [
+        UserNeighborhoods(neighborhoodUName: _neighborhoodStats['neighborhoodUName']),
+        _style.SpacingH('medium'),
+      ];
+    }
+
     List<Widget> colsEvents = [];
     if (_showEvents) {
       _neighborhoodStats['eventInfos'].sort((a, b) => a["start"].toString().compareTo(b["start"].toString()));
@@ -163,6 +173,14 @@ class _NeighborhoodStatsState extends State<NeighborhoodStats> {
           _style.Text1('${widget.uName} Neighborhood Stats (${start} - ${end})', size: 'xlarge'),
           _style.SpacingH('medium'),
           ...cols,
+          _style.SpacingH('medium'),
+          TextButton(child: Text('${_neighborhoodStats['usersCount']} Neighbors'),
+            onPressed: () {
+              setState(() { _showNeighbors = !_showNeighbors; });
+            },
+          ),
+          _style.SpacingH('medium'),
+          ...colsNeighbors,
           _style.SpacingH('medium'),
           TextButton(child: Text('${_neighborhoodStats['eventInfos'].length} Events'),
             onPressed: () {

@@ -210,7 +210,7 @@ class _NeighborhoodState extends State<Neighborhood> {
             if (!currentUserState.isLoggedIn) {
               _linkService.Go('/n/${_neighborhood.uName}', context, currentUserState: currentUserState);
             } else {
-              SaveUserNeighborhood(_neighborhood.id);
+              SaveUserNeighborhood(_neighborhood.uName);
             }
           },
           child: Text('Join Neighborhood'),
@@ -305,12 +305,12 @@ class _NeighborhoodState extends State<Neighborhood> {
     _socketService.emit('GetNeighborhoodByUName', data);
   }
 
-  void SaveUserNeighborhood(String neighborhoodId) {
+  void SaveUserNeighborhood(String neighborhoodUName) {
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
       'userNeighborhood': {
-        'neighborhoodId': neighborhoodId,
+        'neighborhoodUName': neighborhoodUName,
         'userId': userId,
         'status': 'default',
       },
