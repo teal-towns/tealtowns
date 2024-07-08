@@ -5,9 +5,9 @@ import lodash
 import mongo_db
 
 def RunAll():
-    UserNeighborhoodVision()
-    UserNeighborhoodToUName()
-    UserNeighborhoodRoles()
+    # UserNeighborhoodVision()
+    # UserNeighborhoodToUName()
+    # UserNeighborhoodRoles()
     # WeeklyEventLocationAddress()
     # EventFeedbackImageUrls()
     # FeedbackStarsAttended()

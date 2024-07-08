@@ -114,6 +114,8 @@ def GetCoreMetrics(now = None, weekdayStart = 3, pastWeeksCount = 1):
     thisWeek = date_time.create(now.year, now.month, now.day, 0, 0)
     if thisWeek.weekday() != weekdayStart:
         days = thisWeek.weekday() - weekdayStart
+        if days < 0:
+            days = days + 7
         thisWeek = thisWeek - datetime.timedelta(days = days)
     for i in range(pastWeeksCount):
         start = date_time.string(thisWeek)

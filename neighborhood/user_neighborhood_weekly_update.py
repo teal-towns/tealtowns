@@ -27,9 +27,9 @@ def Save(userNeighborhoodWeeklyUpdate: dict, now = None, weekdayStart: int = 0):
     ret = _mongo_db_crud.Save('userNeighborhoodWeeklyUpdate', userNeighborhoodWeeklyUpdate)
     return ret
 
-def Search(stringKeyVals, minKeyVals: dict = {}, maxKeyVals: dict = {}, limit: int = 25, skip: int = 0,
+def Search(equalsKeyVals: dict = {}, minKeyVals: dict = {}, maxKeyVals: dict = {}, limit: int = 25, skip: int = 0,
     sortKeys: str = '-start', withEventsAttendedCount: int = 0):
-    ret = _mongo_db_crud.Search('userNeighborhoodWeeklyUpdate', stringKeyVals = stringKeyVals,
+    ret = _mongo_db_crud.Search('userNeighborhoodWeeklyUpdate', equalsKeyVals = equalsKeyVals,
         minKeyVals = minKeyVals, maxKeyVals = maxKeyVals, limit = limit, skip = skip,
         sortKeys = sortKeys)
     if withEventsAttendedCount == 1 and len(ret['userNeighborhoodWeeklyUpdates']) > 0:

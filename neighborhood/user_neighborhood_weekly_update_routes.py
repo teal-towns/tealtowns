@@ -20,14 +20,14 @@ def addRoutes():
             'sortKeys': '-start',
             'withEventsAttendedCount': 0,
         }, data)
-        stringKeyVals = { 'userId': data['userId'], 'neighborhoodUName': data['neighborhoodUName'], }
+        equalsKeyVals = { 'userId': data['userId'], 'neighborhoodUName': data['neighborhoodUName'], }
         minKeyVals = {}
         maxKeyVals = {}
         if data['startMin'] != '':
             minKeyVals['start'] = data['startMin']
         if data['startMax'] != '':
             maxKeyVals['startMax'] = data['startMax']
-        return _user_neighborhood_weekly_update.Search(stringKeyVals, minKeyVals, maxKeyVals,
+        return _user_neighborhood_weekly_update.Search(equalsKeyVals, minKeyVals, maxKeyVals,
             limit = data['limit'], skip = data['skip'], sortKeys = data['sortKeys'],
             withEventsAttendedCount = data['withEventsAttendedCount'])
     _socket.add_route('SearchUserNeighborhoodWeeklyUpdates', Search)

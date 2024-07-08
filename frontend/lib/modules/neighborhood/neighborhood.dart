@@ -210,7 +210,8 @@ class _NeighborhoodState extends State<Neighborhood> {
     if (!currentUserState.isLoggedIn || 
       (currentUserState.isLoggedIn && (!_neighborhood.userNeighborhood.containsKey('status') ||
       _neighborhood.userNeighborhood['status'] != 'default'))) {
-      colsJoin = [
+      String text = currentUserState.isLoggedIn && _neighborhood.userNeighborhood['status'] != 'default' ? 'Make Default Neighborhood' : 'Join Neighborhood';
+      colsJoin += [
         ElevatedButton(
           onPressed: () {
             if (!currentUserState.isLoggedIn) {
@@ -219,17 +220,23 @@ class _NeighborhoodState extends State<Neighborhood> {
               SaveUserNeighborhood(_neighborhood.uName);
             }
           },
-          child: Text('Join Neighborhood'),
+          child: Text(text),
         ),
         SizedBox(height: 10),
       ];
     }
-    if (currentUserState.isLoggedIn && _neighborhood.userNeighborhood.containsKey('roles') &&
-      _neighborhood.userNeighborhood['roles'].contains('ambassador')) {
-      colsJoin += [
-        _buttons.LinkElevated(context, 'Ambassador Updates', '/user-neighborhood-weekly-updates?neighborhoodUName=${_neighborhood.uName}',),
-        SizedBox(height: 10),
-      ];
+    if (currentUserState.isLoggedIn && _neighborhood.userNeighborhood.containsKey('roles')) {
+      if (_neighborhood.userNeighborhood['roles'].contains('ambassador')) {
+        colsJoin += [
+          _buttons.LinkElevated(context, 'Ambassador Updates', '/user-neighborhood-weekly-updates?neighborhoodUName=${_neighborhood.uName}',),
+          SizedBox(height: 10),
+        ];
+      } else {
+        colsJoin += [
+          _buttons.LinkElevated(context, 'Become Ambassador', '/user-neighborhood-save?neighborhoodUName=${_neighborhood.uName}',),
+          SizedBox(height: 10),
+        ];
+      }
     }
 
     return AppScaffoldComponent(
