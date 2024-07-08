@@ -30,6 +30,7 @@ class _AppInsightsState extends State<AppInsights> {
     'neighborhoodJoin': -1.0,
   };
   List<Map<String, dynamic>> _coreMetricsWeeks = [];
+  bool _loadingCoreMetrics = true;
 
   @override
   void initState() {
@@ -55,7 +56,8 @@ class _AppInsightsState extends State<AppInsights> {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        setState(() { _coreMetricsWeeks = _parseService.parseListMapStringDynamic(data['coreMetricsWeeks']); });
+        setState(() { _coreMetricsWeeks = _parseService.parseListMapStringDynamic(data['coreMetricsWeeks']);
+          _loadingCoreMetrics = false; });
       }
     }));
 
@@ -82,6 +84,14 @@ class _AppInsightsState extends State<AppInsights> {
     double activeUserPercent = 100;
     if (_totalUsers > 0) {
       activeUserPercent = (_activeUsers / _totalUsers) * 100;
+    }
+
+    List<Widget> colsCoreMetrics = [];
+    if (_loadingCoreMetrics) {
+      colsCoreMetrics = [
+        _style.SpacingH('medium'),
+        Column( children: [ LinearProgressIndicator() ] )
+      ];
     }
     return AppScaffoldComponent(
       listWrapper: true,
@@ -113,6 +123,7 @@ class _AppInsightsState extends State<AppInsights> {
               Expanded(flex: 1, child: Text('Bring a Friend')),
             ]
           ),
+          ...colsCoreMetrics,
           ..._coreMetricsWeeks.map((Map<String, dynamic> coreMetricsWeek) {
             String newJoinPercent = coreMetricsWeek['newInvites'] > 0 ?
               (coreMetricsWeek['newEventAttendees'] / coreMetricsWeek['newInvites'] * 100).toStringAsFixed(1) : '?';
@@ -127,7 +138,7 @@ class _AppInsightsState extends State<AppInsights> {
                 Expanded(flex: 1, child: Text('${coreMetricsWeek['newNeighborhoods']}')),
                 Expanded(flex: 1, child: Text('${activeAmbassadorsPercent}% (${coreMetricsWeek['activeAmbassadors']} / ${ coreMetricsWeek['totalAmbassadors']})')),
                 Expanded(flex: 1, child: Text('${coreMetricsWeek['newInvites']}')),
-                Expanded(flex: 1, child: Text('${newJoinPercent}% (${coreMetricsWeek['newEventAttendees']})')),
+                Expanded(flex: 1, child: Text('${newJoinPercent}% (${coreMetricsWeek['newEventAttendees']} / ${coreMetricsWeek['newInvites']})')),
                 Expanded(flex: 1, child: Text('${bringAFriendPercent}% (${coreMetricsWeek['uniqueEventAttendees']} / ${coreMetricsWeek['uniqueEventInviters']})')),
               ]
             );

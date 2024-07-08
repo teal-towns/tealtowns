@@ -38,12 +38,14 @@ class _UserNeighborhoodWeeklyUpdatesState extends State<UserNeighborhoodWeeklyUp
   void initState() {
     super.initState();
 
-    if (widget.neighborhoodUName.length < 1) {
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (widget.neighborhoodUName.length < 1 || !currentUserState.isLoggedIn) {
       Timer(Duration(milliseconds: 200), () {
         context.go('/neighborhoods');
       });
     } else {
       _dataDefault['neighborhoodUName'] = widget.neighborhoodUName;
+      _dataDefault['userId'] = currentUserState.currentUser.id;
     }
   }
 

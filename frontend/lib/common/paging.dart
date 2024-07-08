@@ -56,7 +56,6 @@ class _PagingState extends State<Paging> {
     _routeIds.add(_socketService.onRoute(widget.routeGet, callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
-      print ('data ${data}');
       if (data['valid'] == 1) {
         if (data[widget.dataName].length < widget.itemsPerPage) {
           _canLoadMore = false;
