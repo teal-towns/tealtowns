@@ -210,7 +210,8 @@ class _NeighborhoodState extends State<Neighborhood> {
     if (!currentUserState.isLoggedIn || 
       (currentUserState.isLoggedIn && (!_neighborhood.userNeighborhood.containsKey('status') ||
       _neighborhood.userNeighborhood['status'] != 'default'))) {
-      String text = currentUserState.isLoggedIn && _neighborhood.userNeighborhood['status'] != 'default' ? 'Make Default Neighborhood' : 'Join Neighborhood';
+      String text = currentUserState.isLoggedIn && _neighborhood.userNeighborhood.containsKey('status') &&
+        _neighborhood.userNeighborhood['status'] != 'default' ? 'Make Default Neighborhood' : 'Join Neighborhood';
       colsJoin += [
         ElevatedButton(
           onPressed: () {
