@@ -109,7 +109,7 @@ class InputFields {
 
   Widget inputText(var formVals, String? formValsKey, { String label = '', String hint = '',
     int minLen = -1, int maxLen = -1, var fieldKey = null, int maxLines = 1, int minLines = 1,
-    int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
+    int debounceChange = 1000, Function(String)? onChanged = null, bool required = false,
     Function()? onTap = null, RegExp? pattern = null, String helpText = '', }) {
     Timer? debounce = null;
     String initialVal = '';
@@ -141,7 +141,7 @@ class InputFields {
         } else {
           formVals[formValsKey] = value;
         }
-        if (onChange != null) {
+        if (onChanged != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
             debounce = Timer(Duration(milliseconds: debounceChange), () {
@@ -150,10 +150,10 @@ class InputFields {
               } else {
                 formVals[formValsKey] = value;
               }
-              onChange(value);
+              onChanged(value);
             });
           } else {
-            onChange(value);
+            onChanged(value);
           }
         }
       },
@@ -181,7 +181,7 @@ class InputFields {
 
   Widget inputNumber(var formVals, String? formValsKey, { String label = '', String hint = '',
     double? min = null, double? max = null, var fieldKey = null,
-    int debounceChange = 1000, Function(double?)? onChange = null, bool required = false,
+    int debounceChange = 1000, Function(double?)? onChanged = null, bool required = false,
     String helpText = '', }) {
     Timer? debounce = null;
     String initialVal = '';
@@ -215,7 +215,7 @@ class InputFields {
         } else {
           formVals[formValsKey] = val;
         }
-        if (onChange != null) {
+        if (onChanged != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
             debounce = Timer(Duration(milliseconds: debounceChange), () {
@@ -224,10 +224,10 @@ class InputFields {
               } else {
                 formVals[formValsKey] = val;
               }
-              onChange(val);
+              onChanged(val);
             });
           } else {
-            onChange(val);
+            onChanged(val);
           }
         }
       },
@@ -248,12 +248,12 @@ class InputFields {
   }
 
   Widget inputTime(var formVals, String? formValsKey, { String label = '', String hint = '',
-    var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
+    var fieldKey = null, int debounceChange = 1000, Function(String)? onChanged = null, bool required = false,
     Function()? onTap = null, String helpText = '',}) {
     RegExp pattern = new RegExp(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
     return inputText(formVals, formValsKey, label: label, hint: hint, fieldKey: fieldKey,
       debounceChange: debounceChange, required: required, onTap: onTap, helpText: helpText,
-      pattern: pattern, onChange: (value) {
+      pattern: pattern, onChanged: (value) {
         // Ensure leading zero for hour for sorting.
         int posColon = value.indexOf(':');
         if (posColon == 1) {
@@ -264,15 +264,15 @@ class InputFields {
             formVals[formValsKey] = value;
           }
         }
-        if (onChange != null) {
-          onChange(value);
+        if (onChanged != null) {
+          onChanged(value);
         }
       });
   }
 
   Widget inputDateTime(var formVals, String? formValsKey, { String label = '', String hint = '',
     String dateTimeMin = '', String dateTimeMax = '', String datetimeFormat = 'yyyy-MM-ddTHH:mm:ss',
-    var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null,
+    var fieldKey = null, int debounceChange = 1000, Function(String)? onChanged = null,
     bool required = false, String helpText = '', }) {
 
     DateTime now = new DateTime.now();
@@ -313,7 +313,7 @@ class InputFields {
         } else {
           formVals[formValsKey] = value;
         }
-        if (onChange != null) {
+        if (onChanged != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
             debounce = Timer(Duration(milliseconds: debounceChange), () {
@@ -322,10 +322,10 @@ class InputFields {
               } else {
                 formVals[formValsKey] = value;
               }
-              onChange(value);
+              onChanged(value);
             });
           } else {
-            onChange(value);
+            onChanged(value);
           }
         }
       },
@@ -342,9 +342,9 @@ class InputFields {
     ), helpText: helpText);
   }
 
-  // TODO: fix: currently the outer component must use onChange to set state, otherwise the checkbox will not toggle..
+  // TODO: fix: currently the outer component must use onChanged to set state, otherwise the checkbox will not toggle..
   Widget inputCheckbox(var formVals, String formValsKey, { String label = '',
-    var fieldKey = null, String helpText = '', Function(bool)? onChange = null}) {
+    var fieldKey = null, String helpText = '', Function(bool)? onChanged = null}) {
     bool initialVal = false;
     if (formValsKey == null) {
       initialVal = formVals;
@@ -368,8 +368,8 @@ class InputFields {
         } else {
           formVals[formValsKey] = value;
         }
-        if (onChange != null) {
-          onChange(value!);
+        if (onChanged != null) {
+          onChanged(value!);
         }
       },
       validator: (value) {

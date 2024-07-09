@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 Map<String, List<double>> _colorMap = {
   'primary': [44, 163, 134],
   'primaryLight': [44, 163, 134],
-  'primaryDark': [0, 45, 40],
-  'primaryTransparent': [16, 91, 87, 0.4],
+  'primaryDark': [16, 91, 87],
+  'primaryTransparent': [44, 163, 134, 0.4],
   'accent': [143, 229, 142],
   'accentDark': [143, 229, 142],
   'accentTransparent': [143, 229, 142, 0.4],

@@ -9,10 +9,10 @@ class LandTileSave extends StatefulWidget {
   // final year;
   // final String timeframe;
   final String dataType;
-  final Function(Map<String, dynamic>)? onChange;
+  final Function(Map<String, dynamic>)? onChanged;
 
   LandTileSave({ this.landTile = const {},
-    this.dataType = 'basics', this.onChange = null });
+    this.dataType = 'basics', this.onChanged = null });
 
   @override
   _LandTileSaveState createState() => _LandTileSaveState();
@@ -48,8 +48,8 @@ class _LandTileSaveState extends State<LandTileSave> {
         setState(() {
           _loading = false;
         });
-        if (widget.onChange != null) {
-          widget.onChange!({});
+        if (widget.onChanged != null) {
+          widget.onChanged!({});
         }
       } else {
         setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid, please try again'; });
@@ -158,21 +158,21 @@ class _LandTileSaveState extends State<LandTileSave> {
           children: [
             Container(
               width: width,
-              child: _inputFields.inputNumber(widget.landTile[key], 'value', label: 'Value', hint: '', onChange: (double? val)  {
+              child: _inputFields.inputNumber(widget.landTile[key], 'value', label: 'Value', hint: '', onChanged: (double? val)  {
                 widget.landTile[key]['value'] = val;
               }),
             ),
             //SizedBox(height: 10),
             Container(
               width: width,
-              child: _inputFields.inputNumber(widget.landTile[key], 'min', label: 'Min', hint: '', onChange: (double? val)  {
+              child: _inputFields.inputNumber(widget.landTile[key], 'min', label: 'Min', hint: '', onChanged: (double? val)  {
                 widget.landTile[key]['min'] = val;
               }),
             ),
             //SizedBox(height: 10),
             Container(
               width: width,
-              child: _inputFields.inputNumber(widget.landTile[key], 'max', label: 'Max', hint: '', onChange: (double? val)  {
+              child: _inputFields.inputNumber(widget.landTile[key], 'max', label: 'Max', hint: '', onChanged: (double? val)  {
                 widget.landTile[key]['max'] = val;
               }),
             ),
@@ -183,7 +183,7 @@ class _LandTileSaveState extends State<LandTileSave> {
       ];
     } else {
       inputs += [
-        _inputFields.inputText(widget.landTile[key], 'value', label: 'Value', hint: '', onChange: (String val)  {
+        _inputFields.inputText(widget.landTile[key], 'value', label: 'Value', hint: '', onChanged: (String val)  {
           widget.landTile[key]['value'] = val;
         }),
         SizedBox(height: 10),
@@ -193,16 +193,16 @@ class _LandTileSaveState extends State<LandTileSave> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...inputs,
-        _inputFields.inputText(widget.landTile[key], 'source', label: 'Source', hint: 'Source', onChange: (String val)  {
+        _inputFields.inputText(widget.landTile[key], 'source', label: 'Source', hint: 'Source', onChanged: (String val)  {
           widget.landTile[key]['source'] = val;
         }),
         SizedBox(height: 10),
         _inputFields.inputNumber(widget.landTile[key], 'confidencePercent', min: 0.0, max: 100.0,
-          label: 'Confidence (0 to 100)', hint: 'Confidence (0 to 100)', onChange: (double? val)  {
+          label: 'Confidence (0 to 100)', hint: 'Confidence (0 to 100)', onChanged: (double? val)  {
           widget.landTile[key]['confidencePercent'] = val;
         }),
         SizedBox(height: 10),
-        _inputFields.inputText(widget.landTile[key], 'notes', label: 'Notes', hint: 'Notes', onChange: (String val)  {
+        _inputFields.inputText(widget.landTile[key], 'notes', label: 'Notes', hint: 'Notes', onChanged: (String val)  {
           widget.landTile[key]['notes'] = val;
         }),
         SizedBox(height: 10),

@@ -5,12 +5,13 @@ import '../user_auth/user_class.dart';
 class UserNeighborhoodClass {
   ParseService _parseService = ParseService();
 
-  String id = '', userId = '', neighborhoodUName = '', status = '', vision = '';
+  String id = '', userId = '', neighborhoodUName = '', status = '', vision = '', createdAt = '';
   List<String> roles = [], motivations = [];
   NeighborhoodClass neighborhood = NeighborhoodClass.fromJson({});
   UserClass user = UserClass.fromJson({});
 
-  UserNeighborhoodClass(this.id, this.userId, this.neighborhoodUName, this.status, this.vision, this.roles,
+  UserNeighborhoodClass(this.id, this.userId, this.neighborhoodUName, this.status, this.vision,
+    this.createdAt, this.roles,
     this.motivations, this.neighborhood, this.user);
 
   UserNeighborhoodClass.fromJson(Map<String, dynamic> json) {
@@ -19,6 +20,7 @@ class UserNeighborhoodClass {
     this.neighborhoodUName = json['neighborhoodUName'] ?? '';
     this.status = json['status'] ?? '';
     this.vision = json['vision'] ?? '';
+    this.createdAt = json['createdAt'] ?? '';
     this.roles = json.containsKey('roles') ? _parseService.parseListString(json['roles']) : [];
     this.motivations = json.containsKey('motivations') ? _parseService.parseListString(json['motivations']) : [];
     this.neighborhood = NeighborhoodClass.fromJson(json['neighborhood'] ?? {});
@@ -32,6 +34,7 @@ class UserNeighborhoodClass {
       'neighborhoodUName': neighborhoodUName,
       'status': status,
       'vision': vision,
+      'createdAt': createdAt,
       'roles': roles,
       'motivations': motivations,
     };

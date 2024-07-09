@@ -83,7 +83,7 @@ def Save(neighborhood: dict, userId: str = ''):
     if ('timezone' not in neighborhood or neighborhood['timezone'] == '') and 'location' in neighborhood:
         neighborhood['timezone'] = date_time.GetTimezoneFromLngLat(neighborhood['location']['coordinates'])
     ret = _mongo_db_crud.Save('neighborhood', neighborhood)
-    if len(userId) > 0:
+    if ret['valid'] and len(userId) > 0:
         userNeighborhood = {
             'userId': userId,
             'neighborhoodUName': ret['neighborhood']['uName'],

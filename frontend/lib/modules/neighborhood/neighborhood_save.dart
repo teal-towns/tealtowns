@@ -12,7 +12,9 @@ class NeighborhoodSave extends StatefulWidget {
   String uName;
   double lng;
   double lat;
-  NeighborhoodSave({this.uName = '', this.lng = 0, this.lat = 0, });
+  bool withScaffold;
+  Function(dynamic)? onSave;
+  NeighborhoodSave({this.uName = '', this.lng = 0, this.lat = 0, this.withScaffold = true, this.onSave = null});
 
   @override
   _NeighborhoodSaveState createState() => _NeighborhoodSaveState();
@@ -20,8 +22,8 @@ class NeighborhoodSave extends StatefulWidget {
 
 class _NeighborhoodSaveState extends State<NeighborhoodSave> {
   Map<String, Map<String, dynamic>> _formFields = {
-    'uName': { 'type': 'text', 'label': 'Short name', 'required': true, },
     'location': { 'type': 'location', 'nestedCoordinates': true, 'required': true, },
+    'uName': { 'type': 'text', 'label': 'Short name', 'required': true, },
     'title': { 'required': true, },
   };
   Map<String, dynamic> _formValsDefault = {
@@ -63,9 +65,17 @@ class _NeighborhoodSaveState extends State<NeighborhoodSave> {
           neighborhoodState.CheckAndGet(userId);
         }
         String uName = data['neighborhood']['uName'];
-        context.go('/n/${uName}');
+        if (widget.onSave != null) {
+          widget.onSave!(data['neighborhood']);
+        } else {
+          context.go('/n/${uName}');
+        }
       }
     );
+
+    if (!widget.withScaffold) {
+      return content;
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       body: content,

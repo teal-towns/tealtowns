@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/buttons.dart';
+import '../../common/date_time_service.dart';
 import '../../common/form_input/form_save.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_service.dart';
@@ -19,6 +21,8 @@ class UsersSave extends StatefulWidget {
 }
 
 class _UsersSaveState extends State<UsersSave> {
+  Buttons _buttons = Buttons();
+  DateTimeService _dateTime = DateTimeService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
   List<String> _routeIds = [];
@@ -33,7 +37,13 @@ class _UsersSaveState extends State<UsersSave> {
     'firstName': '',
     'lastName': '',
     'email': '',
+    'sortKeys': '-createdAt',
   };
+  List<Map<String, dynamic>> _sortOpts = [
+    { 'value': '-createdAt', 'label': 'Created At (Desc)', },
+    { 'value': 'firstName', 'label': 'First Name', },
+    { 'value': 'lastName', 'label': 'Last Name', },
+  ];
 
   List<UserClass> _users = [];
   UserClass _selectedUser = UserClass.fromJson({});
@@ -60,6 +70,8 @@ class _UsersSaveState extends State<UsersSave> {
         setState(() { _users = _users; });
       }
     }));
+
+    SearchUsers();
   }
 
   @override
@@ -89,7 +101,7 @@ class _UsersSaveState extends State<UsersSave> {
       ];
     } else {
       colsUsers = [
-        _layoutService.WrapWidth(_users.map((user) => OneUser(user)).toList(),),
+        _layoutService.WrapWidth(_users.map((user) => OneUser(user, context)).toList(),),
         SizedBox(height: 10),
       ];
     }
@@ -100,13 +112,16 @@ class _UsersSaveState extends State<UsersSave> {
       body: Column(
         children: [
           _layoutService.WrapWidth([
-            _inputFields.inputText(_filters, 'firstName', label: 'First Name', onChange: (String newVal) {
+            _inputFields.inputText(_filters, 'firstName', label: 'First Name', onChanged: (String newVal) {
               SearchUsers();
             }),
-            _inputFields.inputText(_filters, 'lastName', label: 'Last Name', onChange: (String newVal) {
+            _inputFields.inputText(_filters, 'lastName', label: 'Last Name', onChanged: (String newVal) {
               SearchUsers();
             }),
-            _inputFields.inputText(_filters, 'email', label: 'Email', onChange: (String newVal) {
+            _inputFields.inputText(_filters, 'email', label: 'Email', onChanged: (String newVal) {
+              SearchUsers();
+            }),
+            _inputFields.inputSelect(_sortOpts, _filters, 'sortKeys', label: 'Sort By', onChanged: (String newVal) {
               SearchUsers();
             }),
           ]),
@@ -118,15 +133,18 @@ class _UsersSaveState extends State<UsersSave> {
     );
   }
 
-  Widget OneUser(UserClass user) {
+  Widget OneUser(UserClass user, BuildContext context) {
+    String createdAt = _dateTime.Format(user.createdAt, 'yyyy-MM-dd HH:mm');
     return InkWell(
       child: Column(
         children: [
-          _style.Text1('${user.firstName} ${user.lastName} (${user.username})'),
+          _buttons.Link(context, '${user.firstName} ${user.lastName} (${user.username})', '/u/${user.username}'),
           _style.SpacingH('medium'),
           _style.Text1('${user.email}'),
           _style.SpacingH('medium'),
           _style.Text1('${user.roles}'),
+          _style.SpacingH('medium'),
+          _style.Text1('${createdAt}'),
         ]
       ),
       onTap: () {

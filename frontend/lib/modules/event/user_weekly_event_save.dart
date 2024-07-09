@@ -204,7 +204,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
           children: [
             _layoutService.WrapWidth([
               _inputFields.inputNumber(_formVals, 'attendeeCountAsk', required: true,
-                label: 'How many spots (including yourself)?', min: 1, onChange: (double? val)  {
+                label: 'How many spots (including yourself)?', min: 1, onChanged: (double? val)  {
                   if (val != null && val! >= 1) {
                     setState(() { _formVals = _formVals;});
                   }

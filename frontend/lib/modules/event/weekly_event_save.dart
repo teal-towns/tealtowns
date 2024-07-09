@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/alert_service.dart';
 import '../../common/colors_service.dart';
 import '../../common/form_input/form_save.dart';
 import '../../common/style.dart';
@@ -22,6 +23,7 @@ class WeeklyEventSave extends StatefulWidget {
 }
 
 class _WeeklyEventSaveState extends State<WeeklyEventSave> {
+  AlertService _alertService = AlertService();
   ColorsService _colors = ColorsService();
   Style _style = Style();
 
@@ -197,6 +199,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
             }
             return data;
           }, onSave: (dynamic data) {
+            _alertService.Show(context, 'Weekly Event Saved!');
             String uName = data['weeklyEvent']['uName'];
             context.go('/we/${uName}');
           },

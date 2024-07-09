@@ -162,9 +162,9 @@ def update_one(collection_name, query, mutation, upsert = False, db1 = None, val
     # So need to just check acknowledged for success? Or a combination of matched count
     # OR modified count or upserted id?
     result = collection.update_one(query, mutation, upsert=upsert)
-    ret['acknowledged'] = result.acknowledged,
-    ret['matched_count'] = result.matched_count,
-    ret['modified_count'] = result.modified_count,
+    ret['acknowledged'] = result.acknowledged
+    ret['matched_count'] = result.matched_count
+    ret['modified_count'] = result.modified_count
     ret['upserted_id'] = from_object_id(result.upserted_id)
     return ret
     # TODO - find and return full updated object?

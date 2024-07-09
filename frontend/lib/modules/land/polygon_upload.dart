@@ -4,9 +4,9 @@ import '../../common/form_input/input_file.dart';
 import '../../common/file_upload_service.dart';
 
 class PolygonUpload extends StatefulWidget {
-  Function(Map<String, dynamic>)? onChange;
+  Function(Map<String, dynamic>)? onChanged;
 
-  PolygonUpload({ @required this.onChange = null, });
+  PolygonUpload({ @required this.onChanged = null, });
 
   @override
   _PolygonUploadState createState() => _PolygonUploadState();
@@ -42,8 +42,8 @@ class _PolygonUploadState extends State<PolygonUpload> {
             filesInfo.add({ 'file': file, 'title': file.name, });
           }
           _fileUploadService.uploadFiles(filesInfo, (List<Map<String, dynamic>> fileData) {
-            if (widget.onChange != null) {
-              widget.onChange!(fileData[0]);
+            if (widget.onChanged != null) {
+              widget.onChanged!(fileData[0]);
             }
           }, fileType: '', routeKey: 'polygonUploadToTiles', );
         }

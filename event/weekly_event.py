@@ -135,6 +135,19 @@ def Save(weeklyEvent: dict):
     weeklyEvent['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
     return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)
 
+def SaveBulk(weeklyEvents: list):
+    ret = { 'valid': 1, 'message': '', 'weeklyEvents': [], }
+    for weeklyEvent in weeklyEvents:
+        weeklyEvent['dayOfWeek'] = int(weeklyEvent['dayOfWeek'])
+        retOne = Save(weeklyEvent)
+        if retOne['valid']:
+            ret['weeklyEvents'].append(retOne['weeklyEvent'])
+        else:
+            ret['message'] += retOne['message']
+    if len(ret['weeklyEvents']) < 1:
+        ret['valid'] = 0
+    return ret
+
 def Remove(weeklyEventId: str):
     # Soft delete to preserve stats.
     # query = { 'weeklyEventId': weeklyEventId }

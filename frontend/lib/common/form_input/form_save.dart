@@ -367,7 +367,7 @@ class _FormSaveState extends State<FormSave> {
       bool guessLocation = value.containsKey('guessLocation') ? value['guessLocation'] : true;
       input = InputLocation(formVals: _formValsLocal, formValsKey: key, label: label, helpText: helpText,
         nestedCoordinates: nestedCoordinates, guessLocation: guessLocation, fullScreen: fullScreen,
-        onChange: (Map<String, dynamic> val) {
+        onChanged: (Map<String, dynamic> val) {
           FromInputLocation(key, val);
         });
     } else if (value['type'] == 'select') {

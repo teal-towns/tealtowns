@@ -148,7 +148,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         _style.SpacingH('medium'),
         _layoutService.WrapWidth([
           InputLocation(formVals: _formVals, formValsKey: 'inputLocation', nestedCoordinates: false,
-            onChange: (Map<String, dynamic> lngLat) {
+            onChanged: (Map<String, dynamic> lngLat) {
               SearchNeighborhoods();
           })],
         width: 300),

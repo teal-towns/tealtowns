@@ -14,7 +14,7 @@ class InputLocation extends StatefulWidget {
   var formVals;
   String formValsKey;
   String label;
-  Function(Map<String, dynamic>)? onChange;
+  Function(Map<String, dynamic>)? onChanged;
   bool nestedCoordinates;
   bool guessLocation;
   bool useUserLocation;
@@ -23,7 +23,7 @@ class InputLocation extends StatefulWidget {
   bool fullScreen;
 
   InputLocation({Key? key, this.formVals = null, this.formValsKey = '',
-    this.label = '', this.onChange = null, this.nestedCoordinates = false,
+    this.label = '', this.onChanged = null, this.nestedCoordinates = false,
     this.guessLocation = true, this.useUserLocation = false,
     this.updateCachedLocation = true, this.helpText = '', this.fullScreen = true}) : super(key: key);
 
@@ -67,7 +67,7 @@ class _InputLocationState extends State<InputLocation> {
     _formVals['address'] = widget.formVals[widget.formValsKey]['address'];
     if (widget.fullScreen && _fullScreenOverride != 'inline') {
       return _inputFields.inputText(_formVals, _formValsKey, label: widget.label, helpText: widget.helpText,
-        onTap: ToggleFullScreen, onChange: (String val) {
+        onTap: ToggleFullScreen, onChanged: (String val) {
         List<String> lngLatString = val.split(',');
         double lng = _parseService.toDoubleNoNull(lngLatString[0]);
         double lat = _parseService.toDoubleNoNull(lngLatString[1]);
@@ -90,7 +90,7 @@ class _InputLocationState extends State<InputLocation> {
           );
         },
         child: _inputFields.inputText(_formVals, _formValsKey, label: widget.label, helpText: widget.helpText,
-          onTap: ToggleDropdown, onChange: (String val) {
+          onTap: ToggleDropdown, onChanged: (String val) {
           List<String> lngLatString = val.split(',');
           double lng = _parseService.toDoubleNoNull(lngLatString[0]);
           double lat = _parseService.toDoubleNoNull(lngLatString[1]);
@@ -146,12 +146,12 @@ class _InputLocationState extends State<InputLocation> {
         setState(() {
           _formVals = _formVals;
         });
-        UpdateLngLat(lngLat[0], lngLat[1]);
+        UpdateLngLat(lngLat[0], lngLat[1], doOnChange: false);
       }
     }
   }
 
-  List<double> UpdateLngLat(double lng, double lat, {Map<String, dynamic> address = const {}}) {
+  List<double> UpdateLngLat(double lng, double lat, {Map<String, dynamic> address = const {}, bool doOnChange = true}) {
     List<double> lngLat = [_parseService.Precision(lng, 5), _parseService.Precision(lat, 5)];
     if (widget.updateCachedLocation) {
       _locationService.SetLngLat(lngLat);
@@ -162,11 +162,11 @@ class _InputLocationState extends State<InputLocation> {
       widget.formVals[widget.formValsKey]['lngLat'] = lngLat;
     }
     widget.formVals[widget.formValsKey]['address'] = address;
-    if (widget.onChange != null) {
-      // widget.onChange!(widget.formVals[widget.formValsKey]);
+    if (doOnChange && widget.onChanged != null) {
+      // widget.onChanged!(widget.formVals[widget.formValsKey]);
       Map<String, dynamic> locationVal = { 'lngLat': widget.formVals[widget.formValsKey]['lngLat'],
         'address': address };
-      widget.onChange!(locationVal);
+      widget.onChanged!(locationVal);
     }
     return lngLat;
   }

@@ -6,7 +6,8 @@ import mongo_db
 def GetAppInsights(now = None, limit: int = 1000000):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'uniqueEventViews': 0, 'eventSignUps': 0,
-        'userSignUps': 0, 'uniqueSignUpViews': 0, 'totalUsers': 0, 'activeUsers': 0,
+        'userSignUps': 0, 'uniqueSignUpViews': 0, 'ambassadorSignUps': 0, 'uniqueAmbassadorSignUpViews': 0,
+        'totalUsers': 0, 'activeUsers': 0,
         'hoursToFirstAction': { 'eventSignUp': -1, 'neighborhoodJoin': -1,}, }
     lastMonth = date_time.string(now - datetime.timedelta(days = 30))
     nowString = date_time.string(now)
@@ -33,6 +34,12 @@ def GetAppInsights(now = None, limit: int = 1000000):
     users = mongo_db.find('user', query, fields = fields, limit = limit)['items']
     ret['userSignUps'] = len(users)
 
+    # Ambassador sign ups
+    query = { 'createdAt': { '$gte': lastMonth } }
+    fields = { '_id': 1, 'createdAt': 1, }
+    neighborhoods = mongo_db.find('neighborhood', query, fields = fields, limit = limit)['items']
+    ret['ambassadorSignUps'] = len(neighborhoods)
+
     query = { 'end': { '$lte': nowString } }
     appInsights = mongo_db.find('appInsight', query)['items']
     if len(appInsights) == 0:
@@ -40,6 +47,7 @@ def GetAppInsights(now = None, limit: int = 1000000):
         appInsights = mongo_db.find('appInsight', query)['items']
     for appInsight in appInsights:
         ret['uniqueSignUpViews'] += len(appInsight['signUpUniqueViewsAt'])
+        ret['uniqueAmbassadorSignUpViews'] += len(appInsight['ambassadorSignUpUniqueViewsAt']) if 'ambassadorSignUpUniqueViewsAt' in appInsight else 0
 
     # Active users
     query = { 'lastActiveAt': { '$gte': lastMonth } }
@@ -95,6 +103,13 @@ def AddView(fieldKey: str, userOrIP: str = '', now = None,):
         item = { 'start': start, 'end': end, }
         item[fieldKey] = uniqueViewsAt
         mongo_db.insert_one('appInsight', item)
+    elif fieldKey not in item:
+        item[fieldKey] = {}
+        item[fieldKey][userOrIP] = [ nowString ]
+        mutation = { '$set': {} }
+        mutation['$set'][fieldKey] = {}
+        mutation['$set'][fieldKey][userOrIP] = [ nowString ]
+        mongo_db.update_one('appInsight', query, mutation, validate = 0)
     elif userOrIP not in item[fieldKey]:
         key = fieldKey + '.' + userOrIP
         mutation = { '$set': {} }

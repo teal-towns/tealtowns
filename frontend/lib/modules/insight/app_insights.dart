@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
+import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
 import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
@@ -13,6 +14,7 @@ class AppInsights extends StatefulWidget {
 }
 
 class _AppInsightsState extends State<AppInsights> {
+  Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
   ParseService _parseService = ParseService();
   List<String> _routeIds = [];
@@ -23,6 +25,8 @@ class _AppInsightsState extends State<AppInsights> {
   int _eventSignUps = 0;
   int _uniqueSignUpViews = 0;
   int _userSignUps = 0;
+  int _uniqueAmbassadorSignUpViews = 0;
+  int _ambassadorSignUps = 0;
   int _activeUsers = 0;
   int _totalUsers = 0;
   var _hoursToFirstAction = {
@@ -46,6 +50,7 @@ class _AppInsightsState extends State<AppInsights> {
         };
         setState(() { _uniqueEventViews = data['uniqueEventViews']; _eventSignUps = data['eventSignUps'];
           _uniqueSignUpViews = data['uniqueSignUpViews']; _userSignUps = data['userSignUps'];
+          _uniqueAmbassadorSignUpViews = data['uniqueAmbassadorSignUpViews']; _ambassadorSignUps = data['ambassadorSignUps'];
           _activeUsers = data['activeUsers']; _totalUsers = data['totalUsers'];
           _hoursToFirstAction = _hoursToFirstAction;
         });
@@ -81,6 +86,10 @@ class _AppInsightsState extends State<AppInsights> {
     if (_uniqueSignUpViews > 0) {
       signUpPercent = (_userSignUps / _uniqueSignUpViews) * 100;
     }
+    double ambassadorSignUpPercent = 100;
+    if (_uniqueAmbassadorSignUpViews > 0) {
+      ambassadorSignUpPercent = (_ambassadorSignUps / _uniqueAmbassadorSignUpViews) * 100;
+    }
     double activeUserPercent = 100;
     if (_totalUsers > 0) {
       activeUserPercent = (_activeUsers / _totalUsers) * 100;
@@ -102,6 +111,8 @@ class _AppInsightsState extends State<AppInsights> {
           _style.Text1('Event Sign Ups / Unique Event Views: ${eventPercent.toStringAsFixed(2)}% (${_eventSignUps} / ${_uniqueEventViews})'),
           _style.SpacingH('medium'),
           _style.Text1('User Sign Ups / Unique Sign Up Views: ${signUpPercent.toStringAsFixed(2)}% (${_userSignUps} / ${_uniqueSignUpViews})'),
+          _style.SpacingH('medium'),
+          _style.Text1('Ambassador Sign Ups / Unique Ambassador Sign Up Views: ${ambassadorSignUpPercent.toStringAsFixed(2)}% (${_ambassadorSignUps} / ${_uniqueAmbassadorSignUpViews})'),
           _style.SpacingH('medium'),
           _style.Text1('Active / Total Users: ${activeUserPercent.toStringAsFixed(2)}% (${_activeUsers} / ${_totalUsers})'),
           _style.SpacingH('medium'),
@@ -142,7 +153,10 @@ class _AppInsightsState extends State<AppInsights> {
                 Expanded(flex: 1, child: Text('${bringAFriendPercent}% (${coreMetricsWeek['uniqueEventAttendees']} / ${coreMetricsWeek['uniqueEventInviters']})')),
               ]
             );
-          })
+          }),
+          _style.SpacingH('xlarge'),
+          _buttons.Link(context, 'Ambassador Insights', '/ambassador-insights'),
+          _style.SpacingH('medium'),
         ]
       ) 
     );

@@ -163,7 +163,7 @@ class _LandState extends State<Land> {
         Container(
           padding: EdgeInsets.only(left: 10, right: 10,),
           child: LandTileSave(landTile: _selectedTile,
-            dataType: _vals['dataType'].toString(), onChange: (var data) {
+            dataType: _vals['dataType'].toString(), onChanged: (var data) {
               _getTiles();
             }),
         ),
@@ -178,13 +178,13 @@ class _LandState extends State<Land> {
       return Column(
         children: [
           AbsorbPointer(
-            child: Mapbox(mapWidth: viewWidth, mapHeight: mapHeight, onChange: _onChangeMap,
+            child: Mapbox(mapWidth: viewWidth, mapHeight: mapHeight, onChanged: _onChangeMap,
               latitude: double.parse(_formVals['latCenter'].toString()), longitude: double.parse(_formVals['lngCenter'].toString()), zoom: 15,
               polygons: _polygons, coordinatesDraw: _coordinatesDraw, ),
           ),
           SizedBox(height: 10),
           // TODO - add back in once add google bucket to backend config.
-          //PolygonSelect(onChange: _onChangePolygon, ),
+          //PolygonSelect(onChanged: _onChangePolygon, ),
           //SizedBox(height: 10),
           _buildFilters(context),
           SizedBox(height: 10),
@@ -214,13 +214,13 @@ class _LandState extends State<Land> {
           child: Column(
             children: [
               AbsorbPointer(
-                child: Mapbox(mapWidth: _sideWidth, mapHeight: mapHeight, onChange: _onChangeMap,
+                child: Mapbox(mapWidth: _sideWidth, mapHeight: mapHeight, onChanged: _onChangeMap,
                   latitude: double.parse(_formVals['latCenter'].toString()), longitude: double.parse(_formVals['lngCenter'].toString()), zoom: 15,
                   polygons: _polygons, coordinatesDraw: _coordinatesDraw ),
               ),
               SizedBox(height: 10),
               // TODO - add back in once add google bucket to backend config.
-              //PolygonSelect(onChange: _onChangePolygon, ),
+              //PolygonSelect(onChanged: _onChangePolygon, ),
               //SizedBox(height: 10),
               _buildFilters(context),
               SizedBox(height: 10),

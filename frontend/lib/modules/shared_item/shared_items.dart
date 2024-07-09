@@ -185,7 +185,8 @@ class _SharedItemsState extends State<SharedItems> {
                     label: 'Type', onChanged: (String val) {
                     _searchSharedItems();
                   }),
-                InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (Map<String, dynamic> val) {
+                InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location',
+                  guessLocation: !_skipCurrentLocation, onChanged: (Map<String, dynamic> val) {
                   _searchSharedItems();
                   }),
                 _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
@@ -193,7 +194,7 @@ class _SharedItemsState extends State<SharedItems> {
                     _searchSharedItems();
                   }),
                 _inputFields.inputText(_filters, 'title', hint: 'title',
-                    label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
+                    label: 'Filter by Title', debounceChange: 1000, onChanged: (String val) {
                     _searchSharedItems();
                   }),
                 _inputFields.inputSelect(_selectOptsInvestor, _filters, 'fundingRequired_min',
@@ -201,11 +202,11 @@ class _SharedItemsState extends State<SharedItems> {
                     _searchSharedItems();
                   }),
                 // _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
-                //     label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                //     label: 'Minimum Funding Needed', debounceChange: 1000, onChanged: (double? val) {
                 //     _searchSharedItems();
                 //   }),
                 // _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
-                //     label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                //     label: 'Maximum Funding Needed', debounceChange: 1000, onChanged: (double? val) {
                 //     _searchSharedItems();
                 //   }),
               ], width: 225),

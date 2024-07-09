@@ -13,7 +13,13 @@ import '../user_auth/current_user_state.dart';
 class UserNeighborhoodSave extends StatefulWidget {
   String id;
   String neighborhoodUName;
-  UserNeighborhoodSave({this.id = '', this.neighborhoodUName = '' });
+  bool withScaffold;
+  Function(dynamic)? onSave;
+  List<Widget> colsText;
+  bool requireNeighborhoodUName;
+  String routeSave;
+  UserNeighborhoodSave({this.id = '', this.neighborhoodUName = '', this.withScaffold = true, this.onSave = null,
+    this.colsText = const [], this.requireNeighborhoodUName = true, this.routeSave = 'SaveUserNeighborhood',});
 
   @override
   _UserNeighborhoodSaveState createState() => _UserNeighborhoodSaveState();
@@ -24,7 +30,7 @@ class _UserNeighborhoodSaveState extends State<UserNeighborhoodSave> {
 
   Map<String, Map<String, dynamic>> _formFields = {
     'motivations': { 'type': 'multiSelectButtons', 'required': true, 'label': 'What possibilities excite you most? Choose multiple.' },
-    'vision': { 'required': true, 'minLines': 4, 'label': 'What is your vision for your neighborhood? Imagine you are living in your ideal neighborhood 6-12 months from now - describe it.' },
+    'vision': { 'required': true, 'minLines': 4, 'label': 'What is your vision for your neighborhood? Imagine you are living in your ideal neighborhood 6-12 months from now - describe it!' },
   };
   Map<String, dynamic> _formValsDefault = {
     'status': 'default',
@@ -51,7 +57,7 @@ class _UserNeighborhoodSaveState extends State<UserNeighborhoodSave> {
 
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
-    if (widget.neighborhoodUName.length < 1 || userId.length < 1) {
+    if ((widget.neighborhoodUName.length < 1 && widget.requireNeighborhoodUName) || userId.length < 1) {
       Timer(Duration(milliseconds: 200), () {
         context.go('/neighborhoods');
       });
@@ -63,27 +69,34 @@ class _UserNeighborhoodSaveState extends State<UserNeighborhoodSave> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> colsText = widget.colsText.length > 0 ? widget.colsText : [
+      _style.Text1('Become a Neighborhood Ambassador for ${widget.neighborhoodUName}', size: 'xlarge'),
+      _style.SpacingH('medium'),
+      _style.Text1('Ambassadors catalyze action in their neighborhood by gathering their neighbors on a regular basis. Ambassadors empower their neighbors to feel a deep sense of belonging and multiply their impact 100x by growing the neighborhood to 150 people connecting weekly.'),
+      _style.SpacingH('medium'),
+      _style.Text1('The 2 weekly responsibilities, which should take about 1 hour per week, are: 1. invite 10 neighbors to join an event, 2. attend 1 event (and fill out feedback).'),
+      _style.SpacingH('medium'),
+      _style.Text1('Anyone may become a ambassador, but you will be removed if you miss 2 consecutive weeks (do not invite neighbors or attend events).'),
+      _style.SpacingH('medium'),
+      _style.Text1('If you are sure you are ready and committed to grow your neighborhood, fill out your neighborhood vision and motivations below.'),
+      _style.SpacingH('medium'),
+    ];
     double fieldWidth = 800;
     Widget content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _style.Text1('Become a Neighborhood Ambassador for ${widget.neighborhoodUName}', size: 'xlarge'),
-        _style.SpacingH('medium'),
-        _style.Text1('Ambassadors catalyze action in their neighborhood by gathering their neighbors on a regular basis. Ambassadors empower their neighbors to feel a deep sense of belonging and multiply their impact 100x by growing the neighborhood to 150 people connecting weekly.'),
-        _style.SpacingH('medium'),
-        _style.Text1('The 2 weekly responsibilities are, which should take about an 1 hour per week, are: 1. invite 10 neighbors to join an event, 2. attend 1 event (and fill out feedback).'),
-        _style.SpacingH('medium'),
-        _style.Text1('Anyone may become a ambassador, but you will be auto removed if you miss 2 consecutive weeks (do not invite neighbors or attend events).'),
-        _style.SpacingH('medium'),
-        _style.Text1('If you are sure you are ready and committed to grow your neighborhood, fill out your neighborhood vision and motivations below.'),
-        _style.SpacingH('medium'),
+        ...colsText,
         FormSave(formVals: UserNeighborhoodClass.fromJson(_formValsDefault).toJson(), dataName: 'userNeighborhood',
-          routeGet: 'GetUserNeighborhoodById', routeSave: 'SaveUserNeighborhood', id: widget.id, fieldWidth: fieldWidth,
+          routeGet: 'GetUserNeighborhoodById', routeSave: widget.routeSave, id: widget.id, fieldWidth: fieldWidth,
           formFields: _formFields,
           parseData: (dynamic data) => UserNeighborhoodClass.fromJson(data).toJson(),
           preSave: (dynamic data) {
             data['userNeighborhood'] = UserNeighborhoodClass.fromJson(data['userNeighborhood']).toJson();
             if (!data['userNeighborhood']['roles'].contains('ambassador')) {
               data['userNeighborhood']['roles'].add('ambassador');
+            }
+            if (widget.routeSave.length < 1 && widget.onSave != null) {
+              widget.onSave!(data['userNeighborhood']);
             }
             return data;
           },
@@ -94,11 +107,18 @@ class _UserNeighborhoodSaveState extends State<UserNeighborhoodSave> {
               var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
               neighborhoodState.CheckAndGet(userId);
             }
-            context.go('/n/${data['userNeighborhood']['neighborhoodUName']}');
+            if (widget.onSave != null) {
+              widget.onSave!(data['userNeighborhood']);
+            } else {
+              context.go('/n/${data['userNeighborhood']['neighborhoodUName']}');
+            }
           }
         ),
       ],
     );
+    if (!widget.withScaffold) {
+      return content;
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       width: fieldWidth,

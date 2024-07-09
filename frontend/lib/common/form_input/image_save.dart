@@ -365,7 +365,7 @@ class _ImageSaveState extends State<ImageSaveComponent> {
         widgetByType = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            _inputFields.inputText(formValsImageSave, 'search_images', hint: 'Search for images', debounceChange: 1000, onChange: (String val) {
+            _inputFields.inputText(formValsImageSave, 'search_images', hint: 'Search for images', debounceChange: 1000, onChanged: (String val) {
               _getImages(val, currentUserState);
             }),
             SizedBox(height: 10),
