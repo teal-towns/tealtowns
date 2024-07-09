@@ -7,9 +7,9 @@ import '../../common/socket_service.dart';
 import './polygon_upload.dart';
 
 class PolygonSelect extends StatefulWidget {
-  Function(Map<String, dynamic>)? onChange;
+  Function(Map<String, dynamic>)? onChanged;
 
-  PolygonSelect({ @required this.onChange = null, });
+  PolygonSelect({ @required this.onChanged = null, });
 
   @override
   _PolygonSelectState createState() => _PolygonSelectState();
@@ -58,8 +58,8 @@ class _PolygonSelectState extends State<PolygonSelect> {
           width: 150,
           child: _inputFields.inputSelectSearch(_optsPolygons, context, _formVals, 'polygonUName', hint: 'Polygon search..', onChanged: (String newVal) {
               setState(() { _formVals = _formVals; });
-              if (widget.onChange != null) {
-                widget.onChange!({ 'uName': _formVals['polygonUName'] });
+              if (widget.onChanged != null) {
+                widget.onChanged!({ 'uName': _formVals['polygonUName'] });
               }
             }, onKeyUp: (String val) {
               _socketService.emit('searchPolygons', { 'searchText': val });
@@ -68,7 +68,7 @@ class _PolygonSelectState extends State<PolygonSelect> {
         ),
         Text('OR'),
         SizedBox(width: 10),
-        PolygonUpload(onChange: widget.onChange, ),
+        PolygonUpload(onChanged: widget.onChanged, ),
       ]
     );
   }

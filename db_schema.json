@@ -420,6 +420,9 @@
         "end": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Used for partial updates during the month; will be done once this equals the 1st of the next month] 2023-06-13 15:30:00 -0700",
         "signUpUniqueViewsAt": {
             "[userId_OR_ipAddress]": [ "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]" ]
+        },
+        "ambassadorSignUpUniqueViewsAt": {
+            "[userId_OR_ipAddress]": [ "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]" ]
         }
     },
     "userInsight": {
@@ -429,7 +432,14 @@
         "userId": "{String}",
         "lastActiveAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
         "firstEventSignUpAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
-        "firstNeighborhoodJoinAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
+        "firstNeighborhoodJoinAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+        "ambassadorSignUpStepsAt": {
+            "userNeighborhoodSave": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "locationSelect": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "neighborhoodUName": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "events": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "resources": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
+        } 
     },
     "icebreaker": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

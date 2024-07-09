@@ -8,7 +8,7 @@ class WeeklyEventClass {
   ParseService _parseService = ParseService();
 
   String id = '', uName = '', neighborhoodUName = '', title = '', description = '', startTime = '', endTime = '',
-    timezone = '', type = '';
+    timezone = '', type = '', createdAt = '';
   List<String> adminUserIds = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
   Map<String, dynamic> locationAddress = {};
@@ -18,11 +18,11 @@ class WeeklyEventClass {
   String xDay = '';
 
   WeeklyEventClass(this.id, this.uName, this.neighborhoodUName, this.title, this.description, this.startTime, this.endTime,
-    this.timezone, this.type, this.adminUserIds,
+    this.timezone, this.type, this.createdAt, this.adminUserIds,
     this.imageUrls, this.location, this.locationAddress, this.dayOfWeek, this.hostGroupSizeDefault, this.archived, this.rsvpDeadlineHours, this.priceUSD,
     this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay);
 
-  WeeklyEventClass.fromJson(Map<String, dynamic> json) {
+  WeeklyEventClass.fromJson(Map<String, dynamic> json, { bool imageUrlsReplaceLocalhost = true }) {
     List<String> days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.uName = json['uName'] ?? '';
@@ -33,8 +33,9 @@ class WeeklyEventClass {
     this.endTime = json['endTime'] ?? '';
     this.timezone = json['timezone'] ?? '';
     this.type = json['type'] ?? '';
+    this.createdAt = json['createdAt'] ?? '';
     this.adminUserIds = _parseService.parseListString(json['adminUserIds'] != null ? json['adminUserIds'] : []);
-    this.imageUrls = _imageService.GetUrls(_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : []));
+    this.imageUrls = _imageService.GetUrls((_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : [])), replaceLocalhost: imageUrlsReplaceLocalhost);
     this.location = LocationClass.fromJson(json['location'] ?? {});
     this.locationAddress = json['locationAddress'] ?? {};
     this.dayOfWeek = json['dayOfWeek'] != null ? _parseService.toIntNoNull(json['dayOfWeek']) : 0;
@@ -59,6 +60,7 @@ class WeeklyEventClass {
       'endTime': endTime,
       'timezone': timezone,
       'type': type,
+      'createdAt': createdAt,
       'adminUserIds': adminUserIds,
       'imageUrls': imageUrls,
       'location': { 'type': 'Point', 'coordinates': location.coordinates },

@@ -37,12 +37,13 @@ class Buttons {
     );
   }
 
-  Widget LinkInline(BuildContext context, String text, String url, {bool checkLoggedIn = false, bool launchUrl = false}) {
+  Widget LinkInline(BuildContext context, String text, String url, {bool checkLoggedIn = false, bool launchUrl = false,
+    String colorText = 'primary'}) {
     return InkWell(
       onTap: () {
         OnPress(context, url, checkLoggedIn: checkLoggedIn, launchUrl: launchUrl);
       },
-      child: Text(text, style: TextStyle( color: Theme.of(context).primaryColor )),
+      child: Text(text, style: TextStyle( color: _colors.colors[colorText] )),
     );
   }
 

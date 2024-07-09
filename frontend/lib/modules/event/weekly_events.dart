@@ -172,7 +172,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     Widget widgetFilters = SizedBox.shrink();
     if (widget.showFilters > 0) {
       widgetFilters = _layoutService.WrapWidth([
-        InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (Map<String, dynamic> val) {
+        InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location',
+          guessLocation: !_skipCurrentLocation, onChanged: (Map<String, dynamic> val) {
           _search();
           }),
         _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',

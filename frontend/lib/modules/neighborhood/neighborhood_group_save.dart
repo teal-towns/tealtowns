@@ -123,7 +123,7 @@ class _NeighborhoodGroupSaveState extends State<NeighborhoodGroupSave> {
         children: [
           _style.Text1('Neighborhood Group: ${_neighborhoodGroup.uName}', size: 'xlarge'),
           _style.Spacing(height: 'medium'),
-          _inputFields.inputText(_filters, 'title', label: 'Search Neighborhoods', onChange: (String val) {
+          _inputFields.inputText(_filters, 'title', label: 'Search Neighborhoods', onChanged: (String val) {
             _socketService.emit('SearchNeighborhoods', _filters);
           }),
           _style.Spacing(height: 'medium'),

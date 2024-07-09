@@ -51,6 +51,7 @@ from event import weekly_event_routes as _weekly_event_routes
 from icebreaker import icebreaker_routes as _icebreaker_routes
 from image import image_routes as _image_routes
 from insight import app_insight_routes as _app_insight_routes
+from insight import user_insight_routes as _user_insight_routes
 from neighborhood import neighborhood_routes as _neighborhood_routes
 from neighborhood import neighborhood_group_routes as _neighborhood_group_routes
 from neighborhood import neighborhood_stats_routes as _neighborhood_stats_routes

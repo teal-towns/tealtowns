@@ -130,10 +130,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       body: Column(
         children: [
           _layoutService.WrapWidth([
-            _inputFields.inputNumber(_formVals, 'rows', label: 'Rows', min: 1, max: 10, onChange: (val) {
+            _inputFields.inputNumber(_formVals, 'rows', label: 'Rows', min: 1, max: 10, onChanged: (val) {
               setState(() { _formVals = _formVals; });
             }),
-            _inputFields.inputNumber(_formVals, 'columns', label: 'Columns', min: 1, max: 5, onChange: (val) {
+            _inputFields.inputNumber(_formVals, 'columns', label: 'Columns', min: 1, max: 5, onChanged: (val) {
               setState(() { _formVals = _formVals; });
             }),
             _inputFields.inputSelect(_optsYesNo, _formVals, 'showImage', label: 'Show Image?', onChanged: (val) {
@@ -154,10 +154,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
             }),
           ]),
           SizedBox(height: 10),
-          _inputFields.inputText(_formVals, 'userMessage', label: 'Message (optional)', onChange: (val) {
+          _inputFields.inputText(_formVals, 'userMessage', label: 'Message (optional)', onChanged: (val) {
             setState(() { _formVals = _formVals; });
           }),
-          // _inputFields.inputText(_formVals, 'outroNote', label: 'Outro Note (optional)', onChange: (val) {
+          // _inputFields.inputText(_formVals, 'outroNote', label: 'Outro Note (optional)', onChanged: (val) {
           //   setState(() { _formVals = _formVals; });
           // }),
           SizedBox(height: 10),

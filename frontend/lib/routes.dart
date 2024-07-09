@@ -19,6 +19,8 @@ import './modules/about/about.dart';
 import './modules/about/team.dart';
 import './modules/about/privacy_terms.dart';
 
+import './modules/ambassador/ambassador_start.dart';
+
 import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
 import './modules/blog/blog_view.dart';
@@ -34,6 +36,7 @@ import './modules/icebreaker/icebreakers.dart';
 import './modules/icebreaker/icebreaker_save.dart';
 
 import './modules/insight/app_insights.dart';
+import './modules/insight/ambassador_insights.dart';
 
 import './modules/land/land_page.dart';
 
@@ -68,6 +71,8 @@ class Routes {
   static const passwordReset = '/password-reset';
   static const signup = '/signup';
 
+  static const ambassadorStart = '/ambassador';
+
   static const usersSave = '/users-save';
 
   static const designLibrary = '/design-library';
@@ -96,6 +101,7 @@ class Routes {
   static const icebreakerSave = '/icebreaker-save';
 
   static const appInsights = '/app-insights';
+  static const ambassadorInsights = '/ambassador-insights';
 
   static const land = '/land';
 
@@ -142,7 +148,7 @@ class AppGoRouter {
       ),
       GoRoute(
         path: Routes.signup,
-        builder: (context, state) => UserSignupComponent(),
+        builder: (context, state) => UserSignup(),
       ),
       GoRoute(
         path: Routes.emailVerify,
@@ -156,6 +162,11 @@ class AppGoRouter {
       GoRoute(
         path: Routes.designLibrary,
         builder: (context, state) => DesignLibrary(),
+      ),
+
+      GoRoute(
+        path: Routes.ambassadorStart,
+        builder: (context, state) => AmbassadorStart(),
       ),
 
       GoRoute(
@@ -223,6 +234,10 @@ class AppGoRouter {
       GoRoute(
         path: Routes.appInsights,
         builder: (context, state) => AppInsights(),
+      ),
+      GoRoute(
+        path: Routes.ambassadorInsights,
+        builder: (context, state) => AmbassadorInsights(),
       ),
 
       GoRoute(

@@ -384,7 +384,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       { 'url': '/blog', 'text': 'Blog' },
     ];
     Color footerColor = _colors.colors['white'];
-    // if (size == 'small') {
+    if (size == 'small') {
       return Container(
         color: _colors.colors['primaryDark'],
         child: Column(
@@ -423,11 +423,39 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           ],
         )
       );
-    // }
-    // return Container(
-    //   color: _colors.colors['primary'],
-    //   child: Text('todo'),
-    // );
+    }
+
+
+    List<Widget> rowsLinks = [];
+    for (Map<String, dynamic> link in links) {
+      rowsLinks += [
+        _buttons.LinkInline(context, link['text'], link['url'], colorText: 'white'),
+        SizedBox(width: 20),
+      ];
+    }
+    return Container(
+      color: _colors.colors['primaryDark'],
+      padding: EdgeInsets.only(top: 20, bottom: 20, left: 50, right: 50),
+      child: Row(
+        children: [
+          Image.asset('assets/images/logo-white.png', width: 30, height: 30),
+          SizedBox(width: 20),
+          Text(email, style: TextStyle(color: footerColor)),
+          Expanded(flex: 1, child: Container()),
+          ...rowsLinks,
+          SizedBox(width: 20),
+          Text('2024 TealTowns', style: TextStyle(color: footerColor)),
+          SizedBox(width: 20),
+          IconButton(
+            iconSize: 25,
+            icon: Icon(CustomIcon.linkedin, color: footerColor),
+            onPressed: () {
+              _linkService.LaunchURL('https://www.linkedin.com/company/101358571');
+            },
+          ),
+        ]
+      )
+    );
   }
 
   Widget _buildSmall(BuildContext context, var currentUserState) {

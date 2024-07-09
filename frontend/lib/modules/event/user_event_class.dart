@@ -3,12 +3,13 @@ import '../../common/parse_service.dart';
 class UserEventClass {
   ParseService _parseService = ParseService();
 
-  String id = '', eventId = '', userId = '', hostStatus = '', attendeeStatus = '', rsvpNote = '';
+  String id = '', eventId = '', userId = '', hostStatus = '', attendeeStatus = '', rsvpNote = '', createdAt = '';
   int hostGroupSizeMax = 0, hostGroupSize = 0, attendeeCountAsk = 0, attendeeCount = 0;
   double creditsEarned = 0, creditsRedeemed = 0, creditsPriceUSD = 0;
   Map<String, dynamic> user = {};
 
   UserEventClass(this.id, this.eventId, this.userId, this.hostStatus, this.attendeeStatus,
+    this.rsvpNote, this.createdAt,
     this.hostGroupSizeMax, this.hostGroupSize, this.attendeeCountAsk, this.attendeeCount,
     this.creditsEarned, this.creditsRedeemed, this.creditsPriceUSD, this.user);
 
@@ -19,6 +20,7 @@ class UserEventClass {
     this.hostStatus = json['hostStatus'] ?? '';
     this.attendeeStatus = json['attendeeStatus'] ?? '';
     this.rsvpNote = json['rsvpNote'] ?? '';
+    this.createdAt = json['createdAt'] ?? '';
     this.hostGroupSizeMax = json['hostGroupSizeMax'] != null ? _parseService.toIntNoNull(json['hostGroupSizeMax']) : 0;
     this.hostGroupSize = json['hostGroupSize'] != null ? _parseService.toIntNoNull(json['hostGroupSize']) : 0;
     this.attendeeCountAsk = json['attendeeCountAsk'] != null ? _parseService.toIntNoNull(json['attendeeCountAsk']) : 0;
@@ -37,6 +39,7 @@ class UserEventClass {
       'hostStatus': hostStatus,
       'attendeeStatus': attendeeStatus,
       'rsvpNote': rsvpNote,
+      'createdAt': createdAt,
       'hostGroupSizeMax': hostGroupSizeMax,
       'hostGroupSize': hostGroupSize,
       'attendeeCountAsk': attendeeCountAsk,

@@ -9,18 +9,20 @@ class ImageService {
 
   ConfigService _configService = ConfigService();
 
-  String GetUrl(String url) {
-    Map<String, dynamic> config = _configService.GetConfig();
-    if (!url.contains(config['SERVER_URL']) &&
-      (config['SERVER_URL'].contains('127.0.0.1') || config['SERVER_URL'].contains('localhost'))) {
-      url = config['SERVER_URL'] + url;
+  String GetUrl(String url, {bool replaceLocalhost = true}) {
+    if (replaceLocalhost) {
+      Map<String, dynamic> config = _configService.GetConfig();
+      if (!url.contains(config['SERVER_URL']) &&
+        (config['SERVER_URL'].contains('127.0.0.1') || config['SERVER_URL'].contains('localhost'))) {
+        url = config['SERVER_URL'] + url;
+      }
     }
     return url;
   }
 
-  List<String> GetUrls(List<String> urls) {
+  List<String> GetUrls(List<String> urls, {bool replaceLocalhost = true}) {
     for (int ii = 0; ii < urls.length; ii++) {
-      urls[ii] = GetUrl(urls[ii]);
+      urls[ii] = GetUrl(urls[ii], replaceLocalhost: replaceLocalhost);
     }
     return urls;
   }

@@ -217,7 +217,7 @@ class _PagingState extends State<Paging> {
     } else {
       int minLines = value.containsKey('minLines') ? value['minLines'] : 1;
       input = _inputFields.inputText(_filters, key, label: label, required: required, minLines: minLines,
-        helpText: helpText, onChange: (String newVal) { OnChanged(); },);
+        helpText: helpText, onChanged: (String newVal) { OnChanged(); },);
     }
     return input;
   }

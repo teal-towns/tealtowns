@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
@@ -46,6 +47,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
   Style _style = Style();
+  late YoutubePlayerController _youtubeController;
 
   bool _loading = true;
   String _message = '';
@@ -67,6 +69,12 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   @override
   void initState() {
     super.initState();
+
+    _youtubeController = YoutubePlayerController.fromVideoId(
+      videoId: '2Rm2kM36c5g',
+      autoPlay: false,
+      params: const YoutubePlayerParams(showFullscreenButton: false),
+    );
 
     _routeIds.add(_socketService.onRoute('GetWeeklyEventByIdWithData', callback: (String resString) {
       var res = jsonDecode(resString);
@@ -503,6 +511,14 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         EventFeedback(weeklyEventId: _weeklyEvent.id, showDetails: 0,),
         SizedBox(height: 10),
         ...colsIcebreakers,
+        SizedBox(height: 10),
+        // Container(height: 300, width: 533,
+        YoutubePlayer(
+          controller: _youtubeController,
+          aspectRatio: 16 / 9,
+        ),
+        // ),
+        SizedBox(height: 10),
       ]
     );
 
