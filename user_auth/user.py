@@ -1,6 +1,7 @@
 import re
 
 import lodash
+import log
 import mongo_db
 from notifications_all import sms_twilio as _sms_twilio
 from user_auth import user_auth as _user_auth
@@ -53,12 +54,10 @@ def VerifyPhone(userId: str, phoneNumberVerificationKey: str):
     }
     result = mongo_db.update_one('user', { '_id': mongo_db.to_object_id(userId) }, mutation)
     if result:
-        user['phoneNumberVerificationKey'] = ''
-        user['phoneNumberVerified'] = 1
         ret['valid'] = 1
         ret['message'] = ''
+        user['phoneNumberVerificationKey'] = ''
         user['phoneNumberVerified'] = 1
-        user['phoneNumberVerificationKey'] = user['phoneNumberVerificationKey']
         ret['user'] = user
     return ret
 
@@ -89,6 +88,7 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str):
                     ret['message'] = 'A message has been sent to ' + phoneNumber + '. Check your phone for your verification key.'
                 else:
                     ret['message'] = retSend['message']
+                    log.log('warn', 'user.SendPhoneVerificationCode error', retSend['message'])
             else:
                 ret['valid'] = 1
                 ret['message'] = 'Your phone number has been removed.'

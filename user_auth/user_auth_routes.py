@@ -2,6 +2,7 @@
 import date_time
 from common import route_parse as _route_parse
 from common import socket as _socket
+import log
 from user_auth import user_auth as _user_auth
 from user_auth import user as _user
 
@@ -100,10 +101,12 @@ def addRoutes():
     _socket.add_route('saveUser', Save)
 
     def SendPhoneVerificationCode(data, auth, websocket):
+        log.log('user_auth_routes.SendPhoneVerificationCode', data['userId'], data['phoneNumber'])
         return _user.SendPhoneVerificationCode(data['userId'], data['phoneNumber'])
     _socket.add_route('SendPhoneVerificationCode', SendPhoneVerificationCode)
 
     def VerifyPhone(data, auth, websocket):
+        log.log('user_auth_routes.VerifyPhone', data['userId'], data['phoneNumberVerificationKey'])
         return _user.VerifyPhone(data['userId'], data['phoneNumberVerificationKey'])
     _socket.add_route('VerifyPhone', VerifyPhone)
 

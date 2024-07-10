@@ -25,6 +25,7 @@ def Send(body: str, toNumber: str, fromNumber: str = ''):
         toNumber = '+' + toNumber
     if _testMode or ('test_mode' in _config['twilio'] and _config['twilio']['test_mode']):
         return ret
+    log.log('info', 'sms_twilio.Send debug', 'toNumber', toNumber, 'body', body, 'fromNumber', fromNumber)
     try:
         client = Client(accountSid, authToken)
         message = client.messages.create(body = body, to = toNumber, from_ = fromNumber)
