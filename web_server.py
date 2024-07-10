@@ -88,12 +88,10 @@ thread4.start()
 # Regular websocket
 async def websocket_handler(request):
 
-    # print ('websocket_handler', request)
     websocket = web.WebSocketResponse(max_msg_size = 100 * 1024 * 1024)
     await websocket.prepare(request)
 
     async for msg in websocket:
-        # print ('msg', msg, websocket, msg.type)
         if msg.type == aiohttp.WSMsgType.ERROR:
             print('websocket connection closed with exception %s' % websocket.exception())
         else:
@@ -101,7 +99,6 @@ async def websocket_handler(request):
                 dataString = msg.data
             elif msg.type == aiohttp.WSMsgType.BINARY:
                 dataString = msg.data.decode(encoding='utf-8')
-            # print ('dataString', dataString)
             try:
                 dataRaw = json.loads(dataString)
                 auth = dataRaw["auth"] if "auth" in dataRaw else {}
@@ -188,13 +185,11 @@ async def websocket_handler(request):
     return websocket
 
 async def index(request):
-    print ('index', request)
     """Serve the client-side application."""
     with open(paths_index['files'] + '/index.html') as f:
         return web.Response(text=f.read(), content_type='text/html')
 
 async def static_files(request):
-    print ('static_files', request)
     # Does not actually work, but prevents error at least..
     encoding = 'latin-1' if 'favicon' in request.path else None
     contentType = mimetypes.guess_type(request.path)[0]
@@ -242,11 +237,9 @@ async def start_async_app():
                     static_files_list.append(file)
             for file in static_files_list:
                 if os.path.isdir(paths_static['files'] + '/' + file):
-                    # print ('static files list', paths_index['route'] + file, static_files)
                     app.router.add_get(paths_index['route'] + file, static_files)
                     app.add_routes([web.static(paths_static['route'] + '/' + file, paths_static['files'] + '/' + file)])
                 else:
-                    # print ('static FILE', paths_index['route'] + file, static_files)
                     app.router.add_get(paths_index['route'] + file, static_files)
 
             app.add_routes([web.static('/assets', paths_static['files'] + '/assets')])

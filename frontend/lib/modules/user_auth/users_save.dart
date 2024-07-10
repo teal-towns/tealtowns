@@ -53,7 +53,7 @@ class _UsersSaveState extends State<UsersSave> {
     super.initState();
 
     var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    if (!currentUserState.isLoggedIn || !currentUserState.currentUser.roles.contains('editUser')) {
+    if (!currentUserState.isLoggedIn) {
       Timer(Duration(milliseconds: 500), () {
         context.go('/home');
       });
@@ -82,6 +82,7 @@ class _UsersSaveState extends State<UsersSave> {
 
   @override
   Widget build(BuildContext context) {
+    var currentUserState = context.watch<CurrentUserState>();
     double fieldWidth = 300;
     List<Widget> colsUsers = [];
     List<Widget> colsForm = [];
@@ -101,7 +102,7 @@ class _UsersSaveState extends State<UsersSave> {
       ];
     } else {
       colsUsers = [
-        _layoutService.WrapWidth(_users.map((user) => OneUser(user, context)).toList(),),
+        _layoutService.WrapWidth(_users.map((user) => OneUser(user, context, currentUserState)).toList(),),
         SizedBox(height: 10),
       ];
     }
@@ -133,20 +134,24 @@ class _UsersSaveState extends State<UsersSave> {
     );
   }
 
-  Widget OneUser(UserClass user, BuildContext context) {
+  Widget OneUser(UserClass user, BuildContext context, CurrentUserState currentUserState) {
     String createdAt = _dateTime.Format(user.createdAt, 'yyyy-MM-dd HH:mm');
+    Widget content = Column(
+      children: [
+        _buttons.Link(context, '${user.firstName} ${user.lastName} (${user.username})', '/u/${user.username}'),
+        _style.SpacingH('medium'),
+        _style.Text1('${user.email}'),
+        _style.SpacingH('medium'),
+        _style.Text1('${user.roles}'),
+        _style.SpacingH('medium'),
+        _style.Text1('${createdAt}'),
+      ]
+    );
+    if (!currentUserState.currentUser.roles.contains('editUser')) {
+      return content;
+    }
     return InkWell(
-      child: Column(
-        children: [
-          _buttons.Link(context, '${user.firstName} ${user.lastName} (${user.username})', '/u/${user.username}'),
-          _style.SpacingH('medium'),
-          _style.Text1('${user.email}'),
-          _style.SpacingH('medium'),
-          _style.Text1('${user.roles}'),
-          _style.SpacingH('medium'),
-          _style.Text1('${createdAt}'),
-        ]
-      ),
+      child: content,
       onTap: () {
         _selectedUser = user;
         setState(() { _selectedUser = _selectedUser; });
