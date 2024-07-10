@@ -52,13 +52,6 @@ class _UsersSaveState extends State<UsersSave> {
   void initState() {
     super.initState();
 
-    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    if (!currentUserState.isLoggedIn) {
-      Timer(Duration(milliseconds: 500), () {
-        context.go('/home');
-      });
-    }
-
     _routeIds.add(_socketService.onRoute('SearchUsers', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
@@ -71,7 +64,14 @@ class _UsersSaveState extends State<UsersSave> {
       }
     }));
 
-    SearchUsers();
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (!currentUserState.isLoggedIn) {
+      Timer(Duration(milliseconds: 500), () {
+        context.go('/home');
+      });
+    } else {
+      SearchUsers();
+    }
   }
 
   @override
@@ -147,7 +147,7 @@ class _UsersSaveState extends State<UsersSave> {
         _style.Text1('${createdAt}'),
       ]
     );
-    if (!currentUserState.currentUser.roles.contains('editUser')) {
+    if (!currentUserState.isLoggedIn || !currentUserState.currentUser.roles.contains('editUser')) {
       return content;
     }
     return InkWell(
