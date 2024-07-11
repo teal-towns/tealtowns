@@ -5,6 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
+    AddWeeklyEventUName()
     # UserInsightAmbassadorSignUpStepsAt()
     # UserNeighborhoodVision()
     # UserNeighborhoodToUName()
@@ -20,11 +21,54 @@ def RunAll():
     # WeeklyEventArchived()
     # TimesToUTC()
     # AddEventEnd()
-    # AddUserEventEnd()
+    AddUserEventEnd()
     # SharedItemMaxMeters()
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def AddWeeklyEventUName():
+    collections = ['event', 'userWeeklyEvent', 'userEvent']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'weeklyEventUName': { '$exists': 0 } }
+            fields = {}
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('AddWeeklyEventUName', collection, len(items))
+            for item in items:
+                weeklyEvent = None
+                if collection == 'event' and len(item['weeklyEventId']) > 0:
+                    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(item['weeklyEventId'])})['item']
+                elif collection == 'userWeeklyEvent':
+                    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(item['weeklyEventId'])})['item']
+                elif collection == 'userEvent':
+                    event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(item['eventId'])})['item']
+                    if event is not None and len(event['weeklyEventId']) > 0:
+                        weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+                if weeklyEvent is not None:
+                    query = {
+                        '_id': mongo_db.to_object_id(item['_id'])
+                    }
+                    mutation = {
+                        '$set': {
+                            'weeklyEventUName': weeklyEvent['uName'],
+                        }
+                    }
+
+                    # print (collection, query, mutation)
+                    mongo_db.update_one(collection, query, mutation)
+                    updatedCounter += 1
+                else:
+                    print ('WeeklyEvent not found', collection, item['_id'])
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def UserInsightAmbassadorSignUpStepsAt():
     collection = 'userInsight'
@@ -550,7 +594,7 @@ def AddUserEventEnd():
     updatedCounter = 0
 
     while True:
-        query = { 'eventEnd': { '$exists': 0 } }
+        query = { '$or': [ { 'eventEnd': { '$exists': 0 } }, { 'eventEnd': '' } ] }
         items = mongo_db.find('userEvent', query, limit=limit, skip=skip)['items']
         skip += len(items)
 

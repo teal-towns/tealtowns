@@ -159,6 +159,8 @@ class _AppInsightsState extends State<AppInsights> {
           _style.SpacingH('medium'),
           _buttons.Link(context, 'Neighborhood Insights', '/neighborhood-insights'),
           _style.SpacingH('medium'),
+          _buttons.Link(context, 'Weekly Events Search', '/weekly-events-search'),
+          _style.SpacingH('medium'),
         ]
       ) 
     );

@@ -75,7 +75,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
 
     var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
 
-    _routeIds.add(_socketService.onRoute('searchWeeklyEvents', callback: (String resString) {
+    _routeIds.add(_socketService.onRoute('SearchNearWeeklyEvents', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
@@ -395,7 +395,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         'withAdmins': 0,
         'type': widget.type,
       };
-      _socketService.emit('searchWeeklyEvents', data);
+      _socketService.emit('SearchNearWeeklyEvents', data);
       if (updateUrl) {
         _UpdateUrl();
       }

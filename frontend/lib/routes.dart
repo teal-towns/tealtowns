@@ -29,6 +29,7 @@ import './modules/event/weekly_events.dart';
 import './modules/event/weekly_event_save.dart';
 import './modules/event/weekly_event_view.dart';
 import './modules/event/weekly_event_print.dart';
+import './modules/event/weekly_events_search.dart';
 import './modules/event/event_feedback_save_page.dart';
 import './modules/event/event_feedback_page.dart';
 
@@ -93,6 +94,7 @@ class Routes {
   static const weeklyEventSave = '/weekly-event-save';
   static const weeklyEventView = '/we/:uName';
   static const weeklyEventPrint = '/wep/:uName';
+  static const weeklyEventsSearch = '/weekly-events-search';
   static const eat = '/eat';
   static const eventFeedbackSave = '/event-feedback-save';
   static const eventFeedback = '/event-feedback';
@@ -424,6 +426,10 @@ class AppGoRouter {
           }
           return WeeklyEvents();
         },
+      ),
+      GoRoute(
+        path: Routes.weeklyEventsSearch,
+        builder: (BuildContext context, GoRouterState state) => WeeklyEventsSearch(),
       ),
       GoRoute(
         path: Routes.eat,

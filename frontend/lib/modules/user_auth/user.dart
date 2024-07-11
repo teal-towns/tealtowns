@@ -42,7 +42,7 @@ class _UserState extends State<User> {
   bool _loadingJoinCollections = true;
   List<WeeklyEventClass> _weeklyEventsAdmin = [];
   List<UserEventClass> _userEventsAttended = [];
-  List<UserFeedbackClass> _userFeedbacks = [];
+  // List<UserFeedbackClass> _userFeedbacks = [];
   List<UserNeighborhoodClass> _userNeighborhoods = [];
 
   @override
@@ -67,7 +67,6 @@ class _UserState extends State<User> {
       if (data['valid'] == 1) {
         _weeklyEventsAdmin = [];
         _userEventsAttended = [];
-        _userFeedbacks = [];
         _userNeighborhoods = [];
         for (var weeklyEvent in data['weeklyEventsAdmin']) {
           _weeklyEventsAdmin.add(WeeklyEventClass.fromJson(weeklyEvent));
@@ -75,25 +74,26 @@ class _UserState extends State<User> {
         for (var userEvent in data['userEventsAttended']) {
           _userEventsAttended.add(UserEventClass.fromJson(userEvent));
         }
-        for (var userFeedback in data['userFeedbacks']) {
-          _userFeedbacks.add(UserFeedbackClass.fromJson(userFeedback));
-        }
+        // _userFeedbacks = [];
+        // for (var userFeedback in data['userFeedbacks']) {
+        //   _userFeedbacks.add(UserFeedbackClass.fromJson(userFeedback));
+        // }
         for (var userNeighborhood in data['userNeighborhoods']) {
           _userNeighborhoods.add(UserNeighborhoodClass.fromJson(userNeighborhood));
         }
         setState(() {
           _weeklyEventsAdmin = _weeklyEventsAdmin;
           _userEventsAttended = _userEventsAttended;
-          _userFeedbacks = _userFeedbacks;
+          // _userFeedbacks = _userFeedbacks;
           _userNeighborhoods = _userNeighborhoods;
           _loadingJoinCollections = false;
         });
       }
     }));
 
+    String username = widget.username;
     if (widget.username.length > 0) {
       _socketService.emit('getUserByUsername', {'username': widget.username});
-      _socketService.emit('GetUserJoinCollections', {'username': widget.username});
       if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn && widget.username == Provider.of<CurrentUserState>(context, listen: false).currentUser.username) {
         _userIsSelf = true;
       }
@@ -104,9 +104,11 @@ class _UserState extends State<User> {
         });
       } else {
         _user = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+        username = _user.username;
         _userIsSelf = true;
       }
     }
+    _socketService.emit('GetUserJoinCollections', {'username': username});
   }
 
   @override
@@ -120,15 +122,62 @@ class _UserState extends State<User> {
         _style.Text1('${_user.firstName} ${_user.lastName} (${_user.username})', size: 'large'),
         _style.SpacingH('medium'),
         phone,
+        _style.SpacingH('xlarge'),
       ];
 
       if (_loadingJoinCollections) {
         cols += [
+          _style.SpacingH('medium'),
           LinearProgressIndicator(),
         ];
       } else {
-        String createdAt;
+        String createdAt, eventEnd;
+        var now = DateTime.now().toUtc();
+        // String nowString = _dateTime.FormatObj(now, 'yyyy-MM-dd HH:mm:ss').replaceAll(' ', 'T');
         cols += [
+          _style.Text1('Attended Events', size: 'large'),
+          ..._userEventsAttended.map((userEvent) {
+            // createdAt = _dateTime.Format(userEvent.createdAt, 'yyyy-MM-dd');
+            var eventEndDT = DateTime.parse(userEvent.eventEnd);
+            eventEnd = _dateTime.Format(userEvent.eventEnd, 'yyyy-MM-dd HH:mm');
+            List<Widget> rowsFeedback = [];
+            if (userEvent.userFeedback.containsKey('_id')) {
+              UserFeedbackClass userFeedback = UserFeedbackClass.fromJson(userEvent.userFeedback);
+              rowsFeedback += [
+                _style.Text1('Feedback: Attended: ${userFeedback.attended}, ${userFeedback.stars} stars'),
+              ];
+            } else {
+              if (eventEndDT.isAfter(now)) {
+                rowsFeedback += [
+                  _style.Text1('(Attending soon)'),
+                ];
+              } else {
+                rowsFeedback += [
+                  _buttons.LinkInline(context, 'Leave Feedback', '/event-feedback-save?eventId=${userEvent.eventId}'),
+                ];
+              }
+            }
+
+            Widget event = _style.Text1('${eventEnd}');
+            if (userEvent.weeklyEventUName.length > 0) {
+              event = _buttons.LinkInline(context, '${eventEnd}', '/we/${userEvent.weeklyEventUName}');
+            }
+            return Row(
+              children: [
+                event,
+                _style.SpacingV('medium'),
+                ...rowsFeedback,
+              ],
+            );
+          }),
+          _style.SpacingH('medium'),
+          // _style.Text1('Feedback', size: 'large'),
+          // ..._userFeedbacks.map((userFeedback) {
+          //   createdAt = _dateTime.Format(userFeedback.createdAt, 'yyyy-MM-dd');
+          //   return _style.Text1('Attended: ${userFeedback.attended}, ${userFeedback.stars} stars, ${createdAt}');
+          // }),
+          // _style.SpacingH('medium'),
+
           _style.SpacingH('medium'),
           _style.Text1('Neighborhoods', size: 'large'),
           ..._userNeighborhoods.map((userNeighborhood) {
@@ -141,22 +190,11 @@ class _UserState extends State<User> {
             return _buttons.LinkInline(context, '${userNeighborhood.neighborhoodUName}, ${createdAt} ${rolesDefault}', '/n/${userNeighborhood.neighborhoodUName}');
           }),
           _style.SpacingH('medium'),
+
           _style.Text1('Weekly Events Admin', size: 'large'),
           ..._weeklyEventsAdmin.map((weeklyEvent) {
             createdAt = _dateTime.Format(weeklyEvent.createdAt, 'yyyy-MM-dd');
             return _buttons.LinkInline(context, '${weeklyEvent.title}, ${createdAt}', '/we/${weeklyEvent.uName}');
-          }),
-          _style.SpacingH('medium'),
-          _style.Text1('Attended Events', size: 'large'),
-          ..._userEventsAttended.map((userEvent) {
-            createdAt = _dateTime.Format(userEvent.createdAt, 'yyyy-MM-dd');
-            return _style.Text1('${createdAt}');
-          }),
-          _style.SpacingH('medium'),
-          _style.Text1('Feedback', size: 'large'),
-          ..._userFeedbacks.map((userFeedback) {
-            createdAt = _dateTime.Format(userFeedback.createdAt, 'yyyy-MM-dd');
-            return _style.Text1('Attended: ${userFeedback.attended}, ${userFeedback.stars} stars, ${createdAt}');
           }),
           _style.SpacingH('medium'),
         ];

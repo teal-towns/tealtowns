@@ -24,9 +24,9 @@ def addRoutes():
         return _event.GetEventWithWeekly(data['eventId'])
     _socket.add_route('GetEventWithWeekly', GetEventWithWeekly)
 
-    def Save(data, auth, websocket):
-        return _event.Save(data['event'])
-    _socket.add_route('SaveEvent', Save)
+    # def Save(data, auth, websocket):
+    #     return _event.Save(data['event'])
+    # _socket.add_route('SaveEvent', Save)
 
     def RemoveById(data, auth, websocket):
         return _event.Remove(data['id'])
