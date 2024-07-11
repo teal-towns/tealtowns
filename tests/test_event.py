@@ -73,9 +73,9 @@ def test_GetUsersAttending():
 
     # 0 since only attendee > 0 is for event 0, which is too far in the past.
     userEvents = [
-        { 'userId': users[0]['_id'], 'eventId': events[0]['_id'], 'attendeeCount': 3, },
-        { 'userId': users[1]['_id'], 'eventId': events[1]['_id'], },
-        { 'userId': users[2]['_id'], 'eventId': events[2]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[0]['_id'], 'attendeeCount': 3, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'eventId': events[1]['_id'], },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'eventId': events[2]['_id'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)
@@ -85,9 +85,9 @@ def test_GetUsersAttending():
 
     # All 3
     userEvents = [
-        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
-        { 'userId': users[1]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 2, },
-        { 'userId': users[2]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 3, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'eventId': events[2]['_id'], 'attendeeCount': 3, },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)
@@ -97,9 +97,9 @@ def test_GetUsersAttending():
 
     # 0 since filter by weekly event id
     userEvents = [
-        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
-        { 'userId': users[1]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 2, },
-        { 'userId': users[2]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 3, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'eventId': events[2]['_id'], 'attendeeCount': 3, },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(weeklyEventIds = ['badid'], now = now)
@@ -109,9 +109,9 @@ def test_GetUsersAttending():
 
     # Only 1 since same user 3 times
     userEvents = [
-        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
-        { 'userId': users[0]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 2, },
-        { 'userId': users[0]['_id'], 'eventId': events[3]['_id'], 'attendeeCount': 3, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[2]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[3]['_id'], 'attendeeCount': 3, },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)
@@ -121,10 +121,10 @@ def test_GetUsersAttending():
 
     # 2 since only 2 unique users
     userEvents = [
-        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
-        { 'userId': users[1]['_id'], 'eventId': events[2]['_id'], 'attendeeCount': 2, },
-        { 'userId': users[0]['_id'], 'eventId': events[3]['_id'], 'attendeeCount': 3, },
-        { 'userId': users[0]['_id'], 'eventId': events[4]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 1, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'eventId': events[2]['_id'], 'attendeeCount': 2, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[3]['_id'], 'attendeeCount': 3, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[4]['_id'], 'attendeeCount': 1, },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
     ret = _event.GetUsersAttending(now = now)

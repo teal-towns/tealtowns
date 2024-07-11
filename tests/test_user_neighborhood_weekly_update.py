@@ -7,13 +7,15 @@ from stubs import stubs_data as _stubs_data
 def test_Save():
     _mongo_mock.InitAllCollections()
 
-    userId1 = 'user1'
+    users = _stubs_data.CreateBulk(count = 1, collectionName = 'user')
+    userId1 = users[0]['_id']
+    username1 = users[0]['username']
     stringKeyVals = { 'userId': userId1 }
     userFeedbacksIn = [
-        { 'userId': userId1, 'attended': 'yes', 'createdAt': '2024-04-01T17:00:00+00:00' },
-        { 'userId': userId1, 'attended': 'no', 'createdAt': '2024-05-02T17:00:00+00:00' },
-        { 'userId': userId1, 'attended': 'yes', 'createdAt': '2024-05-03T17:00:00+00:00' },
-        { 'userId': userId1, 'attended': 'yes', 'createdAt': '2024-05-04T17:00:00+00:00' },
+        { 'userId': userId1, 'username': username1, 'attended': 'yes', 'createdAt': '2024-04-01T17:00:00+00:00' },
+        { 'userId': userId1, 'username': username1, 'attended': 'no', 'createdAt': '2024-05-02T17:00:00+00:00' },
+        { 'userId': userId1, 'username': username1, 'attended': 'yes', 'createdAt': '2024-05-03T17:00:00+00:00' },
+        { 'userId': userId1, 'username': username1, 'attended': 'yes', 'createdAt': '2024-05-04T17:00:00+00:00' },
     ]
     userFeedbacks = _stubs_data.CreateBulk(objs = userFeedbacksIn, collectionName = 'userFeedback', saveInDatabase = 0)
     for userFeedback in userFeedbacks:
