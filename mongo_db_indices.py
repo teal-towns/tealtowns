@@ -18,12 +18,15 @@ def create_all_indices(db):
 
     db['event'].create_index([('weeklyEventId', 1), ('start', 1)], unique=False)
     db['event'].create_index([('neighborhoodUName', 1)], unique=False)
+    db['event'].create_index([('weeklyEventUName', 1)], unique=False)
 
     db['userWeeklyEvent'].create_index([('userId', 1), ('weeklyEventId', 1)], unique=True)
     db['userWeeklyEvent'].create_index([('status', 1)], unique=False)
+    db['userWeeklyEvent'].create_index([('weeklyEventUName', 1)], unique=False)
 
     db['userEvent'].create_index([('userId', 1), ('eventId', 1)], unique=True)
     db['userEvent'].create_index([('creditsPriceUSD', 1), ('hostStatus', 1), ('attendeeStatus', 1)], unique=False)
+    db['userEvent'].create_index([('weeklyEventUName', 1)], unique=False)
 
     # db['sharedItem'].drop_indexes()
     db['sharedItem'].create_index([('uName', 1), ('title', 1), ('currentOwnerUserId', 1), \

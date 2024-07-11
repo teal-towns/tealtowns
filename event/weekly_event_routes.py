@@ -57,6 +57,21 @@ def addRoutes():
         lngLat = data['lngLat']
         return _weekly_event.SearchNear(lngLat, float(data['maxMeters']), data['title'], data['limit'], data['skip'],
             data['withAdmins'], data['type'])
-    _socket.add_route('searchWeeklyEvents', SearchNear)
+    _socket.add_route('SearchNearWeeklyEvents', SearchNear)
+
+    def Search(data, auth, websocket):
+        data = lodash.extend_object({
+            'uName': '',
+            'neighborhoodUName': '',
+            'title': '',
+            'limit': 250,
+            'skip': 0,
+            'sortKeys': '-createdAt',
+        }, data)
+        stringKeyVals = { 'uName': data['uName'], 'neighborhoodUName': data['neighborhoodUName'], 'title': data['title'] }
+        equalsKeyVals = { 'archived': 0 }
+        return _mongo_db_crud.Search('weeklyEvent', stringKeyVals = stringKeyVals, equalsKeyVals = equalsKeyVals,
+            limit = data['limit'], skip = data['skip'], sortKeys = data['sortKeys'])
+    _socket.add_route('SearchWeeklyEvents', Search)
 
 addRoutes()

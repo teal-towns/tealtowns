@@ -26,6 +26,7 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
   List<Map<String, dynamic>> _userInsights = [];
   int _currentAmbassadorsCount = 0;
   List<UserClass> _usersNotCurrent = [];
+  bool _loading = true;
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
           _userInsights = _parseService.parseListMapStringDynamic(data['userInsights']);
           _currentAmbassadorsCount = data['currentAmbassadorsCount'];
           _usersNotCurrent = _usersNotCurrent;
+          _loading = false;
         });
       }
     }));
@@ -59,14 +61,22 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return AppScaffoldComponent(
+        listWrapper: true,
+        body: Column( children: [ LinearProgressIndicator() ] ),
+      );
+    }
 
     List<Widget> colsAmbassadorSteps = [];
     List<String> stepsKeys = ['events', 'neighborhoodUName', 'locationSelect', 'userNeighborhoodSave'];
     for (var i = 0; i < _userInsights.length; i++) {
       String furthestStep = '';
+      String furthestStepAt = '';
       for (var j = 0; j < stepsKeys.length; j++) {
         if (_userInsights[i]['ambassadorSignUpStepsAt'].containsKey(stepsKeys[j])) {
           furthestStep = stepsKeys[j];
+          furthestStepAt = _dateTime.Format(_userInsights[i]['ambassadorSignUpStepsAt'][stepsKeys[j]], 'yyyy-MM-dd HH:mm');
           break;
         }
       }
@@ -75,6 +85,7 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
         Row(
           children: [
             Expanded(flex: 1, child: Text('${furthestStep}')),
+            Expanded(flex: 1, child: Text('${furthestStepAt}')),
             Expanded(flex: 1, child: Text('${user['username']}')),
             Expanded(flex: 1, child: Text('${user['email']}')),
           ]
@@ -95,6 +106,7 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
           Row(
             children: [
               Expanded(flex: 1, child: Text('Furthest Step')),
+              Expanded(flex: 1, child: Text('Furthest Step At')),
               Expanded(flex: 1, child: Text('Username')),
               Expanded(flex: 1, child: Text('Email')),
             ]

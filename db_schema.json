@@ -87,6 +87,7 @@
         "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
         "end": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
         "neighborhoodUName": "{String}",
+        "weeklyEventUName": "{String} @optional for lookup / frontend event link performance",
         "weeklyEventId": "{String} @optional [A new event is generated each week and sign ups for the weeklyEvent are stored here. For NON weekly events, the rest of the fields apply, otherwise they are blank.]",
         "uName": "{String} @optional",
         "type": "{String} @optional ''|sharedMeal",
@@ -109,6 +110,7 @@
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "weeklyEventId": "{String}",
+        "weeklyEventUName": "{String} @optional for lookup / frontend event link performance",
         "userId": "{String}",
         "attendeeCountAsk": "{Int} [1 for self or 2+ bringing guests as a subscription]"
     },
@@ -118,6 +120,7 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "eventId": "{String}",
         "userId": "{String}",
+        "weeklyEventUName": "{String} @optional for lookup / frontend event link performance",
         "hostGroupSizeMax": "{Int} [0 if NOT hosting, 1+ if willing to host]",
         "hostGroupSize": "{Int} [The final host group size]",
         "hostStatus": "{String} pending|complete",

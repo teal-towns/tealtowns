@@ -248,6 +248,12 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           ),
         ];
       }
+      rows += [
+        Expanded(
+          flex: 1,
+          child: _buildNavButton('/user', 'My Events', Icons.event, context, width: double.infinity, fontSize: 10),
+        ),
+      ];
     }
     rows += [
       // Expanded(
@@ -482,6 +488,9 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
             'Neighborhood', Icons.house, context),
         ];
       }
+      buttons += [
+        _buildNavButton('/user', 'My Events', Icons.event, context),
+      ];
     }
     Widget content = Scaffold(
       appBar: AppBar(

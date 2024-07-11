@@ -132,7 +132,6 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
         body: WeeklyEventTemplates(maxEvents: 1, title: title, selectedKeys: selectedKeys,
           neighborhoodUName: _formValsDefault['neighborhoodUName'],
           doSave: false, onSave: (dynamic data) {
-            print ('data ${data}');
             _formValsDefault = data['weeklyEvents'][0];
             setState(() { _step = ''; _formValsDefault = _formValsDefault; });
           }

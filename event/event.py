@@ -44,6 +44,10 @@ def Save(event: dict):
     event = _mongo_db_crud.CleanId(event)
     if '_id' not in event:
         event['uName'] = lodash.CreateUName(event['title'])
+        if 'weeklyEventId' in event and len(event['weeklyEventId']) > 0 and 'weeklyEventUName' not in event:
+            weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+            if weeklyEvent is not None:
+                event['weeklyEventUName'] = weeklyEvent['uName']
     else:
         # Do not allow changing some fields.
         eventExisting = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(event['_id'])})['item']
@@ -81,6 +85,7 @@ def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int =
     retNext = GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline, now)
     event = {
         'weeklyEventId': weeklyEventId,
+        'weeklyEventUName': weeklyEvent['uName'],
         'start': retNext['nextStart'],
         'neighborhoodUName': weeklyEvent['neighborhoodUName'],
     }
@@ -99,6 +104,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
     ret['rsvpDeadlinePassed'] = retNext['rsvpDeadlinePassed']
     event = {
         'weeklyEventId': weeklyEventId,
+        'weeklyEventUName': weeklyEvent['uName'],
         'start': retNext['thisWeekStart'],
         'neighborhoodUName': weeklyEvent['neighborhoodUName'],
     }
@@ -111,6 +117,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
     if retNext['nextStart']:
         eventNext = {
             'weeklyEventId': weeklyEventId,
+            'weeklyEventUName': weeklyEvent['uName'],
             'start': retNext['nextStart'],
             'neighborhoodUName': weeklyEvent['neighborhoodUName'],
         }
