@@ -136,22 +136,84 @@ class _AppInsightsState extends State<AppInsights> {
           ),
           ...colsCoreMetrics,
           ..._coreMetricsWeeks.map((Map<String, dynamic> coreMetricsWeek) {
-            String newJoinPercent = coreMetricsWeek['newInvites'] > 0 ?
-              (coreMetricsWeek['newEventAttendees'] / coreMetricsWeek['newInvites'] * 100).toStringAsFixed(1) : '?';
-            String bringAFriendPercent = coreMetricsWeek['uniqueEventInviters'] > 0 ?
-              (coreMetricsWeek['uniqueEventAttendees'] / coreMetricsWeek['uniqueEventInviters'] * 100).toStringAsFixed(1) : '?';
-            String activeAmbassadorsPercent = coreMetricsWeek['totalAmbassadors'] > 0 ?
-              (coreMetricsWeek['activeAmbassadors'] / coreMetricsWeek['totalAmbassadors'] * 100).toStringAsFixed(1) : '?';
+            String newJoinPercent = coreMetricsWeek['newInvitesCount'] > 0 ?
+              (coreMetricsWeek['newEventAttendees'].length / coreMetricsWeek['newInvitesCount'] * 100).toStringAsFixed(1) : '?';
+            String bringAFriendPercent = coreMetricsWeek['uniqueEventInviterUsernames'].length > 0 ?
+              (coreMetricsWeek['uniqueEventAttendeeUsernames'].length / coreMetricsWeek['uniqueEventInviterUsernames'].length * 100).toStringAsFixed(1) : '?';
+            String activeAmbassadorsPercent = coreMetricsWeek['totalNeighborhoodsCount'] > 0 ?
+              (coreMetricsWeek['activeNeighborhoodUNames'].length / coreMetricsWeek['totalNeighborhoodsCount'] * 100).toStringAsFixed(1) : '?';
             String start = _dateTime.Format(coreMetricsWeek['start'], 'yyyy-MM-dd');
-            return Row(
-              children: [
-                Expanded(flex: 1, child: Text('${start}')),
-                Expanded(flex: 1, child: Text('${coreMetricsWeek['newNeighborhoods']}')),
-                Expanded(flex: 1, child: Text('${activeAmbassadorsPercent}% (${coreMetricsWeek['activeAmbassadors']} / ${ coreMetricsWeek['totalAmbassadors']})')),
-                Expanded(flex: 1, child: Text('${coreMetricsWeek['newInvites']}')),
-                Expanded(flex: 1, child: Text('${newJoinPercent}% (${coreMetricsWeek['newEventAttendees']} / ${coreMetricsWeek['newInvites']})')),
-                Expanded(flex: 1, child: Text('${bringAFriendPercent}% (${coreMetricsWeek['uniqueEventAttendees']} / ${coreMetricsWeek['uniqueEventInviters']})')),
-              ]
+            List<Widget> cols = [
+              Row(
+                children: [
+                  Expanded(flex: 1, child: TextButton(child: Text('${start}'), onPressed: () {
+                    if (!coreMetricsWeek.containsKey('expanded')) {
+                      coreMetricsWeek['expanded'] = true;
+                    } else {
+                      coreMetricsWeek['expanded'] = !coreMetricsWeek['expanded'];
+                    }
+                    setState(() { _coreMetricsWeeks = _coreMetricsWeeks; });
+                  })),
+                  Expanded(flex: 1, child: Text('${coreMetricsWeek['newNeighborhoods'].length}')),
+                  Expanded(flex: 1, child: Text('${activeAmbassadorsPercent}% (${coreMetricsWeek['activeNeighborhoodUNames'].length} / ${ coreMetricsWeek['totalNeighborhoodsCount']})')),
+                  Expanded(flex: 1, child: Text('${coreMetricsWeek['newInvitesCount']}')),
+                  Expanded(flex: 1, child: Text('${newJoinPercent}% (${coreMetricsWeek['newEventAttendees'].length} / ${coreMetricsWeek['newInvitesCount']})')),
+                  Expanded(flex: 1, child: Text('${bringAFriendPercent}% (${coreMetricsWeek['uniqueEventAttendeeUsernames'].length} / ${coreMetricsWeek['uniqueEventInviterUsernames'].length})')),
+                ]
+              )
+            ];
+            if (coreMetricsWeek.containsKey('expanded') && coreMetricsWeek['expanded']) {
+              List<Widget> rows = [
+                Expanded(flex: 1, child: Container()),
+              ];
+              List<Widget> colsTemp = [];
+
+              if (coreMetricsWeek['newNeighborhoods'].length == 0) {
+                rows.add(Expanded(flex: 1, child: Container()));
+              } else {
+                for (int i = 0; i < coreMetricsWeek['newNeighborhoods'].length; i++) {
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['newNeighborhoods'][i]['uName'], '/n/${coreMetricsWeek['newNeighborhoods'][i]['uName']}', launchUrl: false));
+                }
+                rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
+              }
+
+              if (coreMetricsWeek['activeNeighborhoodUNames'].length == 0) {
+                rows.add(Expanded(flex: 1, child: Container()));
+              } else {
+                colsTemp = [];
+                for (int i = 0; i < coreMetricsWeek['activeNeighborhoodUNames'].length; i++) {
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['activeNeighborhoodUNames'][i], '/n/${coreMetricsWeek['activeNeighborhoodUNames'][i]}', launchUrl: false));
+                }
+                rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
+              }
+
+              // new invites - blank
+              rows.add(Expanded(flex: 1, child: Container()));
+
+              if (coreMetricsWeek['newEventAttendees'].length == 0) {
+                rows.add(Expanded(flex: 1, child: Container()));
+              } else {
+                colsTemp = [];
+                for (int i = 0; i < coreMetricsWeek['newEventAttendees'].length; i++) {
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['newEventAttendees'][i]['username'], '/u/${coreMetricsWeek['newEventAttendees'][i]['username']}', launchUrl: false));
+                }
+                rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
+              }
+
+              if (coreMetricsWeek['uniqueEventInviterUsernames'].length == 0) {
+                rows.add(Expanded(flex: 1, child: Container()));
+              } else {
+                colsTemp = [];
+                for (int i = 0; i < coreMetricsWeek['uniqueEventInviterUsernames'].length; i++) {
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['uniqueEventInviterUsernames'][i], '/u/${coreMetricsWeek['uniqueEventInviterUsernames'][i]}', launchUrl: true));
+                }
+                rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
+              }
+
+              cols.add(Row(children: rows));
+            }
+            return Column(
+              children: cols
             );
           }),
           _style.SpacingH('xlarge'),

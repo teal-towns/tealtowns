@@ -57,6 +57,7 @@ def create_all_indices(db):
     db['userNeighborhood'].create_index([('userId', 1), ('neighborhoodUName', 1)], unique=True)
 
     db['userNeighborhoodWeeklyUpdate'].create_index([('userId', 1), ('neighborhoodUName', 1), ('start', 1)], unique=True)
+    db['userNeighborhoodWeeklyUpdate'].create_index([('username', 1)], unique=False)
 
     db['neighborhoodGroup'].create_index([('uName', 1)], unique=True)
 

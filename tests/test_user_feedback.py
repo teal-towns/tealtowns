@@ -80,7 +80,8 @@ def test_CheckAskForFeedback():
     assert ret['missingFeedbackEventIds'] == [ events[0]['_id'] ]
 
     # Already gave feedback
-    userFeedback = { 'userId': users[0]['_id'], 'forType': 'event', 'forId': events[3]['_id'],
+    userFeedback = { 'userId': users[0]['_id'], 'username': users[0]['username'],
+        'forType': 'event', 'forId': events[3]['_id'],
         'attended': 'yes', 'stars': 4, 'willJoinNextWeek': 'yes', }
     ret = _mongo_db_crud.Save('userFeedback', userFeedback)
     now = date_time.from_string('2024-03-09T18:30:00-07:00')

@@ -9,6 +9,10 @@ from notifications_all import sms_twilio as _sms_twilio
 from notifications_all import email_sendgrid as _email_sendgrid
 
 def Save(userFeedback: dict, withCheckAskForFeedback: int = 0):
+    userFeedback = _mongo_db_crud.CleanId(userFeedback)
+    if '_id' not in userFeedback and 'username' not in userFeedback:
+        user = mongo_db.find_one('user', {'_id': mongo_db.to_object_id(userFeedback['userId'])})['item']
+        userFeedback['username'] = user['username']
     ret = _mongo_db_crud.Save('userFeedback', userFeedback)
     ret['smsAttemptCount'] = 0
     ret['emailAttemptCount'] = 0

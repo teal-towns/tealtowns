@@ -42,6 +42,7 @@ def Save(userEvent: dict, payType: str):
     else:
         event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
         weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+        user = mongo_db.find_one('user', {'_id': mongo_db.to_object_id(userEvent['userId'])})['item']
         if 'hostGroupSizeMax' not in userEvent:
             userEvent['hostGroupSizeMax'] = 0
         # Override some fields
@@ -55,6 +56,7 @@ def Save(userEvent: dict, payType: str):
             'creditsPriceUSD': weeklyEvent['priceUSD'],
             'eventEnd': event['end'],
             'weeklyEventUName': weeklyEvent['uName'],
+            'username': user['username'],
         })
 
     freeEvent = 0

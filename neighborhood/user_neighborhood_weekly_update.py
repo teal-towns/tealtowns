@@ -23,6 +23,10 @@ def Save(userNeighborhoodWeeklyUpdate: dict, now = None, weekdayStart: int = 0):
         item = mongo_db.find_one('userNeighborhoodWeeklyUpdate', query)['item']
         if item is not None and '_id' in item:
             userNeighborhoodWeeklyUpdate['_id'] = item['_id']
+        else:
+            fields = { 'username': 1 }
+            user = mongo_db.find_one('user', {'_id': userNeighborhoodWeeklyUpdate['userId']}, fields = fields)['item']
+            userNeighborhoodWeeklyUpdate['username'] = user['username']
 
     ret = _mongo_db_crud.Save('userNeighborhoodWeeklyUpdate', userNeighborhoodWeeklyUpdate)
     return ret

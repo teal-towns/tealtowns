@@ -5,7 +5,8 @@ import lodash
 import mongo_db
 
 def RunAll():
-    AddWeeklyEventUName()
+    AddUsernames()
+    # AddWeeklyEventUName()
     # UserInsightAmbassadorSignUpStepsAt()
     # UserNeighborhoodVision()
     # UserNeighborhoodToUName()
@@ -21,11 +22,47 @@ def RunAll():
     # WeeklyEventArchived()
     # TimesToUTC()
     # AddEventEnd()
-    AddUserEventEnd()
+    # AddUserEventEnd()
     # SharedItemMaxMeters()
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def AddUsernames():
+    collections = ['userNeighborhoodWeeklyUpdate', 'userInsight', 'userFeedback', 'userEvent']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'username': { '$exists': 0 } }
+            fields = { '_id': 1, 'userId': 1 }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('AddUsernames', collection, len(items))
+            for item in items:
+                fields = { 'username': 1 }
+                user = mongo_db.find_one('user', {'_id': item['userId']}, fields = fields)['item']
+                if user is not None:
+                    query = {
+                        '_id': mongo_db.to_object_id(item['_id'])
+                    }
+                    mutation = {
+                        '$set': {
+                            'username': user['username'],
+                        },
+                    }
+
+                    # print (query, mutation)
+                    mongo_db.update_one(collection, query, mutation)
+                    updatedCounter += 1
+                else:
+                    print('User not found: ' + item['userId'])
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def AddWeeklyEventUName():
     collections = ['event', 'userWeeklyEvent', 'userEvent']
