@@ -29,6 +29,7 @@ def test_Save():
 
     userFeedback = {
         'userId': users[0]['_id'],
+        'username': users[0]['username'],
         'forType': 'event',
         'forId': events[0]['_id'],
         'willJoinNextWeek': 'yes',
@@ -57,10 +58,10 @@ def test_CheckAskForFeedback():
     events = _stubs_data.CreateBulk(objs = events, collectionName = 'event')
     # User 0 went to events 0, 3, 4 (signed up for 1 but did not get a spot).
     userEvents = [
-        { 'userId': users[0]['_id'], 'eventId': events[0]['_id'], 'attendeeCount': 3, 'eventEnd': events[0]['end'], },
-        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 0, 'eventEnd': events[1]['end'], },
-        { 'userId': users[0]['_id'], 'eventId': events[3]['_id'], 'attendeeCount': 1, 'eventEnd': events[3]['end'], },
-        { 'userId': users[0]['_id'], 'eventId': events[4]['_id'], 'attendeeCount': 2, 'eventEnd': events[4]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[0]['_id'], 'attendeeCount': 3, 'eventEnd': events[0]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 0, 'eventEnd': events[1]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[3]['_id'], 'attendeeCount': 1, 'eventEnd': events[3]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[4]['_id'], 'attendeeCount': 2, 'eventEnd': events[4]['end'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
 
@@ -80,7 +81,8 @@ def test_CheckAskForFeedback():
     assert ret['missingFeedbackEventIds'] == [ events[0]['_id'] ]
 
     # Already gave feedback
-    userFeedback = { 'userId': users[0]['_id'], 'forType': 'event', 'forId': events[3]['_id'],
+    userFeedback = { 'userId': users[0]['_id'], 'username': users[0]['username'],
+        'forType': 'event', 'forId': events[3]['_id'],
         'attended': 'yes', 'stars': 4, 'willJoinNextWeek': 'yes', }
     ret = _mongo_db_crud.Save('userFeedback', userFeedback)
     now = date_time.from_string('2024-03-09T18:30:00-07:00')

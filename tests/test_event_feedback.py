@@ -71,12 +71,12 @@ def test_CheckAndCreateForEndingEvents():
     # User 0 went to events 0, 3, 4 (signed up for 1 but did not get a spot).
     # User 1 went to events 0, 1
     userEvents = [
-        { 'userId': users[0]['_id'], 'eventId': events[0]['_id'], 'attendeeCount': 3, 'eventEnd': events[0]['end'], },
-        { 'userId': users[0]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 0, 'eventEnd': events[1]['end'], },
-        { 'userId': users[0]['_id'], 'eventId': events[3]['_id'], 'attendeeCount': 1, 'eventEnd': events[3]['end'], },
-        { 'userId': users[0]['_id'], 'eventId': events[4]['_id'], 'attendeeCount': 2, 'eventEnd': events[4]['end'], },
-        { 'userId': users[1]['_id'], 'eventId': events[0]['_id'], 'attendeeCount': 1, 'eventEnd': events[0]['end'], },
-        { 'userId': users[1]['_id'], 'eventId': events[1]['_id'], 'attendeeCount': 2, 'eventEnd': events[1]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[0]['_id'], 'attendeeCount': 3, 'eventEnd': events[0]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 0, 'eventEnd': events[1]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[3]['_id'], 'attendeeCount': 1, 'eventEnd': events[3]['end'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'eventId': events[4]['_id'], 'attendeeCount': 2, 'eventEnd': events[4]['end'], },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'eventId': events[0]['_id'], 'attendeeCount': 1, 'eventEnd': events[0]['end'], },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'eventId': events[1]['_id'], 'attendeeCount': 2, 'eventEnd': events[1]['end'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, collectionName = 'userEvent')
 

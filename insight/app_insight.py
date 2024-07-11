@@ -135,46 +135,53 @@ def GetCoreMetrics(now = None, weekdayStart = 3, pastWeeksCount = 1):
     for i in range(pastWeeksCount):
         start = date_time.string(thisWeek)
         end = date_time.string(thisWeek + datetime.timedelta(days = 7))
-        ret['coreMetricsWeeks'].append({ 'newNeighborhoods': 0, 'newInvites': 0, 'newEventAttendees': 0,
-            'uniqueEventInviters': 0, 'uniqueEventAttendees': 0, 'totalAmbassadors': 0, 'activeAmbassadors': 0,
+        ret['coreMetricsWeeks'].append({ 'newNeighborhoods': [], 'newInvites': [], 'newInvitesCount': 0,
+            'newEventAttendees': [], 'uniqueEventInviterUsernames': [],
+            'uniqueEventAttendeeUsernames': [], 'totalNeighborhoodsCount': 0, 'activeNeighborhoodUNames': [],
             'start': start, 'end': end, })
 
         # New neighborhoods
         query = { 'createdAt': { '$gte': start, '$lte': end } }
-        neighborhoods = mongo_db.find('neighborhood', query, fields = { '_id': 1 }, limit = limit)['items']
-        ret['coreMetricsWeeks'][i]['newNeighborhoods'] = len(neighborhoods)
+        fields = { 'uName': 1, }
+        neighborhoods = mongo_db.find('neighborhood', query, fields = fields, limit = limit)['items']
+        ret['coreMetricsWeeks'][i]['newNeighborhoods'] = neighborhoods
 
         # New invites
         query = { 'inviteCount': { '$gt': 0 }, 'start': { '$gte': start, '$lte': end } }
-        fields = { 'inviteCount': 1, 'attendedCount': 1, }
-        userNeighborhoodWeeklyUpdates = mongo_db.find('userNeighborhoodWeeklyUpdate', query,
+        fields = { 'inviteCount': 1, 'attendedCount': 1, 'username': 1, 'neighborhoodUName': 1, }
+        ret['coreMetricsWeeks'][i]['newInvites'] = mongo_db.find('userNeighborhoodWeeklyUpdate', query,
             fields = fields, limit = limit)['items']
-        for userNeighborhoodWeeklyUpdate in userNeighborhoodWeeklyUpdates:
-            ret['coreMetricsWeeks'][i]['newInvites'] += userNeighborhoodWeeklyUpdate['inviteCount']
+        for userNeighborhoodWeeklyUpdate in ret['coreMetricsWeeks'][i]['newInvites']:
+            ret['coreMetricsWeeks'][i]['newInvitesCount'] += userNeighborhoodWeeklyUpdate['inviteCount']
+            # Also add to unique event inviters
+            if userNeighborhoodWeeklyUpdate['username'] not in ret['coreMetricsWeeks'][i]['uniqueEventInviterUsernames']:
+                ret['coreMetricsWeeks'][i]['uniqueEventInviterUsernames'].append(userNeighborhoodWeeklyUpdate['username'])
 
         # New event attendees
         query = { 'firstEventSignUpAt': { '$gte': start, '$lte': end } }
-        userInsights = mongo_db.find('userInsight', query, fields = { '_id': 1 }, limit = limit)['items']
-        ret['coreMetricsWeeks'][i]['newEventAttendees'] = len(userInsights)
+        fields = { 'username': 1, 'firstEventSignUpAt': 1, }
+        userInsights = mongo_db.find('userInsight', query, fields = fields, limit = limit)['items']
+        ret['coreMetricsWeeks'][i]['newEventAttendees'] = userInsights
 
         # Unique event inviters
         # https://stackoverflow.com/a/15224544
         query = { 'invites.0': { '$exists': 1 }, 'createdAt': { '$gte': start, '$lte': end } }
-        userFeedbacks = mongo_db.find('userFeedback', query, fields = { '_id': 1 }, limit = limit)['items']
-        ret['coreMetricsWeeks'][i]['uniqueEventInviters'] += len(userFeedbacks)
-        # Also add in ambassador invites.
-        ret['coreMetricsWeeks'][i]['uniqueEventInviters'] += len(userNeighborhoodWeeklyUpdates)
+        fields = { 'username': 1, }
+        userFeedbacks = mongo_db.find('userFeedback', query, fields = fields, limit = limit)['items']
+        for userFeedback in userFeedbacks:
+            if userFeedback['username'] not in ret['coreMetricsWeeks'][i]['uniqueEventInviterUsernames']:
+                ret['coreMetricsWeeks'][i]['uniqueEventInviterUsernames'].append(userFeedback['username'])
 
         # Unique event attendees
         query = { 'attendeeCount': { '$gte': 1 }, 'createdAt': { '$gte': start, '$lte': end } }
-        userIds = mongo_db.findDistinct('userEvent', 'userId', query)['values']
-        ret['coreMetricsWeeks'][i]['uniqueEventAttendees'] = len(userIds)
+        usernames = mongo_db.findDistinct('userEvent', 'username', query)['values']
+        ret['coreMetricsWeeks'][i]['uniqueEventAttendeeUsernames'] = usernames
 
         # Ambassadors
-        ret['coreMetricsWeeks'][i]['totalAmbassadors'] = mongo_db.Count('neighborhood')['count']
+        ret['coreMetricsWeeks'][i]['totalNeighborhoodsCount'] = mongo_db.Count('neighborhood')['count']
         query = { 'start': { '$gte': start, '$lte': end } }
         neighborhoodUNames = mongo_db.findDistinct('userNeighborhoodWeeklyUpdate', 'neighborhoodUName', query)['values']
-        ret['coreMetricsWeeks'][i]['activeAmbassadors'] = len(neighborhoodUNames)
+        ret['coreMetricsWeeks'][i]['activeNeighborhoodUNames'] = neighborhoodUNames
 
         thisWeek = thisWeek - datetime.timedelta(days = 7)
 

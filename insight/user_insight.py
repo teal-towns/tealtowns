@@ -17,8 +17,12 @@ def Save(userInsight, skipIfExistsKeys: list = ['firstEventSignUpAt', 'firstNeig
         for key in skipIfExistsKeys:
             if key in item and key in userInsight:
                 del userInsight[key]
-    elif 'ambassadorSignUpStepsAt' not in userInsight:
-        userInsight['ambassadorSignUpStepsAt'] = {}
+    else:
+        if 'ambassadorSignUpStepsAt' not in userInsight:
+            userInsight['ambassadorSignUpStepsAt'] = {}
+        if 'username' not in userInsight:
+            user = mongo_db.find_one('user', { '_id': userInsight['userId'] })['item']
+            userInsight['username'] = user['username']
     return _mongo_db_crud.Save('userInsight', userInsight)
 
 def SetActionAt(userId: str, field: str, now = None):
