@@ -91,10 +91,11 @@ class _UserNeighborhoodWeeklyUpdatesState extends State<UserNeighborhoodWeeklyUp
   }
 
   Widget OneItem(UserNeighborhoodWeeklyUpdateClass userNeighborhoodWeeklyUpdate, BuildContext context) {
-    String startDate = _dateTime.Format(userNeighborhoodWeeklyUpdate.start, 'EEEE M/d/y');
+    String startDate = _dateTime.Format(userNeighborhoodWeeklyUpdate.start, 'M/d/y');
+    String endDate = _dateTime.Format(userNeighborhoodWeeklyUpdate.end, 'M/d/y');
     return Column(
       children: [
-        _style.Text1('${startDate}'),
+        _style.Text1('${startDate} - ${endDate}'),
         _style.SpacingH('medium'),
         _style.Text1('${userNeighborhoodWeeklyUpdate.inviteCount} invites (${userNeighborhoodWeeklyUpdate.attendedCount} attended)'),
         _style.SpacingH('medium'),

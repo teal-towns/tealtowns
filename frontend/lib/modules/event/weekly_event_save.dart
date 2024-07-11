@@ -9,6 +9,7 @@ import '../../common/colors_service.dart';
 import '../../common/form_input/form_save.dart';
 import '../../common/style.dart';
 import './weekly_event_class.dart';
+import './weekly_event_templates.dart';
 import '../about/welcome_about.dart';
 import '../neighborhood/neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
@@ -61,6 +62,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   String _formMode = '';
   List<String> _formStepKeys = [];
   String _title = 'Save Event';
+  String _step = '';
 
   @override
   void initState() {
@@ -115,11 +117,29 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _formFields.remove('hostGroupSizeDefault');
       _formFields.remove('priceUSD');
       _formFields['location']!['guessLocation'] = false;
+    } else {
+      _step = 'templates';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_step == 'templates') {
+      String title = 'Select an event template to start with';
+      List<String> selectedKeys = ['sandwichSundays'];
+      return AppScaffoldComponent(
+        listWrapper: true,
+        body: WeeklyEventTemplates(maxEvents: 1, title: title, selectedKeys: selectedKeys,
+          neighborhoodUName: _formValsDefault['neighborhoodUName'],
+          doSave: false, onSave: (dynamic data) {
+            print ('data ${data}');
+            _formValsDefault = data['weeklyEvents'][0];
+            setState(() { _step = ''; _formValsDefault = _formValsDefault; });
+          }
+        ),
+      );
+    }
+
     double fieldWidth = 300;
     List<Widget> colsNewEvent = [];
     if (widget.id == null || widget.id!.length <= 0) {

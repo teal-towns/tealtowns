@@ -21,6 +21,7 @@ import '../neighborhood/neighborhood_state.dart';
 import '../neighborhood/neighborhood_class.dart';
 import '../user_auth/user_signup.dart';
 import '../event/weekly_event_class.dart';
+import '../event/weekly_event_templates.dart';
 
 class AmbassadorStart extends StatefulWidget {
   @override
@@ -51,93 +52,6 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
   bool _saving = false;
   bool _loadingIP = true;
   bool _initedIP = false;
-
-  List<Map<String, dynamic>> _formValsEventsList = [
-    {
-      'key': 'sandwichSundays',
-      'selected': true,
-      'formVals': {
-        'title': 'Sandwich Sundays',
-        'dayOfWeek': 6,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/sandwich.jpg'],
-        'description': 'Join your neighbors to eat sandwiches and connect. Bring a sandwich, or just yourself!',
-      }
-    },
-    {
-      'key': 'meatlessMondays',
-      'selected': false,
-      'formVals': {
-        'title': 'Meatless Mondays',
-        'dayOfWeek': 0,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/veggie-bowl.jpg'],
-        'description': 'Join your neighbors to eat climate friendly vegetarian food and connect. Bring a veggie dish, or just yourself!',
-      }
-    },
-    {
-      'key': 'tacoTuesdays',
-      'selected': false,
-      'formVals': {
-        'title': 'Taco Tuesdays',
-        'dayOfWeek': 1,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/tacos-people.jpg'],
-        'description': 'Join your neighbors to eat tacos and connect. Bring some tacos, or just yourself!',
-      }
-    },
-    {
-      'key': 'burritoWednesdays',
-      'selected': true,
-      'formVals': {
-        'title': 'Burrito Wednesdays',
-        'dayOfWeek': 2,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/burritos.jpg'],
-        'description': 'Join your neighbors to eat burritos and connect. Bring a burrito, or just yourself!',
-      }
-    },
-    {
-      'key': 'happyHourThursdays',
-      'selected': false,
-      'formVals': {
-        'title': 'Happy Hour Thursdays',
-        'dayOfWeek': 3,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/drinks-people.jpg'],
-        'description': 'Join your neighbors to enjoy drinks and connect. Bring a beverage of your choice, or just yourself!',
-      }
-    },
-    {
-      'key': 'frozenPizzaFridays',
-      'selected': false,
-      'formVals': {
-        'title': 'Frozen Pizza Fridays',
-        'dayOfWeek': 4,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/pizza-people.jpg'],
-        'description': 'Join your neighbors to enjoy pizza and connect. Bring some pizza, or just yourself!',
-      }
-    },
-    {
-      'key': 'brunchSaturdays',
-      'selected': false,
-      'formVals': {
-        'title': 'Brunch Saturdays',
-        'dayOfWeek': 5,
-        'startTime': '10:00',
-        'endTime': '11:00',
-        'imageUrls': ['/assets/assets/images/events/waffles-people.jpg'],
-        'description': 'Join your neighbors to enjoy brunch and connect. Bring your favorite brunch item, or just yourself!',
-      }
-    },
-  ];
 
   @override
   void initState() {
@@ -186,22 +100,22 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
       }
     }));
 
-    _routeIds.add(_socketService.onRoute('SaveWeeklyEvents', callback: (String resString) {
-      var res = json.decode(resString);
-      var data = res['data'];
-      if (data['valid'] == 1) {
-        _weeklyEvents = [];
-        for (var weeklyEvent in data['weeklyEvents']) {
-          _weeklyEvents.add(WeeklyEventClass.fromJson(weeklyEvent));
-        }
-        _step = 'resources';
-        setState(() { _weeklyEvents = _weeklyEvents; _step = _step; _saving = false; });
-        String userId = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
-        _socketService.emit('UserInsightSetActionAt', { 'userId': userId, 'field': 'ambassadorSignUpStepsAt.resources' });
-      } else {
-        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; _saving = false; });
-      }
-    }));
+    // _routeIds.add(_socketService.onRoute('SaveWeeklyEvents', callback: (String resString) {
+    //   var res = json.decode(resString);
+    //   var data = res['data'];
+    //   if (data['valid'] == 1) {
+    //     _weeklyEvents = [];
+    //     for (var weeklyEvent in data['weeklyEvents']) {
+    //       _weeklyEvents.add(WeeklyEventClass.fromJson(weeklyEvent));
+    //     }
+    //     _step = 'resources';
+    //     setState(() { _weeklyEvents = _weeklyEvents; _step = _step; _saving = false; });
+    //     String userId = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+    //     _socketService.emit('UserInsightSetActionAt', { 'userId': userId, 'field': 'ambassadorSignUpStepsAt.resources' });
+    //   } else {
+    //     setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; _saving = false; });
+    //   }
+    // }));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _init();
@@ -318,7 +232,22 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
     //     }),
     //   ];
     } else if (_step == 'events') {
-      cols += [ _Events() ];
+      cols += [
+        WeeklyEventTemplates(location: _formVals['inputLocation']['lngLat'],
+          locationAddress: _formVals['inputLocation']['address'],
+          neighborhoodUName: _formVals['neighborhoodUName'],
+          onSave: (dynamic data) {
+            _weeklyEvents = [];
+            for (var weeklyEvent in data['weeklyEvents']) {
+              _weeklyEvents.add(WeeklyEventClass.fromJson(weeklyEvent));
+            }
+            _step = 'resources';
+            setState(() { _weeklyEvents = _weeklyEvents; _step = _step; _saving = false; });
+            String userId = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+            _socketService.emit('UserInsightSetActionAt', { 'userId': userId, 'field': 'ambassadorSignUpStepsAt.resources' });
+          }
+        ),
+      ];
     } else if (_step == 'resources') {
       Map<String, dynamic> config = _configService.GetConfig();
       String globalEventsUrl = '${config['SERVER_URL']}/ne/global';
@@ -388,106 +317,6 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
           ...colsVideo,
         ]
       )
-    );
-  }
-
-  Widget _Events() {
-    List<Map<String, dynamic>> optsDayOfWeek = [
-      {'value': 0, 'label': 'Monday'},
-      {'value': 1, 'label': 'Tuesday'},
-      {'value': 2, 'label': 'Wednesday'},
-      {'value': 3, 'label': 'Thursday'},
-      {'value': 4, 'label': 'Friday'},
-      {'value': 5, 'label': 'Saturday'},
-      {'value': 6, 'label': 'Sunday'},
-    ];
-
-    int selectedCount = 0;
-    String userId = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
-    List<Widget> items = [];
-    for (int i = 0; i < _formValsEventsList.length; i++) {
-      if (_formValsEventsList[i]['selected']) {
-        selectedCount += 1;
-      }
-      _formValsEventsList[i]['formVals']['location'] = _formVals['inputLocation']['lngLat'];
-      _formValsEventsList[i]['formVals']['locationAddress'] = _formVals['inputLocation']['address'];
-      _formValsEventsList[i]['formVals']['neighborhoodUName'] = _formVals['neighborhoodUName'];
-      _formValsEventsList[i]['formVals']['hostGroupSizeDefault'] = 10;
-      _formValsEventsList[i]['formVals']['priceUSD'] = 0;
-      _formValsEventsList[i]['formVals']['rsvpDeadlineHours'] = 0;
-      _formValsEventsList[i]['formVals']['adminUserIds'] = [ userId ];
-
-      items.add(
-        InkWell(
-          onTap: () {
-            _formValsEventsList[i]['selected'] = !_formValsEventsList[i]['selected'];
-            setState(() { _formValsEventsList = _formValsEventsList; });
-          },
-          child: Container(
-            color: _formValsEventsList[i]['selected'] ? _colors.colors['secondary'] : null,
-            padding: EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.network(_formValsEventsList[i]['formVals']!['imageUrls']![0], height: 100, width: double.infinity, fit: BoxFit.cover),
-                // ImageSaveComponent(formVals: _formValsEventsList[i]['formVals'], formValsKey: 'imageUrls', multiple: true,
-                //   label: 'Image', imageUploadSimple: true,),
-                SizedBox(height: 10),
-                // _style.Text1('${_formValsEventsList[i]['formVals']!['title']}', size: 'large'),
-                _inputFields.inputText(_formValsEventsList[i]['formVals'], 'title', label: 'Title', required: true),
-                SizedBox(height: 10),
-                _inputFields.inputSelect(optsDayOfWeek, _formValsEventsList[i]['formVals'], 'dayOfWeek', label: 'Day of Week', required: true,),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(flex: 1,
-                      child: _inputFields.inputTime(_formValsEventsList[i]['formVals'], 'startTime', label: 'Start Time', required: true,),
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(flex: 1,
-                      child: _inputFields.inputTime(_formValsEventsList[i]['formVals'], 'endTime', label: 'End Time', required: true,),
-                    ),
-                  ]
-                ),
-                SizedBox(height: 10),
-              ]
-            )
-          )
-        )
-      );
-    }
-
-    List<Widget> colsSave = [];
-    if (selectedCount > 0) {
-      colsSave = [
-        ElevatedButton(child: Text('Create ${selectedCount} Events'),
-          onPressed: () {
-            var data = {
-              'weeklyEvents': [],
-            };
-            Map<String, dynamic> config = _configService.GetConfig();
-            String globalEventsUrl = '${config['SERVER_URL']}/ne/global';
-            for (int i = 0; i < _formValsEventsList.length; i++) {
-              if (_formValsEventsList[i]['selected']) {
-                data['weeklyEvents']!.add(WeeklyEventClass.fromJson(_formValsEventsList[i]['formVals'],
-                  imageUrlsReplaceLocalhost: false).toJson());
-              }
-            }
-            setState(() { _saving = true; });
-            _socketService.emit('SaveWeeklyEvents', data);
-          },
-        ),
-      ];
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _style.Text1('Select 1 to 3 events you would like to start with:', size: 'large', colorKey: 'primary'),
-        _style.SpacingH('medium'),
-        _layoutService.WrapWidth(items, width: 200,),
-        _style.SpacingH('medium'),
-        ...colsSave,
-      ]
     );
   }
 }
