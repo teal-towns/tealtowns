@@ -205,7 +205,7 @@ class _AppInsightsState extends State<AppInsights> {
               } else {
                 colsTemp = [];
                 for (int i = 0; i < coreMetricsWeek['uniqueEventInviterUsernames'].length; i++) {
-                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['uniqueEventInviterUsernames'][i], '/u/${coreMetricsWeek['uniqueEventInviterUsernames'][i]}', launchUrl: true));
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['uniqueEventInviterUsernames'][i], '/u/${coreMetricsWeek['uniqueEventInviterUsernames'][i]}', launchUrl: false));
                 }
                 rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
               }
