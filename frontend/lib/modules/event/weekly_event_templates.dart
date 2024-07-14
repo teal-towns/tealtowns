@@ -128,6 +128,18 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
         'description': 'Join your neighbors to enjoy brunch and connect. Bring your favorite brunch item, or just yourself!',
       }
     },
+    {
+      'key': 'gameplayEvent',
+      'selected': false,
+      'formVals': {
+        'title': 'Gameplay Weekends',
+        'dayOfWeek': 6,
+        'startTime': '16:00',
+        'endTime': '18:00',
+        'imageUrls': ['/assets/assets/images/events/gameplay.jpg'],
+        'description': 'Join your neighbors for an exciting gameplay this weekend. Bring your favorite games or join others!',
+      }
+    },
   ];
 
   @override
