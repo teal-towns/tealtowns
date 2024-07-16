@@ -143,7 +143,8 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         _style.SpacingH('medium'),
         Align(
           alignment: Alignment.topRight,
-          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save', checkLoggedIn: true),
+          // child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save', checkLoggedIn: true),
+          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/ambassador', checkLoggedIn: false),
         ),
         _style.SpacingH('medium'),
         _layoutService.WrapWidth([

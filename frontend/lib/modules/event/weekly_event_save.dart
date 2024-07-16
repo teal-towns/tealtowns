@@ -114,8 +114,8 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
 
     // Do not allow changing some fields.
     if (widget.id != null && widget.id!.length > 0) {
-      _formFields.remove('hostGroupSizeDefault');
-      _formFields.remove('priceUSD');
+      // _formFields.remove('hostGroupSizeDefault');
+      // _formFields.remove('priceUSD');
       _formFields['location']!['guessLocation'] = false;
     } else {
       _step = 'templates';

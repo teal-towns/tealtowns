@@ -49,6 +49,8 @@ def Save(userNeighborhood: dict):
     if item is not None and '_id' in item:
         userNeighborhood['_id'] = item['_id']
     else:
+        user = mongo_db.find_one('user', { '_id': userNeighborhood['userId'] })['item']
+        userNeighborhood['username'] = user['username']
         if 'roles' not in userNeighborhood:
             userNeighborhood['roles'] = []
         if 'motivations' not in userNeighborhood:
@@ -57,4 +59,14 @@ def Save(userNeighborhood: dict):
             userNeighborhood['vision'] = ''
     ret = _mongo_db_crud.Save('userNeighborhood', userNeighborhood)
     _user_insight.Save({ 'userId': userNeighborhood['userId'], 'firstNeighborhoodJoinAt': date_time.now_string() })
+    return ret
+
+def RemoveRole(username: str, neighborhoodUName: str, role: str, removeRelated: int = 1):
+    ret = { "valid": 1, "message": "" }
+    query = { "username": username, "neighborhoodUName": neighborhoodUName }
+    mutation = { "$pull": { "roles": role } }
+    mongo_db.update_one('userNeighborhood', query, mutation)
+    if removeRelated:
+        if role == 'ambassador':
+            mongo_db.delete_many('userNeighborhoodWeeklyUpdate', query)
     return ret

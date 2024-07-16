@@ -172,7 +172,7 @@ class _AppInsightsState extends State<AppInsights> {
                 rows.add(Expanded(flex: 1, child: Container()));
               } else {
                 for (int i = 0; i < coreMetricsWeek['newNeighborhoods'].length; i++) {
-                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['newNeighborhoods'][i]['uName'], '/n/${coreMetricsWeek['newNeighborhoods'][i]['uName']}', launchUrl: false));
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['newNeighborhoods'][i]['uName'], '/n/${coreMetricsWeek['newNeighborhoods'][i]['uName']}', launchUrl: true));
                 }
                 rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
               }
@@ -182,7 +182,7 @@ class _AppInsightsState extends State<AppInsights> {
               } else {
                 colsTemp = [];
                 for (int i = 0; i < coreMetricsWeek['activeNeighborhoodUNames'].length; i++) {
-                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['activeNeighborhoodUNames'][i], '/n/${coreMetricsWeek['activeNeighborhoodUNames'][i]}', launchUrl: false));
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['activeNeighborhoodUNames'][i], '/n/${coreMetricsWeek['activeNeighborhoodUNames'][i]}', launchUrl: true));
                 }
                 rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
               }
@@ -195,7 +195,7 @@ class _AppInsightsState extends State<AppInsights> {
               } else {
                 colsTemp = [];
                 for (int i = 0; i < coreMetricsWeek['newEventAttendees'].length; i++) {
-                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['newEventAttendees'][i]['username'], '/u/${coreMetricsWeek['newEventAttendees'][i]['username']}', launchUrl: false));
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['newEventAttendees'][i]['username'], '/u/${coreMetricsWeek['newEventAttendees'][i]['username']}', launchUrl: true));
                 }
                 rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
               }
@@ -205,7 +205,7 @@ class _AppInsightsState extends State<AppInsights> {
               } else {
                 colsTemp = [];
                 for (int i = 0; i < coreMetricsWeek['uniqueEventInviterUsernames'].length; i++) {
-                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['uniqueEventInviterUsernames'][i], '/u/${coreMetricsWeek['uniqueEventInviterUsernames'][i]}', launchUrl: false));
+                  colsTemp.add(_buttons.LinkInline(context, coreMetricsWeek['uniqueEventInviterUsernames'][i], '/u/${coreMetricsWeek['uniqueEventInviterUsernames'][i]}', launchUrl: true));
                 }
                 rows.add(Expanded(flex: 1, child: Column(children: colsTemp)));
               }
