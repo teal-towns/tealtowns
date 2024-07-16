@@ -251,6 +251,11 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
     } else if (_step == 'resources') {
       Map<String, dynamic> config = _configService.GetConfig();
       String globalEventsUrl = '${config['SERVER_URL']}/ne/global';
+      List<Widget> flyerButtons = [];
+      for (var i = 0; i < _weeklyEvents.length; i++) {
+        String flyerUrl = '/wep/${_weeklyEvents[i].uName}';
+        flyerButtons.add(_buttons.LinkInline(context, _weeklyEvents[i].title, flyerUrl, launchUrl: true));
+      }
       cols += [
         Container(width: 800,
           child: Column(
@@ -263,11 +268,13 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
               _buttons.LinkElevated(context, 'Join Slack',
                 'https://join.slack.com/t/tealtowns/shared_invite/zt-291gxxen8-LRs~9JmLHq8mqYUlzGncIQ', launchUrl: true),
               _style.SpacingH('medium'),
-              _style.Text1('Join your virtual neighbors in Global Eat Together events to share ideas to grown your neighborhood.'),
+              _style.Text1('Join your virtual neighbors in Global Eat Together events to share best practices to grow your neighborhood.'),
               _style.SpacingH('medium'),
               _buttons.LinkElevated(context, 'Global Eat Together Events', globalEventsUrl, launchUrl: true),
               _style.SpacingH('medium'),
               _style.Text1('You can print flyers to post on your neighbor\'s doors or knock on doors and show the QR code on your phone.'),
+              _style.SpacingH('medium'),
+              _layoutService.WrapWidth(flyerButtons,),
               _style.SpacingH('medium'),
               _buttons.LinkElevated(context, 'View and Share Your Event', '/we/${_weeklyEvents[0].uName}'),
               _style.SpacingH('medium'),

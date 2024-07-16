@@ -49,6 +49,8 @@ def Save(userNeighborhood: dict):
     if item is not None and '_id' in item:
         userNeighborhood['_id'] = item['_id']
     else:
+        user = mongo_db.find_one('user', { '_id': userNeighborhood['userId'] })['item']
+        userNeighborhood['username'] = user['username']
         if 'roles' not in userNeighborhood:
             userNeighborhood['roles'] = []
         if 'motivations' not in userNeighborhood:
