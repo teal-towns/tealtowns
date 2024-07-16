@@ -29,7 +29,7 @@ def RunAll():
     pass
 
 def AddUsernames():
-    collections = ['userNeighborhoodWeeklyUpdate', 'userInsight', 'userFeedback', 'userEvent']
+    collections = ['userNeighborhood', 'userNeighborhoodWeeklyUpdate', 'userInsight', 'userFeedback', 'userEvent']
     for collection in collections:
         limit = 250
         skip = 0

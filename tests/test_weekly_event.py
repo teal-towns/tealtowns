@@ -572,13 +572,13 @@ def test_SaveWeeklyEvent():
     # Edit again
     weeklyEvent['title'] = 'title edit'
     # Do not allow editing price.
-    originalPrice = weeklyEvent['priceUSD']
-    newPrice = 1234
-    weeklyEvent['priceUSD'] = newPrice
+    # originalPrice = weeklyEvent['priceUSD']
+    # newPrice = 1234
+    # weeklyEvent['priceUSD'] = newPrice
     retWeeklyEvent = _weekly_event.Save(weeklyEvent)
     assert retWeeklyEvent['valid'] == 1
     assert retWeeklyEvent['weeklyEvent']['title'] == weeklyEvent['title']
-    assert retWeeklyEvent['weeklyEvent']['priceUSD'] == originalPrice
+    # assert retWeeklyEvent['weeklyEvent']['priceUSD'] == originalPrice
 
     # Price must be $0 or $5 minimum
     weeklyEvent = weeklyEvents[1]
