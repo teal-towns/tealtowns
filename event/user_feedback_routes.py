@@ -20,8 +20,12 @@ def addRoutes():
     def Save(data, auth, websocket):
         data = lodash.extend_object({
             'withCheckAskForFeedback': 0,
+            'withCheckNeighborhoodAmbassador': 0,
+            'neighborhoodUName': '',
         }, data)
-        return _user_feedback.Save(data['userFeedback'], withCheckAskForFeedback = data['withCheckAskForFeedback'])
+        return _user_feedback.Save(data['userFeedback'], withCheckAskForFeedback = data['withCheckAskForFeedback'],
+            withCheckNeighborhoodAmbassador = data['withCheckNeighborhoodAmbassador'],
+            neighborhoodUName = data['neighborhoodUName'])
     _socket.add_route('SaveUserFeedback', Save)
 
     def Get(data, auth, websocket):

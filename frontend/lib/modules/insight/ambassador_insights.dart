@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
@@ -7,8 +8,9 @@ import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../../app_scaffold.dart';
-// import '../user_auth/user_class.dart';
 import '../neighborhood/user_neighborhood_class.dart';
+// import '../user_auth/user_class.dart';
+import '../user_auth/current_user_state.dart';
 
 class AmbassadorInsights extends StatefulWidget {
   @override
@@ -52,6 +54,14 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
           _userNeighborhoodsNotStarted = _userNeighborhoodsNotStarted;
           _loading = false;
         });
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('RemoveUserNeighborhoodRole', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _socketService.emit('GetAmbassadorInsights', {});
       }
     }));
 
@@ -99,6 +109,8 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
     }
 
     List<Widget> colsBehind = [];
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    bool mayRemove = currentUserState.isLoggedIn && currentUserState.currentUser.roles.contains('editAmbassador') ? true : false;
     for (var item in _userNeighborhoodWeeklyUpdatesBehindByUser.entries) {
       List<Map<String, dynamic>> updates = _parseService.parseListMapStringDynamic(item.value);
       String username = updates[0]['username'];
@@ -115,10 +127,23 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
         ...updates.map((Map<String, dynamic> update) {
           String start = _dateTime.Format(update['start'], 'y/M/d');
           String end = _dateTime.Format(update['end'], 'y/M/d');
+          Widget neighborhood = Text('${update['neighborhoodUName']}');
+          if (mayRemove) {
+            neighborhood = Row(
+              children: [
+                Text('${update['neighborhoodUName']}'),
+                TextButton(child: Text('Remove Ambassador'), onPressed: () {
+                  var data = { 'username': username, 'neighborhoodUName': update['neighborhoodUName'],
+                    'role': 'ambassador', };
+                  _socketService.emit('RemoveUserNeighborhoodRole', data);
+                }),
+              ]
+            );
+          }
           return Row(
             children: [
               Expanded(flex: 1, child: Text('${start} - ${end}')),
-              Expanded(flex: 1, child: Text('${update['neighborhoodUName']}')),
+              Expanded(flex: 1, child: neighborhood),
               Expanded(flex: 1, child: Text('${update['inviteCount']}')),
               Expanded(flex: 1, child: Text('${update['attendedCount']}')),
             ]

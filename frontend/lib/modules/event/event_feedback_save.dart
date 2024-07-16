@@ -8,6 +8,7 @@ import '../../common/date_time_service.dart';
 import '../../common/form_input/image_save.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/link_service.dart';
+import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import './user_event_class.dart';
 import './event_class.dart';
@@ -28,6 +29,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
   LinkService _linkService = LinkService();
+  ParseService _parseService = ParseService();
 
   Map<String, dynamic> _eventFeedback = {};
   Map<String, dynamic> _formValsEventFeedback = {
@@ -164,7 +166,12 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
           currentUserState.SetAppData({'eventFeedbackMissingIds': data['missingFeedbackEventIds']});
         }
         String route = '/home';
-        if (_weeklyEvent.uName.length > 0) {
+        int isAlreadyAmbassador = data.containsKey('isAlreadyAmbassador') ? _parseService.toIntNoNull(data['isAlreadyAmbassador']) : 0;
+        int stars = _parseService.toIntNoNull(data['userFeedback']['stars']);
+        if (isAlreadyAmbassador < 1 && stars >= 4) {
+          String neighborhoodUName = data['neighborhoodUName'];
+          route = '/user-neighborhood-save?neighborhoodUName=${neighborhoodUName}';
+        } else if (_weeklyEvent.uName.length > 0) {
           route = '/we/' + _weeklyEvent.uName;
         }
         context.go(route);
@@ -382,6 +389,8 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
         'invites': invites,
       },
       'withCheckAskForFeedback': 1,
+      'withCheckNeighborhoodAmbassador': 1,
+      'neighborhoodUName': _weeklyEvent.neighborhoodUName,
     };
     if (_userFeedbackId.length > 0) {
       data['userFeedback']['_id'] = _userFeedbackId;

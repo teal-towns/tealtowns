@@ -30,4 +30,8 @@ def addRoutes():
         return _mongo_db_crud.GetById('userNeighborhood', data['id'])
     _socket.add_route('GetUserNeighborhoodById', GetById)
 
+    def RemoveRole(data, auth, websocket):
+        return _user_neighborhood.RemoveRole(data['username'], data['neighborhoodUName'], data['role'])
+    _socket.add_route('RemoveUserNeighborhoodRole', RemoveRole)
+
 addRoutes()
