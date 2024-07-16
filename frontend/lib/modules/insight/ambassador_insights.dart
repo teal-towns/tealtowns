@@ -204,10 +204,21 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
           _style.Text1('${_userNeighborhoodsNotStarted.length} ambassadors NOT STARTED (no updates yet)'),
           _style.SpacingH('medium'),
           ..._userNeighborhoodsNotStarted.map((UserNeighborhoodClass userNeighborhood) {
+            List<Widget> colsRemove = [];
+            if (mayRemove) {
+              colsRemove = [
+                TextButton(child: Text('Remove Ambassador'), onPressed: () {
+                  var data = { 'username': userNeighborhood.username, 'neighborhoodUName': userNeighborhood.neighborhoodUName,
+                    'role': 'ambassador', };
+                  _socketService.emit('RemoveUserNeighborhoodRole', data);
+                }),
+              ];
+            }
             return Row(
               children: [
                 Expanded(flex: 1, child: _buttons.LinkInline(context, userNeighborhood.username, '/u/${userNeighborhood.username}', launchUrl: true)),
                 Expanded(flex: 1, child: Text('${userNeighborhood.neighborhoodUName}')),
+                ...colsRemove,
               ]
             );
           }),
