@@ -18,8 +18,25 @@ def addRoutes():
     _socket.add_route('SearchEvents', Search)
 
     def Save(data, auth, websocket):
-        return _user_feedback.Save(data['userFeedback'])
+        data = lodash.extend_object({
+            'withCheckAskForFeedback': 0,
+            'withCheckNeighborhoodAmbassador': 0,
+            'neighborhoodUName': '',
+        }, data)
+        return _user_feedback.Save(data['userFeedback'], withCheckAskForFeedback = data['withCheckAskForFeedback'],
+            withCheckNeighborhoodAmbassador = data['withCheckNeighborhoodAmbassador'],
+            neighborhoodUName = data['neighborhoodUName'])
     _socket.add_route('SaveUserFeedback', Save)
+
+    def Get(data, auth, websocket):
+        data = lodash.extend_object({
+            'userId': '',
+            'forType': '',
+            'forId': '',
+        }, data)
+        query = { 'forType': data['forType'], 'forId': data['forId'], 'userId': data['userId'] }
+        return _mongo_db_crud.Get('userFeedback', query)
+    _socket.add_route('GetUserFeedback', Get)
 
     def GetByEvent(data, auth, websocket):
         return _mongo_db_crud.Get('userFeedback', { 'forType': 'event', 'forId': data['eventId'] })

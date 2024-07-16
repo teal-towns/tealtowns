@@ -65,6 +65,13 @@
             "type": "Point",
             "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         },
+        "locationAddress": {
+            "street": "{String}",
+            "city": "{String}",
+            "state": "{String}",
+            "zip": "{String}",
+            "country": "{String}"
+        },
         "adminUserIds": [ "{String}" ],
         "hostGroupSizeDefault": "{Int} [(minimum) People per each host. This will also be used to calculate credits per event type.]",
         "hostMoneyPerPersonUSD": "{Float}",
@@ -80,6 +87,7 @@
         "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
         "end": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
         "neighborhoodUName": "{String}",
+        "weeklyEventUName": "{String} @optional for lookup / frontend event link performance",
         "weeklyEventId": "{String} @optional [A new event is generated each week and sign ups for the weeklyEvent are stored here. For NON weekly events, the rest of the fields apply, otherwise they are blank.]",
         "uName": "{String} @optional",
         "type": "{String} @optional ''|sharedMeal",
@@ -102,6 +110,7 @@
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "weeklyEventId": "{String}",
+        "weeklyEventUName": "{String} @optional for lookup / frontend event link performance",
         "userId": "{String}",
         "attendeeCountAsk": "{Int} [1 for self or 2+ bringing guests as a subscription]"
     },
@@ -111,6 +120,8 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "eventId": "{String}",
         "userId": "{String}",
+        "username": "{String}",
+        "weeklyEventUName": "{String} @optional for lookup / frontend event link performance",
         "hostGroupSizeMax": "{Int} [0 if NOT hosting, 1+ if willing to host]",
         "hostGroupSize": "{Int} [The final host group size]",
         "hostStatus": "{String} pending|complete",
@@ -230,6 +241,17 @@
         "stripeConnectedAccountId": "{String}",
         "status": "{String} pending|complete"
     },
+    "mercuryPayOut": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "accountKey": "{String}",
+        "recipientKey": "{String}",
+        "amountUSD": "{Float}",
+        "forId": "{String}",
+        "forType": "{String}",
+        "paidOut": "{Int} 0|1"
+    },
     "neighborhood": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
@@ -247,8 +269,26 @@
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
-        "neighborhoodId": "{String}",
-        "status": "{String} default|''"
+        "username": "{String}",
+        "neighborhoodUName": "{String}",
+        "status": "{String} default|''",
+        "roles": [
+            "{String} [empty or one of 'creator', 'ambassador', 'eventCreator']"
+        ],
+        "vision": "{String} @optional",
+        "motivations": [ "{String}" ]
+    },
+    "userNeighborhoodWeeklyUpdate": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "userId": "{String}",
+        "username": "{String}",
+        "neighborhoodUName": "{String}",
+        "start": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
+        "end": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Used for partial updates] 2023-06-13 15:30:00 -0700",
+        "inviteCount": "{Int}",
+        "attendedCount": "{Int} @optional"
     },
     "neighborhoodGroup": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -326,15 +366,19 @@
                 "userIds": [ "{String}" ]
             }
         ],
-        "notificationSent": "{Int} 0|1"
+        "notificationSent": "{Int} 0|1",
+        "imageUrls": [ "{String} @optional" ]
     },
     "userFeedback": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
+        "username": "{String}",
         "forType":"{String} event",
         "forId":"{String} [eventId]",
+        "attended": "{String} yes|no",
+        "stars": "{Int} 1-5",
         "willJoinNextWeek": "{String} yes|no|futureWeek",
         "willInvite": "{String} @optional no|willMeetNewNeighbor",
         "invites": [ "{String} @optional" ]
@@ -354,6 +398,7 @@
                 "id": "{String}",
                 "start": "{String}",
                 "attendeeCount": "{Int}",
+                "firstEventAttendeeCount": "{Int}",
                 "weeklyEventId":"{String}",
                 "weeklyEventUName": "{String}"
             }
@@ -382,6 +427,9 @@
         "end": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Used for partial updates during the month; will be done once this equals the 1st of the next month] 2023-06-13 15:30:00 -0700",
         "signUpUniqueViewsAt": {
             "[userId_OR_ipAddress]": [ "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]" ]
+        },
+        "ambassadorSignUpUniqueViewsAt": {
+            "[userId_OR_ipAddress]": [ "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]" ]
         }
     },
     "userInsight": {
@@ -389,9 +437,17 @@
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2023-06-13 15:30:00 -0700",
         "userId": "{String}",
+        "username":"{String}",
         "lastActiveAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
         "firstEventSignUpAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
-        "firstNeighborhoodJoinAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
+        "firstNeighborhoodJoinAt": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+        "ambassadorSignUpStepsAt": {
+            "userNeighborhoodSave": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "locationSelect": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "neighborhoodUName": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "events": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "resources": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
+        } 
     },
     "icebreaker": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

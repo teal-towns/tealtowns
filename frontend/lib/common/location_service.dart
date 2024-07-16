@@ -88,4 +88,36 @@ class LocationService {
     return _lngLat;
   }
 
+  String JoinAddress(Map<String, dynamic> address) {
+    String addressString = '';
+    if (address.containsKey('street') && address['street'].length > 0) {
+      addressString += address['street'];
+    }
+    if (address.containsKey('city') && address['city'].length > 0) {
+      if (addressString.length > 0) {
+        addressString += ', ';
+      }
+      addressString += address['city'];
+    }
+    if (address.containsKey('state') && address['state'].length > 0) {
+      if (addressString.length > 0) {
+        addressString += ', ';
+      }
+      addressString += address['state'];
+    }
+    if (address.containsKey('zip') && address['zip'].length > 0) {
+      if (addressString.length > 0) {
+        addressString += ', ';
+      }
+      addressString += address['zip'];
+    }
+    if (address.containsKey('country') && address['country'].length > 0) {
+      if (addressString.length > 0) {
+        addressString += ', ';
+      }
+      addressString += address['country'];
+    }
+    return addressString;
+  }
+
 }

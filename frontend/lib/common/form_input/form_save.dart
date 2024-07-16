@@ -33,11 +33,13 @@ class FormSave extends StatefulWidget {
   String loggedOutRedirect;
   String title;
   String saveText;
+  bool requireLoggedIn;
 
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
     this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.align = 'center', this.id = '',
     this.uName = '', this.formFields = null,
-    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', this.saveText = 'Save', });
+    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', this.saveText = 'Save',
+    this.requireLoggedIn = true,});
 
   @override
   _FormSaveState createState() => _FormSaveState();
@@ -58,6 +60,7 @@ class _FormSaveState extends State<FormSave> {
   bool _firstLoadDone = false;
   bool _loading = false;
   String _message = '';
+  Map<String, dynamic> _formValsLocal = {};
 
   int _step = 0;
   int _firstStepIndex = 0;
@@ -66,7 +69,7 @@ class _FormSaveState extends State<FormSave> {
   void initState() {
     super.initState();
 
-    if (!Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
+    if (widget.requireLoggedIn && !Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
       Timer(Duration(milliseconds: 500), () {
         context.go(widget.loggedOutRedirect);
       });
@@ -122,7 +125,7 @@ class _FormSaveState extends State<FormSave> {
     List<Widget> cols = [];
     if (widget.title.length > 0) {
       cols += [
-        _style.Text1(widget.title, size: 'xlarge'),
+        _style.Text1(widget.title, size: 'xlarge', colorKey: 'primary'),
         _style.Spacing(height: 'medium'),
       ];
     }
@@ -358,15 +361,21 @@ class _FormSaveState extends State<FormSave> {
     }
     bool required = value.containsKey('required') ? value['required'] : true;
     if (value['type'] == 'location') {
+      _formValsLocal[key] = ToInputLocation(key, _formVals);
+      bool fullScreen = value.containsKey('fullScreen') ? value['fullScreen'] : true;
       bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
-      input = InputLocation(formVals: _formVals, formValsKey: key, label: label, helpText: helpText,
-        nestedCoordinates: nestedCoordinates);
+      bool guessLocation = value.containsKey('guessLocation') ? value['guessLocation'] : true;
+      input = InputLocation(formVals: _formValsLocal, formValsKey: key, label: label, helpText: helpText,
+        nestedCoordinates: nestedCoordinates, guessLocation: guessLocation, fullScreen: fullScreen,
+        onChanged: (Map<String, dynamic> val) {
+          FromInputLocation(key, val);
+        });
     } else if (value['type'] == 'select') {
-      input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText,);
+      input = _inputFields.inputSelect(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'selectButtons') {
-      input = _inputFields.inputSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText,);
+      input = _inputFields.inputSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'multiSelectButtons') {
-      input = _inputFields.inputMultiSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText,);
+      input = _inputFields.inputMultiSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'time') {
       input = _inputFields.inputTime(_formVals, key, label: label, required: required, helpText: helpText,);
     } else if (value['type'] == 'number') {
@@ -385,6 +394,32 @@ class _FormSaveState extends State<FormSave> {
         helpText: helpText,);
     }
     return input;
+  }
+
+  Map<String, dynamic> ToInputLocation(String key, Map<String, dynamic> formVals) {
+    if (widget.formFields![key]!.containsKey('nestedAddress') &&
+      widget.formFields![key]!['nestedAddress']) {
+      return formVals[key];
+    }
+    Map<String, dynamic> address = {};
+    if (widget.formFields![key]!.containsKey('addressField') &&
+      formVals.containsKey(widget.formFields![key]!['addressField'])) {
+      address = formVals[widget.formFields![key]!['addressField']];
+    }
+    return { 'lngLat': formVals[key], 'address': address };
+  }
+
+  void FromInputLocation(String key, Map<String, dynamic> locationVal) {
+    if (widget.formFields![key]!.containsKey('nestedAddress') &&
+      widget.formFields![key]!['nestedAddress']) {
+      _formVals[key] = { 'lngLat': locationVal['lngLat'], 'address': locationVal['address'] };
+    } else {
+      _formVals[key] = locationVal['lngLat'];
+      if (widget.formFields![key]!.containsKey('addressField') &&
+        _formVals.containsKey(widget.formFields![key]!['addressField'])) {
+        _formVals[widget.formFields![key]!['addressField']] = locationVal['address'];
+      }
+    }
   }
 
   bool formValid() {
@@ -412,7 +447,7 @@ class _FormSaveState extends State<FormSave> {
     var data = {};
     data[widget.dataName] = _formVals;
     if (widget.preSave != null) {
-      data[widget.dataName] = widget.preSave!(data[widget.dataName]);
+      data = widget.preSave!(data);
     }
     saveData(data);
   }

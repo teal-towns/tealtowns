@@ -44,6 +44,10 @@ def Save(event: dict):
     event = _mongo_db_crud.CleanId(event)
     if '_id' not in event:
         event['uName'] = lodash.CreateUName(event['title'])
+        if 'weeklyEventId' in event and len(event['weeklyEventId']) > 0 and 'weeklyEventUName' not in event:
+            weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+            if weeklyEvent is not None:
+                event['weeklyEventUName'] = weeklyEvent['uName']
     else:
         # Do not allow changing some fields.
         eventExisting = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(event['_id'])})['item']
@@ -81,6 +85,7 @@ def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int =
     retNext = GetNextEventStart(weeklyEvent, minHoursBeforeRsvpDeadline, now)
     event = {
         'weeklyEventId': weeklyEventId,
+        'weeklyEventUName': weeklyEvent['uName'],
         'start': retNext['nextStart'],
         'neighborhoodUName': weeklyEvent['neighborhoodUName'],
     }
@@ -99,6 +104,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
     ret['rsvpDeadlinePassed'] = retNext['rsvpDeadlinePassed']
     event = {
         'weeklyEventId': weeklyEventId,
+        'weeklyEventUName': weeklyEvent['uName'],
         'start': retNext['thisWeekStart'],
         'neighborhoodUName': weeklyEvent['neighborhoodUName'],
     }
@@ -111,6 +117,7 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
     if retNext['nextStart']:
         eventNext = {
             'weeklyEventId': weeklyEventId,
+            'weeklyEventUName': weeklyEvent['uName'],
             'start': retNext['nextStart'],
             'neighborhoodUName': weeklyEvent['neighborhoodUName'],
         }
@@ -202,13 +209,14 @@ def GetUsersAttending(daysPast: int = 7, weeklyEventIds = None, now = None,
             eventIds.append(event['_id'])
             weeklyEventUName = weeklyEventsById[event['weeklyEventId']]['uName'] if event['weeklyEventId'] in weeklyEventsById else ''
             ret['eventInfos'].append({ 'id': event['_id'], 'start': event['start'], 'attendeeCount': 0,
+                'firstEventAttendeeCount': 0,
                 'weeklyEventId': event['weeklyEventId'], 'weeklyEventUName': weeklyEventUName, })
             eventInfosMap[event['_id']] = index
         query = { 'eventId': { '$in': eventIds }, 'attendeeCount': { '$gte': 1 } }
         userIds = mongo_db.findDistinct('userEvent', 'userId', query)['values']
         ret['uniqueUsersCount'] = len(userIds)
         if withFreePaidStats:
-            fields = { 'creditsPriceUSD': 1, 'eventId': 1, 'attendeeCount': 1, }
+            fields = { 'creditsPriceUSD': 1, 'eventId': 1, 'userId': 1, 'attendeeCount': 1, 'createdAt': 1, }
             userEvents = mongo_db.find('userEvent', query, fields = fields, limit = limit)['items']
             ret['totalEventUsersCount'] = len(userEvents)
             ret['freeEventsCount'] = 0
@@ -220,6 +228,13 @@ def GetUsersAttending(daysPast: int = 7, weeklyEventIds = None, now = None,
             paidEventsMap = {}
             for userEvent in userEvents:
                 ret['eventInfos'][eventInfosMap[userEvent['eventId']]]['attendeeCount'] += userEvent['attendeeCount']
+                # See if this user has attended any events before this.
+                query = { 'eventId': userEvent['eventId'], 'userId': userEvent['userId'],
+                    'createdAt': { '$lt': userEvent['createdAt'] } }
+                userEventBefore = mongo_db.find_one('userEvent', query)['item']
+                if userEventBefore is None:
+                    ret['eventInfos'][eventInfosMap[userEvent['eventId']]]['firstEventAttendeeCount'] += 1
+
                 if userEvent['creditsPriceUSD'] == 0:
                     ret['totalFreeEventUsersCount'] += 1
                     if userEvent['eventId'] not in freeEventsMap:

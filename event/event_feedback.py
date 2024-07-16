@@ -9,16 +9,17 @@ import mongo_db
 from common import mongo_db_crud as _mongo_db_crud
 from event import event as _event
 from event import user_event as _user_event
+from event import user_feedback as _user_feedback
 
 _config = ml_config.get_config()
 
 def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0, withUserFeedback: int = 0,
-    withEvent: int = 0,):
+    withEvent: int = 0, withCheckAskForFeedbackUserId: str = ''):
     ret = { "valid": 1, "message": "", 'userFeedbacks': [], }
     ret['eventFeedback'] = mongo_db.find_one('eventFeedback', { "eventId": eventId })['item']
     if ret['eventFeedback'] is None and autoCreate:
         eventFeedback = { "eventId": eventId, "feedbackVotes": [], "positiveVotes": [],
-            "notificationSent": notificationSent, }
+            "notificationSent": notificationSent, "imageUrls": [], }
         ret = _mongo_db_crud.Save('eventFeedback', eventFeedback)
     if ret['eventFeedback'] is None:
         ret['valid'] = 0
@@ -30,6 +31,9 @@ def GetByEvent(eventId: str, autoCreate: int = 1, notificationSent: int = 0, wit
             ret['userFeedbacks'] = mongo_db.find('userFeedback', query)['items']
         if withEvent:
             ret['event'] = mongo_db.find_one('event', { "_id": mongo_db.to_object_id(eventId) })['item']
+    if len(withCheckAskForFeedbackUserId) > 0:
+        ret1 = _user_feedback.CheckAskForFeedback(withCheckAskForFeedbackUserId)
+        ret['missingFeedbackEventIds'] = ret1['missingFeedbackEventIds']
 
     return ret
 
@@ -121,15 +125,26 @@ def RemovePositiveUserVotes(eventFeedbackId: str, positiveVoteIds: list, userId:
     ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
     return ret
 
+def AddImages(eventFeedbackId: str, imageUrls: list):
+    ret = { "valid": 1, "message": "" }
+    query = { "_id": mongo_db.to_object_id(eventFeedbackId) }
+    mutation = { "$push": { "imageUrls": { "$each": imageUrls } } }
+    mongo_db.update_one('eventFeedback', query, mutation)
+    ret['eventFeedback'] = GetEventFeedback(eventFeedbackId)
+    return ret
+
 def GetEventFeedback(eventFeedbackId: str):
     return mongo_db.find_one('eventFeedback', { "_id": mongo_db.to_object_id(eventFeedbackId) })['item']
 
-def GetByWeeklyEvent(weeklyEventId: str, withUserFeedback: int = 0):
+def GetByWeeklyEvent(weeklyEventId: str, withUserFeedback: int = 0, withCheckAskForFeedbackUserId: str = ''):
     ret = { "valid": 1, "message": "", 'eventFeedback': {}, 'userFeedbacks': [] }
     retPastEvent = _event.GetMostRecentPastEvent(weeklyEventId)
     if '_id' in retPastEvent['event']:
-        retFeedback = GetByEvent(retPastEvent['event']['_id'], withUserFeedback = withUserFeedback, autoCreate = 0)
+        retFeedback = GetByEvent(retPastEvent['event']['_id'], withUserFeedback = withUserFeedback, autoCreate = 0,
+            withCheckAskForFeedbackUserId = withCheckAskForFeedbackUserId)
         ret['eventFeedback'] = retFeedback['eventFeedback']
+        if 'missingFeedbackEventIds' in retFeedback:
+            ret['missingFeedbackEventIds'] = retFeedback['missingFeedbackEventIds']
         ret['event'] = retPastEvent['event']
         if withUserFeedback:
             ret['userFeedbacks'] = retFeedback['userFeedbacks']

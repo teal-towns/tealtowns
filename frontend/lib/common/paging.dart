@@ -21,7 +21,7 @@ class Paging extends StatefulWidget {
 
   Paging({Key? key, required this.body, this.dataName= '', this.routeGet = '', this.onGet = null,
     this.itemsPerPage = 10, this.sortKeys = '-createdAt', this.dataDefault = const {},
-    this.sortOpts = const [], this.filterFields = const {}, this.filterWidth = 300, }) : super(key: key);
+    this.sortOpts = const [], this.filterFields = const {}, this.filterWidth = 250, }) : super(key: key);
 
   @override
   _PagingState createState() => _PagingState();
@@ -130,12 +130,20 @@ class _PagingState extends State<Paging> {
         SizedBox(height: 20),
       ];
     }
+    List<Widget> colsNoResults = [];
+    if (_items.length < 1 && !_loading) {
+      colsNoResults = [
+        Text('No results found'),
+        SizedBox(height: 10),
+      ];
+    }
     return (
       Column(
         children: [
           ...colsFilters,
           widget.body,
           SizedBox(height: 10),
+          ...colsNoResults,
           ...colsFooter,
         ]
       )
@@ -187,11 +195,6 @@ class _PagingState extends State<Paging> {
       label = label[0].toUpperCase() + label.substring(1);
     }
     bool required = value.containsKey('required') ? value['required'] : true;
-    // if (value['type'] == 'location') {
-    //   bool nestedCoordinates = value.containsKey('nestedCoordinates') ? value['nestedCoordinates'] : false;
-    //   input = InputLocation(formVals: _filters, formValsKey: key, label: label, helpText: helpText,
-    //     nestedCoordinates: nestedCoordinates);
-    // } else if (value['type'] == 'select') {
     if (value['type'] == 'select') {
       input = _inputFields.inputSelect(value['options'], _filters, key, label: label, helpText: helpText,
         onChanged: (String newVal) { OnChanged(); }, );
@@ -214,7 +217,7 @@ class _PagingState extends State<Paging> {
     } else {
       int minLines = value.containsKey('minLines') ? value['minLines'] : 1;
       input = _inputFields.inputText(_filters, key, label: label, required: required, minLines: minLines,
-        helpText: helpText, onChange: (String newVal) { OnChanged(); },);
+        helpText: helpText, onChanged: (String newVal) { OnChanged(); },);
     }
     return input;
   }

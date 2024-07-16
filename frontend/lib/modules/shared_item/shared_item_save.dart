@@ -94,8 +94,8 @@ class _SharedItemSaveState extends State<SharedItemSave> {
         formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, loggedOutRedirect: '/own',
         parseData: (dynamic data) => SharedItemClass.fromJson(data).toJson(),
         preSave: (dynamic data) {
-          data = SharedItemClass.fromJson(data).toJson();
-          data['currentOwnerUserId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+          data['sharedItem'] = SharedItemClass.fromJson(data['sharedItem']).toJson();
+          data['sharedItem']['currentOwnerUserId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
           return data;
         }, onSave: (dynamic data) {
           String sharedItemId = data['sharedItem']['_id'];

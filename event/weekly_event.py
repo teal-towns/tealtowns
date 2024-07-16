@@ -1,6 +1,7 @@
 import threading
 import time
 
+from common import location as _location
 from common import math_polygon as _math_polygon
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
@@ -64,7 +65,8 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
     return ret
 
 def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUserEvents: int = 0,
-    withUserId: str = '', weeklyEventUName: str = '', withEventInsight: int = 0, userOrIP: str = ''):
+    withUserId: str = '', weeklyEventUName: str = '', withEventInsight: int = 0, userOrIP: str = '',
+    addEventView: int = 1):
     ret = _mongo_db_crud.GetById('weeklyEvent', weeklyEventId, uName = weeklyEventUName)
     if not ret['valid'] or '_id' not in ret['weeklyEvent']:
         return ret
@@ -91,15 +93,19 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
         ret['event'] = retEvents['nextWeekEvent'] if retEvents['rsvpDeadlinePassed'] else retEvents['thisWeekEvent']
         ret['rsvpDeadlinePassed'] = retEvents['rsvpDeadlinePassed']
         ret['nextEvent'] = retEvents['nextWeekEvent']
-        if withUserEvents:
+        if withUserEvents and '_id' in ret['event']:
             retStats = _user_event.GetStats(ret['event']['_id'], withUserId = withUserId)
             ret['attendeesCount'] = retStats['attendeesCount']
             ret['attendeesWaitingCount'] = retStats['attendeesWaitingCount']
             ret['nonHostAttendeesWaitingCount'] = retStats['nonHostAttendeesWaitingCount']
             ret['userEvent'] = retStats['userEvent']
-        if withEventInsight:
-            ret['eventInsight'] = _event_insight.GetByEvent(ret['event']['_id'], addEventView = 1,
+        else:
+            ret['userEvent'] = {}
+        if withEventInsight and '_id' in ret['event']:
+            ret['eventInsight'] = _event_insight.GetByEvent(ret['event']['_id'], addEventView = addEventView,
                 userOrIP = userOrIP)['eventInsight']
+        else:
+            ret['eventInsight'] = {}
 
     return ret
 
@@ -114,16 +120,46 @@ def Save(weeklyEvent: dict):
             else:
                 weeklyEvent['priceUSD'] = 5
     else:
-        # Do not allow changing some fields.
+        # Some field changes require other updates.
         weeklyEventExisting = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEvent['_id'])})['item']
         if weeklyEventExisting:
-            weeklyEvent['hostGroupSizeDefault'] = weeklyEventExisting['hostGroupSizeDefault']
-            weeklyEvent['priceUSD'] = weeklyEventExisting['priceUSD']
+            # Give credits to existing users who have subscribed.
+            if weeklyEvent['priceUSD'] != weeklyEventExisting['priceUSD'] and \
+                weeklyEventExisting['priceUSD'] > 0:
+                EndSubscriptions(weeklyEventExisting['_id'])
     if 'timezone' not in weeklyEvent or weeklyEvent['timezone'] == '':
         weeklyEvent['timezone'] = date_time.GetTimezoneFromLngLat(weeklyEvent['location']['coordinates'])
+    if 'locationAddress' not in weeklyEvent or len(weeklyEvent['locationAddress']) < 1 or \
+        'street' not in weeklyEvent['locationAddress'] or len(weeklyEvent['locationAddress']['street']) < 1:
+        weeklyEvent['locationAddress'] = _location.LngLatToAddress(weeklyEvent['location']['coordinates'][0],
+            weeklyEvent['location']['coordinates'][1])['address']
     payInfo = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
     weeklyEvent['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
     return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)
+
+def SaveBulk(weeklyEvents: list):
+    ret = { 'valid': 1, 'message': '', 'weeklyEvents': [], }
+    for weeklyEvent in weeklyEvents:
+        weeklyEvent['dayOfWeek'] = int(weeklyEvent['dayOfWeek'])
+        retOne = Save(weeklyEvent)
+        if retOne['valid']:
+            ret['weeklyEvents'].append(retOne['weeklyEvent'])
+        else:
+            ret['message'] += retOne['message']
+    if len(ret['weeklyEvents']) < 1:
+        ret['valid'] = 0
+    return ret
+
+def EndSubscriptions(weeklyEventId):
+    ret = { 'valid': 1, 'message': '' }
+    # End stripe subscription
+    query = { 'forId': weeklyEventId, 'forType': 'weeklyEvent' }
+    userPaymentSubscriptions = mongo_db.find('userPaymentSubscription', query)['items']
+    for userPaymentSubscription in userPaymentSubscriptions:
+        _user_payment.CancelSubscription(userPaymentSubscription['_id'])
+    # Already done individually IF were paid events.
+    mongo_db.delete_many('userWeeklyEvent', { 'weeklyEventId': weeklyEventId })
+    return ret
 
 def Remove(weeklyEventId: str):
     # Soft delete to preserve stats.
@@ -136,13 +172,8 @@ def Remove(weeklyEventId: str):
 
     # mongo_db.delete_many('event', { 'weeklyEventId': weeklyEventId })
 
-    # End stripe subscription
-    query = { 'forId': weeklyEventId, 'forType': 'weeklyEvent' }
-    userPaymentSubscriptions = mongo_db.find('userPaymentSubscription', query)['items']
-    for userPaymentSubscription in userPaymentSubscriptions:
-        _user_payment.CancelSubscription(userPaymentSubscription['_id'])
-    # Already done individually IF were paid events.
-    mongo_db.delete_many('userWeeklyEvent', { 'weeklyEventId': weeklyEventId })
+    EndSubscriptions(weeklyEventId)
+
     # return _mongo_db_crud.RemoveById('weeklyEvent', weeklyEventId)
     mutation = { '$set': { 'archived': 1 } }
     query = { '_id': mongo_db.to_object_id(weeklyEventId) }

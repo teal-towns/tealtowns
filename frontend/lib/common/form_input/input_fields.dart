@@ -109,7 +109,7 @@ class InputFields {
 
   Widget inputText(var formVals, String? formValsKey, { String label = '', String hint = '',
     int minLen = -1, int maxLen = -1, var fieldKey = null, int maxLines = 1, int minLines = 1,
-    int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
+    int debounceChange = 1000, Function(String)? onChanged = null, bool required = false,
     Function()? onTap = null, RegExp? pattern = null, String helpText = '', }) {
     Timer? debounce = null;
     String initialVal = '';
@@ -141,7 +141,7 @@ class InputFields {
         } else {
           formVals[formValsKey] = value;
         }
-        if (onChange != null) {
+        if (onChanged != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
             debounce = Timer(Duration(milliseconds: debounceChange), () {
@@ -150,16 +150,18 @@ class InputFields {
               } else {
                 formVals[formValsKey] = value;
               }
-              onChange(value);
+              onChanged(value);
             });
           } else {
-            onChange(value);
+            onChanged(value);
           }
         }
       },
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        focusColor: _colors.colors['primary'],
+        hoverColor: _colors.colors['primary'],
       ),
       validator: (value) {
         if (required && value?.isEmpty == true) {
@@ -179,7 +181,7 @@ class InputFields {
 
   Widget inputNumber(var formVals, String? formValsKey, { String label = '', String hint = '',
     double? min = null, double? max = null, var fieldKey = null,
-    int debounceChange = 1000, Function(double?)? onChange = null, bool required = false,
+    int debounceChange = 1000, Function(double?)? onChanged = null, bool required = false,
     String helpText = '', }) {
     Timer? debounce = null;
     String initialVal = '';
@@ -199,31 +201,33 @@ class InputFields {
       //initialValue: initialVal,
       controller: controller,
       onSaved: (value) {
+        double? val = ForceMinMax(_parseService.toDouble(value, allowNull: true), min, max);
         if (formValsKey == null) {
-          formVals = _parseService.toDouble(value, allowNull: true);
+          formVals = val;
         } else {
-          formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
+          formVals[formValsKey] = val;
         }
       },
       onChanged: (value) {
+        double? val = ForceMinMax(_parseService.toDouble(value, allowNull: true), min, max);
         if (formValsKey == null) {
-          formVals = _parseService.toDouble(value, allowNull: true);
+          formVals = val;
         } else {
-          formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
+          formVals[formValsKey] = val;
         }
-        if (onChange != null) {
+        if (onChanged != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
             debounce = Timer(Duration(milliseconds: debounceChange), () {
               if (formValsKey == null) {
-                formVals = _parseService.toDouble(value, allowNull: true);
+                formVals = val;
               } else {
-                formVals[formValsKey] = _parseService.toDouble(value, allowNull: true);
+                formVals[formValsKey] = val;
               }
-              onChange(_parseService.toDouble(value, allowNull: true));
+              onChanged(val);
             });
           } else {
-            onChange(_parseService.toDouble(value, allowNull: true));
+            onChanged(val);
           }
         }
       },
@@ -244,12 +248,12 @@ class InputFields {
   }
 
   Widget inputTime(var formVals, String? formValsKey, { String label = '', String hint = '',
-    var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null, bool required = false,
+    var fieldKey = null, int debounceChange = 1000, Function(String)? onChanged = null, bool required = false,
     Function()? onTap = null, String helpText = '',}) {
     RegExp pattern = new RegExp(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
     return inputText(formVals, formValsKey, label: label, hint: hint, fieldKey: fieldKey,
       debounceChange: debounceChange, required: required, onTap: onTap, helpText: helpText,
-      pattern: pattern, onChange: (value) {
+      pattern: pattern, onChanged: (value) {
         // Ensure leading zero for hour for sorting.
         int posColon = value.indexOf(':');
         if (posColon == 1) {
@@ -260,15 +264,15 @@ class InputFields {
             formVals[formValsKey] = value;
           }
         }
-        if (onChange != null) {
-          onChange(value);
+        if (onChanged != null) {
+          onChanged(value);
         }
       });
   }
 
   Widget inputDateTime(var formVals, String? formValsKey, { String label = '', String hint = '',
     String dateTimeMin = '', String dateTimeMax = '', String datetimeFormat = 'yyyy-MM-ddTHH:mm:ss',
-    var fieldKey = null, int debounceChange = 1000, Function(String)? onChange = null,
+    var fieldKey = null, int debounceChange = 1000, Function(String)? onChanged = null,
     bool required = false, String helpText = '', }) {
 
     DateTime now = new DateTime.now();
@@ -309,7 +313,7 @@ class InputFields {
         } else {
           formVals[formValsKey] = value;
         }
-        if (onChange != null) {
+        if (onChanged != null) {
           if (debounceChange > 0) {
             if (debounce?.isActive ?? false) debounce?.cancel();
             debounce = Timer(Duration(milliseconds: debounceChange), () {
@@ -318,10 +322,10 @@ class InputFields {
               } else {
                 formVals[formValsKey] = value;
               }
-              onChange(value);
+              onChanged(value);
             });
           } else {
-            onChange(value);
+            onChanged(value);
           }
         }
       },
@@ -338,9 +342,9 @@ class InputFields {
     ), helpText: helpText);
   }
 
-  // TODO: fix: currently the outer component must use onChange to set state, otherwise the checkbox will not toggle..
+  // TODO: fix: currently the outer component must use onChanged to set state, otherwise the checkbox will not toggle..
   Widget inputCheckbox(var formVals, String formValsKey, { String label = '',
-    var fieldKey = null, String helpText = '', Function(bool)? onChange = null}) {
+    var fieldKey = null, String helpText = '', Function(bool)? onChanged = null}) {
     bool initialVal = false;
     if (formValsKey == null) {
       initialVal = formVals;
@@ -364,8 +368,8 @@ class InputFields {
         } else {
           formVals[formValsKey] = value;
         }
-        if (onChange != null) {
-          onChange(value!);
+        if (onChanged != null) {
+          onChanged(value!);
         }
       },
       validator: (value) {
@@ -385,12 +389,24 @@ class InputFields {
     if (options.length < 1) {
       // print ('No options for inputSelect ${formValsKey} ${value}');
       return SizedBox.shrink();
+    } else {
+      bool found = false;
+      for (int i = 0; i < options.length; i++) {
+        if (options[i]['value'].toString() == value) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        value = null;
+      }
     }
     return InputWrapper(Container(
       child: DropdownButtonFormField(
         isExpanded: true,
         key: fieldKey,
         value: value,
+        dropdownColor: Colors.white,
         onSaved: (value) {
           if (formValsKey == null) {
             formVals = value;
@@ -442,8 +458,9 @@ class InputFields {
     }
     return InputWrapper(SelectButtonsFormField(
       options: options,
-      colorSelected: _colors.colors['primary'],
+      colorSelected: _colors.colors['secondary'],
       color: _colors.colors['greyLight'],
+      colorText: _colors.colors['brown'],
       label: label,
       initialValue: value,
       onSaved: (value) {
@@ -464,6 +481,9 @@ class InputFields {
         }
       },
       validator: (value) {
+        if (required && value?.isEmpty == true) {
+          return 'Please select one';
+        }
         return null;
       },
     ), helpText: helpText);
@@ -482,8 +502,9 @@ class InputFields {
     }
     return InputWrapper(MultiSelectButtonsFormField(
       options: options,
-      colorSelected: _colors.colors['primary'],
+      colorSelected: _colors.colors['secondary'],
       color: _colors.colors['greyLight'],
+      colorText: _colors.colors['brown'],
       label: label,
       initialValue: values,
       onSaved: (values) {
@@ -504,6 +525,9 @@ class InputFields {
         }
       },
       validator: (values) {
+        if (required && values!.length < 1) {
+          return 'Please select at least one';
+        }
         return null;
       },
     ), helpText: helpText);
@@ -756,4 +780,16 @@ String? validateMinMax(double value, double? min, double? max) {
     return 'Must be less than ${max}';
   }
   return null;
+}
+
+double? ForceMinMax(double? value, double? min, double? max) {
+  if (value == null) {
+    return value;
+  }
+  if (min != null && value < min) {
+    return min;
+  } else if (max != null && value > max) {
+    return max;
+  }
+  return value;
 }

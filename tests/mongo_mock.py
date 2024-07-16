@@ -10,10 +10,12 @@ from notifications_all import sms_twilio as _sms_twilio
 from pay_mercury import pay_mercury as _pay_mercury
 
 from stubs import stubs_event as _stubs_event
+from stubs import stubs_mercury_pay_out as _stubs_mercury_pay_out
 from stubs import stubs_shared_item as _stubs_shared_item
 from stubs import stubs_shared_item_owner as _stubs_shared_item_owner
 from stubs import stubs_user as _stubs_user
 from stubs import stubs_user_event as _stubs_user_event
+from stubs import stubs_user_feedback as _stubs_user_feedback
 from stubs import stubs_weekly_event as _stubs_weekly_event
 
 from vector_tiles import vector_tiles_databases as _vector_tiles_databases
@@ -25,8 +27,8 @@ _initedLive = 0
 _collectionNames = ['user', 'image', 'blog',
     'weeklyEvent', 'event', 'userWeeklyEvent', 'userEvent',
     'sharedItem', 'sharedItemOwner',
-    'userMoney', 'userPayment', 'userPaymentSubscription', 'userStripeAccount',
-    'neighborhood', 'userNeighborhood', 'neighborhoodGroup',
+    'userMoney', 'userPayment', 'userPaymentSubscription', 'userStripeAccount', 'mercuryPayOut',
+    'neighborhood', 'userNeighborhood', 'neighborhoodGroup', 'userNeighborhoodWeeklyUpdate',
     'certificationLevel', 'journeyStep', 'neighborhoodCertificationLevel', 'neighborhoodJourneyStep',
     'userMessage',
     'eventFeedback', 'userFeedback',
@@ -63,10 +65,12 @@ def InitAllCollections():
         log.init_logger(config)
 
         _stubs_event.AddDefault()
+        _stubs_mercury_pay_out.AddDefault()
         _stubs_shared_item.AddDefault()
         _stubs_shared_item_owner.AddDefault()
         _stubs_user.AddDefault()
         _stubs_user_event.AddDefault()
+        _stubs_user_feedback.AddDefault()
         _stubs_weekly_event.AddDefault()
 
         _sms_twilio.SetTestMode(1)

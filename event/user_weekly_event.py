@@ -23,7 +23,9 @@ def Save(userWeeklyEvent: dict, now = None):
             ret['valid'] = 0
             ret['message'] = 'Insufficient funds.'
             return ret
-    
+
+    if '_id' not in userWeeklyEvent:
+        userWeeklyEvent['weeklyEventUName'] = weeklyEvent['uName']
     ret = _mongo_db_crud.Save('userWeeklyEvent', userWeeklyEvent)
 
     retAdd = AddWeeklyUsersToEvent(weeklyEvent['_id'], now = now)
@@ -61,9 +63,9 @@ def AddWeeklyUsersToEvent(weeklyEventId: str, now = None):
                 'eventEnd': retEvent['event']['end'],
             }
             retUserEvent = _user_event.Save(userEvent, 'paidSubscription')
-            ret['notifyUserIdsHosts']['sms'] += retUserEvent['notifyUserIdsHosts']['sms']
-            ret['notifyUserIdsAttendees']['sms'] += retUserEvent['notifyUserIdsAttendees']['sms']
             if retUserEvent['valid']:
+                ret['notifyUserIdsHosts']['sms'] += retUserEvent['notifyUserIdsHosts']['sms']
+                ret['notifyUserIdsAttendees']['sms'] += retUserEvent['notifyUserIdsAttendees']['sms']
                 ret['newUserEvents'].append(retUserEvent['userEvent'])
                 retPhone = _user.GetPhone(userId)
                 if retPhone['valid']:
@@ -79,9 +81,11 @@ def Get(weeklyEventId: str, userId: str, withWeeklyEvent: int = 0, withEvent: in
         query = { 'userId': userId, 'forType': 'weeklyEvent', 'forId': weeklyEventId }
         userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
         if userPaymentSubscription is not None:
+            weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
             userWeeklyEvent = {
                 'userId': userId,
                 'weeklyEventId': weeklyEventId,
+                'weeklyEventUName': weeklyEvent['uName'],
                 'attendeeCountAsk': 1,
             }
             ret = Save(userWeeklyEvent)

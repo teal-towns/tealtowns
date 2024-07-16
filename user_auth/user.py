@@ -1,6 +1,7 @@
 import re
 
 import lodash
+import log
 import mongo_db
 from notifications_all import sms_twilio as _sms_twilio
 from user_auth import user_auth as _user_auth
@@ -53,12 +54,10 @@ def VerifyPhone(userId: str, phoneNumberVerificationKey: str):
     }
     result = mongo_db.update_one('user', { '_id': mongo_db.to_object_id(userId) }, mutation)
     if result:
-        user['phoneNumberVerificationKey'] = ''
-        user['phoneNumberVerified'] = 1
         ret['valid'] = 1
         ret['message'] = ''
+        user['phoneNumberVerificationKey'] = ''
         user['phoneNumberVerified'] = 1
-        user['phoneNumberVerificationKey'] = user['phoneNumberVerificationKey']
         ret['user'] = user
     return ret
 
@@ -89,6 +88,7 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str):
                     ret['message'] = 'A message has been sent to ' + phoneNumber + '. Check your phone for your verification key.'
                 else:
                     ret['message'] = retSend['message']
+                    log.log('warn', 'user.SendPhoneVerificationCode error', retSend['message'])
             else:
                 ret['valid'] = 1
                 ret['message'] = 'Your phone number has been removed.'
@@ -96,3 +96,49 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str):
 
 def GetUrl(user: dict):
     return _config['web_server']['urls']['base'] + '/u/' + str(user['username'])
+
+def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
+    ret = { 'valid': 1, 'message': '', }
+
+    if len(userId) < 1 and len(username) > 0:
+        user = mongo_db.find_one('user', { 'username': username })['item']
+        if user is not None:
+            userId = user['_id']
+        else:
+            ret['valid'] = 0
+            ret['message'] = 'User not found'
+            return ret
+
+    sortObj = { 'createdAt': -1 }
+
+    query = { 'adminUserIds': userId }
+    fields = { 'uName': 1, 'title': 1, 'createdAt': 1, }
+    ret['weeklyEventsAdmin'] = mongo_db.find('weeklyEvent', query, fields = fields, sort_obj = sortObj,
+        limit = limit)['items']
+
+    query = { 'userId': userId, 'attendeeCount': { '$gt': 0 } }
+    fields = { 'eventId': 1, 'createdAt': 1, 'eventEnd': 1, 'weeklyEventUName': 1, }
+    sortObj = { 'eventEnd': -1 }
+    ret['userEventsAttended'] = mongo_db.find('userEvent', query, fields = fields, sort_obj = sortObj,
+        limit = limit)['items']
+    eventIds = []
+    indexMap = {}
+    for index, userEvent in enumerate(ret['userEventsAttended']):
+        eventIds.append(userEvent['eventId'])
+        indexMap[userEvent['eventId']] = index
+    query = { 'userId': userId, 'forId': { '$in': eventIds }, 'forType': 'event', }
+    fields = { 'forType': 1, 'forId': 1, 'attended': 1, 'stars': 1, 'createdAt': 1, }
+    # query = { 'userId': userId }
+    # fields = { 'forType': 1, 'forId': 1, 'attended': 1, 'stars': 1, 'createdAt': 1, }
+    userFeedbacks = mongo_db.find('userFeedback', query, fields = fields, sort_obj = sortObj,
+        limit = limit)['items']
+    for userFeedback in userFeedbacks:
+        ret['userEventsAttended'][indexMap[userFeedback['forId']]]['userFeedback'] = userFeedback
+
+    sortObj = { 'createdAt': -1 }
+    query = { 'userId': userId }
+    fields = { 'neighborhoodUName': 1, 'roles': 1, 'status': 1, 'createdAt': 1, }
+    ret['userNeighborhoods'] = mongo_db.find('userNeighborhood', query, fields = fields, sort_obj = sortObj,
+        limit = limit)['items']
+
+    return ret

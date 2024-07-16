@@ -41,11 +41,11 @@ class _BelongingSurveyState extends State<BelongingSurvey> {
           _style.Text1('https://www.projectoverzero.org/media-and-publications/belongingbarometer'),
           _style.Spacing(height: 'medium'),
           FormSave(formVals: _formVals, formFields: _formFields, fieldWidth: double.infinity, align: 'left',
-            saveText: 'See my score',
+            saveText: 'See my score', dataName: 'belonging',
             preSave: (dynamic data) {
               int score = 0;
               int count = 0;
-              for(var v in data.values) {
+              for(var v in data['belonging'].values) {
                 score += int.tryParse(v) ?? 0;
                 count += 1;
               }

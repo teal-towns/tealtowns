@@ -102,7 +102,7 @@ def removeArrayIndices(array, indices):
             del array1[index]
     return array1
 
-def CreateUName(title, maxChars = 6, minChars = 5):
+def CreateUName(title, maxChars = 7, minChars = 6):
     # Remove all non letters, go to lowercase, then cut at max length to make a username.
     uName = title.lower()
     regex = re.compile('[^a-zA-Z]')

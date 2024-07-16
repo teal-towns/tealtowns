@@ -18,12 +18,15 @@ def create_all_indices(db):
 
     db['event'].create_index([('weeklyEventId', 1), ('start', 1)], unique=False)
     db['event'].create_index([('neighborhoodUName', 1)], unique=False)
+    db['event'].create_index([('weeklyEventUName', 1)], unique=False)
 
     db['userWeeklyEvent'].create_index([('userId', 1), ('weeklyEventId', 1)], unique=True)
     db['userWeeklyEvent'].create_index([('status', 1)], unique=False)
+    db['userWeeklyEvent'].create_index([('weeklyEventUName', 1)], unique=False)
 
     db['userEvent'].create_index([('userId', 1), ('eventId', 1)], unique=True)
     db['userEvent'].create_index([('creditsPriceUSD', 1), ('hostStatus', 1), ('attendeeStatus', 1)], unique=False)
+    db['userEvent'].create_index([('weeklyEventUName', 1)], unique=False)
 
     # db['sharedItem'].drop_indexes()
     db['sharedItem'].create_index([('uName', 1), ('title', 1), ('currentOwnerUserId', 1), \
@@ -50,7 +53,11 @@ def create_all_indices(db):
     db['neighborhood'].create_index([('location', '2dsphere')])
     db['neighborhood'].create_index([('title', 1)], unique=False)
 
-    db['userNeighborhood'].create_index([('userId', 1), ('neighborhoodId', 1)], unique=True)
+    # db['userNeighborhood'].drop_indexes()
+    db['userNeighborhood'].create_index([('userId', 1), ('neighborhoodUName', 1)], unique=True)
+
+    db['userNeighborhoodWeeklyUpdate'].create_index([('userId', 1), ('neighborhoodUName', 1), ('start', 1)], unique=True)
+    db['userNeighborhoodWeeklyUpdate'].create_index([('username', 1)], unique=False)
 
     db['neighborhoodGroup'].create_index([('uName', 1)], unique=True)
 
@@ -84,3 +91,5 @@ def create_all_indices(db):
     db['userInsight'].create_index([('userId', 1)], unique=True)
     db['userInsight'].create_index([('lastActiveAt', 1), ('firstEventSignUpAt', 1), \
         ('firstNeighborhoodJoinAt', 1)], unique=False)
+    
+    db['mercuryPayOut'].create_index([('paidOut', 1), ('createdAt', 1)], unique=False)

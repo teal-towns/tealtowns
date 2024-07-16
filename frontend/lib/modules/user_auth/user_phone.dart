@@ -162,7 +162,7 @@ class _UserPhoneState extends State<UserPhone> {
               pattern: pattern, minLen: 8, maxLen: 15,)),
             Container(width: width, child: _inputFields.inputCheckbox(_formVals, 'terms',
               label: 'I agree to receive text messages from TealTowns. Consent is not a condition of purchase. Message and data rates may apply. Message frequency varies. Unsubscribe at any time by clicking the unsubscribe link (where available).',
-              onChange: (bool val) {
+              onChanged: (bool val) {
                 _formVals['terms'] = val;
                 setState(() { _formVals = _formVals; });
               },

@@ -23,7 +23,8 @@ class Style {
     'small': 5,
     'medium': 10,
     'large': 20,
-    'xlarge': 30,
+    'xlarge': 40,
+    'xxlarge': 80,
   };
 
   Map<String, double> GetFontSizes() {
@@ -35,12 +36,15 @@ class Style {
   }
 
   Widget Text1(String text, { String size = 'medium', Widget? left = null, Widget? right = null,
-    String colorKey = 'text', FontWeight fontWeight = FontWeight.normal }) {
+    String colorKey = 'text', FontWeight fontWeight = FontWeight.normal, double fontSize = -1, }) {
     if (!_fontSizeMap.containsKey(size)) {
       size = 'medium';
     }
+    if (fontSize < 0) {
+      fontSize = _fontSizeMap[size]!;
+    }
     Widget content = Text(text, style: TextStyle(
-      fontSize: _fontSizeMap[size],
+      fontSize: fontSize,
       color: _colors.colors[colorKey],
       fontWeight: fontWeight,
     ));

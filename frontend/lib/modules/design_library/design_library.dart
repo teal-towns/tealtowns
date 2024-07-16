@@ -33,7 +33,8 @@ class _DesignLibraryState extends State<DesignLibrary> {
   ];
   Map<String, Map<String, dynamic>> _formFields = {
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
-    'location': { 'type': 'location', 'nestedCoordinates': true },
+    'location': { 'type': 'location', 'nestedCoordinates': true, 'fullScreen': false, },
+    'locationFullScreen': { 'type': 'location', 'nestedCoordinates': true },
     'title': {},
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
     'dayOfWeek': { 'type': 'select' },
@@ -43,7 +44,8 @@ class _DesignLibraryState extends State<DesignLibrary> {
     'ranges': { 'type': 'multiSelectButtons', 'label': 'Choose multiple', },
   };
   Map<String, dynamic>_formVals = {
-    'location': { 'coordinates': [0,0] },
+    'location': { 'coordinates': [0.0,0.0] },
+    'locationFullScreen': { 'coordinates': [0.0,0.0] },
     'range': 2,
   };
 
@@ -70,7 +72,9 @@ class _DesignLibraryState extends State<DesignLibrary> {
               color: _colors.colors[key],
               // child: Text(key),
             ),
-            Text(key),
+            Text('${key}'),
+            _style.SpacingH('medium'),
+            Text('${_colors.GetRGB(key)}'),
           ],
         ),
       );
@@ -100,7 +104,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
           _style.SpacingH('medium'),
           _style.Text1('Forms', size: 'large'),
           _style.SpacingH('medium'),
-          FormSave(formVals: _formVals, formFields: _formFields),
+          FormSave(formVals: _formVals, formFields: _formFields, requireLoggedIn: false),
           _style.SpacingH('medium'),
           _style.Text1('Colors', size: 'large'),
           _style.SpacingH('medium'),

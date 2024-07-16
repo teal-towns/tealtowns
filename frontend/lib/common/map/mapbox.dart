@@ -13,7 +13,7 @@ class Mapbox extends StatefulWidget {
   var polygons = [];
   double mapWidth;
   double mapHeight;
-  Function(Map<String, dynamic>)? onChange;
+  Function(Map<String, dynamic>)? onChanged;
   int debounceChange;
   double latitude;
   double longitude;
@@ -23,7 +23,7 @@ class Mapbox extends StatefulWidget {
   String markerImage;
 
   Mapbox({ this.polygons = const [], this.mapHeight = 300, this.mapWidth = 300,
-    this.onChange = null, this.debounceChange = 1000, this.latitude = 0,
+    this.onChanged = null, this.debounceChange = 1000, this.latitude = 0,
     this.longitude = 0, this.zoom = 13.0, this.coordinatesDraw = const [], this.markerLngLat = const [],
     this.markerImage = 'assets/images/map-marker.png' });
 
@@ -128,7 +128,7 @@ class _MapboxState extends State<Mapbox> {
       _parseService.Precision(_longitude, 6) != _parseService.Precision(_mapController.cameraPosition!.target.longitude, 6)) {
       _latitude = _mapController.cameraPosition!.target.latitude;
       _longitude = _mapController.cameraPosition!.target.longitude;
-      if (widget.onChange != null && _mapController.cameraPosition != null) {
+      if (widget.onChanged != null && _mapController.cameraPosition != null) {
         if (widget.debounceChange > 0) {
           if (_debounceOnChange?.isActive ?? false) { _debounceOnChange?.cancel(); };
           _debounceOnChange = Timer(Duration(milliseconds: widget.debounceChange), () {
@@ -146,7 +146,7 @@ class _MapboxState extends State<Mapbox> {
     if (_mapController.cameraPosition!.zoom != null) {
       zoom = _mapController.cameraPosition!.zoom!.floor();
     }
-    widget.onChange!({'zoom': zoom, 'latitude': _mapController.cameraPosition!.target.latitude,
+    widget.onChanged!({'zoom': zoom, 'latitude': _mapController.cameraPosition!.target.latitude,
       'longitude': _mapController.cameraPosition!.target.longitude });
   }
 

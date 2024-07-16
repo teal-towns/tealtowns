@@ -42,9 +42,11 @@ def Save(userEvent: dict, payType: str):
     else:
         event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
         weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+        user = mongo_db.find_one('user', {'_id': mongo_db.to_object_id(userEvent['userId'])})['item']
         if 'hostGroupSizeMax' not in userEvent:
             userEvent['hostGroupSizeMax'] = 0
-        userEvent = lodash.extend_object({
+        # Override some fields
+        userEvent = lodash.extend_object(userEvent, {
             'hostStatus': 'pending' if userEvent['hostGroupSizeMax'] > 0 else 'complete',
             'hostGroupSize': 0,
             'attendeeStatus': 'pending',
@@ -53,7 +55,9 @@ def Save(userEvent: dict, payType: str):
             'creditsRedeemed': 0,
             'creditsPriceUSD': weeklyEvent['priceUSD'],
             'eventEnd': event['end'],
-        }, userEvent)
+            'weeklyEventUName': weeklyEvent['uName'],
+            'username': user['username'],
+        })
 
     freeEvent = 0
     if payType == 'free' and checkPay:
@@ -74,7 +78,8 @@ def Save(userEvent: dict, payType: str):
         userEvent['attendeeCount'] = userEvent['attendeeCountAsk']
         userEvent['attendeeStatus'] = 'complete'
 
-    ret = _mongo_db_crud.Save('userEvent', userEvent)
+    retOne = _mongo_db_crud.Save('userEvent', userEvent)
+    ret['userEvent'] = retOne['userEvent']
     _user_insight.Save({ 'userId': userEvent['userId'], 'firstEventSignUpAt': date_time.now_string() })
     if checkPay:
         ret['spotsPaidFor'] = retPay['spotsPaidFor']

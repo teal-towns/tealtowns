@@ -7,18 +7,25 @@ def AddRoutes():
     def GetByEvent(data, auth, websocket):
         withUserFeedback = data['withUserFeedback'] if 'withUserFeedback' in data else 0
         withEvent = data['withEvent'] if 'withEvent' in data else 0
+        withCheckAskForFeedbackUserId = data['withCheckAskForFeedbackUserId'] if 'withCheckAskForFeedbackUserId' in data else ''
         return _event_feedback.GetByEvent(data['eventId'], withUserFeedback = withUserFeedback,
-            withEvent = withEvent)
+            withEvent = withEvent, withCheckAskForFeedbackUserId = withCheckAskForFeedbackUserId)
     _socket.add_route('GetEventFeedbackByEvent', GetByEvent)
 
     def GetByWeeklyEvent(data, auth, websocket):
         withUserFeedback = data['withUserFeedback'] if 'withUserFeedback' in data else 0
-        return _event_feedback.GetByWeeklyEvent(data['weeklyEventId'], withUserFeedback = withUserFeedback)
+        withCheckAskForFeedbackUserId = data['withCheckAskForFeedbackUserId'] if 'withCheckAskForFeedbackUserId' in data else ''
+        return _event_feedback.GetByWeeklyEvent(data['weeklyEventId'], withUserFeedback = withUserFeedback,
+            withCheckAskForFeedbackUserId = withCheckAskForFeedbackUserId)
     _socket.add_route('GetEventFeedbackByWeeklyEvent', GetByWeeklyEvent)
 
     def Save(data, auth, websocket):
         return _mongo_db_crud.Save('eventFeedback', data['eventFeedback'])
     _socket.add_route('SaveEventFeedback', Save)
+
+    def AddImages(data, auth, websocket):
+        return _event_feedback.AddImages(data['eventFeedbackId'], data['imageUrls'])
+    _socket.add_route('AddEventFeedbackImages', AddImages)
 
 def AddRoutesAsync():
     async def AddFeedbackVote(data, auth, websocket):

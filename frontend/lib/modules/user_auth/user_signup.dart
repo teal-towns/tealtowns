@@ -8,25 +8,33 @@ import '../../common/ip_service.dart';
 import '../../common/socket_service.dart';
 import './user_class.dart';
 import '../../common/form_input/input_fields.dart';
+import '../../common/style.dart';
 import './current_user_state.dart';
 import '../../routes.dart';
 
-class UserSignupComponent extends StatefulWidget {
+class UserSignup extends StatefulWidget {
+  bool withScaffold;
+  bool redirectOnDone;
+  Function(dynamic)? onSave;
+  UserSignup({this.withScaffold = true, this.redirectOnDone = true, this.onSave = null});
+
   @override
   _UserSignupState createState() => _UserSignupState();
 }
 
-class _UserSignupState extends State<UserSignupComponent> {
+class _UserSignupState extends State<UserSignup> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
   IPService _ipService = IPService();
+  Style _style = Style();
 
   final _formKey = GlobalKey<FormState>();
   var formVals = {};
   bool _loading = false;
   String _message = '';
   bool _loadingIP = true;
+  bool _initedIP = false;
 
   @override
   void initState() {
@@ -41,13 +49,18 @@ class _UserSignupState extends State<UserSignupComponent> {
           var user = UserClass.fromJson(data['user']);
           if (user.id.length > 0) {
             Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
-            String route = '/home';
-            String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
-            if (redirectUrl.length > 0) {
-              route = redirectUrl;
-              Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl('');
+            if (widget.onSave != null) {
+              widget.onSave!(user);
             }
-            context.go(route);
+            if (widget.redirectOnDone) {
+              String route = '/home';
+              String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
+              if (redirectUrl.length > 0) {
+                route = redirectUrl;
+                Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl('');
+              }
+              context.go(route);
+            }
           } else {
             setState(() { _message = 'Error, please try again.'; });
           }
@@ -89,7 +102,7 @@ class _UserSignupState extends State<UserSignupComponent> {
             setState(() { _loading = false; });
           }
         },
-        child: Text('Sign Up'),
+        child: Text('Start my TealTown!'),
       ),
     );
   }
@@ -109,7 +122,8 @@ class _UserSignupState extends State<UserSignupComponent> {
   @override
   Widget build(BuildContext context) {
     var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    if (_ipService.IsLoaded() || currentUserState.isLoggedIn) {
+    if (!_initedIP && (_ipService.IsLoaded() || currentUserState.isLoggedIn)) {
+      _initedIP = true;
       _loadingIP = false;
       var data = {
         'fieldKey': 'signUpUniqueViewsAt',
@@ -118,30 +132,41 @@ class _UserSignupState extends State<UserSignupComponent> {
       _socketService.emit('AddAppInsightView', data);
     }
 
+    Widget content = Form(
+      key: _formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: [
+              Image.asset('assets/images/logo.png', width: 30, height: 30),
+              SizedBox(width: 10),
+              _style.Text1('Registration', size: 'large', colorKey: 'primary'),
+            ]
+          ),
+          _inputFields.inputEmail(formVals, 'email'),
+          _inputFields.inputPassword(formVals, 'password', minLen: 6),
+          _inputFields.inputText(formVals, 'firstName', minLen: 2, label: 'First Name'),
+          _inputFields.inputText(formVals, 'lastName', minLen: 2, label: 'Last Name'),
+          _buildSubmit(context),
+          _buildMessage(context),
+          TextButton(
+            onPressed: () {
+              context.go(Routes.login);
+            },
+            child: Text('Already have an account? Log in.'),
+          ),
+        ]
+      ),
+    );
+    if (!widget.withScaffold) {
+      return content;
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       width: 600,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _inputFields.inputEmail(formVals, 'email'),
-            _inputFields.inputPassword(formVals, 'password', minLen: 6),
-            _inputFields.inputText(formVals, 'firstName', minLen: 2, label: 'First Name'),
-            _inputFields.inputText(formVals, 'lastName', minLen: 2, label: 'Last Name'),
-            _buildSubmit(context),
-            _buildMessage(context),
-            TextButton(
-              onPressed: () {
-                context.go(Routes.login);
-              },
-              child: Text('Already have an account? Log in.'),
-            ),
-          ]
-        ),
-      ),
+      body: content,
     );
   }
 

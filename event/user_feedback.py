@@ -8,7 +8,12 @@ from event import weekly_event as _weekly_event
 from notifications_all import sms_twilio as _sms_twilio
 from notifications_all import email_sendgrid as _email_sendgrid
 
-def Save(userFeedback: dict):
+def Save(userFeedback: dict, withCheckAskForFeedback: int = 0, withCheckNeighborhoodAmbassador: int = 0,
+    neighborhoodUName: str = '') -> dict:
+    userFeedback = _mongo_db_crud.CleanId(userFeedback)
+    if '_id' not in userFeedback and 'username' not in userFeedback:
+        user = mongo_db.find_one('user', {'_id': mongo_db.to_object_id(userFeedback['userId'])})['item']
+        userFeedback['username'] = user['username']
     ret = _mongo_db_crud.Save('userFeedback', userFeedback)
     ret['smsAttemptCount'] = 0
     ret['emailAttemptCount'] = 0
@@ -33,6 +38,17 @@ def Save(userFeedback: dict):
             elif contactType == 'email':
                 _email_sendgrid.Send(user['firstName'] + ' invited you to an event!', body, invite)
                 ret['emailAttemptCount'] += 1
+    if withCheckAskForFeedback:
+        ret1 = CheckAskForFeedback(userFeedback['userId'], userFeedback['forId'])
+        ret['missingFeedbackEventIds'] = ret1['missingFeedbackEventIds']
+    if withCheckNeighborhoodAmbassador and len(neighborhoodUName) > 0:
+        ret['isAlreadyAmbassador'] = 0
+        ret['neighborhoodUName'] = neighborhoodUName
+        query = { 'userId': userFeedback['userId'], 'neighborhoodUName': neighborhoodUName }
+        item = mongo_db.find_one('userNeighborhood', query)['item']
+        if item is not None and 'ambassador' in item['roles']:
+            ret['isAlreadyAmbassador'] = 1
+
     return ret
 
 def GuessContactType(contactText: str):

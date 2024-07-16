@@ -37,6 +37,31 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      - uses: subosito/flutter-action@v2
+        with:
+          # flutter-version: '3.19.3'
+          channel: 'stable'
+          cache: true
 
+      # - name: Run SSH Command
+      #   run: ssh -oStrictHostKeyChecking=no root@tealtowns.org 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && flutter upgrade && cd frontend && flutter build web --web-renderer canvaskit && systemctl restart systemd_web_server_tealtowns.service'
+      - name: 'Create env file'
+        run: |
+          cd ./frontend
+          touch .env
+          echo SOCKET_URL_PUBLIC=wss://tealtowns.org/ws >> .env
+          echo SERVER_URL=https://tealtowns.org >> .env
+          echo APP_NAME=tealtowns >> .env
+          echo REDIRECT_HTTP=1 >> .env
+          echo REDIRECT_WWW=1 >> .env
+          echo REDIRECT_DOMAINS=tealtowns.com >> .env
+          echo DOMAIN==tealtowns.org >> .env
+          echo APP_URL_PUBLIC=https://tealtowns.org >> .env
+          echo MAPBOX_ACCESS_TOKEN=${{ secrets.PROD_MAPBOX_ACCESS_TOKEN }} >> .env
+          cat .env
+      - name: 'Build Flutter app'
+        run: cd ./frontend && flutter build web --web-renderer canvaskit
+      - name: 'Upload Flutter app'
+        run: scp -oStrictHostKeyChecking=no -r ./frontend/build/web root@tealtowns.org:/var/www/tealtowns/frontend/build
       - name: Run SSH Command
-        run: ssh -oStrictHostKeyChecking=no root@tealtowns.org 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && flutter upgrade && cd frontend && flutter build web --web-renderer canvaskit && systemctl restart systemd_web_server_tealtowns.service'
+        run: ssh -oStrictHostKeyChecking=no root@tealtowns.org 'cd /var/www/tealtowns && git checkout . && git pull origin main && pip3 install -r ./requirements.txt && systemctl restart systemd_web_server_tealtowns.service'

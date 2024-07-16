@@ -38,7 +38,9 @@ class _NeighborhoodsState extends State<Neighborhoods> {
   List<NeighborhoodClass> _neighborhoods = [];
   String _message = '';
   bool _loading = false;
-  Map<String, dynamic> _formVals = {};
+  Map<String, dynamic> _formVals = {
+    'inputLocation': {},
+  };
 
   @override
   void initState() {
@@ -64,10 +66,16 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       var data = res['data'];
       if (data['valid'] == 1) {
         SearchNeighborhoods();
+        String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+          Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+        if (userId.length > 0) {
+          var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+          neighborhoodState.CheckAndGet(userId);
+        }
       }
     }));
 
-    _formVals['location'] = [widget.lng, widget.lat];
+    _formVals['inputLocation']['lngLat'] = [widget.lng, widget.lat];
 
     // Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods(notify: false);
 
@@ -94,7 +102,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
     }
     Map<String, dynamic> config = _config.GetConfig();
     List<Widget> content = [];
-    if (!_locationService.LocationValid(_formVals['location'])) {
+    if (!_locationService.LocationValid(_formVals['inputLocation']['lngLat'])) {
       content = [ Text('Enter your location to see neighborhoods near you.') ];
     } else {
       if (_neighborhoods.length <= 0) {
@@ -109,7 +117,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
             colsDefault = [
               ElevatedButton(
                 onPressed: () {
-                  SaveUserNeighborhood(_neighborhoods[i].id);
+                  SaveUserNeighborhood(_neighborhoods[i].uName);
                 },
                 child: Text('Make Default'),
               ),
@@ -135,12 +143,13 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         _style.SpacingH('medium'),
         Align(
           alignment: Alignment.topRight,
-          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save', checkLoggedIn: true),
+          // child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save', checkLoggedIn: true),
+          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/ambassador', checkLoggedIn: false),
         ),
         _style.SpacingH('medium'),
         _layoutService.WrapWidth([
-          InputLocation(formVals: _formVals, formValsKey: 'location', nestedCoordinates: false,
-            onChange: (List<double?> lngLat) {
+          InputLocation(formVals: _formVals, formValsKey: 'inputLocation', nestedCoordinates: false,
+            onChanged: (Map<String, dynamic> lngLat) {
               SearchNeighborhoods();
           })],
         width: 300),
@@ -159,19 +168,19 @@ class _NeighborhoodsState extends State<Neighborhoods> {
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
-      'location': { 'lngLat': _formVals['location'], 'maxMeters': widget.maxMeters, },
+      'location': { 'lngLat': _formVals['inputLocation']['lngLat'], 'maxMeters': widget.maxMeters, },
       'withLocationDistance': 1,
       'userId': userId,
     };
     _socketService.emit('SearchNeighborhoods', data);
   }
 
-  void SaveUserNeighborhood(String neighborhoodId) {
+  void SaveUserNeighborhood(String neighborhoodUName) {
     String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
       Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
     var data = {
       'userNeighborhood': {
-        'neighborhoodId': neighborhoodId,
+        'neighborhoodUName': neighborhoodUName,
         'userId': userId,
         'status': 'default',
       },

@@ -2,7 +2,6 @@ import math
 
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
-import lodash
 import mongo_db
 from shared_item import shared_item_payment_math as _shared_item_payment_math
 from event import event_payment as _event_payment
@@ -121,8 +120,7 @@ def CheckMoveRevenueToBank(amountUSDPreFee: float, forType: str, forId: str, rec
 
         if ret['revenueUSD'] > 0:
             revenue = ret['revenueUSD']
-            transactionKey = forType + '_' + forId + '_' + lodash.random_string()
-            retOne = _pay_mercury.MakeTransaction('MercuryEndUserFunds', 'MercuryUserRevenue', revenue, transactionKey)
+            retOne = _pay_mercury.QueueTransaction('MercuryEndUserFunds', 'MercuryUserRevenue', revenue, forId, forType)
 
     return ret
 

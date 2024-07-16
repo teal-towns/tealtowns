@@ -19,6 +19,8 @@ import './modules/about/about.dart';
 import './modules/about/team.dart';
 import './modules/about/privacy_terms.dart';
 
+import './modules/ambassador/ambassador_start.dart';
+
 import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
 import './modules/blog/blog_view.dart';
@@ -26,6 +28,8 @@ import './modules/blog/blog_view.dart';
 import './modules/event/weekly_events.dart';
 import './modules/event/weekly_event_save.dart';
 import './modules/event/weekly_event_view.dart';
+import './modules/event/weekly_event_print.dart';
+import './modules/event/weekly_events_search.dart';
 import './modules/event/event_feedback_save_page.dart';
 import './modules/event/event_feedback_page.dart';
 
@@ -33,6 +37,7 @@ import './modules/icebreaker/icebreakers.dart';
 import './modules/icebreaker/icebreaker_save.dart';
 
 import './modules/insight/app_insights.dart';
+import './modules/insight/ambassador_insights.dart';
 
 import './modules/land/land_page.dart';
 
@@ -46,6 +51,9 @@ import './modules/neighborhood/neighborhood_group_save.dart';
 import './modules/neighborhood/neighborhood_insights.dart';
 import './modules/neighborhood/neighborhood_journey_page.dart';
 import './modules/neighborhood/neighborhood_stats.dart';
+import './modules/neighborhood/user_neighborhood_save.dart';
+import './modules/neighborhood/user_neighborhood_weekly_update_save.dart';
+import './modules/neighborhood/user_neighborhood_weekly_updates.dart';
 
 import './modules/shared_item/shared_items.dart';
 import './modules/shared_item/shared_item_save.dart';
@@ -63,6 +71,8 @@ class Routes {
   static const logout = '/logout';
   static const passwordReset = '/password-reset';
   static const signup = '/signup';
+
+  static const ambassadorStart = '/ambassador';
 
   static const usersSave = '/users-save';
 
@@ -83,6 +93,8 @@ class Routes {
   static const weeklyEvents = '/weekly-events';
   static const weeklyEventSave = '/weekly-event-save';
   static const weeklyEventView = '/we/:uName';
+  static const weeklyEventPrint = '/wep/:uName';
+  static const weeklyEventsSearch = '/weekly-events-search';
   static const eat = '/eat';
   static const eventFeedbackSave = '/event-feedback-save';
   static const eventFeedback = '/event-feedback';
@@ -91,6 +103,7 @@ class Routes {
   static const icebreakerSave = '/icebreaker-save';
 
   static const appInsights = '/app-insights';
+  static const ambassadorInsights = '/ambassador-insights';
 
   static const land = '/land';
 
@@ -104,6 +117,9 @@ class Routes {
   static const neighborhoodGroup = '/neighborhood-group/:uName';
   static const neighborhoodJourney = '/neighborhood-journey';
   static const neighborhoodStats = '/neighborhood-stats/:uName';
+  static const userNeighborhoodSave = '/user-neighborhood-save';
+  static const userNeighborhoodWeeklyUpdates = '/user-neighborhood-weekly-updates';
+  static const userNeighborhoodWeeklyUpdateSave = '/user-neighborhood-weekly-update-save';
 
   static const sharedItems = '/own';
   static const sharedItemSave = '/shared-item-save';
@@ -134,7 +150,7 @@ class AppGoRouter {
       ),
       GoRoute(
         path: Routes.signup,
-        builder: (context, state) => UserSignupComponent(),
+        builder: (context, state) => UserSignup(),
       ),
       GoRoute(
         path: Routes.emailVerify,
@@ -148,6 +164,11 @@ class AppGoRouter {
       GoRoute(
         path: Routes.designLibrary,
         builder: (context, state) => DesignLibrary(),
+      ),
+
+      GoRoute(
+        path: Routes.ambassadorStart,
+        builder: (context, state) => AmbassadorStart(),
       ),
 
       GoRoute(
@@ -215,6 +236,10 @@ class AppGoRouter {
       GoRoute(
         path: Routes.appInsights,
         builder: (context, state) => AppInsights(),
+      ),
+      GoRoute(
+        path: Routes.ambassadorInsights,
+        builder: (context, state) => AmbassadorInsights(),
       ),
 
       GoRoute(
@@ -307,6 +332,27 @@ class AppGoRouter {
         },
       ),
       GoRoute(
+        path: Routes.userNeighborhoodSave,
+        builder: (BuildContext context, GoRouterState state) => UserNeighborhoodSave(
+          id: state.uri.queryParameters['id'] ?? '',
+          neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
+        )
+      ),
+      GoRoute(
+        path: Routes.userNeighborhoodWeeklyUpdateSave,
+        builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdateSave(
+          id: state.uri.queryParameters['id'] ?? '',
+          neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
+        )
+      ),
+      GoRoute(
+        path: Routes.userNeighborhoodWeeklyUpdates,
+        builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdates(
+          neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
+        )
+      ),
+
+      GoRoute(
         path: Routes.neighborhoodJourney,
         builder: (context, state) => NeighborhoodJourneyPage(),
       ),
@@ -370,6 +416,20 @@ class AppGoRouter {
           }
           return WeeklyEvents();
         },
+      ),
+      GoRoute(
+        path: Routes.weeklyEventPrint,
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters["uName"];
+          if (uName != null) {
+            return WeeklyEventPrint(uName: uName);
+          }
+          return WeeklyEvents();
+        },
+      ),
+      GoRoute(
+        path: Routes.weeklyEventsSearch,
+        builder: (BuildContext context, GoRouterState state) => WeeklyEventsSearch(),
       ),
       GoRoute(
         path: Routes.eat,

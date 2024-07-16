@@ -4,8 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/alert_service.dart';
+import '../../common/colors_service.dart';
 import '../../common/form_input/form_save.dart';
+import '../../common/style.dart';
 import './weekly_event_class.dart';
+import './weekly_event_templates.dart';
 import '../about/welcome_about.dart';
 import '../neighborhood/neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
@@ -20,6 +24,10 @@ class WeeklyEventSave extends StatefulWidget {
 }
 
 class _WeeklyEventSaveState extends State<WeeklyEventSave> {
+  AlertService _alertService = AlertService();
+  ColorsService _colors = ColorsService();
+  Style _style = Style();
+
   List<Map<String, dynamic>> _optsDayOfWeek = [
     {'value': 0, 'label': 'Monday'},
     {'value': 1, 'label': 'Tuesday'},
@@ -31,16 +39,18 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   ];
   List<Map<String, dynamic>> _optsNeighborhood = [];
   Map<String, Map<String, dynamic>> _formFields = {
-    'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
-    'location': { 'type': 'location', 'nestedCoordinates': true },
+    'location': { 'type': 'location', 'nestedCoordinates': true, 'guessLocation': true,
+      'addressField': 'locationAddress', },
     'title': {},
-    'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
     'dayOfWeek': { 'type': 'select' },
     'startTime': { 'type': 'time' },
     'endTime': { 'type': 'time' },
     'hostGroupSizeDefault': { 'type': 'number', 'min': 0, 'required': true },
     'priceUSD': { 'type': 'number', 'min': 0, 'required': true },
     'rsvpDeadlineHours': { 'type': 'number', 'min': 0, 'required': true },
+    'neighborhoodUName': { 'type': 'select', 'label': 'Neighborhood', },
+    'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
+    'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
   };
   Map<String, dynamic> _formValsDefault = {
     'hostGroupSizeDefault': 0,
@@ -51,7 +61,8 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   };
   String _formMode = '';
   List<String> _formStepKeys = [];
-  String _title = 'Create an event';
+  String _title = 'Save Event';
+  String _step = '';
 
   @override
   void initState() {
@@ -67,7 +78,9 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
           String uName = neighborhoodState.userNeighborhoods[i].neighborhood.uName;
           _optsNeighborhood.add({'value': uName, 'label': uName, });
         }
-        _formFields['neighborhoodUName'] = { 'type': 'select', 'options': _optsNeighborhood, 'label': 'Neighborhood', };
+        _formFields['neighborhoodUName']!['options'] = _optsNeighborhood;
+      } else {
+        _formFields.remove('neighborhoodUName');
       }
     } else {
       Timer(Duration(milliseconds: 200), () {
@@ -95,44 +108,126 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _formFields['priceUSD']!['helpText'] = 'This single event price will be discounted for subscriptions and hosts will earn their next event free, so with a host group size of 10, a \$10 event will be about \$7 for a yearly subscription and about \$5 event budget.';
       _formStepKeys = ['location', 'description', 'dayOfWeek', 'startTime'];
 
-      _title = 'Create a shared meal';
+      _title = 'Create Shared Meal';
     }
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
 
     // Do not allow changing some fields.
     if (widget.id != null && widget.id!.length > 0) {
-      _formFields.remove('hostGroupSizeDefault');
-      _formFields.remove('priceUSD');
+      // _formFields.remove('hostGroupSizeDefault');
+      // _formFields.remove('priceUSD');
+      _formFields['location']!['guessLocation'] = false;
+    } else {
+      _step = 'templates';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    double fieldWidth = 300;
-    Widget content = FormSave(formVals: WeeklyEventClass.fromJson(_formValsDefault).toJson(), dataName: 'weeklyEvent',
-      routeGet: 'getWeeklyEventById', routeSave: 'saveWeeklyEvent', id: widget.id, fieldWidth: fieldWidth,
-      formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, title: _title,
-      parseData: (dynamic data) => WeeklyEventClass.fromJson(data).toJson(),
-      preSave: (dynamic data) {
-        data = WeeklyEventClass.fromJson(data).toJson();
-        if (data['adminUserIds'] == null) {
-          data['adminUserIds'] = [];
-        }
-        if (data['adminUserIds'].length == 0) {
-          var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-          if (currentUser != null) {
-            data['adminUserIds'].add(currentUser.id);
+    if (_step == 'templates') {
+      String title = 'Select an event template to start with';
+      List<String> selectedKeys = ['sandwichSundays'];
+      return AppScaffoldComponent(
+        listWrapper: true,
+        body: WeeklyEventTemplates(maxEvents: 1, title: title, selectedKeys: selectedKeys,
+          neighborhoodUName: _formValsDefault['neighborhoodUName'],
+          doSave: false, onSave: (dynamic data) {
+            _formValsDefault = data['weeklyEvents'][0];
+            setState(() { _step = ''; _formValsDefault = _formValsDefault; });
           }
-        }
-        return data;
-      }, onSave: (dynamic data) {
-        String uName = data['weeklyEvent']['uName'];
-        context.go('/we/${uName}');
-      }
+        ),
+      );
+    }
+
+    double fieldWidth = 300;
+    List<Widget> colsNewEvent = [];
+    if (widget.id == null || widget.id!.length <= 0) {
+      _title = 'New Event';
+      colsNewEvent = [
+        _style.Text1('Welcome, TealTowns Ambassador! Ready to bring your neighborhood together? Follow these simple steps to create an engaging event and share it with your neighbors:'),
+        _style.SpacingH('medium'),
+        Text.rich(TextSpan(
+          children: [
+            TextSpan(
+              text: 'Event Details: ',
+              style: TextStyle(color: _colors.colors['primary']),
+            ),
+            TextSpan(
+              text: 'Start by filling out the event fields with all the important details. Include the event name, date, time, location, and a brief description. Make sure to highlight any special activities or themes to get everyone excited!',
+            ),
+          ],
+        )),
+        _style.SpacingH('medium'),
+        Text.rich(TextSpan(
+          children: [
+            TextSpan(
+              text: 'Generate Your Event: ',
+              style: TextStyle(color: _colors.colors['primary']),
+            ),
+            TextSpan(
+              text: 'Once you\'ve completed the event details, customize your event flyer by selecting which details to include. Choose from a map, QR code, neighborhood events link, an intro note, and an end note. Tailor your flyer to suit your audience and make it as informative and engaging as possible.',
+            ),
+          ],
+        )),
+        _style.SpacingH('medium'),
+        Text.rich(TextSpan(
+          children: [
+            TextSpan(
+              text: 'Share the QR Code: ',
+              style: TextStyle(color: _colors.colors['primary']),
+            ),
+            TextSpan(
+              text: 'Print the QR code or save it to your device. You can distribute it to your neighbors by placing it on community boards, sharing it in local social media groups, or handing out flyers.',
+            ),
+          ],
+        )),
+        _style.SpacingH('medium'),
+        _style.Text1('By following these steps, you\'ll make it easy for your neighbors to stay informed and excited about your event. Thank you for being a part of TealTowns and helping to create a connected, vibrant community!'),
+        _style.SpacingH('xlarge'),
+        Row(
+          children: [
+            Image.asset('assets/images/logo.png', width: 30, height: 30),
+            SizedBox(width: 10),
+            _style.Text1('Event Details', size: 'large', colorKey: 'primary'),
+          ]
+        ),
+        _style.SpacingH('medium'),
+      ];
+    }
+    Widget content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _style.Text1(_title, size: 'xlarge', colorKey: 'primary'),
+        _style.SpacingH('medium'),
+        ...colsNewEvent,
+        // _style.SpacingH('xlarge'),
+        FormSave(formVals: WeeklyEventClass.fromJson(_formValsDefault).toJson(), dataName: 'weeklyEvent',
+          routeGet: 'getWeeklyEventById', routeSave: 'saveWeeklyEvent', id: widget.id, fieldWidth: fieldWidth,
+          formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, saveText: 'Save Event',
+          parseData: (dynamic data) => WeeklyEventClass.fromJson(data).toJson(),
+          preSave: (dynamic data) {
+            data['weeklyEvent'] = WeeklyEventClass.fromJson(data['weeklyEvent']).toJson();
+            if (data['weeklyEvent']['adminUserIds'] == null) {
+              data['weeklyEvent']['adminUserIds'] = [];
+            }
+            if (data['weeklyEvent']['adminUserIds'].length == 0) {
+              var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+              if (currentUser != null) {
+                data['weeklyEvent']['adminUserIds'].add(currentUser.id);
+              }
+            }
+            return data;
+          }, onSave: (dynamic data) {
+            _alertService.Show(context, 'Weekly Event Saved!');
+            String uName = data['weeklyEvent']['uName'];
+            context.go('/we/${uName}');
+          },
+        )
+      ]
     );
     return AppScaffoldComponent(
       listWrapper: true,
-      width: 600,
+      width: 650,
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 600) {

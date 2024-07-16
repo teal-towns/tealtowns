@@ -38,7 +38,7 @@ class _IcebreakerSaveState extends State<IcebreakerSave> {
       formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, title: _title,
       parseData: (dynamic data) => IcebreakerClass.fromJson(data).toJson(),
       preSave: (dynamic data) {
-        data = IcebreakerClass.fromJson(data).toJson();
+        data['icebreaker'] = IcebreakerClass.fromJson(data['icebreaker']).toJson();
         return data;
       },
       onSave: (dynamic data) {

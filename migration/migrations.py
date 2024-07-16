@@ -5,6 +5,15 @@ import lodash
 import mongo_db
 
 def RunAll():
+    AddUsernames()
+    # AddWeeklyEventUName()
+    # UserInsightAmbassadorSignUpStepsAt()
+    # UserNeighborhoodVision()
+    # UserNeighborhoodToUName()
+    # UserNeighborhoodRoles()
+    # WeeklyEventLocationAddress()
+    # EventFeedbackImageUrls()
+    # FeedbackStarsAttended()
     # EventViewsAt()
     # AddTimezoneToNeighborhood()
     # PayQuantityAndStripeIds()
@@ -18,6 +27,301 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def AddUsernames():
+    collections = ['userNeighborhood', 'userNeighborhoodWeeklyUpdate', 'userInsight', 'userFeedback', 'userEvent']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'username': { '$exists': 0 } }
+            fields = { '_id': 1, 'userId': 1 }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('AddUsernames', collection, len(items))
+            for item in items:
+                fields = { 'username': 1 }
+                user = mongo_db.find_one('user', {'_id': item['userId']}, fields = fields)['item']
+                if user is not None:
+                    query = {
+                        '_id': mongo_db.to_object_id(item['_id'])
+                    }
+                    mutation = {
+                        '$set': {
+                            'username': user['username'],
+                        },
+                    }
+
+                    # print (query, mutation)
+                    mongo_db.update_one(collection, query, mutation)
+                    updatedCounter += 1
+                else:
+                    print('User not found: ' + item['userId'])
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
+
+def AddWeeklyEventUName():
+    collections = ['event', 'userWeeklyEvent', 'userEvent']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'weeklyEventUName': { '$exists': 0 } }
+            fields = {}
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('AddWeeklyEventUName', collection, len(items))
+            for item in items:
+                weeklyEvent = None
+                if collection == 'event' and len(item['weeklyEventId']) > 0:
+                    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(item['weeklyEventId'])})['item']
+                elif collection == 'userWeeklyEvent':
+                    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(item['weeklyEventId'])})['item']
+                elif collection == 'userEvent':
+                    event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(item['eventId'])})['item']
+                    if event is not None and len(event['weeklyEventId']) > 0:
+                        weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+                if weeklyEvent is not None:
+                    query = {
+                        '_id': mongo_db.to_object_id(item['_id'])
+                    }
+                    mutation = {
+                        '$set': {
+                            'weeklyEventUName': weeklyEvent['uName'],
+                        }
+                    }
+
+                    # print (collection, query, mutation)
+                    mongo_db.update_one(collection, query, mutation)
+                    updatedCounter += 1
+                else:
+                    print ('WeeklyEvent not found', collection, item['_id'])
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
+
+def UserInsightAmbassadorSignUpStepsAt():
+    collection = 'userInsight'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'ambassadorSignUpStepsAt': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('UserInsightAmbassadorSignUpStepsAt', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'ambassadorSignUpStepsAt': {},
+                },
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
+
+def UserNeighborhoodVision():
+    collection = 'userNeighborhood'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'vision': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('userNeighborhoodVision', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'vision': '',
+                    'motivations': [],
+                },
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
+
+def UserNeighborhoodToUName():
+    collection = 'userNeighborhood'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'neighborhoodUName': { '$exists': 0 } }
+        fields = { '_id': 1, 'neighborhoodId': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('userNeighborhoodToUName', collection, len(items))
+        for item in items:
+            fields = { 'uName': 1, }
+            print ('item', item)
+            neighborhood = mongo_db.find_one('neighborhood', { '_id': mongo_db.to_object_id(item['neighborhoodId']) }, fields = fields)['item']
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'neighborhoodUName': neighborhood['uName'],
+                },
+                '$unset': { 'neighborhoodId': 1 },
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
+
+def UserNeighborhoodRoles():
+    collection = 'userNeighborhood'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'roles': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('userNeighborhoodRoles', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'roles': ['creator', 'ambassador'],
+                }
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
+
+def WeeklyEventLocationAddress():
+    collection = 'weeklyEvent'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'locationAddress': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('WeeklyEventLocationAddress', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'locationAddress': {},
+                }
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
+
+def EventFeedbackImageUrls():
+    collection = 'eventFeedback'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'imageUrls': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('EventFeedbackImageUrls', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'imageUrls': [],
+                }
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
+
+def FeedbackStarsAttended():
+    collection = 'userFeedback'
+    limit = 250
+    skip = 0
+    updatedCounter = 0
+    while True:
+        query = {'stars': { '$exists': 0 } }
+        fields = { '_id': 1, }
+        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+        skip += len(items)
+
+        print ('FeedbackStarsAttended', collection, len(items))
+        for item in items:
+            query = {
+                '_id': mongo_db.to_object_id(item['_id'])
+            }
+            mutation = {
+                '$set': {
+                    'stars': 5,
+                    'attended': 'yes',
+                }
+            }
+
+            # print (query, mutation)
+            mongo_db.update_one(collection, query, mutation)
+            updatedCounter += 1
+
+        if len(items) < limit:
+            print('Updated ' + str(updatedCounter) + ' items')
+            break
 
 def EventViewsAt():
     collection = 'eventInsight'
@@ -327,7 +631,7 @@ def AddUserEventEnd():
     updatedCounter = 0
 
     while True:
-        query = { 'eventEnd': { '$exists': 0 } }
+        query = { '$or': [ { 'eventEnd': { '$exists': 0 } }, { 'eventEnd': '' } ] }
         items = mongo_db.find('userEvent', query, limit=limit, skip=skip)['items']
         skip += len(items)
 

@@ -49,7 +49,7 @@ class _SharedItemsState extends State<SharedItems> {
     'fundingRequired_min': '',
     'fundingRequired_max': '',
     // 'lngLat': [-79.574983, 8.993036],
-    'lngLat': [0, 0],
+    'inputLocation': { 'lngLat': [0, 0], 'address': {} },
     'myType': '',
   };
   bool _loading = true;
@@ -122,9 +122,9 @@ class _SharedItemsState extends State<SharedItems> {
       });
     }));
 
-    _filters['lngLat'] = _locationService.GetLngLat();
+    _filters['inputLocation']['lngLat'] = _locationService.GetLngLat();
     if (widget.lat != 0 && widget.lng != 0) {
-      _filters['lngLat'] = [widget.lng, widget.lat];
+      _filters['inputLocation']['lngLat'] = [widget.lng, widget.lat];
       _skipCurrentLocation = true;
     }
     for (int ii = 0; ii < _selectOptsMaxMeters.length; ii++) {
@@ -185,7 +185,8 @@ class _SharedItemsState extends State<SharedItems> {
                     label: 'Type', onChanged: (String val) {
                     _searchSharedItems();
                   }),
-                InputLocation(formVals: _filters, formValsKey: 'lngLat', label: 'Location', guessLocation: !_skipCurrentLocation, onChange: (List<double?> val) {
+                InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location',
+                  guessLocation: !_skipCurrentLocation, onChanged: (Map<String, dynamic> val) {
                   _searchSharedItems();
                   }),
                 _inputFields.inputSelect(_selectOptsMaxMeters, _filters, 'maxMeters',
@@ -193,7 +194,7 @@ class _SharedItemsState extends State<SharedItems> {
                     _searchSharedItems();
                   }),
                 _inputFields.inputText(_filters, 'title', hint: 'title',
-                    label: 'Filter by Title', debounceChange: 1000, onChange: (String val) {
+                    label: 'Filter by Title', debounceChange: 1000, onChanged: (String val) {
                     _searchSharedItems();
                   }),
                 _inputFields.inputSelect(_selectOptsInvestor, _filters, 'fundingRequired_min',
@@ -201,11 +202,11 @@ class _SharedItemsState extends State<SharedItems> {
                     _searchSharedItems();
                   }),
                 // _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
-                //     label: 'Minimum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                //     label: 'Minimum Funding Needed', debounceChange: 1000, onChanged: (double? val) {
                 //     _searchSharedItems();
                 //   }),
                 // _inputFields.inputNumber(_filters, 'fundingRequired_max', hint: '\$500',
-                //     label: 'Maximum Funding Needed', debounceChange: 1000, onChange: (double? val) {
+                //     label: 'Maximum Funding Needed', debounceChange: 1000, onChanged: (double? val) {
                 //     _searchSharedItems();
                 //   }),
               ], width: 225),
@@ -229,13 +230,13 @@ class _SharedItemsState extends State<SharedItems> {
 
   void _init() async {
     if (!_skipCurrentLocation) {
-      if (_locationService.LocationValid(_filters['lngLat'])) {
+      if (_locationService.LocationValid(_filters['inputLocation']['lngLat'])) {
         _searchSharedItems();
       }
       List<double> lngLat = await _locationService.GetLocation(context);
-      if (_locationService.IsDifferent(lngLat, _filters['lngLat'])) {
+      if (_locationService.IsDifferent(lngLat, _filters['inputLocation']['lngLat'])) {
         setState(() {
-          _filters['lngLat'] = lngLat;
+          _filters['inputLocation']['lngLat'] = lngLat;
         });
       }
     }
@@ -479,8 +480,7 @@ class _SharedItemsState extends State<SharedItems> {
       //'sortKey': '-created_at',
       //'tags': [],
       // 'withOwnerInfo': 1,
-      // 'lngLat': [_filters['lng'], _filters['lat']],
-      'lngLat': _filters['lngLat'],
+      'lngLat': _filters['inputLocation']['lngLat'],
       'maxMeters': _filters['maxMeters'],
       'withOwnerUserId': currentUser != null ? currentUser.id : '',
     };
@@ -499,8 +499,8 @@ class _SharedItemsState extends State<SharedItems> {
   
   void _UpdateUrl() {
     if(kIsWeb) {
-      String? lng = _filters['lngLat'][0]?.toString();
-      String? lat = _filters['lngLat'][1]?.toString();
+      String? lng = _filters['inputLocation']['lngLat'][0]?.toString();
+      String? lat = _filters['inputLocation']['lngLat'][1]?.toString();
       String? maxMeters = _filters['maxMeters']?.toString();
       html.window.history.pushState({}, '', '/own?lng=${lng}&lat=${lat}&range=${maxMeters}');
       // final url =  html.window.history.state.toString();
