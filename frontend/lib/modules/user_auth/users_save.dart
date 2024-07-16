@@ -88,6 +88,9 @@ class _UsersSaveState extends State<UsersSave> {
     List<Widget> colsForm = [];
     if (_selectedUser.id.length > 0) {
       colsForm = [
+        SizedBox(height: 10),
+        Text('${_selectedUser.firstName} ${_selectedUser.lastName} (${_selectedUser.username})'),
+        SizedBox(height: 10),
         FormSave(formVals: _selectedUser.toJson(), dataName: 'user',
           routeSave: 'SaveUserRole', fieldWidth: fieldWidth,
           formFields: _formFields,
