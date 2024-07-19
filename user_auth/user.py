@@ -85,7 +85,7 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str, mode: str = 'sms'):
     fields = {
         'verification': 'phoneNumberVerificationKey',
         'verified': 'phoneNumberVerified',
-        'phone': 'phoneNumber',
+        'number': 'phoneNumber',
     }
     if mode == 'whatsapp':
         fields['verification'] = 'whatsappNumberVerificationKey'
