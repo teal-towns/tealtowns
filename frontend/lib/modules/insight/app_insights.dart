@@ -219,6 +219,8 @@ class _AppInsightsState extends State<AppInsights> {
           _style.SpacingH('xlarge'),
           _buttons.Link(context, 'Ambassador Insights', '/ambassador-insights'),
           _style.SpacingH('medium'),
+          _buttons.Link(context, 'Ambassadors Updates', '/ambassadors-updates'),
+          _style.SpacingH('medium'),
           _buttons.Link(context, 'Neighborhood Insights', '/neighborhood-insights'),
           _style.SpacingH('medium'),
           _buttons.Link(context, 'Weekly Events Search', '/weekly-events-search'),

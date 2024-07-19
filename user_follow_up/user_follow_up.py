@@ -15,13 +15,13 @@ import ml_config
 
 _config = ml_config.get_config()
 
-def CheckAndDoFollowUps(now = None, maxAttempts: int = 5, nextFollowUpMinDays: int = 1, nextFollowUpMaxDays: int = 3,
+def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: int = 1, nextFollowUpMaxDays: int = 3,
     nextFollowUpHourMin = 10, nextFollowUpHourMax = 19):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'notifyUsernamesByType': {}, 'doneCount': 0, }
 
-    # Remove any old follow ups (more than 18 days old, which is past max attempts times max follow up days).
-    oldDate = date_time.string(now - datetime.timedelta(days = (5 + 1) * 3))
+    # Remove any old follow ups (more than 21 days old, which is past max attempts times max follow up days).
+    oldDate = date_time.string(now - datetime.timedelta(days = (6 + 1) * 3))
     query = { 'createdAt': { '$lt': oldDate } }
     retDelete = mongo_db.delete_many('userFollowUp', query)
 

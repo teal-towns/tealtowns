@@ -15,7 +15,8 @@ import '../user_auth/current_user_state.dart';
 
 class UserNeighborhoodWeeklyUpdates extends StatefulWidget {
   String neighborhoodUName;
-  UserNeighborhoodWeeklyUpdates({ this.neighborhoodUName = '' });
+  String mode;
+  UserNeighborhoodWeeklyUpdates({ this.neighborhoodUName = '', this.mode = 'singleAmbassador', });
 
   @override
   _UserNeighborhoodWeeklyUpdatesState createState() => _UserNeighborhoodWeeklyUpdatesState();
@@ -38,37 +39,48 @@ class _UserNeighborhoodWeeklyUpdatesState extends State<UserNeighborhoodWeeklyUp
   void initState() {
     super.initState();
 
-    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    if (widget.neighborhoodUName.length < 1 || !currentUserState.isLoggedIn) {
-      Timer(Duration(milliseconds: 200), () {
-        context.go('/neighborhoods');
-      });
+    if (widget.mode == 'singleAmbassador') {
+      var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+      if (widget.neighborhoodUName.length < 1 || !currentUserState.isLoggedIn) {
+        Timer(Duration(milliseconds: 200), () {
+          context.go('/neighborhoods');
+        });
+      } else {
+        _dataDefault['neighborhoodUName'] = widget.neighborhoodUName;
+        _dataDefault['userId'] = currentUserState.currentUser.id;
+      }
     } else {
-      _dataDefault['neighborhoodUName'] = widget.neighborhoodUName;
-      _dataDefault['userId'] = currentUserState.currentUser.id;
+      _filterFields['username'] = {};
     }
   }
 
   @override
   Widget build(BuildContext context) {
     var currentUserState = context.watch<CurrentUserState>();
+    String title = widget.mode == 'singleAmbassador' ? 'Neighborhood Weekly Updates (${widget.neighborhoodUName})' : 'Ambassadors Updates';
+    List<Widget> colsSave = [];
+    if (widget.mode == 'singleAmbassador') {
+      colsSave = [
+        Align(
+          alignment: Alignment.topRight,
+          child: ElevatedButton(
+            onPressed: () {
+              String url = '/user-neighborhood-weekly-update-save?neighborhoodUName=${widget.neighborhoodUName}';
+              _linkService.Go(url, context, currentUserState: currentUserState);
+            },
+            child: Text('Create New Update'),
+          ),
+        ),
+        SizedBox(height: 10),
+      ];
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       body: Column(
         children: [
-          _style.Text1('Neighborhood Weekly Updates (${widget.neighborhoodUName})', size: 'large'),
+          _style.Text1(title, size: 'large'),
           SizedBox(height: 10,),
-          Align(
-            alignment: Alignment.topRight,
-            child: ElevatedButton(
-              onPressed: () {
-                String url = '/user-neighborhood-weekly-update-save?neighborhoodUName=${widget.neighborhoodUName}';
-                _linkService.Go(url, context, currentUserState: currentUserState);
-              },
-              child: Text('Create New Update'),
-            ),
-          ),
-          SizedBox(height: 10),
+          ...colsSave,
           Paging(dataName: 'userNeighborhoodWeeklyUpdates', routeGet: 'SearchUserNeighborhoodWeeklyUpdates',
             dataDefault: _dataDefault, filterFields: _filterFields,
             onGet: (dynamic items) {
@@ -93,14 +105,9 @@ class _UserNeighborhoodWeeklyUpdatesState extends State<UserNeighborhoodWeeklyUp
   Widget OneItem(UserNeighborhoodWeeklyUpdateClass userNeighborhoodWeeklyUpdate, BuildContext context) {
     String startDate = _dateTime.Format(userNeighborhoodWeeklyUpdate.start, 'M/d/y');
     String endDate = _dateTime.Format(userNeighborhoodWeeklyUpdate.end, 'M/d/y');
-    return Column(
-      children: [
-        _style.Text1('${startDate} - ${endDate}'),
-        _style.SpacingH('medium'),
-        _style.Text1('${userNeighborhoodWeeklyUpdate.inviteCount} invites (${userNeighborhoodWeeklyUpdate.attendedCount} attended)'),
-        _style.SpacingH('medium'),
-        _style.Text1('${userNeighborhoodWeeklyUpdate.eventsAttendedCount} events you attended'),
-        _style.SpacingH('medium'),
+    List<Widget> colsEdit = [];
+    if (widget.mode == 'singleAmbassador') {
+      colsEdit = [
         ElevatedButton(
           onPressed: () {
             context.go('/user-neighborhood-weekly-update-save?id=${userNeighborhoodWeeklyUpdate.id}&neighborhoodUName=${widget.neighborhoodUName}');
@@ -108,6 +115,26 @@ class _UserNeighborhoodWeeklyUpdatesState extends State<UserNeighborhoodWeeklyUp
           child: Text('Edit'),
         ),
         _style.SpacingH('medium'),
+      ];
+    }
+    List<Widget> colsUsername = [];
+    if (widget.mode != 'singleAmbassador') {
+      colsUsername = [
+        _style.Text1(userNeighborhoodWeeklyUpdate.username),
+        _style.SpacingH('medium'),
+      ];
+    }
+    String attendedName = widget.mode == 'singleAmbassador' ? 'You' : 'Ambassador';
+    return Column(
+      children: [
+        ...colsUsername,
+        _style.Text1('${startDate} - ${endDate}'),
+        _style.SpacingH('medium'),
+        _style.Text1('${userNeighborhoodWeeklyUpdate.inviteCount} invites (${userNeighborhoodWeeklyUpdate.attendedCount} attended)'),
+        _style.SpacingH('medium'),
+        _style.Text1('${attendedName} attended ${userNeighborhoodWeeklyUpdate.eventsAttendedCount} events'),
+        _style.SpacingH('medium'),
+        ...colsEdit,
       ]
     );
   }

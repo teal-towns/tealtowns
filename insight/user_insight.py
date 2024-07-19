@@ -39,7 +39,7 @@ def SetActionAt(userId: str, field: str, now = None):
         ret['valid'] = 0
     return ret
 
-def GetAmbassadorInsights(now = None, withUsers: int = 1):
+def GetAmbassadorInsights(now = None, withUsers: int = 1, activeDaysPast: int = 5):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'ambassadorsSignUpCompleteUsernames': [], 'userInsights': [],
         'onTrackAmbassadorUsernames': [], 'userNeighborhoodWeeklyUpdatesBehindByUser': {},
@@ -69,7 +69,7 @@ def GetAmbassadorInsights(now = None, withUsers: int = 1):
             ret['userInsights'][userIdMap[user['_id']]]['user'] = user
 
     # See which ambassadors who have been active this month, are up to date
-    lastWeek = date_time.string(now - datetime.timedelta(days = 7))
+    lastWeek = date_time.string(now - datetime.timedelta(days = activeDaysPast))
     # Start with users who have made an update in the past week.
     query = { 'end': { '$gte': lastWeek }, 'inviteCount': { '$gt': 0 } }
     userNeighborhoodWeeklyUpdates = mongo_db.find('userNeighborhoodWeeklyUpdate', query)['items']
