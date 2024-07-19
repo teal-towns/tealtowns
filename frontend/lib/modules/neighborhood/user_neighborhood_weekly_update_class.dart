@@ -3,16 +3,17 @@ import '../../common/parse_service.dart';
 class UserNeighborhoodWeeklyUpdateClass {
   ParseService _parseService = ParseService();
 
-  String id = '', userId = '', neighborhoodUName = '', start = '', end = '';
+  String id = '', userId = '', username = '', neighborhoodUName = '', start = '', end = '';
   int inviteCount = 0, attendedCount = 0;
   int eventsAttendedCount = 0;
 
-  UserNeighborhoodWeeklyUpdateClass(this.id, this.userId, this.neighborhoodUName, this.start, this.end,
+  UserNeighborhoodWeeklyUpdateClass(this.id, this.userId, this.username, this.neighborhoodUName, this.start, this.end,
     this.inviteCount, this.attendedCount, this.eventsAttendedCount);
 
   UserNeighborhoodWeeklyUpdateClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
     this.userId = json['userId'] ?? '';
+    this.username = json['username'] ?? '';
     this.neighborhoodUName = json['neighborhoodUName'] ?? '';
     this.start = json['start'] ?? '';
     this.end = json['end'] ?? '';
@@ -25,6 +26,7 @@ class UserNeighborhoodWeeklyUpdateClass {
     {
       '_id': id,
       'userId': userId,
+      'username': username,
       'neighborhoodUName': neighborhoodUName,
       'start': start,
       'end': end,

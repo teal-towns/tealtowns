@@ -12,6 +12,7 @@ def addRoutes():
     def Search(data, auth, websocket):
         data = lodash.extend_object({
             'userId': '',
+            'username': '',
             'neighborhoodUName': '',
             'startMin': '',
             'startMax': '',
@@ -20,14 +21,19 @@ def addRoutes():
             'sortKeys': '-start',
             'withEventsAttendedCount': 0,
         }, data)
-        equalsKeyVals = { 'userId': data['userId'], 'neighborhoodUName': data['neighborhoodUName'], }
+        stringKeyVals = { 'username': data['username'] }
+        equalsKeyVals = {}
+        if data['userId'] != '':
+            equalsKeyVals['userId'] = data['userId']
+        if data['neighborhoodUName'] != '':
+            equalsKeyVals['neighborhoodUName'] = data['neighborhoodUName']
         minKeyVals = {}
         maxKeyVals = {}
         if data['startMin'] != '':
             minKeyVals['start'] = data['startMin']
         if data['startMax'] != '':
             maxKeyVals['startMax'] = data['startMax']
-        return _user_neighborhood_weekly_update.Search(equalsKeyVals, minKeyVals, maxKeyVals,
+        return _user_neighborhood_weekly_update.Search(stringKeyVals, equalsKeyVals, minKeyVals, maxKeyVals,
             limit = data['limit'], skip = data['skip'], sortKeys = data['sortKeys'],
             withEventsAttendedCount = data['withEventsAttendedCount'])
     _socket.add_route('SearchUserNeighborhoodWeeklyUpdates', Search)

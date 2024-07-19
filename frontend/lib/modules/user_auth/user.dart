@@ -187,7 +187,20 @@ class _UserState extends State<User> {
               rolesDefault += '(default) ';
             }
             rolesDefault += userNeighborhood.roles.join(', ');
-            return _buttons.LinkInline(context, '${userNeighborhood.neighborhoodUName}, ${createdAt} ${rolesDefault}', '/n/${userNeighborhood.neighborhoodUName}');
+            List<Widget> rowsAmbassadorUpdate = [ SizedBox.shrink() ];
+            if (userNeighborhood.roles.contains('ambassador')) {
+              rowsAmbassadorUpdate = [
+                _style.SpacingV('medium'),
+                _buttons.LinkInline(context, 'Ambassador Update', '/au/${userNeighborhood.neighborhoodUName}'),
+              ];
+            }
+            return Row(
+              children: [
+                _buttons.LinkInline(context, '${userNeighborhood.neighborhoodUName}', '/n/${userNeighborhood.neighborhoodUName}'),
+                _style.Text1(', ${createdAt} ${rolesDefault}'),
+                ...rowsAmbassadorUpdate,
+              ]
+            );
           }),
           _style.SpacingH('medium'),
 
