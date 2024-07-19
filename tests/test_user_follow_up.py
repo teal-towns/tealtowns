@@ -125,8 +125,17 @@ def test_CheckAndDoFollowUps():
     assert countsByKey['ambassadorSignUp'] == 1
     assert countsByKey['ambassadorUpdate'] == 2
 
-    # 10 days later, removed (over max attempts)
+    # 10 days from start, attempt 6
     now = date_time.from_string('2024-05-30 15:00:00+00:00')
+    ret = _user_follow_up.CheckAndDoFollowUps(now = now, nextFollowUpMinDays = nextFollowUpMinDays,
+        nextFollowUpMaxDays = nextFollowUpMaxDays, nextFollowUpHourMin = nextFollowUpHourMin,
+        nextFollowUpHourMax = nextFollowUpHourMax)
+    countsByKey = SumCounts(ret)
+    assert countsByKey['ambassadorSignUp'] == 1
+    assert countsByKey['ambassadorUpdate'] == 2
+
+    # 12 days later, removed (over max attempts)
+    now = date_time.from_string('2024-06-02 15:00:00+00:00')
     ret = _user_follow_up.CheckAndDoFollowUps(now = now, nextFollowUpMinDays = nextFollowUpMinDays,
         nextFollowUpMaxDays = nextFollowUpMaxDays, nextFollowUpHourMin = nextFollowUpHourMin,
         nextFollowUpHourMax = nextFollowUpHourMax)
