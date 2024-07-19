@@ -91,5 +91,12 @@ def create_all_indices(db):
     db['userInsight'].create_index([('userId', 1)], unique=True)
     db['userInsight'].create_index([('lastActiveAt', 1), ('firstEventSignUpAt', 1), \
         ('firstNeighborhoodJoinAt', 1)], unique=False)
+
+    db['userFollowUp'].drop_indexes()
+    db['userFollowUp'].create_index([('username', 1), ('neighborhoodUName', 1), ('forType', 1),
+        ('attempt', 1)], unique=True)
+    db['userFollowUp'].create_index([('nextFollowUpAt', 1), ('nextFollowUpDone', 1)], unique=False)
     
     db['mercuryPayOut'].create_index([('paidOut', 1), ('createdAt', 1)], unique=False)
+
+    

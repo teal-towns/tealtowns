@@ -118,6 +118,7 @@ class Routes {
   static const neighborhoodJourney = '/neighborhood-journey';
   static const neighborhoodStats = '/neighborhood-stats/:uName';
   static const userNeighborhoodSave = '/user-neighborhood-save';
+  static const ambassadorUpdates = '/au/:neighborhoodUName';
   static const userNeighborhoodWeeklyUpdates = '/user-neighborhood-weekly-updates';
   static const userNeighborhoodWeeklyUpdateSave = '/user-neighborhood-weekly-update-save';
 
@@ -350,6 +351,16 @@ class AppGoRouter {
         builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdates(
           neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
         )
+      ),
+      GoRoute(
+        path: Routes.ambassadorUpdates,
+        builder: (BuildContext context, GoRouterState state) {
+          String? neighborhoodUName = state.pathParameters["neighborhoodUName"];
+          if (neighborhoodUName != null) {
+            return UserNeighborhoodWeeklyUpdates(neighborhoodUName: neighborhoodUName);
+          }
+          return UserNeighborhoodWeeklyUpdates();
+        },
       ),
 
       GoRoute(

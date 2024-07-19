@@ -20,6 +20,7 @@ import '../neighborhood/user_neighborhood_save.dart';
 import '../neighborhood/neighborhood_state.dart';
 import '../neighborhood/neighborhood_class.dart';
 import '../user_auth/user_signup.dart';
+import '../user_auth/user_phone.dart';
 import '../event/weekly_event_class.dart';
 import '../event/weekly_event_templates.dart';
 
@@ -151,6 +152,8 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
       _socketService.emit('UserInsightSetActionAt', { 'userId': currentUserState.currentUser.id, 'field': 'ambassadorSignUpStepsAt.userNeighborhoodSave' });
     }
 
+    Map<String, dynamic> config = _configService.GetConfig();
+
     List<Widget> cols = [];
     if (_step == 'signUp') {
       cols += [
@@ -203,9 +206,12 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
             children: [
               _inputFields.inputText(_formVals, 'neighborhoodUName', minLen: 2, label: 'Choose a short name for your neighborhood',
                 onChanged: (String val) {
+                  val = val.toLowerCase().replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (Match match) => '');
                   setState(() { _formVals['neighborhoodUName'] = val; });
                 }
               ),
+              _style.SpacingH('medium'),
+              Text('${config['SERVER_URL']}/n/${_formVals['neighborhoodUName']} will be your neighborhood link.'),
               _style.SpacingH('medium'),
               ElevatedButton(child: Text('Next'), onPressed: () {
                 Map<String, dynamic> data = {
@@ -249,13 +255,23 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
         ),
       ];
     } else if (_step == 'resources') {
-      Map<String, dynamic> config = _configService.GetConfig();
       String globalEventsUrl = '${config['SERVER_URL']}/ne/global';
       List<Widget> flyerButtons = [];
       for (var i = 0; i < _weeklyEvents.length; i++) {
         String flyerUrl = '/wep/${_weeklyEvents[i].uName}';
         flyerButtons.add(_buttons.LinkInline(context, _weeklyEvents[i].title, flyerUrl, launchUrl: true));
       }
+
+      // List<Widget> colsPhone = [];
+      // if ((currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) &&
+      //   (currentUserState.currentUser.whatsappNumber!.length < 1 || currentUserState.currentUser.whatsappNumberVerified < 1)) {
+      //   colsPhone = [
+      //     Text('Would you prefer support via SMS or WhatsApp?'),
+      //     UserPhone(),
+      //     SizedBox(height: 30),
+      //   ];
+      // }
+
       cols += [
         Container(width: 800,
           child: Column(
@@ -263,20 +279,21 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
             children: [
               _style.Text1('Events created, the last step is to Invite Your Neighbors!', size: 'large', colorKey: 'primary'),
               _style.SpacingH('medium'),
+              // ...colsPhone,
               _style.Text1('Join the Slack and join and post an introduction in #5-ambassadors to get support on your journey.'),
               _style.SpacingH('medium'),
-              _buttons.LinkElevated(context, 'Join Slack',
+              _buttons.Link(context, 'Join Slack',
                 'https://join.slack.com/t/tealtowns/shared_invite/zt-291gxxen8-LRs~9JmLHq8mqYUlzGncIQ', launchUrl: true),
               _style.SpacingH('medium'),
               _style.Text1('Join your virtual neighbors in Global Eat Together events to share best practices to grow your neighborhood.'),
               _style.SpacingH('medium'),
-              _buttons.LinkElevated(context, 'Global Eat Together Events', globalEventsUrl, launchUrl: true),
+              _buttons.Link(context, 'Global Eat Together Events', globalEventsUrl, launchUrl: true),
               _style.SpacingH('medium'),
               _style.Text1('You can print flyers to post on your neighbor\'s doors or knock on doors and show the QR code on your phone.'),
               _style.SpacingH('medium'),
               _layoutService.WrapWidth(flyerButtons,),
               _style.SpacingH('medium'),
-              _buttons.LinkElevated(context, 'View and Share Your Event', '/we/${_weeklyEvents[0].uName}'),
+              _buttons.LinkElevated(context, 'Sign Up for and Share Your Event', '/we/${_weeklyEvents[0].uName}'),
               _style.SpacingH('medium'),
             ],
           ),

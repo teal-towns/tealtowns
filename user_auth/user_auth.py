@@ -31,6 +31,8 @@ def getUserFields():
         'updatedAt': True,
         'phoneNumber': True,
         'phoneNumberVerified': True,
+        'whatsappNumber': True,
+        'whatsappNumberVerified': True,
         'emailVerified': True,
     }
 

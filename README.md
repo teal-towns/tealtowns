@@ -49,3 +49,9 @@ Note: `git status -s` to see current status/changes.
 - Android
   - `flutter build appbundle`
   - Use Google Play to upload app bundle & submit for review
+
+## Common actions
+
+### Twilio / whatsapp
+
+- Add WhatsApp message templates on twilio.com Content Template Builder, then add / update the ids in `config.yml`
