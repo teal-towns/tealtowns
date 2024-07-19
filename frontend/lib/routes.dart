@@ -175,7 +175,14 @@ class AppGoRouter {
 
       GoRoute(
         path: Routes.user,
-        builder: (context, state) => User(),
+        builder: (BuildContext context, GoRouterState state) {
+          String mode = '';
+          String? ambassadorUpdates = state.uri.queryParameters['au'] ?? '';
+          if (ambassadorUpdates != null && ambassadorUpdates.length > 0) {
+            mode = 'ambassadorUpdates';
+          }
+          return User(mode: mode);
+        },
       ),
       GoRoute(
         path: Routes.userUsername,

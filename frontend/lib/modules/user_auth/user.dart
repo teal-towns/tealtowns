@@ -20,8 +20,9 @@ import '../event/user_feedback_class.dart';
 
 class User extends StatefulWidget {
   String username;
+  String mode;
 
-  User({this.username = ''});
+  User({this.username = '', this.mode = ''});
 
   @override
   _UserState createState() => _UserState();
@@ -117,13 +118,15 @@ class _UserState extends State<User> {
     if (_message.length > 0) {
       cols.add(Text('${_message}'));
     } else {
-      Widget phone = _userIsSelf ? UserPhone() : SizedBox.shrink();
-      cols += [
-        _style.Text1('${_user.firstName} ${_user.lastName} (${_user.username})', size: 'large'),
-        _style.SpacingH('medium'),
-        phone,
-        _style.SpacingH('xlarge'),
-      ];
+      if (widget.mode == '') {
+        Widget phone = _userIsSelf ? UserPhone() : SizedBox.shrink();
+        cols += [
+          _style.Text1('${_user.firstName} ${_user.lastName} (${_user.username})', size: 'large'),
+          _style.SpacingH('medium'),
+          phone,
+          _style.SpacingH('xlarge'),
+        ];
+      }
 
       if (_loadingJoinCollections) {
         cols += [
@@ -134,83 +137,93 @@ class _UserState extends State<User> {
         String createdAt, eventEnd;
         var now = DateTime.now().toUtc();
         // String nowString = _dateTime.FormatObj(now, 'yyyy-MM-dd HH:mm:ss').replaceAll(' ', 'T');
-        cols += [
-          _style.Text1('Attended Events', size: 'large'),
-          ..._userEventsAttended.map((userEvent) {
-            // createdAt = _dateTime.Format(userEvent.createdAt, 'yyyy-MM-dd');
-            var eventEndDT = DateTime.parse(userEvent.eventEnd);
-            eventEnd = _dateTime.Format(userEvent.eventEnd, 'yyyy-MM-dd HH:mm');
-            List<Widget> rowsFeedback = [];
-            if (userEvent.userFeedback.containsKey('_id')) {
-              UserFeedbackClass userFeedback = UserFeedbackClass.fromJson(userEvent.userFeedback);
-              rowsFeedback += [
-                _style.Text1('Feedback: Attended: ${userFeedback.attended}, ${userFeedback.stars} stars'),
-              ];
-            } else {
-              if (eventEndDT.isAfter(now)) {
+        if (widget.mode == '') {
+          cols += [
+            _style.Text1('Attended Events', size: 'large'),
+            ..._userEventsAttended.map((userEvent) {
+              // createdAt = _dateTime.Format(userEvent.createdAt, 'yyyy-MM-dd');
+              var eventEndDT = DateTime.parse(userEvent.eventEnd);
+              eventEnd = _dateTime.Format(userEvent.eventEnd, 'yyyy-MM-dd HH:mm');
+              List<Widget> rowsFeedback = [];
+              if (userEvent.userFeedback.containsKey('_id')) {
+                UserFeedbackClass userFeedback = UserFeedbackClass.fromJson(userEvent.userFeedback);
                 rowsFeedback += [
-                  _style.Text1('(Attending soon)'),
+                  _style.Text1('Feedback: Attended: ${userFeedback.attended}, ${userFeedback.stars} stars'),
                 ];
               } else {
-                rowsFeedback += [
-                  _buttons.LinkInline(context, 'Leave Feedback', '/event-feedback-save?eventId=${userEvent.eventId}'),
+                if (eventEndDT.isAfter(now)) {
+                  rowsFeedback += [
+                    _style.Text1('(Attending soon)'),
+                  ];
+                } else {
+                  rowsFeedback += [
+                    _buttons.LinkInline(context, 'Leave Feedback', '/event-feedback-save?eventId=${userEvent.eventId}'),
+                  ];
+                }
+              }
+
+              Widget event = _style.Text1('${eventEnd}');
+              if (userEvent.weeklyEventUName.length > 0) {
+                event = _buttons.LinkInline(context, '${eventEnd}', '/we/${userEvent.weeklyEventUName}');
+              }
+              return Row(
+                children: [
+                  event,
+                  _style.SpacingV('medium'),
+                  ...rowsFeedback,
+                ],
+              );
+            }),
+            _style.SpacingH('medium'),
+            // _style.Text1('Feedback', size: 'large'),
+            // ..._userFeedbacks.map((userFeedback) {
+            //   createdAt = _dateTime.Format(userFeedback.createdAt, 'yyyy-MM-dd');
+            //   return _style.Text1('Attended: ${userFeedback.attended}, ${userFeedback.stars} stars, ${createdAt}');
+            // }),
+            // _style.SpacingH('medium'),
+          ];
+        }
+
+        if (widget.mode == '' || widget.mode == 'ambassadorUpdates') {
+          cols += [
+            _style.SpacingH('medium'),
+            _style.Text1('Neighborhoods', size: 'large'),
+            ..._userNeighborhoods.map((userNeighborhood) {
+              createdAt = _dateTime.Format(userNeighborhood.createdAt, 'yyyy-MM-dd');
+              String rolesDefault = '';
+              if (userNeighborhood.status == 'default') {
+                rolesDefault += '(default) ';
+              }
+              rolesDefault += userNeighborhood.roles.join(', ');
+              List<Widget> rowsAmbassadorUpdate = [ SizedBox.shrink() ];
+              if (userNeighborhood.roles.contains('ambassador')) {
+                rowsAmbassadorUpdate = [
+                  _style.SpacingV('medium'),
+                  _buttons.LinkInline(context, 'Ambassador Update', '/au/${userNeighborhood.neighborhoodUName}'),
                 ];
               }
-            }
+              return Row(
+                children: [
+                  _buttons.LinkInline(context, '${userNeighborhood.neighborhoodUName}', '/n/${userNeighborhood.neighborhoodUName}'),
+                  _style.Text1(', ${createdAt} ${rolesDefault}'),
+                  ...rowsAmbassadorUpdate,
+                ]
+              );
+            }),
+            _style.SpacingH('medium'),
+          ];
+        }
 
-            Widget event = _style.Text1('${eventEnd}');
-            if (userEvent.weeklyEventUName.length > 0) {
-              event = _buttons.LinkInline(context, '${eventEnd}', '/we/${userEvent.weeklyEventUName}');
-            }
-            return Row(
-              children: [
-                event,
-                _style.SpacingV('medium'),
-                ...rowsFeedback,
-              ],
-            );
-          }),
-          _style.SpacingH('medium'),
-          // _style.Text1('Feedback', size: 'large'),
-          // ..._userFeedbacks.map((userFeedback) {
-          //   createdAt = _dateTime.Format(userFeedback.createdAt, 'yyyy-MM-dd');
-          //   return _style.Text1('Attended: ${userFeedback.attended}, ${userFeedback.stars} stars, ${createdAt}');
-          // }),
-          // _style.SpacingH('medium'),
-
-          _style.SpacingH('medium'),
-          _style.Text1('Neighborhoods', size: 'large'),
-          ..._userNeighborhoods.map((userNeighborhood) {
-            createdAt = _dateTime.Format(userNeighborhood.createdAt, 'yyyy-MM-dd');
-            String rolesDefault = '';
-            if (userNeighborhood.status == 'default') {
-              rolesDefault += '(default) ';
-            }
-            rolesDefault += userNeighborhood.roles.join(', ');
-            List<Widget> rowsAmbassadorUpdate = [ SizedBox.shrink() ];
-            if (userNeighborhood.roles.contains('ambassador')) {
-              rowsAmbassadorUpdate = [
-                _style.SpacingV('medium'),
-                _buttons.LinkInline(context, 'Ambassador Update', '/au/${userNeighborhood.neighborhoodUName}'),
-              ];
-            }
-            return Row(
-              children: [
-                _buttons.LinkInline(context, '${userNeighborhood.neighborhoodUName}', '/n/${userNeighborhood.neighborhoodUName}'),
-                _style.Text1(', ${createdAt} ${rolesDefault}'),
-                ...rowsAmbassadorUpdate,
-              ]
-            );
-          }),
-          _style.SpacingH('medium'),
-
-          _style.Text1('Weekly Events Admin', size: 'large'),
-          ..._weeklyEventsAdmin.map((weeklyEvent) {
-            createdAt = _dateTime.Format(weeklyEvent.createdAt, 'yyyy-MM-dd');
-            return _buttons.LinkInline(context, '${weeklyEvent.title}, ${createdAt}', '/we/${weeklyEvent.uName}');
-          }),
-          _style.SpacingH('medium'),
-        ];
+        if (widget.mode == '') {
+          cols += [
+            _style.Text1('Weekly Events Admin', size: 'large'),
+            ..._weeklyEventsAdmin.map((weeklyEvent) {
+              createdAt = _dateTime.Format(weeklyEvent.createdAt, 'yyyy-MM-dd');
+              return _buttons.LinkInline(context, '${weeklyEvent.title}, ${createdAt}', '/we/${weeklyEvent.uName}');
+            }),
+            _style.SpacingH('medium'),
+          ];
+        }
       }
     }
     return AppScaffoldComponent(
