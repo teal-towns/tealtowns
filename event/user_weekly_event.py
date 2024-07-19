@@ -49,6 +49,7 @@ def AddWeeklyUsersToEvent(weeklyEventId: str, now = None):
     smsInfo = {
         'body': "If you would like to host or add guests for this week's event: " + _weekly_event.GetUrl(weeklyEvent),
     }
+    messageTemplateVariables = { "1": _weekly_event.GetUrl(weeklyEvent) }
     # Get all weekly event users and ensure they are all signed up for this week's event (sign them up if not yet).
     query = { 'weeklyEventId': weeklyEventId }
     userWeeklyEvents = mongo_db.find('userWeeklyEvent', query)['items']
@@ -69,7 +70,8 @@ def AddWeeklyUsersToEvent(weeklyEventId: str, now = None):
                 ret['newUserEvents'].append(retUserEvent['userEvent'])
                 retPhone = _user.GetPhone(userId)
                 if retPhone['valid']:
-                    retSms = _sms_twilio.Send(smsInfo['body'], retPhone['phoneNumber'])
+                    retSms = _sms_twilio.Send(smsInfo['body'], retPhone['phoneNumber'], mode = retPhone['mode'],
+                        messageTemplateKey = 'eventJoined', messageTemplateVariables = messageTemplateVariables)
                     if retSms['valid']:
                         ret['notifyUserIds']['sms'].append(userId)
     return ret

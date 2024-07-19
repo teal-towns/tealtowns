@@ -63,6 +63,7 @@ from pay_stripe import stripe_routes as _stripe_routes
 httpRoutesFunc.append(_stripe_routes.Routes)
 from user_auth import user_auth_routes as _user_auth_routes
 from user_auth import user_routes as _user_routes
+from user_follow_up import user_follow_up_routes as _user_follow_up_routes
 from user_message import user_message_routes as _user_message_routes
 from user_payment import user_payment_routes as _user_payment_routes
 from vector_tiles import vector_tiles_routes as _vector_tiles_routes
@@ -84,6 +85,9 @@ thread3.start()
 from pay_mercury import pay_mercury as _pay_mercury
 thread4 = threading.Thread(target = _pay_mercury.CheckDoTransactionsLoop, args=())
 thread4.start()
+from user_follow_up import user_follow_up as _user_follow_up
+thread5 = threading.Thread(target = _user_follow_up.CheckDoUserFollowUpLoop, args=())
+thread5.start()
 
 # Regular websocket
 async def websocket_handler(request):

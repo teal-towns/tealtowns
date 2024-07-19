@@ -28,6 +28,9 @@ def Save(userInsight, skipIfExistsKeys: list = ['firstEventSignUpAt', 'firstNeig
 def SetActionAt(userId: str, field: str, now = None):
     now = now if now is not None else date_time.now()
     ret = { "valid": 1, "message": "" }
+    item = mongo_db.find_one('userInsight', { 'userId': userId })['item']
+    if item is None:
+        Save({ 'userId': userId })
     query = { 'userId': userId }
     mutation = { '$set': {} }
     mutation['$set'][field] = date_time.string(now)
@@ -39,17 +42,17 @@ def SetActionAt(userId: str, field: str, now = None):
 def GetAmbassadorInsights(now = None, withUsers: int = 1):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'ambassadorsSignUpCompleteUsernames': [], 'userInsights': [],
-        'onTrackAmbassadorUsernames': [], 'userNeighborhoodWeeklyUpdatesBehindByUser': {}, 'userNeighborhoodsNotStarted': [], }
+        'onTrackAmbassadorUsernames': [], 'userNeighborhoodWeeklyUpdatesBehindByUser': {},
+        'userNeighborhoodsNotStarted': [], }
     lastMonth = date_time.string(now - datetime.timedelta(days = 30))
     fields = { 'userId': 1, 'ambassadorSignUpStepsAt': 1, 'username': 1 }
     # First see who has completed all of the ambassador sign up steps.
     query = { 'ambassadorSignUpStepsAt.userNeighborhoodSave': { '$gte': lastMonth },
         'ambassadorSignUpStepsAt.resources': { '$exists': 1 } }
     userInsights = mongo_db.find('userInsight', query, fields = fields)['items']
-    for userInsight in userInsights:
-        ret['ambassadorsSignUpCompleteUsernames'].append(userInsight['username'])
     userIds = []
     for userInsight in userInsights:
+        ret['ambassadorsSignUpCompleteUsernames'].append(userInsight['username'])
         userIds.append(userInsight['userId'])
     query = { 'ambassadorSignUpStepsAt.userNeighborhoodSave': { '$gte': lastMonth }, 'userId': { '$nin': userIds } }
     ret['userInsights'] = mongo_db.find('userInsight', query, fields = fields)['items']
@@ -99,4 +102,11 @@ def GetAmbassadorInsights(now = None, withUsers: int = 1):
     query = { 'userId': { '$nin': userIdsDone }, 'roles': 'ambassador' }
     ret['userNeighborhoodsNotStarted'] = mongo_db.find('userNeighborhood', query)['items']
 
+    return ret
+
+def UnsetAmbassadorSignUpSteps(username: str):
+    ret = { "valid": 1, "message": "" }
+    query = { 'username': username }
+    mutation = { '$unset': { 'ambassadorSignUpStepsAt': 1 } }
+    mongo_db.update_one('userInsight', query, mutation)
     return ret

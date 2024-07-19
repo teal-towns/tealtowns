@@ -3,6 +3,7 @@ import random
 import copy
 
 # from common import mongo_db_crud as _mongo_db_crud
+import date_time
 import lodash
 import mongo_db
 
@@ -22,6 +23,15 @@ def RandomWords(count = 5, wordMin = 2, wordMax = 10):
 
 def RandomTime():
     return str(random.randint(0, 23)).zfill(2) + ':' + str(random.randint(0, 59)).zfill(2)
+
+def RandomDateTime():
+    now = date_time.now()
+    year = random.randint(now.year - 1, now.year)
+    month = random.randint(1, 12)
+    day = random.randint(1, 28)
+    hour = random.randint(0, 23)
+    minute = random.randint(0, 59)
+    return date_time.string(date_time.create(year, now.month, now.day, hour, minute))
 
 def RandomPhone():
     return "+1" + str(random.randint(1000000000, 9999999999))

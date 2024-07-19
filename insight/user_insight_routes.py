@@ -10,4 +10,8 @@ def addRoutes():
         return _user_insight.GetAmbassadorInsights()
     _socket.add_route('GetAmbassadorInsights', GetAmbassadorInsights)
 
+    def UnsetAmbassadorSignUpSteps(data, auth, websocket):
+        return _user_insight.UnsetAmbassadorSignUpSteps(data['username'])
+    _socket.add_route('UnsetAmbassadorSignUpSteps', UnsetAmbassadorSignUpSteps)
+
 addRoutes()
