@@ -11,6 +11,7 @@ import '../../app_scaffold.dart';
 import '../neighborhood/user_neighborhood_class.dart';
 // import '../user_auth/user_class.dart';
 import '../user_auth/current_user_state.dart';
+import './user_follow_up_class.dart';
 
 class AmbassadorInsights extends StatefulWidget {
   @override
@@ -33,6 +34,9 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
   bool _loading = true;
   bool _showOnTrack = false;
   bool _showSignUpComplete = false;
+  Map<String, List<String>> _followUpsBySignUp = {};
+  Map<String, List<String>> _followUpsByBehind = {};
+  Map<String, List<String>> _followUpsByNotStarted = {};
 
   @override
   void initState() {
@@ -65,7 +69,76 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
       }
     }));
 
+    _routeIds.add(_socketService.onRoute('UnsetAmbassadorSignUpSteps', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _socketService.emit('GetAmbassadorInsights', {});
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('SearchUserFollowUp', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        SetUserFollowUps(data['userFollowUps']);
+      }
+    }));
+
     _socketService.emit('GetAmbassadorInsights', {});
+  }
+
+  void SetUserFollowUps(var userFollowUps) {
+    for (var i = 0; i < userFollowUps.length; i++) {
+      UserFollowUpClass userFollowUp = UserFollowUpClass.fromJson(userFollowUps[i]);
+      if (userFollowUp.forType == 'ambassadorSignUp') {
+        for (int j = 0; j < _userInsights.length; j++) {
+          if (_userInsights[j]['username'] == userFollowUp.username) {
+            String followUp = _dateTime.Format(userFollowUp.followUpAt, 'M/d/yy HH:mm');
+            if (!_followUpsBySignUp.containsKey(userFollowUp.username)) {
+              _followUpsBySignUp[userFollowUp.username] = [];
+            }
+            _followUpsBySignUp[userFollowUp.username]!.add(followUp);
+            break;
+          }
+        }
+      } else if (userFollowUp.forType == 'ambassadorUpdate') {
+        for (var item in _userNeighborhoodWeeklyUpdatesBehindByUser.entries) {
+          List<Map<String, dynamic>> updates = _parseService.parseListMapStringDynamic(item.value);
+          String username = updates[0]['username'];
+          // String neighborhoodUName = updates[0]['neighborhoodUName'];
+          // String key = username + '_' + neighborhoodUName;
+          String key = username;
+          if (username == userFollowUp.username) {
+            String followUp = _dateTime.Format(userFollowUp.followUpAt, 'M/d/yy HH:mm');
+            if (!_followUpsByBehind.containsKey(key)) {
+              _followUpsByBehind[key] = [];
+            }
+            _followUpsByBehind[key]!.add(followUp);
+            break;
+          }
+        }
+
+        for (int j = 0; j < _userNeighborhoodsNotStarted.length; j++) {
+          String username = _userNeighborhoodsNotStarted[j].username;
+          String neighborhoodUName = _userNeighborhoodsNotStarted[j].neighborhoodUName;
+          String key = username + '_' + neighborhoodUName;
+          if (username == userFollowUp.username && neighborhoodUName == userFollowUp.neighborhoodUName) {
+            String followUp = _dateTime.Format(userFollowUp.followUpAt, 'M/d/yy HH:mm');
+            if (!_followUpsByNotStarted.containsKey(key)) {
+              _followUpsByNotStarted[key] = [];
+            }
+            _followUpsByNotStarted[key]!.add(followUp);
+            break;
+          }
+        }
+      }
+    }
+    setState(() {
+      _followUpsBySignUp = _followUpsBySignUp;
+      _followUpsByBehind = _followUpsByBehind;
+      _followUpsByNotStarted = _followUpsByNotStarted;
+    });
   }
 
   @override
@@ -83,6 +156,9 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
       );
     }
 
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    bool mayRemove = currentUserState.isLoggedIn && currentUserState.currentUser.roles.contains('editAmbassador') ? true : false;
+
     List<Widget> colsAmbassadorSteps = [];
     List<String> stepsKeys = ['events', 'neighborhoodUName', 'locationSelect', 'userNeighborhoodSave'];
     for (var i = 0; i < _userInsights.length; i++) {
@@ -96,6 +172,19 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
         }
       }
       Map<String, dynamic> user = _userInsights[i]['user'];
+      Widget rowRemove = SizedBox.shrink();
+      if (mayRemove) {
+        rowRemove = Expanded(flex: 1, child: TextButton(child: Text('Remove'), onPressed: () {
+          _socketService.emit('UnsetAmbassadorSignUpSteps', { 'username': user['username'] });
+        }));
+      }
+      Widget rowFollowUpsAt = Expanded(flex: 1, child: TextButton(child: Text('Follow Ups'), onPressed: () {
+        var data = { 'username': user['username'], 'forType': 'ambassadorSignUp', };
+        _socketService.emit('SearchUserFollowUp', data);
+      }));
+      if (_followUpsBySignUp.containsKey(user['username'])) {
+        rowFollowUpsAt = Expanded(flex: 1, child: Text(_followUpsBySignUp[user['username']]!.join(', ')));
+      }
       colsAmbassadorSteps.add(
         Row(
           children: [
@@ -103,19 +192,29 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
             Expanded(flex: 1, child: Text('${furthestStepAt}')),
             Expanded(flex: 1, child: Text('${user['username']}')),
             Expanded(flex: 1, child: Text('${user['email']}')),
+            rowRemove,
+            rowFollowUpsAt,
           ]
         ),
       );
     }
 
     List<Widget> colsBehind = [];
-    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    bool mayRemove = currentUserState.isLoggedIn && currentUserState.currentUser.roles.contains('editAmbassador') ? true : false;
     for (var item in _userNeighborhoodWeeklyUpdatesBehindByUser.entries) {
       List<Map<String, dynamic>> updates = _parseService.parseListMapStringDynamic(item.value);
       String username = updates[0]['username'];
+
+      Widget followUpsAt = TextButton(child: Text('Follow Ups'), onPressed: () {
+        var data = { 'username': username, 'forType': 'ambassadorUpdate', };
+        _socketService.emit('SearchUserFollowUp', data);
+      });
+      if (_followUpsByBehind.containsKey(username)) {
+        followUpsAt = Text(_followUpsByBehind[username]!.join(', '));
+      }
+
       colsBehind += [
         _buttons.LinkInline(context, username, '/u/${username}', launchUrl: true),
+        followUpsAt,
         Row(
           children: [
             Expanded(flex: 1, child: Text('Week')),
@@ -187,6 +286,8 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
               Expanded(flex: 1, child: Text('Furthest Step At')),
               Expanded(flex: 1, child: Text('Username')),
               Expanded(flex: 1, child: Text('Email')),
+              // Expanded(flex: 1, child: Text('Remove')),
+              Expanded(flex: 1, child: Text('Follow Ups')),
             ]
           ),
           ...colsAmbassadorSteps,
@@ -214,11 +315,22 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
                 }),
               ];
             }
+
+            String key = userNeighborhood.username + '_' + userNeighborhood.neighborhoodUName;
+            Widget followUpsAt = TextButton(child: Text('Follow Ups'), onPressed: () {
+              var data = { 'username': userNeighborhood.username, 'forType': 'ambassadorUpdate',
+                'neighborhoodUName': userNeighborhood.neighborhoodUName, };
+              _socketService.emit('SearchUserFollowUp', data);
+            });
+            if (_followUpsByNotStarted.containsKey(key)) {
+              followUpsAt = Text(_followUpsByNotStarted[key]!.join(', '));
+            }
             return Row(
               children: [
                 Expanded(flex: 1, child: _buttons.LinkInline(context, userNeighborhood.username, '/u/${userNeighborhood.username}', launchUrl: true)),
                 Expanded(flex: 1, child: Text('${userNeighborhood.neighborhoodUName}')),
                 ...colsRemove,
+                followUpsAt,
               ]
             );
           }),

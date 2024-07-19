@@ -5,7 +5,8 @@ import lodash
 import mongo_db
 
 def RunAll():
-    AddUsernames()
+    CleanUpEmptyUsernames()
+    # AddUsernames()
     # AddWeeklyEventUName()
     # UserInsightAmbassadorSignUpStepsAt()
     # UserNeighborhoodVision()
@@ -27,6 +28,28 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def CleanUpEmptyUsernames():
+    collections = ['userNeighborhood', 'userNeighborhoodWeeklyUpdate']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'username': '' }
+            fields = None
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('CleanUpEmptyUsernames', collection, len(items))
+            for item in items:
+                # print ('deleting item', item)
+                mongo_db.delete_one(collection, { '_id': mongo_db.to_object_id(item['_id']) })
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def AddUsernames():
     collections = ['userNeighborhood', 'userNeighborhoodWeeklyUpdate', 'userInsight', 'userFeedback', 'userEvent']

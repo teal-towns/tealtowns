@@ -55,6 +55,17 @@ twilio:
   auth_token: TOKEN-HERE
   from: '+1xxxyyyzzzz'
   test_mode: 1
+  message_service_id: 'ID-HERE'
+  message_template_ids:
+    verificationCode: 'HX7b10a66539a9ecdb8c73707b0a8077ed'
+    eventHostMoney: 'HX9625cb83d3a4b3e84a2ae62f4db7b3ed'
+    eventAttendConfirmed: 'HX5da7deb996d255eb1c6df4b7826ab853'
+    eventJoined: 'HX7ff7d2ebb867ab64dd5f686f938f1890'
+    eventInvite: 'HX05c2d8d6b5ecb2292bd0b2498035e1d6'
+    eventNotEnoughHosts: 'HX5b85c5caa99bc06f3f9b1be0dfc54862'
+    eventSubscriptionCanceled: 'HX074082bd43f9202c322c28f295d7f530'
+    eventFeedback: 'HX13b393ae2c058ef16d11c4b532cbe0d3'
+    ambassadorUpdateFollowUp: 'HXb98060731c8db441ba613193007b89c4'
 mercury:
   test_mode: 1
   api_token: TOKEN-HERE

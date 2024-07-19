@@ -58,7 +58,7 @@ class _UserNeighborhoodWeeklyUpdateSaveState extends State<UserNeighborhoodWeekl
         return data;
       },
       onSave: (dynamic data) {
-        context.go('/user-neighborhood-weekly-updates?neighborhoodUName=${data['userNeighborhoodWeeklyUpdate']['neighborhoodUName']}');
+        context.go('/au/${data['userNeighborhoodWeeklyUpdate']['neighborhoodUName']}');
       }
     );
     return AppScaffoldComponent(

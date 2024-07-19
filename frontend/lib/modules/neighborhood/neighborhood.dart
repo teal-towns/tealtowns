@@ -229,7 +229,7 @@ class _NeighborhoodState extends State<Neighborhood> {
     if (currentUserState.isLoggedIn && _neighborhood.userNeighborhood.containsKey('roles')) {
       if (_neighborhood.userNeighborhood['roles'].contains('ambassador')) {
         colsJoin += [
-          _buttons.LinkElevated(context, 'Ambassador Updates', '/user-neighborhood-weekly-updates?neighborhoodUName=${_neighborhood.uName}',),
+          _buttons.LinkElevated(context, 'Ambassador Updates', '/au/${_neighborhood.uName}',),
           SizedBox(height: 10),
         ];
       } else {

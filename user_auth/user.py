@@ -27,45 +27,72 @@ def SaveUser(user, keys: list = ['first_name', 'last_name', 'lngLat']):
         ret['valid'] = 1
     return ret
 
-def GetPhone(userId: str, requireVerified: int = 0):
+def GetPhone(userId: str, requireVerified: int = 0, username: str = ''):
     ret = { 'valid': 0, 'message': '', 'phoneNumber': '' }
-    user = _user_auth.getById(userId)
-    if user is not None and 'phoneNumber' in user and (requireVerified == 0 or user['phoneNumberVerified'] == 1):
-        ret['phoneNumber'] = user['phoneNumber']
-        ret['valid'] = 1
+    if len(username) > 0:
+        user = _user_auth.getByUsername(username)
+    else:
+        user = _user_auth.getById(userId)
+    if user is not None:
+        if 'phoneNumber' in user and (requireVerified == 0 or user['phoneNumberVerified'] == 1):
+            ret['phoneNumber'] = user['phoneNumber']
+            ret['mode'] = 'sms'
+            ret['valid'] = 1
+        elif 'whatsappPhoneNumber' in user and (requireVerified == 0 or user['whatsappNumberVerified'] == 1):
+            ret['phoneNumber'] = user['whatsappNumber']
+            ret['mode'] = 'whatsapp'
+            ret['valid'] = 1
     return ret
 
-def VerifyPhone(userId: str, phoneNumberVerificationKey: str):
+def VerifyPhone(userId: str, phoneNumberVerificationKey: str, mode: str = 'sms'):
     ret = { 'valid': 0, 'message': 'Incorrect key, please try again', 'user': {}, }
     fields = _user_auth.getUserFields()
     fields['phoneNumberVerificationKey'] = True
+    fields['whatsappNumberVerificationKey'] = True
     user = _user_auth.getById(userId, fields = fields)
     if user is None:
         ret['message'] = 'User not found'
         return ret
-    if user['phoneNumberVerificationKey'] != phoneNumberVerificationKey:
+
+    verificationField = 'phoneNumberVerificationKey'
+    verifiedField = 'phoneNumberVerified'
+    if mode == 'whatsapp':
+        verificationField = 'whatsappNumberVerificationKey'
+        verifiedField = 'whatsappNumberVerified'
+
+    if user[verificationField] != phoneNumberVerificationKey:
         ret['message'] = 'Incorrect key, please try again'
         return ret
     mutation = {
-        '$set': {
-            'phoneNumberVerificationKey': '',
-            'phoneNumberVerified': 1,
-        }
+        '$set': {}
     }
+    mutation['$set'][verificationField] = ''
+    mutation['$set'][verifiedField] = 1
     result = mongo_db.update_one('user', { '_id': mongo_db.to_object_id(userId) }, mutation)
     if result:
         ret['valid'] = 1
         ret['message'] = ''
-        user['phoneNumberVerificationKey'] = ''
-        user['phoneNumberVerified'] = 1
+        user[verificationField] = ''
+        user[verifiedField] = 1
         ret['user'] = user
     return ret
 
-def SendPhoneVerificationCode(userId: str, phoneNumber: str):
-    ret = { 'valid': 0, 'message': '', 'phoneNumber': phoneNumber, }
+def SendPhoneVerificationCode(userId: str, phoneNumber: str, mode: str = 'sms'):
+    ret = { 'valid': 0, 'message': '', 'user': {}, }
     regex = re.compile('[^0-9 ]')
     phoneNumber = regex.sub('', phoneNumber)
-    ret['phoneNumber'] = phoneNumber
+
+    fields = {
+        'verification': 'phoneNumberVerificationKey',
+        'verified': 'phoneNumberVerified',
+        'number': 'phoneNumber',
+    }
+    if mode == 'whatsapp':
+        fields['verification'] = 'whatsappNumberVerificationKey'
+        fields['verified'] = 'whatsappNumberVerified'
+        fields['number'] = 'whatsappNumber'
+
+    ret[fields['number']] = phoneNumber
 
     user = mongo_db.find_one('user', { '_id': mongo_db.to_object_id(userId) })['item']
     if user is not None:
@@ -73,16 +100,18 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str):
         if len(phoneNumber) > 0:
             phoneNumberVerificationKey = lodash.random_string(6, charsType = 'numeric')
         mutation = {
-            '$set': {
-                'phoneNumber': phoneNumber,
-                'phoneNumberVerificationKey': phoneNumberVerificationKey,
-                'phoneNumberVerified': 0,
-            }
+            '$set': {}
         }
+        mutation['$set'][fields['number']] = phoneNumber
+        mutation['$set'][fields['verified']] = 0
+        mutation['$set'][fields['verification']] = phoneNumberVerificationKey
         result = mongo_db.update_one('user', { '_id': mongo_db.to_object_id(userId) }, mutation)
         if result:
             if len(phoneNumber) > 0:
-                retSend = _sms_twilio.Send('Your verification key is ' + phoneNumberVerificationKey, phoneNumber)
+                messageTemplateVariables = { "1": phoneNumberVerificationKey }
+                retSend = _sms_twilio.Send('Your verification key is ' + phoneNumberVerificationKey, phoneNumber,
+                    mode = mode, messageTemplateKey = 'verificationCode',
+                    messageTemplateVariables = messageTemplateVariables)
                 if retSend['valid'] == 1:
                     ret['valid'] = 1
                     ret['message'] = 'A message has been sent to ' + phoneNumber + '. Check your phone for your verification key.'
@@ -92,6 +121,8 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str):
             else:
                 ret['valid'] = 1
                 ret['message'] = 'Your phone number has been removed.'
+    if ret['valid']:
+        ret['user'] = _user_auth.getById(userId)
     return ret
 
 def GetUrl(user: dict):

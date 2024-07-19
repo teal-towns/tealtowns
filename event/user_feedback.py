@@ -28,12 +28,14 @@ def Save(userFeedback: dict, withCheckAskForFeedback: int = 0, withCheckNeighbor
         fields = { 'firstName': 1, 'lastName': 1 }
         user = mongo_db.find_one('user', query, fields = fields)['item']
         body = user['firstName'] + ' invited you to an event! ' + _weekly_event.GetUrl(weeklyEvent)
+        messageTemplateVariables = { "1": user['firstName'], "2": _weekly_event.GetUrl(weeklyEvent) }
         regex = re.compile('[^0-9 ]')
         for invite in userFeedback['invites']:
             contactType = GuessContactType(invite)
             if contactType == 'phone':
                 phoneNumber = regex.sub('', invite)
-                retSms = _sms_twilio.Send(body, phoneNumber)
+                retSms = _sms_twilio.Send(body, phoneNumber, mode = 'sms',
+                    messageTemplateKey = 'eventInvite', messageTemplateVariables = messageTemplateVariables)
                 ret['smsAttemptCount'] += 1
             elif contactType == 'email':
                 _email_sendgrid.Send(user['firstName'] + ' invited you to an event!', body, invite)
