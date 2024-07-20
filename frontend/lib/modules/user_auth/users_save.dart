@@ -71,6 +71,7 @@ class _UsersSaveState extends State<UsersSave> {
       var data = res['data'];
       if (data['valid'] == 1 && data.containsKey('user')) {
         Provider.of<CurrentUserState>(context, listen: false).clearUser();
+        Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods();
         var user = UserClass.fromJson(data['user']);
         Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
         String route = '/home';

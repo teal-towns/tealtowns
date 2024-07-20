@@ -9,6 +9,9 @@ import '../../common/socket_service.dart';
 import './current_user_state.dart';
 import '../../routes.dart';
 
+import '../neighborhood/neighborhood_state.dart';
+import '../neighborhood/user_neighborhood_class.dart';
+
 class UserLogoutComponent extends StatefulWidget {
   @override
   _UserLogoutState createState() => _UserLogoutState();
@@ -30,6 +33,7 @@ class _UserLogoutState extends State<UserLogoutComponent> {
       var data = res['data'];
       if (data['valid'] == 1) {
         Provider.of<CurrentUserState>(context, listen: false).clearUser();
+        Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods();
         context.go(Routes.home);
       } else {
         setState(() { _message = data['message'].length > 0 ? data['message'] : 'Logout error'; });

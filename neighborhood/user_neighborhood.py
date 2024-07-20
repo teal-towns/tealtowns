@@ -37,7 +37,9 @@ def Search(stringKeyVals: dict = {}, limit: int = 250, skip: int = 0, withNeighb
     return ret
 
 def Save(userNeighborhood: dict):
-    if userNeighborhood['status'] == 'default':
+    if 'userId' not in userNeighborhood or 'neighborhoodUName' not in userNeighborhood:
+        return { 'valid': 0, 'message': 'Missing userId or neighborhoodUName' }
+    if 'status' in userNeighborhood and userNeighborhood['status'] == 'default':
         # First remove any existing defaults.
         SetAllStatus(userNeighborhood['userId'], '')
     # Check if already exists, otherwise will get duplicate error.
@@ -48,6 +50,8 @@ def Save(userNeighborhood: dict):
     item = mongo_db.find_one('userNeighborhood', query)['item']
     if item is not None and '_id' in item:
         userNeighborhood['_id'] = item['_id']
+        if 'username' in userNeighborhood:
+            del userNeighborhood['username']
     else:
         user = mongo_db.find_one('user', { '_id': userNeighborhood['userId'] })['item']
         userNeighborhood['username'] = user['username']
