@@ -11,6 +11,7 @@ def test_Save():
     userNeighborhoods = mongo_db.find('userNeighborhood', {'userId': users[0]['_id']})['items']
     assert len(userNeighborhoods) == 1
     assert userNeighborhoods[0]['status'] == 'default'
+    assert userNeighborhoods[0]['username'] == users[0]['username']
 
     # Add second neighborhood
     userNeighborhood = { 'userId': users[0]['_id'], 'neighborhoodUName': 'neighborhood2', 'status': 'default', 'motivations': [], }
@@ -18,6 +19,7 @@ def test_Save():
     userNeighborhoods = mongo_db.find('userNeighborhood', {'userId': users[0]['_id']})['items']
     assert len(userNeighborhoods) == 2
     for item in userNeighborhoods:
+        assert len(item['username']) > 0
         if item['neighborhoodUName'] == 'neighborhood1':
             assert item['status'] == ''
         if item['neighborhoodUName'] == 'neighborhood2':
@@ -29,9 +31,18 @@ def test_Save():
     userNeighborhoods = mongo_db.find('userNeighborhood', {'userId': users[0]['_id']})['items']
     assert len(userNeighborhoods) == 2
     for item in userNeighborhoods:
+        assert len(item['username']) > 0
         if item['neighborhoodUName'] == 'neighborhood1':
             assert item['status'] == 'default'
         if item['neighborhoodUName'] == 'neighborhood2':
             assert item['status'] == ''
+
+    # Do not allow unsetting username.
+    userNeighborhood = { 'userId': users[0]['_id'], 'neighborhoodUName': 'neighborhood1', 'username': '', }
+    _user_neighborhood.Save(userNeighborhood)
+    userNeighborhoods = mongo_db.find('userNeighborhood', {'userId': users[0]['_id']})['items']
+    assert len(userNeighborhoods) == 2
+    for item in userNeighborhoods:
+        assert len(item['username']) > 0
 
     _mongo_mock.CleanUp()
