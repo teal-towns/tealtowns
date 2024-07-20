@@ -32,4 +32,8 @@ def addRoutes():
         return _user.GetJoinCollections(data['userId'], data['username'])
     _socket.add_route('GetUserJoinCollections', GetUserJoinCollections)
 
+    def HijackLogin(data, auth, websocket):
+        return _user.HijackLogin(data['superUserId'], data['usernameToHijack'])
+    _socket.add_route('HijackLogin', HijackLogin)
+
 addRoutes()

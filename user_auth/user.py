@@ -3,6 +3,7 @@ import re
 import lodash
 import log
 import mongo_db
+from neighborhood import user_neighborhood as _user_neighborhood
 from notifications_all import sms_twilio as _sms_twilio
 from user_auth import user_auth as _user_auth
 import ml_config
@@ -171,5 +172,33 @@ def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
     fields = { 'neighborhoodUName': 1, 'roles': 1, 'status': 1, 'createdAt': 1, }
     ret['userNeighborhoods'] = mongo_db.find('userNeighborhood', query, fields = fields, sort_obj = sortObj,
         limit = limit)['items']
+
+    return ret
+
+def HijackLogin(superUserId: str, usernameToHijack: str):
+    ret = { 'valid': 0, 'message': '', 'user': {} }
+    user = _user_auth.getByUsername(usernameToHijack)
+    if user is not None and user['status'] == 'member':
+        retSess = _user_auth.updateSession(user['_id'])
+        if 'sessionId' in retSess:
+            ret['valid'] = 1
+            user['sessionId'] = retSess['sessionId']
+            # del user['password']
+            ret['user'] = user
+            # Copied from login route
+            if 'roles' in ret['user']:
+                # del ret['user']['roles']
+                ret['user']['roles'] = ",".join(ret['user']['roles'])
+            # if 'withUserNeighborhoods' in data and data['withUserNeighborhoods']:
+            if True:
+                ret['userNeighborhoods'] = _user_neighborhood.Search(stringKeyVals = { 'userId': ret['user']['_id'], },
+                    withNeighborhoods = 1)['userNeighborhoods']
+
+            # Log out super user.
+            _user_auth.logout(superUserId)
+        else:
+            ret['message'] = retSess['message']
+    else:
+        ret['message'] = 'User not found'
 
     return ret

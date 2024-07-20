@@ -3,6 +3,7 @@ import datetime
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
 import mongo_db
+from user_follow_up import user_follow_up as _user_follow_up
 
 def Save(userNeighborhoodWeeklyUpdate: dict, now = None, weekdayStart: int = 0):
     now = now if now is not None else date_time.now()
@@ -29,6 +30,18 @@ def Save(userNeighborhoodWeeklyUpdate: dict, now = None, weekdayStart: int = 0):
             userNeighborhoodWeeklyUpdate['username'] = user['username']
 
     ret = _mongo_db_crud.Save('userNeighborhoodWeeklyUpdate', userNeighborhoodWeeklyUpdate)
+
+    # Clear out follow ups.
+    username = None
+    if 'username' in ret['userNeighborhoodWeeklyUpdate']:
+        username = ret['userNeighborhoodWeeklyUpdate']['username']
+    else:
+        fields = { 'username': 1 }
+        user = mongo_db.find_one('user', {'_id': userNeighborhoodWeeklyUpdate['userId']}, fields = fields)['item']
+        username = user['username']
+    _user_follow_up.RemoveFollowUps(username, 'ambassadorUpdate',
+        ret['userNeighborhoodWeeklyUpdate']['neighborhoodUName'])
+
     return ret
 
 def Search(stringKeyVals: dict = {}, equalsKeyVals: dict = {}, minKeyVals: dict = {}, maxKeyVals: dict = {}, limit: int = 25, skip: int = 0,

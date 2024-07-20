@@ -11,6 +11,10 @@ import './current_user_state.dart';
 import '../../routes.dart';
 
 class UserPasswordResetComponent extends StatefulWidget {
+  String resetKey;
+  String email;
+  UserPasswordResetComponent({this.resetKey = '', this.email = '' });
+
   @override
   _UserPasswordResetState createState() => _UserPasswordResetState();
 }
@@ -55,6 +59,13 @@ class _UserPasswordResetState extends State<UserPasswordResetComponent> {
       }
       setState(() { _loading = false; });
     }));
+
+    if (widget.resetKey.length > 0) {
+      formVals['passwordResetKey'] = widget.resetKey;
+    }
+    if (widget.email.length > 0) {
+      formVals['email'] = widget.email;
+    }
   }
 
   Widget _buildSubmit(BuildContext context) {
@@ -103,7 +114,7 @@ class _UserPasswordResetState extends State<UserPasswordResetComponent> {
           children: <Widget>[
             _inputFields.inputEmail(formVals, 'email'),
             _inputFields.inputText(formVals, 'passwordResetKey', minLen: 2, label: 'Reset Key'),
-            _inputFields.inputPassword(formVals, 'password', minLen: 6),
+            _inputFields.inputPassword(formVals, 'password', minLen: 6, label: 'New Password'),
             _buildSubmit(context),
             _buildMessage(context),
           ]

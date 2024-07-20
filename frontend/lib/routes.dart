@@ -156,11 +156,17 @@ class AppGoRouter {
       ),
       GoRoute(
         path: Routes.emailVerify,
-        builder: (context, state) => UserEmailVerifyComponent(),
+        builder: (context, state) => UserEmailVerifyComponent(
+          verifyKey: state.uri.queryParameters['key'] ?? '',
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
       ),
       GoRoute(
         path: Routes.passwordReset,
-        builder: (context, state) => UserPasswordResetComponent(),
+        builder: (BuildContext context, GoRouterState state) => UserPasswordResetComponent(
+          resetKey: state.uri.queryParameters['key'] ?? '',
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
       ),
 
       GoRoute(
