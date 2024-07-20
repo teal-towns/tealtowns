@@ -1,5 +1,8 @@
+import copy
+
 import date_time
 from insight import user_insight as _user_insight
+import mongo_db
 import mongo_mock as _mongo_mock
 from neighborhood import user_neighborhood_weekly_update as _user_neighborhood_weekly_update
 from stubs import stubs_data as _stubs_data
@@ -58,6 +61,10 @@ def test_CheckAndDoFollowUps():
     userNeighborhoodWeeklyUpdates = _stubs_data.CreateBulk(objs = userNeighborhoodWeeklyUpdates,
         collectionName = 'userNeighborhoodWeeklyUpdate')
 
+    userFollowUpQuery = { 'username': { '$in': [] } }
+    for user in users:
+        userFollowUpQuery['username']['$in'].append(user['username'])
+
     nextFollowUpMaxDays = 2
     nextFollowUpMinDays = 2
     nextFollowUpHourMin = 10
@@ -70,6 +77,10 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 2
     assert countsByKey['ambassadorUpdate'] == 3
+    query = copy.deepcopy(userFollowUpQuery)
+    query['attempt'] = 1
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 5
 
     # Next hour; too soon for new notifications
     now = date_time.from_string('2024-05-20 10:00:00+00:00')
@@ -79,6 +90,10 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 0
     assert countsByKey['ambassadorUpdate'] == 0
+    query = copy.deepcopy(userFollowUpQuery)
+    query['attempt'] = 1
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 5
 
     # 2 days from start, attempt 2
     now = date_time.from_string('2024-05-22 15:00:00+00:00')
@@ -88,9 +103,16 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 2
     assert countsByKey['ambassadorUpdate'] == 3
+    query = copy.deepcopy(userFollowUpQuery)
+    query['attempt'] = 2
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 5
 
     # user 0 finishes sign up.
     _user_insight.SetActionAt(users[0]['_id'], 'ambassadorSignUpStepsAt.resources')
+    # All follow ups should be removed.
+    items = mongo_db.find('userFollowUp', { 'username': users[0]['username'], 'forType': 'ambassadorSignUp' })['items']
+    assert len(items) == 0
 
     # 4 days from start, attempt 3
     now = date_time.from_string('2024-05-24 15:00:00+00:00')
@@ -100,6 +122,10 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 1
     assert countsByKey['ambassadorUpdate'] == 3
+    query = copy.deepcopy(userFollowUpQuery)
+    query['attempt'] = 3
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 4
 
     # 6 days from start, attempt 4
     now = date_time.from_string('2024-05-26 15:00:00+00:00')
@@ -109,6 +135,10 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 1
     assert countsByKey['ambassadorUpdate'] == 3
+    query = copy.deepcopy(userFollowUpQuery)
+    query['attempt'] = 4
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 4
 
     # user 3 submits a weekly update
     userNeighborhoodWeeklyUpdate = { 'userId': users[3]['_id'], 'username': users[3]['username'], 'start': '2024-05-15 09:00:00+00:00',
@@ -124,6 +154,10 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 1
     assert countsByKey['ambassadorUpdate'] == 2
+    query = copy.deepcopy(userFollowUpQuery)
+    query['attempt'] = 5
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 3
 
     # 10 days from start, attempt 6
     now = date_time.from_string('2024-05-30 15:00:00+00:00')
@@ -133,6 +167,10 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 1
     assert countsByKey['ambassadorUpdate'] == 2
+    query = copy.deepcopy(userFollowUpQuery)
+    query['attempt'] = 6
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 3
 
     # 12 days later, removed (over max attempts)
     now = date_time.from_string('2024-06-02 15:00:00+00:00')
@@ -142,5 +180,8 @@ def test_CheckAndDoFollowUps():
     countsByKey = SumCounts(ret)
     assert countsByKey['ambassadorSignUp'] == 0
     assert countsByKey['ambassadorUpdate'] == 0
+    query = copy.deepcopy(userFollowUpQuery)
+    items = mongo_db.find('userFollowUp', query)['items']
+    assert len(items) == 0
 
     _mongo_mock.CleanUp()

@@ -99,12 +99,7 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
             attempt = userFollowUp['attempt'] + 1
             # Remove if over max attempts.
             if attempt > maxAttempts:
-                query = {
-                    'username': username,
-                    'neighborhoodUName': neighborhoodUName,
-                    'forType': forType,
-                }
-                mongo_db.delete_many('userFollowUp', query)
+                RemoveFollowUps(username, forType, neighborhoodUName)
                 if forType == 'ambassadorSignUp':
                     _user_insight.UnsetAmbassadorSignUpSteps(username)
                 elif forType == 'ambassadorUpdate':
@@ -148,7 +143,7 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                 if forType == 'ambassadorUpdate':
                     neighborhood = mongo_db.find_one('neighborhood', { 'uName': neighborhoodUName })['item']
                     timezone = neighborhood['timezone']
-                userFollowUp = {
+                userFollowUpNew = {
                     'username': username,
                     'neighborhoodUName': neighborhoodUName,
                     'forType': forType,
@@ -160,7 +155,11 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                     'nextFollowUpDone': 0,
                     'attempt': attempt,
                 }
-                mongo_db.insert_one('userFollowUp', userFollowUp)
+                try:
+                    mongo_db.insert_one('userFollowUp', userFollowUpNew)
+                except Exception as e:
+                    log.log('error', 'user_follow_up.CheckAndDoFollowUps Error inserting userFollowUp: ' + str(e))
+                    pass
     
     if len(nextFollowUpDoneObjectIds) > 0:
         query = { '_id': { '$in': nextFollowUpDoneObjectIds } }
@@ -169,6 +168,15 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
         ret['doneCount'] = len(nextFollowUpDoneObjectIds)
 
     return ret
+
+def RemoveFollowUps(username: str, forType: str, neighborhoodUName: str = ''):
+    query = {
+        'username': username,
+        'forType': forType,
+    }
+    if len(neighborhoodUName) > 0:
+        query['neighborhoodUName'] = neighborhoodUName
+    mongo_db.delete_many('userFollowUp', query)
 
 def CheckDoUserFollowUpLoop(timeoutMinutes = 60):
     log.log('info', 'user_follow_up.CheckDoUserFollowUpLoop starting')

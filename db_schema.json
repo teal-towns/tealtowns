@@ -13,7 +13,7 @@
         "passwordResetKey":"{String} @optional [string of random string to allow resetting password] lk3jlkja",
         "status": "{String} @optional ['guest' until email verified, 'member'] member",
         "roles": [
-            "{String} [one of '', 'admin', 'editUser', 'tealtownsTeam']"
+            "{String} [one of '', 'admin', 'editUser', 'tealtownsTeam', 'hijackUser']"
         ],
         "emailVerificationKey": "{String} @optional",
         "emailVerified": "{Int} @optional 1 or 0",

@@ -4,6 +4,7 @@ import date_time
 from common import mongo_db_crud as _mongo_db_crud
 # import lodash
 import mongo_db
+from user_follow_up import user_follow_up as _user_follow_up
 
 def Save(userInsight, skipIfExistsKeys: list = ['firstEventSignUpAt', 'firstNeighborhoodJoinAt']):
     # userInsight = lodash.extend_object({
@@ -37,6 +38,12 @@ def SetActionAt(userId: str, field: str, now = None):
     retOne = mongo_db.update_one('userInsight', query, mutation, validate = 0)
     if retOne['modified_count'] < 1:
         ret['valid'] = 0
+    else:
+        # Clear out follow ups.
+        if field == 'ambassadorSignUpStepsAt.resources':
+            userInsight = mongo_db.find_one('userInsight', { 'userId': userId })['item']
+            _user_follow_up.RemoveFollowUps(userInsight['username'], 'ambassadorSignUp')
+
     return ret
 
 def GetAmbassadorInsights(now = None, withUsers: int = 1, activeDaysPast: int = 5):

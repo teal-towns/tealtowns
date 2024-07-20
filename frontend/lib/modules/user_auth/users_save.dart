@@ -14,6 +14,8 @@ import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './user_class.dart';
 import './current_user_state.dart';
+import '../neighborhood/neighborhood_state.dart';
+import '../neighborhood/user_neighborhood_class.dart';
 
 class UsersSave extends StatefulWidget {
   @override
@@ -61,6 +63,29 @@ class _UsersSaveState extends State<UsersSave> {
           _users.add(UserClass.fromJson(user));
         }
         setState(() { _users = _users; });
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('HijackLogin', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1 && data.containsKey('user')) {
+        Provider.of<CurrentUserState>(context, listen: false).clearUser();
+        var user = UserClass.fromJson(data['user']);
+        Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
+        String route = '/home';
+        if (data.containsKey('userNeighborhoods')) {
+          List<UserNeighborhoodClass> userNeighborhoods = [];
+          for (var i = 0; i < data['userNeighborhoods'].length; i++) {
+            UserNeighborhoodClass userNeighborhood = UserNeighborhoodClass.fromJson(data['userNeighborhoods'][i]);
+            userNeighborhoods.add(userNeighborhood);
+            if (userNeighborhood.status == 'default') {
+              route = '/n/${userNeighborhood.neighborhood.uName}';
+            }
+          }
+          Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
+        }
+        context.go(route);
       }
     }));
 
@@ -139,6 +164,28 @@ class _UsersSaveState extends State<UsersSave> {
 
   Widget OneUser(UserClass user, BuildContext context, CurrentUserState currentUserState) {
     String createdAt = _dateTime.Format(user.createdAt, 'yyyy-MM-dd HH:mm');
+
+    List<Widget> colsEdit = [];
+    if (currentUserState.isLoggedIn && currentUserState.currentUser.roles.contains('editUser')) {
+      colsEdit += [
+        TextButton(child: Text('Edit'), onPressed: () {
+          _selectedUser = user;
+          setState(() { _selectedUser = _selectedUser; });
+        }),
+        _style.SpacingH('medium'),
+      ];
+    }
+
+    if (currentUserState.isLoggedIn && currentUserState.currentUser.roles.contains('hijackUser')) {
+      colsEdit += [
+        TextButton(child: Text('Hijack'), onPressed: () {
+          var data = { 'superUserId': currentUserState.currentUser.id, 'usernameToHijack': user.username };
+          _socketService.emit('HijackLogin', data);
+        }),
+        _style.SpacingH('medium'),
+      ];
+    }
+
     Widget content = Column(
       children: [
         _buttons.Link(context, '${user.firstName} ${user.lastName} (${user.username})', '/u/${user.username}'),
@@ -148,18 +195,11 @@ class _UsersSaveState extends State<UsersSave> {
         _style.Text1('${user.roles}'),
         _style.SpacingH('medium'),
         _style.Text1('${createdAt}'),
+        _style.SpacingH('medium'),
+        ...colsEdit,
       ]
     );
-    if (!currentUserState.isLoggedIn || !currentUserState.currentUser.roles.contains('editUser')) {
-      return content;
-    }
-    return InkWell(
-      child: content,
-      onTap: () {
-        _selectedUser = user;
-        setState(() { _selectedUser = _selectedUser; });
-      },
-    );
+    return content;
   }
 
   void SearchUsers() {
