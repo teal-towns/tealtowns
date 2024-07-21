@@ -58,6 +58,7 @@ jobs:
           echo DOMAIN==tealtowns.org >> .env
           echo APP_URL_PUBLIC=https://tealtowns.org >> .env
           echo MAPBOX_ACCESS_TOKEN=${{ secrets.PROD_MAPBOX_ACCESS_TOKEN }} >> .env
+          echo SENTRY_DSN=${{ secrets.PROD_SENTRY_DSN }} >> .env
           cat .env
       - name: 'Build Flutter app'
         run: cd ./frontend && flutter build web --web-renderer canvaskit
