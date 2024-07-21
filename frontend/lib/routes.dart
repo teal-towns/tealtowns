@@ -72,7 +72,7 @@ class Routes {
   static const userUsername = '/u/:username';
 
   static const about = '/about';
-  static const team = '/team'; 
+  static const team = '/team';
   static const privacyPolicy = '/privacy-policy';
   static const termsOfService = '/terms-of-service';
 
@@ -144,12 +144,10 @@ class AppGoRouter {
         path: Routes.passwordReset,
         builder: (context, state) => UserPasswordResetComponent(),
       ),
-
       GoRoute(
         path: Routes.designLibrary,
         builder: (context, state) => DesignLibrary(),
       ),
-
       GoRoute(
         path: Routes.user,
         builder: (context, state) => User(),
@@ -164,22 +162,18 @@ class AppGoRouter {
           return User();
         },
       ),
-
       GoRoute(
         path: Routes.usersSave,
         builder: (context, state) => UsersSave(),
       ),
-
       GoRoute(
         path: Routes.about,
         builder: (BuildContext context, GoRouterState state) => About(),
       ),
-
       GoRoute(
         path: Routes.team,
         builder: (BuildContext context, GoRouterState state) => Team(),
       ),
-
       GoRoute(
         path: Routes.privacyPolicy,
         builder: (BuildContext context, GoRouterState state) => PrivacyTerms(
@@ -192,7 +186,6 @@ class AppGoRouter {
           type: 'terms',
         ),
       ),
-
       GoRoute(
         path: Routes.blogList,
         builder: (context, state) => BlogList(),
@@ -211,12 +204,10 @@ class AppGoRouter {
           return BlogList();
         },
       ),
-
       GoRoute(
         path: Routes.appInsights,
         builder: (context, state) => AppInsights(),
       ),
-
       GoRoute(
         path: Routes.icebreakers,
         builder: (context, state) => Icebreakers(),
@@ -227,34 +218,31 @@ class AppGoRouter {
           id: state.uri.queryParameters['id'] ?? '',
         ),
       ),
-
       GoRoute(
-        path: Routes.land,
-        builder: (BuildContext context, GoRouterState state) => LandPage(
-            goRouterState: state,
-            lat: double.parse(state.uri.queryParameters['lat'] ?? '-999'),
-            lng: double.parse(state.uri.queryParameters['lng'] ?? '-999'),
-            // timeframe: state.uri.queryParameters['tf'] ?? '',
-            // year: int.parse(state.uri.queryParameters['year'] ?? '-999'),
-            underlay: state.uri.queryParameters['u'] ?? '',
-            tileSize: state.uri.queryParameters['size'] ?? '',
-            dataType: state.uri.queryParameters['dt'] ?? '',
-            polygonUName: state.uri.queryParameters['pg'] ?? '',
-          )
-      ),
-
+          path: Routes.land,
+          builder: (BuildContext context, GoRouterState state) => LandPage(
+                goRouterState: state,
+                lat: double.parse(state.uri.queryParameters['lat'] ?? '-999'),
+                lng: double.parse(state.uri.queryParameters['lng'] ?? '-999'),
+                // timeframe: state.uri.queryParameters['tf'] ?? '',
+                // year: int.parse(state.uri.queryParameters['year'] ?? '-999'),
+                underlay: state.uri.queryParameters['u'] ?? '',
+                tileSize: state.uri.queryParameters['size'] ?? '',
+                dataType: state.uri.queryParameters['dt'] ?? '',
+                polygonUName: state.uri.queryParameters['pg'] ?? '',
+              )),
       GoRoute(
         path: Routes.neighborhoods,
         builder: (context, state) => NeighborhoodsPage(),
       ),
       GoRoute(
-        path: Routes.neighborhoodSave,
-        builder: (BuildContext context, GoRouterState state) => NeighborhoodSave(
-          uName: state.uri.queryParameters['uName'] ?? '',
-          lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
-          lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
-        )
-      ),
+          path: Routes.neighborhoodSave,
+          builder: (BuildContext context, GoRouterState state) =>
+              NeighborhoodSave(
+                uName: state.uri.queryParameters['uName'] ?? '',
+                lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
+                lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
+              )),
       GoRoute(
         path: Routes.neighborhoodView,
         builder: (BuildContext context, GoRouterState state) {
@@ -286,11 +274,11 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.neighborhoodGroupSave,
-        builder: (BuildContext context, GoRouterState state) => NeighborhoodGroupSave(
-          uName: state.uri.queryParameters['uName'] ?? '',
-        )
-      ),
+          path: Routes.neighborhoodGroupSave,
+          builder: (BuildContext context, GoRouterState state) =>
+              NeighborhoodGroupSave(
+                uName: state.uri.queryParameters['uName'] ?? '',
+              )),
       GoRoute(
         path: Routes.neighborhoodInsights,
         builder: (context, state) => NeighborhoodInsights(),
@@ -300,8 +288,12 @@ class AppGoRouter {
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
-            return NeighborhoodStats(uName: uName,
-              showFreePaid: state.uri.queryParameters['showFreePaid'] != null ? true : false,);
+            return NeighborhoodStats(
+              uName: uName,
+              showFreePaid: state.uri.queryParameters['showFreePaid'] != null
+                  ? true
+                  : false,
+            );
           }
           return NeighborhoodsPage();
         },
@@ -314,7 +306,6 @@ class AppGoRouter {
         path: Routes.belongingSurvey,
         builder: (context, state) => BelongingSurvey(),
       ),
-
       GoRoute(
         path: Routes.sharedItems,
         builder: (BuildContext context, GoRouterState state) => SharedItems(
@@ -329,23 +320,22 @@ class AppGoRouter {
           id: state.uri.queryParameters['id'] ?? '',
         ),
       ),
-
       GoRoute(
         path: Routes.sharedItemOwnerSave,
-        builder: (BuildContext context, GoRouterState state) => SharedItemOwnerSave(
+        builder: (BuildContext context, GoRouterState state) =>
+            SharedItemOwnerSave(
           sharedItemOwnerId: state.uri.queryParameters['id'] ?? '',
           sharedItemId: state.uri.queryParameters['sharedItemId'] ?? '',
           userId: state.uri.queryParameters['userId'] ?? '',
-          generation: state.uri.queryParameters['generation'] != null ?
-            int.parse(state.uri.queryParameters['generation']!) : 0,
+          generation: state.uri.queryParameters['generation'] != null
+              ? int.parse(state.uri.queryParameters['generation']!)
+              : 0,
         ),
       ),
-
       GoRoute(
         path: Routes.userMoney,
         builder: (BuildContext context, GoRouterState state) => UserMoney(),
       ),
-
       GoRoute(
         path: Routes.weeklyEvents,
         builder: (BuildContext context, GoRouterState state) => WeeklyEvents(
@@ -383,19 +373,18 @@ class AppGoRouter {
         ),
       ),
       GoRoute(
-        path: Routes.eventFeedbackSave,
-        builder: (BuildContext context, GoRouterState state) => EventFeedbackSavePage(
-          eventId: state.uri.queryParameters['eventId'] ?? '',
-        )
-      ),
+          path: Routes.eventFeedbackSave,
+          builder: (BuildContext context, GoRouterState state) =>
+              EventFeedbackSavePage(
+                eventId: state.uri.queryParameters['eventId'] ?? '',
+              )),
       GoRoute(
-        path: Routes.eventFeedback,
-        builder: (BuildContext context, GoRouterState state) => EventFeedbackPage(
-          eventId: state.uri.queryParameters['eventId'] ?? '',
-          weeklyEventId: state.uri.queryParameters['weeklyEventId'] ?? '',
-        )
-      ),
-
+          path: Routes.eventFeedback,
+          builder: (BuildContext context, GoRouterState state) =>
+              EventFeedbackPage(
+                eventId: state.uri.queryParameters['eventId'] ?? '',
+                weeklyEventId: state.uri.queryParameters['weeklyEventId'] ?? '',
+              )),
       GoRoute(
         path: Routes.notFound,
         builder: (context, state) => RouteNotFoundPage(),

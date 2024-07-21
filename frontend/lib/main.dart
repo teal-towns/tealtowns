@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 //}
 import 'package:universal_html/html.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import './common/config_service.dart';
 import './common/localstorage_service.dart';
@@ -31,8 +33,10 @@ main() async {
     String url = Uri.base.toString();
     // dot env is not loading properly if on www? So just assume if null to redirect.
     // Check www first so can also redirect http to https after if necessary.
-    if ((dotenv.env['REDIRECT_DOMAINS'] != null && dotenv.env['DOMAIN'] != null &&
-      dotenv.env['REDIRECT_DOMAINS']!.length > 0 && dotenv.env['DOMAIN']!.length > 0)) {
+    if ((dotenv.env['REDIRECT_DOMAINS'] != null &&
+        dotenv.env['DOMAIN'] != null &&
+        dotenv.env['REDIRECT_DOMAINS']!.length > 0 &&
+        dotenv.env['DOMAIN']!.length > 0)) {
       List<String> domains = dotenv.env['REDIRECT_DOMAINS']!.split(',');
       for (String domain in domains) {
         if (url.contains(domain)) {
@@ -43,7 +47,7 @@ main() async {
       }
     }
     if ((dotenv.env['REDIRECT_WWW'] == '1' ||
-      dotenv.env['REDIRECT_WWW'] == null) &&
+            dotenv.env['REDIRECT_WWW'] == null) &&
         url.contains('www.')) {
       if (url.contains('https://') || url.contains('http://')) {
         url = url.replaceAll('www.', '');
@@ -65,7 +69,7 @@ main() async {
   _localstorageService.init(dotenv.env['APP_NAME']);
 
   SocketService _socketService = SocketService();
-  _socketService.connect({ 'default': dotenv.env['SOCKET_URL_PUBLIC'] });
+  _socketService.connect({'default': dotenv.env['SOCKET_URL_PUBLIC']});
 
   setPathUrlStrategy();
   runApp(MultiProvider(
@@ -90,10 +94,12 @@ class _MyApp extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    var currentUserState =
+        Provider.of<CurrentUserState>(context, listen: false);
     currentUserState.checkAndLogin();
-    var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
-    if(currentUserState.isLoggedIn) {
+    var neighborhoodState =
+        Provider.of<NeighborhoodState>(context, listen: false);
+    if (currentUserState.isLoggedIn) {
       String userId = currentUserState.currentUser.id;
       neighborhoodState.CheckAndGet(userId, notify: false);
     } else {
@@ -105,6 +111,17 @@ class _MyApp extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'tealtowns',
       routerConfig: _appRouter,
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        Locale('en'), // English
+        Locale('es'), // Spanish
+        Locale('ja'), // Japanese
+      ],
     );
     ;
   }
