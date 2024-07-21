@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,7 @@ import '../third_party/custom_icon_icons.dart';
 import './common/buttons.dart';
 import './common/colors_service.dart';
 import './common/link_service.dart';
+import './common/socket_service.dart';
 import './modules/user_auth/current_user_state.dart';
 import './modules/neighborhood/neighborhood_state.dart';
 import './routes.dart';
@@ -42,6 +44,31 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   Buttons _buttons = Buttons();
   ColorsService _colors = ColorsService();
   LinkService _linkService = LinkService();
+  List<String> _routeIds = [];
+  SocketService _socketService = SocketService();
+
+  String _gitSha = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _routeIds.add(_socketService.onRoute('GetGitSha', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        setState(() { _gitSha = data['gitSha'].substring(0,7); });
+      }
+    }));
+
+    _socketService.emit('GetGitSha', {});
+  }
+
+  @override
+  void dispose() {
+    _socketService.offRouteIds(_routeIds);
+    super.dispose();
+  }
 
   Widget _buildLinkButton(BuildContext context, String routePath, String label) {
     return Container(
@@ -230,6 +257,8 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
               ...spanLinks,
             ]
           )),
+          SizedBox(height: 10),
+          Text('Version ${_gitSha}'),
         ],
       ),
     );

@@ -46,7 +46,7 @@ def SetActionAt(userId: str, field: str, now = None):
 
     return ret
 
-def GetAmbassadorInsights(now = None, withUsers: int = 1, activeDaysPast: int = 5):
+def GetAmbassadorInsights(now = None, withUsers: int = 1, activeDaysPast: int = 4):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'ambassadorsSignUpCompleteUsernames': [], 'userInsights': [],
         'onTrackAmbassadorUsernames': [], 'userNeighborhoodWeeklyUpdatesBehindByUser': {},
