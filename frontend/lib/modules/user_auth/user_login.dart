@@ -157,9 +157,7 @@ class _UserLoginState extends State<UserLoginComponent> {
             _buildMessage(context),
             TextButton(
               onPressed: () {
-                // TESTING
-                throw StateError('Failure in a microtask');
-                // context.go(Routes.signup);
+                context.go(Routes.signup);
               },
               child: Text('No account? Sign up.'),
             ),
