@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:sentry/sentry.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
@@ -65,6 +66,10 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   UserEventClass _userEvent = UserEventClass.fromJson({});
   List<UserEventClass> _userEvents = [];
   List<IcebreakerClass> _icebreakers = [];
+
+  // Stopwatch stopwatch = new Stopwatch()..start();
+  bool _initialLoadDone = false;
+  final _transaction = Sentry.startTransaction('weekly_event_view render', 'task');
 
   @override
   void initState() {
@@ -553,6 +558,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     );
 
     double width = 1200;
+    if (!_initialLoadDone) {
+      _initialLoadDone = true;
+      // final transaction = Sentry.getSpan();
+      // transaction?.setMeasurement('weekly_event_view.render',
+      //   stopwatch.elapsedMilliseconds / 1000);
+      _transaction.finish();
+      // print ('render ${stopwatch.elapsedMilliseconds / 1000}');
+      // stopwatch.stop();
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       width: width,
