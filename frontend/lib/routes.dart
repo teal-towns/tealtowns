@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import './modules/home.dart';
 import './modules/route_not_found.dart';
@@ -132,6 +133,7 @@ class Routes {
 
 class AppGoRouter {
   GoRouter router = GoRouter(
+    observers: [ SentryNavigatorObserver() ],
     initialLocation: Routes.home,
     errorBuilder: (BuildContext context, GoRouterState state) {
       String route = state.uri.toString();
@@ -139,30 +141,30 @@ class AppGoRouter {
     },
     routes: [
       GoRoute(
-        path: Routes.home,
+        path: Routes.home, name: 'home',
         builder: (BuildContext context, GoRouterState state) => HomeComponent(),
       ),
       GoRoute(
-        path: Routes.login,
+        path: Routes.login, name: 'login',
         builder: (context, state) => UserLoginComponent(),
       ),
       GoRoute(
-        path: Routes.logout,
+        path: Routes.logout, name: 'logout',
         builder: (context, state) => UserLogoutComponent(),
       ),
       GoRoute(
-        path: Routes.signup,
+        path: Routes.signup, name: 'signup',
         builder: (context, state) => UserSignup(),
       ),
       GoRoute(
-        path: Routes.emailVerify,
+        path: Routes.emailVerify, name: 'emailVerify',
         builder: (context, state) => UserEmailVerifyComponent(
           verifyKey: state.uri.queryParameters['key'] ?? '',
           email: state.uri.queryParameters['email'] ?? '',
         ),
       ),
       GoRoute(
-        path: Routes.passwordReset,
+        path: Routes.passwordReset, name: 'passwordReset',
         builder: (BuildContext context, GoRouterState state) => UserPasswordResetComponent(
           resetKey: state.uri.queryParameters['key'] ?? '',
           email: state.uri.queryParameters['email'] ?? '',
@@ -170,17 +172,17 @@ class AppGoRouter {
       ),
 
       GoRoute(
-        path: Routes.designLibrary,
+        path: Routes.designLibrary, name: 'designLibrary',
         builder: (context, state) => DesignLibrary(),
       ),
 
       GoRoute(
-        path: Routes.ambassadorStart,
+        path: Routes.ambassadorStart, name: 'ambassadorStart',
         builder: (context, state) => AmbassadorStart(),
       ),
 
       GoRoute(
-        path: Routes.user,
+        path: Routes.user, name: 'user',
         builder: (BuildContext context, GoRouterState state) {
           String mode = '';
           String? ambassadorUpdates = state.uri.queryParameters['au'] ?? '';
@@ -191,7 +193,7 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.userUsername,
+        path: Routes.userUsername, name: 'userUsername',
         builder: (BuildContext context, GoRouterState state) {
           String? username = state.pathParameters["username"];
           if (username != null) {
@@ -202,43 +204,43 @@ class AppGoRouter {
       ),
 
       GoRoute(
-        path: Routes.usersSave,
+        path: Routes.usersSave, name: 'usersSave',
         builder: (context, state) => UsersSave(),
       ),
 
       GoRoute(
-        path: Routes.about,
+        path: Routes.about, name: 'about',
         builder: (BuildContext context, GoRouterState state) => About(),
       ),
 
       GoRoute(
-        path: Routes.team,
+        path: Routes.team, name: 'team',
         builder: (BuildContext context, GoRouterState state) => Team(),
       ),
 
       GoRoute(
-        path: Routes.privacyPolicy,
+        path: Routes.privacyPolicy, name: 'privacyPolicy',
         builder: (BuildContext context, GoRouterState state) => PrivacyTerms(
           type: 'privacy',
         ),
       ),
       GoRoute(
-        path: Routes.termsOfService,
+        path: Routes.termsOfService, name: 'termsOfService',
         builder: (BuildContext context, GoRouterState state) => PrivacyTerms(
           type: 'terms',
         ),
       ),
 
       GoRoute(
-        path: Routes.blogList,
+        path: Routes.blogList, name: 'blogList',
         builder: (context, state) => BlogList(),
       ),
       GoRoute(
-        path: Routes.blogSave,
+        path: Routes.blogSave, name: 'blogSave',
         builder: (context, state) => BlogSave(),
       ),
       GoRoute(
-        path: Routes.blogView,
+        path: Routes.blogView, name: 'blogView',
         builder: (BuildContext context, GoRouterState state) {
           String? slug = state.pathParameters["slug"];
           if (slug != null) {
@@ -249,27 +251,27 @@ class AppGoRouter {
       ),
 
       GoRoute(
-        path: Routes.appInsights,
+        path: Routes.appInsights, name: 'appInsights',
         builder: (context, state) => AppInsights(),
       ),
       GoRoute(
-        path: Routes.ambassadorInsights,
+        path: Routes.ambassadorInsights, name: 'ambassadorInsights',
         builder: (context, state) => AmbassadorInsights(),
       ),
 
       GoRoute(
-        path: Routes.icebreakers,
+        path: Routes.icebreakers, name: 'icebreakers',
         builder: (context, state) => Icebreakers(),
       ),
       GoRoute(
-        path: Routes.icebreakerSave,
+        path: Routes.icebreakerSave, name: 'icebreakerSave',
         builder: (BuildContext context, GoRouterState state) => IcebreakerSave(
           id: state.uri.queryParameters['id'] ?? '',
         ),
       ),
 
       GoRoute(
-        path: Routes.land,
+        path: Routes.land, name: 'land',
         builder: (BuildContext context, GoRouterState state) => LandPage(
             goRouterState: state,
             lat: double.parse(state.uri.queryParameters['lat'] ?? '-999'),
@@ -284,11 +286,11 @@ class AppGoRouter {
       ),
 
       GoRoute(
-        path: Routes.neighborhoods,
+        path: Routes.neighborhoods, name: 'neighborhoods',
         builder: (context, state) => NeighborhoodsPage(),
       ),
       GoRoute(
-        path: Routes.neighborhoodSave,
+        path: Routes.neighborhoodSave, name: 'neighborhoodSave',
         builder: (BuildContext context, GoRouterState state) => NeighborhoodSave(
           uName: state.uri.queryParameters['uName'] ?? '',
           lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
@@ -296,7 +298,7 @@ class AppGoRouter {
         )
       ),
       GoRoute(
-        path: Routes.neighborhoodView,
+        path: Routes.neighborhoodView, name: 'neighborhoodView',
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
@@ -306,7 +308,7 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.neighborhoodEvents,
+        path: Routes.neighborhoodEvents, name: 'neighborhoodEvents',
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
@@ -316,7 +318,7 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.neighborhoodGroup,
+        path: Routes.neighborhoodGroup, name: 'neighborhoodGroup',
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
@@ -326,17 +328,17 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.neighborhoodGroupSave,
+        path: Routes.neighborhoodGroupSave, name: 'neighborhoodGroupSave',
         builder: (BuildContext context, GoRouterState state) => NeighborhoodGroupSave(
           uName: state.uri.queryParameters['uName'] ?? '',
         )
       ),
       GoRoute(
-        path: Routes.neighborhoodInsights,
+        path: Routes.neighborhoodInsights, name: 'neighborhoodInsights',
         builder: (context, state) => NeighborhoodInsights(),
       ),
       GoRoute(
-        path: Routes.neighborhoodStats,
+        path: Routes.neighborhoodStats, name: 'neighborhoodStats',
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
@@ -347,27 +349,27 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.userNeighborhoodSave,
+        path: Routes.userNeighborhoodSave, name: 'userNeighborhoodSave',
         builder: (BuildContext context, GoRouterState state) => UserNeighborhoodSave(
           id: state.uri.queryParameters['id'] ?? '',
           neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
         )
       ),
       GoRoute(
-        path: Routes.userNeighborhoodWeeklyUpdateSave,
+        path: Routes.userNeighborhoodWeeklyUpdateSave, name: 'userNeighborhoodWeeklyUpdateSave',
         builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdateSave(
           id: state.uri.queryParameters['id'] ?? '',
           neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
         )
       ),
       GoRoute(
-        path: Routes.userNeighborhoodWeeklyUpdates,
+        path: Routes.userNeighborhoodWeeklyUpdates, name: 'userNeighborhoodWeeklyUpdates',
         builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdates(
           neighborhoodUName: state.uri.queryParameters['neighborhoodUName'] ?? '',
         )
       ),
       GoRoute(
-        path: Routes.ambassadorUpdatesSingle,
+        path: Routes.ambassadorUpdatesSingle, name: 'ambassadorUpdatesSingle',
         builder: (BuildContext context, GoRouterState state) {
           String? neighborhoodUName = state.pathParameters["neighborhoodUName"];
           if (neighborhoodUName != null) {
@@ -377,23 +379,23 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.ambassadorsUpdates,
+        path: Routes.ambassadorsUpdates, name: 'ambassadorsUpdates',
         builder: (BuildContext context, GoRouterState state) => UserNeighborhoodWeeklyUpdates(
           mode: 'allAmbassadors',
         )
       ),
 
       GoRoute(
-        path: Routes.neighborhoodJourney,
+        path: Routes.neighborhoodJourney, name: 'neighborhoodJourney',
         builder: (context, state) => NeighborhoodJourneyPage(),
       ),
       GoRoute(
-        path: Routes.belongingSurvey,
+        path: Routes.belongingSurvey, name: 'belongingSurvey',
         builder: (context, state) => BelongingSurvey(),
       ),
 
       GoRoute(
-        path: Routes.sharedItems,
+        path: Routes.sharedItems, name: 'sharedItems',
         builder: (BuildContext context, GoRouterState state) => SharedItems(
           lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
           lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
@@ -401,14 +403,14 @@ class AppGoRouter {
         ),
       ),
       GoRoute(
-        path: Routes.sharedItemSave,
+        path: Routes.sharedItemSave, name: 'sharedItemSave',
         builder: (BuildContext context, GoRouterState state) => SharedItemSave(
           id: state.uri.queryParameters['id'] ?? '',
         ),
       ),
 
       GoRoute(
-        path: Routes.sharedItemOwnerSave,
+        path: Routes.sharedItemOwnerSave, name: 'sharedItemOwnerSave',
         builder: (BuildContext context, GoRouterState state) => SharedItemOwnerSave(
           sharedItemOwnerId: state.uri.queryParameters['id'] ?? '',
           sharedItemId: state.uri.queryParameters['sharedItemId'] ?? '',
@@ -419,12 +421,12 @@ class AppGoRouter {
       ),
 
       GoRoute(
-        path: Routes.userMoney,
+        path: Routes.userMoney, name: 'userMoney',
         builder: (BuildContext context, GoRouterState state) => UserMoney(),
       ),
 
       GoRoute(
-        path: Routes.weeklyEvents,
+        path: Routes.weeklyEvents, name: 'weeklyEvents',
         builder: (BuildContext context, GoRouterState state) => WeeklyEvents(
           lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
           lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
@@ -432,14 +434,14 @@ class AppGoRouter {
         ),
       ),
       GoRoute(
-        path: Routes.weeklyEventSave,
+        path: Routes.weeklyEventSave, name: 'weeklyEventSave',
         builder: (BuildContext context, GoRouterState state) => WeeklyEventSave(
           id: state.uri.queryParameters['id'] ?? '',
           type: state.uri.queryParameters['type'] ?? '',
         ),
       ),
       GoRoute(
-        path: Routes.weeklyEventView,
+        path: Routes.weeklyEventView, name: 'weeklyEventView',
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
@@ -449,7 +451,7 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.weeklyEventPrint,
+        path: Routes.weeklyEventPrint, name: 'weeklyEventPrint',
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
@@ -459,11 +461,11 @@ class AppGoRouter {
         },
       ),
       GoRoute(
-        path: Routes.weeklyEventsSearch,
+        path: Routes.weeklyEventsSearch, name: 'weeklyEventsSearch',
         builder: (BuildContext context, GoRouterState state) => WeeklyEventsSearch(),
       ),
       GoRoute(
-        path: Routes.eat,
+        path: Routes.eat, name: 'eat',
         builder: (BuildContext context, GoRouterState state) => WeeklyEvents(
           lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
           lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
@@ -474,13 +476,13 @@ class AppGoRouter {
         ),
       ),
       GoRoute(
-        path: Routes.eventFeedbackSave,
+        path: Routes.eventFeedbackSave, name: 'eventFeedbackSave',
         builder: (BuildContext context, GoRouterState state) => EventFeedbackSavePage(
           eventId: state.uri.queryParameters['eventId'] ?? '',
         )
       ),
       GoRoute(
-        path: Routes.eventFeedback,
+        path: Routes.eventFeedback, name: 'eventFeedback',
         builder: (BuildContext context, GoRouterState state) => EventFeedbackPage(
           eventId: state.uri.queryParameters['eventId'] ?? '',
           weeklyEventId: state.uri.queryParameters['weeklyEventId'] ?? '',
@@ -488,7 +490,7 @@ class AppGoRouter {
       ),
 
       GoRoute(
-        path: Routes.notFound,
+        path: Routes.notFound, name: 'notFound',
         builder: (context, state) => RouteNotFoundPage(),
       ),
     ],

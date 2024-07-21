@@ -72,7 +72,6 @@ main() async {
 
   // WidgetsFlutterBinding.ensureInitialized();
   if (dotenv.env['SENTRY_DSN'] != null && dotenv.env['SENTRY_DSN']!.length > 0) {
-    print ('init');
     await SentryFlutter.init(
       (options) {
         options.dsn = dotenv.env['SENTRY_DSN'];
@@ -122,6 +121,9 @@ class _MyApp extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'tealtowns',
       routerConfig: _appRouter,
+      // navigatorObservers: [
+      //   SentryNavigatorObserver()
+      // ],
     );
     ;
   }
