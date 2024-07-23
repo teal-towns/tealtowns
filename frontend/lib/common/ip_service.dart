@@ -25,7 +25,7 @@ class IPService {
     try {
       var ipAddress = IpAddress(type: RequestType.json);
       dynamic data = await ipAddress.getIpAddress();
-      print(data.toString());
+      // print(data.toString());
       _ipAddress = data['ip'].toString().replaceAll('.', '-');
       _ipLoaded = true;
       return IP();

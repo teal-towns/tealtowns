@@ -70,6 +70,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   // Stopwatch stopwatch = new Stopwatch()..start();
   bool _initialLoadDone = false;
   final _transaction = Sentry.startTransaction('weekly_event_view render', 'task');
+  bool _initialWeeklyEventLoaded = false;
 
   @override
   void initState() {
@@ -85,47 +86,43 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        if (data.containsKey('weeklyEvent') && data['weeklyEvent'].containsKey('_id') &&
-          data.containsKey('event') && data['event'].containsKey('_id') &&
-          data.containsKey('nextEvent') && data['nextEvent'].containsKey('_id')) {
-          _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
-          if (data.containsKey('event')) {
-            _event = EventClass.fromJson(data['event']);
+        var states = {};
+        if (data.containsKey('weeklyEvent') && data['weeklyEvent'].containsKey('_id') && data['weeklyEvent']['uName'] == widget.uName) {
+          if (!_initialWeeklyEventLoaded) {
+            _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
+            setState(() { _weeklyEvent = _weeklyEvent; });
+            _socketService.emit('GetRandomIcebreakers', {'count': 1});
+            _initialWeeklyEventLoaded = true;
           }
-          if (data.containsKey('nextEvent')) {
-            _nextEvent = EventClass.fromJson(data['nextEvent']);
-          }
-          if (data.containsKey('rsvpDeadlinePassed')) {
-            _rsvpDeadlinePassed = data['rsvpDeadlinePassed'];
-          }
-          if (data.containsKey('attendeesCount')) {
-            _attendeesCount = data['attendeesCount'];
-          }
-          if (data.containsKey('nonHostAttendeesWaitingCount')) {
-            _nonHostAttendeesWaitingCount = data['nonHostAttendeesWaitingCount'];
-          }
-          if (data.containsKey('userEvent')) {
-            _userEvent = UserEventClass.fromJson(data['userEvent']);
-          }
-          if (data.containsKey('eventInsight') && data['eventInsight'] != null &&
-            data['eventInsight'].containsKey('_id')) {
-            _eventInsight = EventInsightClass.fromJson(data['eventInsight']);
-          }
-          setState(() {
-            _weeklyEvent = _weeklyEvent;
-            _event = _event;
-            _nextEvent = _nextEvent;
-            _rsvpDeadlinePassed = _rsvpDeadlinePassed;
-            _attendeesCount = _attendeesCount;
-            _nonHostAttendeesWaitingCount = _nonHostAttendeesWaitingCount;
-            _userEvent = _userEvent;
-            _eventInsight = _eventInsight;
-            _loading = false;
-          });
-        } else {
-          _message = data['message'].length > 0 ? data['message'] : 'Error.';
-          context.go('/weekly-events');
         }
+        if (data.containsKey('event') && data['event'].containsKey('_id') &&
+          data.containsKey('nextEvent') && data['nextEvent'].containsKey('_id')) {
+          _event = EventClass.fromJson(data['event']);
+          _nextEvent = EventClass.fromJson(data['nextEvent']);
+          _rsvpDeadlinePassed = data['rsvpDeadlinePassed'];
+          setState(() { _event = _event; _nextEvent = _nextEvent; _rsvpDeadlinePassed = _rsvpDeadlinePassed; });
+        }
+        if (data.containsKey('attendeesCount')) {
+          _attendeesCount = data['attendeesCount'];
+          _nonHostAttendeesWaitingCount = data['nonHostAttendeesWaitingCount'];
+          setState(() { _attendeesCount = _attendeesCount; _nonHostAttendeesWaitingCount = _nonHostAttendeesWaitingCount; });
+        }
+        if (data.containsKey('userEvent')) {
+          _userEvent = UserEventClass.fromJson(data['userEvent']);
+          setState(() { _userEvent = _userEvent; });
+        }
+        if (data.containsKey('eventInsight') && data['eventInsight'] != null &&
+          data['eventInsight'].containsKey('_id')) {
+          _eventInsight = EventInsightClass.fromJson(data['eventInsight']);
+          setState(() { _eventInsight = _eventInsight; });
+        }
+        setState(() {
+          _loading = false;
+        });
+        // } else {
+        //   _message = data['message'].length > 0 ? data['message'] : 'Error.';
+        //   context.go('/weekly-events');
+        // }
       } else {
         _message = data['message'].length > 0 ? data['message'] : 'Error.';
         context.go('/weekly-events');
@@ -171,8 +168,6 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         setState(() { _icebreakers = _icebreakers; });
       }
     }));
-
-    _socketService.emit('GetRandomIcebreakers', {'count': 1});
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _init();
@@ -398,49 +393,54 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       attendeeInfo += [ SizedBox(height: 10) ];
     }
 
-    if (!alreadySignedUp) {
-      String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
-      String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
-      attendeeInfo += [
-        Text(rsvpSignUpText),
-        SizedBox(height: 10),
-        UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
-        SizedBox(height: 10),
-      ];
-    } else {
-      attendeeInfo += [
-        UserEventSave(eventId: _userEvent.eventId),
-        SizedBox(height: 10),
-      ];
+    if (_nextEvent.start.length > 0) {
+      if (!alreadySignedUp) {
+        String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
+        String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
+        attendeeInfo += [
+          Text(rsvpSignUpText),
+          SizedBox(height: 10),
+          UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
+          SizedBox(height: 10),
+        ];
+      } else {
+        attendeeInfo += [
+          UserEventSave(eventId: _userEvent.eventId),
+          SizedBox(height: 10),
+        ];
+      }
     }
 
-    String format = 'yMMdTHHmmss';
-    String start1 = _dateTime.Format(_event.start, format, local: true);
-    String end1 = _event.end.length > 0 ? _event.end : _event.start;
-    end1 = _dateTime.Format(end1, format, local: true);
-    // String timezone = _weeklyEvent.timezone;
-    String timezone = Uri.encodeComponent(_dateTime.TZ(_event.start, local: true));
-    String details = Uri.encodeComponent(shareUrl);
-    String title = Uri.encodeComponent(_weeklyEvent.title);
-    String location = Uri.encodeComponent('${_weeklyEvent.location.coordinates[1]},${_weeklyEvent.location.coordinates[0]}');
-    // https://www.labnol.org/calendar/
-    // https://calendar.google.com/calendar/render?action=TEMPLATE&dates=20240517T021500Z%2F20240517T024500Z&details=https%3A%2F%2Ftest.com%2Fyes&text=Todos%20Santos%20Park%20Day
-    List<Map<String, String>> calendarLinks = [
-      { 'name': 'Google', 'url': 'https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${start1}%2F${end1}&details=${details}&text=${title}&location=${location}&ctz=${timezone}' },
-    ];
-    List<Widget> colsCalendar = [
-      Text('Add to your calendar:'),
-      SizedBox(height: 10),
-      Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: [
-          ...calendarLinks.map<Widget>((link) {
-            return _buttons.Link(context, link['name']!, link['url']!, launchUrl: true);
-          })
-        ]
-      )
-    ];
+    List<Widget> colsCalendar = [];
+    if (_event.start.length > 0) {
+      String format = 'yMMdTHHmmss';
+      String start1 = _dateTime.Format(_event.start, format, local: true);
+      String end1 = _event.end.length > 0 ? _event.end : _event.start;
+      end1 = _dateTime.Format(end1, format, local: true);
+      // String timezone = _weeklyEvent.timezone;
+      String timezone = Uri.encodeComponent(_dateTime.TZ(_event.start, local: true));
+      String details = Uri.encodeComponent(shareUrl);
+      String title = Uri.encodeComponent(_weeklyEvent.title);
+      String location = Uri.encodeComponent('${_weeklyEvent.location.coordinates[1]},${_weeklyEvent.location.coordinates[0]}');
+      // https://www.labnol.org/calendar/
+      // https://calendar.google.com/calendar/render?action=TEMPLATE&dates=20240517T021500Z%2F20240517T024500Z&details=https%3A%2F%2Ftest.com%2Fyes&text=Todos%20Santos%20Park%20Day
+      List<Map<String, String>> calendarLinks = [
+        { 'name': 'Google', 'url': 'https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${start1}%2F${end1}&details=${details}&text=${title}&location=${location}&ctz=${timezone}' },
+      ];
+      colsCalendar = [
+        Text('Add to your calendar:'),
+        SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            ...calendarLinks.map<Widget>((link) {
+              return _buttons.Link(context, link['name']!, link['url']!, launchUrl: true);
+            })
+          ]
+        )
+      ];
+    }
 
     List<Widget> colsInsights = [];
     if (_eventInsight.uniqueViewsAt.length > 0) {

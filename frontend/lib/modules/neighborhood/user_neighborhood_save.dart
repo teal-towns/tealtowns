@@ -74,7 +74,7 @@ class _UserNeighborhoodSaveState extends State<UserNeighborhoodSave> {
       _style.SpacingH('medium'),
       _style.Text1('Ambassadors catalyze action in their neighborhood by gathering their neighbors on a regular basis. Ambassadors empower their neighbors to feel a deep sense of belonging and multiply their impact 100x by growing the neighborhood to 150 people connecting weekly.'),
       _style.SpacingH('medium'),
-      _style.Text1('The 2 weekly responsibilities, which should take about 1 hour per week, are: 1. invite 10 neighbors to join an event, 2. attend 1 event (and fill out feedback).'),
+      _style.Text1('The 2 weekly responsibilities, which should take about 1 hour per week, are: 1. invite 10 neighbors to join an event, 2. attend your in person neighborhood event (and fill out feedback).'),
       _style.SpacingH('medium'),
       _style.Text1('Anyone may become a ambassador, but you will be removed if you miss 2 consecutive weeks (do not invite neighbors or attend events).'),
       _style.SpacingH('medium'),

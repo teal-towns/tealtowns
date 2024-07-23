@@ -5,6 +5,7 @@ import aiohttp_cors
 import asyncio
 import json
 import mimetypes
+import sentry_sdk
 import ssl
 import sys
 import time
@@ -30,6 +31,9 @@ from migration import migrations as _migrations
 # AIOHTTP_NOSENDFILE=1
 
 config = ml_config.get_config()
+if 'sentry' in config and 'dsn' in config['sentry'] and \
+    ('test_mode' not in config['sentry'] or not config['sentry']['test_mode']):
+    sentry_sdk.init(dsn=config['sentry']['dsn'], traces_sample_rate=1.0, profiles_sample_rate=1.0,)
 log.init_logger(config)
 db = ml_config.get_db(config)
 config_notifications = config['notifications'] or {}

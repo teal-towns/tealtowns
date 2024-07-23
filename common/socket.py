@@ -1,5 +1,6 @@
 import asyncio
 import json
+import sentry_sdk
 
 _routes = {}
 _routes_async = {}
@@ -14,12 +15,14 @@ def get_route_type(route: str):
 def socket_router(websocket, route: str, data, auth: dict):
     if route not in _routes:
         raise Exception("route not found")
-    return _routes[route](data, auth, websocket)
+    with sentry_sdk.start_transaction(op="task", name="socket route " + route):
+        return _routes[route](data, auth, websocket)
 
 async def socket_router_async(websocket, route: str, data, auth: dict):
     if route not in _routes_async:
         raise Exception("route not found")
-    return await _routes_async[route](data, auth, websocket)
+    with sentry_sdk.start_transaction(op="task", name="socket async route " + route):
+        return await _routes_async[route](data, auth, websocket)
 
 def add_route(route: str, func, mode="sync"):
     if mode == "async":
