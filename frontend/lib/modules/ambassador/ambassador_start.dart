@@ -280,7 +280,7 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
               _style.Text1('Events created, the last step is to Invite Your Neighbors!', size: 'large', colorKey: 'primary'),
               _style.SpacingH('medium'),
               // ...colsPhone,
-              _style.Text1('Join the Slack and join and post an introduction in #5-ambassadors to get support on your journey.'),
+              _style.Text1('Join the Slack and join and post an introduction in #8-ambassadors to get support on your journey.'),
               _style.SpacingH('medium'),
               _buttons.Link(context, 'Join Slack',
                 'https://join.slack.com/t/tealtowns/shared_invite/zt-291gxxen8-LRs~9JmLHq8mqYUlzGncIQ', launchUrl: true),

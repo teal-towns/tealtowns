@@ -57,18 +57,22 @@ class _PagingState extends State<Paging> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        if (data[widget.dataName].length < widget.itemsPerPage) {
-          _canLoadMore = false;
+        if (!data.containsKey(widget.dataName)) {
+          setState(() { _message = 'Error, ${widget.dataName} key does not exist.'; });
         } else {
-          _canLoadMore = true;
-        }
-        if (widget.onGet != null) {
-          if (_lastPageNumber == 1) {
-            _items = [];
+          if (data[widget.dataName].length < widget.itemsPerPage) {
+            _canLoadMore = false;
+          } else {
+            _canLoadMore = true;
           }
-          _items += data[widget.dataName];
-          widget.onGet!(_items);
-          setState(() { _items = _items; });
+          if (widget.onGet != null) {
+            if (_lastPageNumber == 1) {
+              _items = [];
+            }
+            _items += data[widget.dataName];
+            widget.onGet!(_items);
+            setState(() { _items = _items; });
+          }
         }
       } else {
         setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; });

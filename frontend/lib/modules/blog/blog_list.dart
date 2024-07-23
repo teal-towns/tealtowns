@@ -182,12 +182,7 @@ class _BlogListState extends State<BlogList> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              ElevatedButton(
-                onPressed: () {
-                  context.go('/b/${blog.slug}');
-                },
-                child: Text('View'),
-              ),
+              _buttons.LinkElevated(context, 'View', '/b/${blog.slug}', launchUrl: true),
               SizedBox(width: 10),
               ...buttons,
             ]

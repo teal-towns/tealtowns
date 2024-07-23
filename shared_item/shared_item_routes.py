@@ -41,8 +41,18 @@ def addRoutes():
     _socket.add_route('removeSharedItem', Remove)
 
     def GetById(data, auth, websocket):
-        return _mongo_db_crud.GetById('sharedItem', data['id'])
+        data = lodash.extend_object({
+            'withOwnerUserId': '',
+        }, data)
+        return _shared_item.GetById(data['id'], withOwnerUserId = data['withOwnerUserId'])
     _socket.add_route('getSharedItemById', GetById)
+
+    def GetByUName(data, auth, websocket):
+        data = lodash.extend_object({
+            'withOwnerUserId': '',
+        }, data)
+        return _shared_item.GetById('', data['uName'], withOwnerUserId = data['withOwnerUserId'])
+    _socket.add_route('GetSharedItemByUName', GetByUName)
 
     def GetSharedItemDownPaymentLink(data, auth, websocket):
         if data['checkAndUseBalance']:
