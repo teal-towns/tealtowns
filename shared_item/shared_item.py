@@ -114,6 +114,16 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
 
     return ret
 
+def GetById(id: str, uName: str = '', withOwnerUserId: str = ''):
+    ret = _mongo_db_crud.GetById('sharedItem', id, uName = uName)
+    if ret['valid'] and len(withOwnerUserId) > 0:
+        query = { 'userId': withOwnerUserId, 'sharedItemId': ret['sharedItem']['_id'] }
+        sharedItemOwner = mongo_db.find_one('sharedItemOwner', query)['item']
+        # Check generation (ensure 1 above current)
+        if sharedItemOwner is not None and sharedItemOwner['generation'] == ret['sharedItem']['generation'] + 1:
+            ret['sharedItem']['sharedItemOwner_current'] = sharedItemOwner
+    return ret
+
 def Save(sharedItem: dict, now = None):
     ret = { 'valid': 1, 'message': '', 'sharedItem': {}, 'sharedItemOwner': {} }
     sharedItem = _mongo_db_crud.CleanId(sharedItem)

@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:sentry/sentry.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
@@ -11,6 +15,7 @@ import '../../common/config_service.dart';
 import '../../common/date_time_service.dart';
 import '../../common/ip_service.dart';
 import '../../common/link_service.dart';
+import '../../common/location_service.dart';
 import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -39,13 +44,16 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   ConfigService _configService = ConfigService();
   DateTimeService _dateTime = DateTimeService();
   IPService _ipService = IPService();
+  LocationService _locationService = LocationService();
   LinkService _linkService = LinkService();
   SocketService _socketService = SocketService();
   Style _style = Style();
+  late YoutubePlayerController _youtubeController;
 
   bool _loading = true;
   String _message = '';
   bool _loadingIP = true;
+  bool _initedIP = false;
 
   bool _inited = false;
   WeeklyEventClass _weeklyEvent = WeeklyEventClass.fromJson({});
@@ -59,16 +67,27 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
   List<UserEventClass> _userEvents = [];
   List<IcebreakerClass> _icebreakers = [];
 
+  // Stopwatch stopwatch = new Stopwatch()..start();
+  bool _initialLoadDone = false;
+  final _transaction = Sentry.startTransaction('weekly_event_view render', 'task');
+
   @override
   void initState() {
     super.initState();
 
-    _routeIds.add(_socketService.onRoute('getWeeklyEventById', callback: (String resString) {
+    _youtubeController = YoutubePlayerController.fromVideoId(
+      videoId: '2Rm2kM36c5g',
+      autoPlay: false,
+      params: const YoutubePlayerParams(showFullscreenButton: false),
+    );
+
+    _routeIds.add(_socketService.onRoute('GetWeeklyEventByIdWithData', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
         if (data.containsKey('weeklyEvent') && data['weeklyEvent'].containsKey('_id') &&
-          data['event'].containsKey('_id') && data['nextEvent'].containsKey('_id')) {
+          data.containsKey('event') && data['event'].containsKey('_id') &&
+          data.containsKey('nextEvent') && data['nextEvent'].containsKey('_id')) {
           _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
           if (data.containsKey('event')) {
             _event = EventClass.fromJson(data['event']);
@@ -88,7 +107,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           if (data.containsKey('userEvent')) {
             _userEvent = UserEventClass.fromJson(data['userEvent']);
           }
-          if (data.containsKey('eventInsight')) {
+          if (data.containsKey('eventInsight') && data['eventInsight'] != null &&
+            data['eventInsight'].containsKey('_id')) {
             _eventInsight = EventInsightClass.fromJson(data['eventInsight']);
           }
           setState(() {
@@ -176,7 +196,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     if (_ipService.IsLoaded() || currentUserState.isLoggedIn) {
       _loadingIP = false;
     }
-    if (!_inited && !_loadingIP) {
+    if (!_inited) {
       _inited = true;
       var data = {
         // 'id': widget.id,
@@ -186,12 +206,21 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         'withUserEvents': 1,
         'withUserId': currentUserState.isLoggedIn ? currentUserState.currentUser.id : '',
         'withEventInsight': 1,
+        // 'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
+        'addEventView': 0,
+      };
+      _socketService.emit('GetWeeklyEventByIdWithData', data);
+    }
+    if (!_initedIP && !_loadingIP && _event.id.length > 0) {
+      _initedIP = true;
+      var data = {
+        'eventId': _event.id,
         'userOrIP': currentUserState.isLoggedIn ? 'user_' + currentUserState.currentUser.id : _ipService.IP(),
       };
-      _socketService.emit('getWeeklyEventById', data);
+      _socketService.emit('AddEventInsightView', data);
     }
 
-    if (_loading || _loadingIP) {
+    if (_loading) {
       return AppScaffoldComponent(
         listWrapper: true,
         body: Padding(
@@ -202,7 +231,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     List<Widget> buttons = [];
-    if (currentUserState.isLoggedIn && _weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
+    if (currentUserState.isLoggedIn && (_weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)
+      || currentUserState.hasRole('admin'))) {
       buttons = [
         TextButton(
           onPressed: () {
@@ -252,6 +282,11 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     bool alreadySignedUp = false;
+    if (_userEvent.id.length > 0) {
+      if (_userEvent.attendeeCountAsk > 0) {
+        alreadySignedUp = true;
+      }
+    }
 
     Map<String, dynamic> config = _configService.GetConfig();
 
@@ -264,6 +299,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ),
       SizedBox(height: 10),
       Text(shareUrl),
+      SizedBox(height: 10),
+      _buttons.Link(context, 'Print Flyer', '/wep/${_weeklyEvent.uName}'),
       SizedBox(height: 10),
     ];
     List<Widget> colsShare = [
@@ -360,78 +397,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       }
       attendeeInfo += [ SizedBox(height: 10) ];
     }
-    if (_weeklyEvent.priceUSD == 0) {
-      attendeeInfo += [
-        // Text('This is a free event, no RSVP required!'),
-        // SizedBox(height: 10),
-        // ...colsShare,
-      ];
-    } else {
-      if (_userEvent.id.length > 0) {
-        if (_userEvent.attendeeCountAsk > 0) {
-          alreadySignedUp = true;
-        }
-        // This is already shown in UserEventSave
-        // if (_userEvent.hostGroupSizeMax > 0) {
-        //   if (_userEvent.hostGroupSize == _userEvent.hostGroupSizeMax) {
-        //     attendeeInfo += [
-        //       Text('You are hosting ${_userEvent.hostGroupSize} people.'),
-        //       SizedBox(height: 10),
-        //     ];
-        //   } else {
-        //     int diff = _userEvent.hostGroupSizeMax - _userEvent.hostGroupSize;
-        //     attendeeInfo += [
-        //       Text('You are hosting ${_userEvent.hostGroupSize} people thus far, waiting on ${diff} more.'),
-        //       SizedBox(height: 10),
-        //       Text('Share this event with your neighbors to fill your spots:'),
-        //       SizedBox(height: 10),
-        //       ...colsShare,
-        //     ];
-        //   }
-        // }
-        // if (_userEvent.attendeeCountAsk > 0) {
-        //   if (_userEvent.attendeeCount > 0) {
-        //     int guestsGoing = _userEvent.attendeeCount - 1;
-        //     int guestsWaiting = _userEvent.attendeeCountAsk - _userEvent.attendeeCount - 1;
-        //     String text1 = 'You are going';
-        //     if (guestsGoing > 0) {
-        //       text1 += ', with ${guestsGoing} guests';
-        //     }
-        //     if (guestsWaiting > 0) {
-        //       text1 += ', waiting on ${guestsWaiting} more spots';
-        //     }
-        //     attendeeInfo += [
-        //       Text(text1),
-        //       SizedBox(height: 10),
-        //       Text('Share this event with your neighbors:'),
-        //       SizedBox(height: 10),
-        //       ...colsShare,
-        //     ];
-        //   } else {
-        //     attendeeInfo += [
-        //       Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
-        //       SizedBox(height: 10),
-        //       Text('Share this event with your neighbors to get another host so you can join:'),
-        //       SizedBox(height: 10),
-        //       ...colsShare,
-        //     ];
-        //   }
-        // }
-        // if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
-        //   String text1 = '';
-        //   if (_userEvent.creditsEarned > 0) {
-        //     text1 += '${_userEvent.creditsEarned} credits earned. ';
-        //   }
-        //   if (_userEvent.creditsRedeemed > 0) {
-        //     text1 += '${_userEvent.creditsRedeemed} credits redeemed. ';
-        //   }
-        //   attendeeInfo += [
-        //     Text(text1),
-        //     SizedBox(height: 10),
-        //   ];
-        // }
-      }
-    }
+
     if (!alreadySignedUp) {
       String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
       String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
@@ -492,16 +458,55 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
+    List<Widget> colsAddress = [];
+    String address = _locationService.JoinAddress(_weeklyEvent.locationAddress);
+    if (address.length > 0) {
+      colsAddress += [
+        Text(address),
+        SizedBox(height: 10),
+      ];
+    }
+
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _style.Text1('${_weeklyEvent.title}', size: 'xlarge'),
-        SizedBox(height: 10),
         _weeklyEvent.imageUrls.length <= 0 ?
           Image.asset('assets/images/shared-meal.jpg', height: 300, width: double.infinity, fit: BoxFit.cover,)
             : Image.network(_weeklyEvent.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
         SizedBox(height: 10),
-        Text(_weeklyEvent.description),
+        _style.Text1('${_weeklyEvent.title}', size: 'xlarge', colorKey: 'primary'),
+        SizedBox(height: 30),
+        Row(
+          children: [
+            Image.asset('assets/images/logo.png', width: 30, height: 30),
+            SizedBox(width: 10),
+            _style.Text1('Description', size: 'large', colorKey: 'primary'),
+          ]
+        ),
+        SizedBox(height: 10),
+        MarkdownBody(
+          selectable: true,
+          data: _weeklyEvent.description!,
+          onTapLink: (text, href, title) {
+            launch(href!);
+          },
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+            h1: Theme.of(context).textTheme.displayLarge,
+            h2: Theme.of(context).textTheme.displayMedium,
+            h3: Theme.of(context).textTheme.displaySmall,
+            h4: Theme.of(context).textTheme.headlineMedium,
+            h5: Theme.of(context).textTheme.headlineSmall,
+            h6: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        SizedBox(height: 30),
+        Row(
+          children: [
+            Image.asset('assets/images/logo.png', width: 30, height: 30),
+            SizedBox(width: 10),
+            _style.Text1('Event Details', size: 'large', colorKey: 'primary'),
+          ]
+        ),
         SizedBox(height: 10),
         // _style.Text1('${_weeklyEvent.xDay}s ${_weeklyEvent.startTime} - ${_weeklyEvent.endTime}',
         //     left: Icon(Icons.calendar_today)),
@@ -511,6 +516,14 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         EventFeedback(weeklyEventId: _weeklyEvent.id, showDetails: 0,),
         SizedBox(height: 10),
         ...colsIcebreakers,
+        SizedBox(height: 10),
+        // Container(height: 300, width: 533,
+        YoutubePlayer(
+          controller: _youtubeController,
+          aspectRatio: 16 / 9,
+        ),
+        // ),
+        SizedBox(height: 10),
       ]
     );
 
@@ -522,6 +535,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           zoom: 17, markerLngLat: [_weeklyEvent.location.coordinates[0], _weeklyEvent.location.coordinates[1]],
         ),
         SizedBox(height: 10),
+        ...colsAddress,
         ...admins,
         SizedBox(height: 10),
         ...colsCalendar,
@@ -544,6 +558,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     );
 
     double width = 1200;
+    if (!_initialLoadDone) {
+      _initialLoadDone = true;
+      // final transaction = Sentry.getSpan();
+      // transaction?.setMeasurement('weekly_event_view.render',
+      //   stopwatch.elapsedMilliseconds / 1000);
+      _transaction.finish();
+      // print ('render ${stopwatch.elapsedMilliseconds / 1000}');
+      // stopwatch.stop();
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       width: width,

@@ -141,7 +141,8 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     }
 
     List<Widget> colsPhone = [];
-    if (currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) {
+    if ((currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) &&
+      (currentUserState.currentUser.whatsappNumber!.length < 1 || currentUserState.currentUser.whatsappNumberVerified < 1)) {
       colsPhone = [
         Text('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
         SizedBox(height: 10),
@@ -204,7 +205,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
           children: [
             _layoutService.WrapWidth([
               _inputFields.inputNumber(_formVals, 'attendeeCountAsk', required: true,
-                label: 'How many spots (including yourself)?', min: 1, onChange: (double? val)  {
+                label: 'How many spots (including yourself)?', min: 1, onChanged: (double? val)  {
                   if (val != null && val! >= 1) {
                     setState(() { _formVals = _formVals;});
                   }

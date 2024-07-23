@@ -12,11 +12,15 @@ class DateTimeService {
 
   bool _tzInited = false;
 
-  String Format(var dateTime, String format, {bool local = true}) {
+  String Format(String dateTime, String format, {bool local = true}) {
     var dateValue = DateTime.parse(dateTime);
     if (local) {
       dateValue = dateValue.toUtc().toLocal();
     }
+    return DateFormat(format).format(dateValue);
+  }
+
+  String FormatObj(DateTime dateValue, String format) {
     return DateFormat(format).format(dateValue);
   }
 

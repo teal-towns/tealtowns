@@ -4,6 +4,7 @@ from common import mongo_db_crud as _mongo_db_crud
 from event import event as _event
 from event import weekly_event as _weekly_event
 from shared_item import shared_item as _shared_item
+from neighborhood import user_neighborhood as _user_neighborhood
 
 def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
     weeklyEventsCount: int = 3, sharedItemsCount: int = 3, maxMeters: float = 500,
@@ -15,12 +16,11 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
         ret['message'] = 'Neighborhood not found for ' + uName
         return ret
 
-    neighborhoodId = ret['neighborhood']['_id']
     neighborhoodUName = ret['neighborhood']['uName']
     if userId:
         userNeighborhoods = _mongo_db_crud.Search('userNeighborhood', stringKeyVals = {'userId': userId})['userNeighborhoods']
         for userNeighborhood in userNeighborhoods:
-            if neighborhoodId == userNeighborhood['neighborhoodId']:
+            if neighborhoodUName == userNeighborhood['neighborhoodUName']:
                 ret['neighborhood']['userNeighborhood'] = userNeighborhood
 
     lngLat = ret['neighborhood']['location']['coordinates']
@@ -51,7 +51,7 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
                 ret['totalCutUSD'] = retAttending['totalCutUSD']
                 ret['totalEventUsersCount'] = retAttending['totalEventUsersCount']
     if withUsersCount:
-        items = mongo_db.find('userNeighborhood', {'neighborhoodId': neighborhoodId})['items']
+        items = mongo_db.find('userNeighborhood', {'neighborhoodUName': neighborhoodUName})['items']
         ret['usersCount'] = len(items)
     if withSharedItems:
         items = []
@@ -71,15 +71,25 @@ def SearchNear(stringKeyVals: dict = {}, locationKeyVals: dict = {}, limit: int 
     if userId:
         userNeighborhoods = _mongo_db_crud.Search('userNeighborhood', stringKeyVals = {'userId': userId})['userNeighborhoods']
         for index, neighborhood in enumerate(ret['neighborhoods']):
-            neighborhoodId = neighborhood['_id']
+            neighborhoodUName = neighborhood['uName']
             for userNeighborhood in userNeighborhoods:
-                if neighborhoodId == userNeighborhood['neighborhoodId']:
+                if neighborhoodUName == userNeighborhood['neighborhoodUName']:
                     ret['neighborhoods'][index]['userNeighborhood'] = userNeighborhood
                     break
 
     return ret
 
-def Save(neighborhood: dict):
+def Save(neighborhood: dict, userId: str = ''):
     if ('timezone' not in neighborhood or neighborhood['timezone'] == '') and 'location' in neighborhood:
         neighborhood['timezone'] = date_time.GetTimezoneFromLngLat(neighborhood['location']['coordinates'])
-    return _mongo_db_crud.Save('neighborhood', neighborhood)
+    ret = _mongo_db_crud.Save('neighborhood', neighborhood)
+    if ret['valid'] and len(userId) > 0:
+        userNeighborhood = {
+            'userId': userId,
+            'neighborhoodUName': ret['neighborhood']['uName'],
+            'status': 'default',
+            'roles': ['creator', 'ambassador'],
+        }
+        ret1 = _user_neighborhood.Save(userNeighborhood)
+        ret['userNeighborhood'] = ret1['userNeighborhood']
+    return ret

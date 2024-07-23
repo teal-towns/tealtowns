@@ -24,6 +24,7 @@ def updateWithEnvironmentVars(config):
 
 def get_db(config):
     if 'mongodb' in config and 'url' in config['mongodb'] and 'db_name' in config['mongodb']:
+        print ("connecting to mongodb", config['mongodb']['db_name'])
         db = mongo_db.connect_to_db(config['mongodb']['url'], config['mongodb']['db_name'])
         print ("connected to mongodb", config['mongodb']['db_name'])
         return db

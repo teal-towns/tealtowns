@@ -30,6 +30,7 @@ def Allowed(route, auth, data):
     byRoute = {
         'SaveUserRole': { 'roles': ['editUser'] },
         'SaveIcebreaker': { 'roles': ['tealtownsTeam'] },
+        'HijackLogin': { 'roles': ['hijackUser'] },
     }
 
     if route in perms or route in userIdRequired or route in admin:

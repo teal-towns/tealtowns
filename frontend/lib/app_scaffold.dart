@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,9 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 
 import '../third_party/custom_icon_icons.dart';
-// import './common/buttons.dart';
+import './common/buttons.dart';
 import './common/colors_service.dart';
 import './common/link_service.dart';
+import './common/socket_service.dart';
 import './modules/user_auth/current_user_state.dart';
 import './modules/neighborhood/neighborhood_state.dart';
 import './routes.dart';
@@ -39,9 +41,34 @@ class AppScaffoldComponent extends StatefulWidget {
 }
 
 class _AppScaffoldState extends State<AppScaffoldComponent> {
-  // Buttons _buttons = Buttons();
+  Buttons _buttons = Buttons();
   ColorsService _colors = ColorsService();
   LinkService _linkService = LinkService();
+  List<String> _routeIds = [];
+  SocketService _socketService = SocketService();
+
+  String _gitSha = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _routeIds.add(_socketService.onRoute('GetGitSha', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        setState(() { _gitSha = data['gitSha'].substring(0,7); });
+      }
+    }));
+
+    _socketService.emit('GetGitSha', {});
+  }
+
+  @override
+  void dispose() {
+    _socketService.offRouteIds(_routeIds);
+    super.dispose();
+  }
 
   Widget _buildLinkButton(BuildContext context, String routePath, String label) {
     return Container(
@@ -230,6 +257,8 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
               ...spanLinks,
             ]
           )),
+          SizedBox(height: 10),
+          Text('Version ${_gitSha}'),
         ],
       ),
     );
@@ -248,6 +277,12 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           ),
         ];
       }
+      rows += [
+        Expanded(
+          flex: 1,
+          child: _buildNavButton('/user', 'My Events', Icons.event, context, width: double.infinity, fontSize: 10),
+        ),
+      ];
     }
     rows += [
       // Expanded(
@@ -309,11 +344,28 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       ];
     }
 
+    List<Widget> colsBelowHeader = [];
+    if (currentUserState.appData.containsKey('eventFeedbackSave')) {
+      String link = '/event-feedback-save?eventId=' + currentUserState.appData['eventFeedbackSave']['eventId'];
+      colsBelowHeader = [
+        Container(color: _colors.colors['primary'], height: 50,
+          child: Row(
+            children: [
+              Expanded(flex: 1, child: Text('')),
+              _buttons.Link(context, 'Add Your Event Feedback', link, colorBackground: 'white'),
+              Expanded(flex: 1, child: Text('')),
+            ]
+          )
+        ),
+      ];
+    }
+
     if (widget.listWrapper) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ...colsHeader,
+          ...colsBelowHeader,
           Expanded(flex: 1,
             child: ListView(
               children: [
@@ -342,6 +394,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ...colsHeader,
+        ...colsBelowHeader,
         Expanded(flex: 1,
           child: Container(
             color: Colors.white,
@@ -366,9 +419,9 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       { 'url': '/blog', 'text': 'Blog' },
     ];
     Color footerColor = _colors.colors['white'];
-    // if (size == 'small') {
+    if (size == 'small') {
       return Container(
-        color: _colors.colors['primary'],
+        color: _colors.colors['primaryDark'],
         child: Column(
           children: [
             SizedBox(height: 30),
@@ -405,11 +458,39 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           ],
         )
       );
-    // }
-    // return Container(
-    //   color: _colors.colors['primary'],
-    //   child: Text('todo'),
-    // );
+    }
+
+
+    List<Widget> rowsLinks = [];
+    for (Map<String, dynamic> link in links) {
+      rowsLinks += [
+        _buttons.LinkInline(context, link['text'], link['url'], colorText: 'white'),
+        SizedBox(width: 20),
+      ];
+    }
+    return Container(
+      color: _colors.colors['primaryDark'],
+      padding: EdgeInsets.only(top: 20, bottom: 20, left: 50, right: 50),
+      child: Row(
+        children: [
+          Image.asset('assets/images/logo-white.png', width: 30, height: 30),
+          SizedBox(width: 20),
+          Text(email, style: TextStyle(color: footerColor)),
+          Expanded(flex: 1, child: Container()),
+          ...rowsLinks,
+          SizedBox(width: 20),
+          Text('2024 TealTowns', style: TextStyle(color: footerColor)),
+          SizedBox(width: 20),
+          IconButton(
+            iconSize: 25,
+            icon: Icon(CustomIcon.linkedin, color: footerColor),
+            onPressed: () {
+              _linkService.LaunchURL('https://www.linkedin.com/company/101358571');
+            },
+          ),
+        ]
+      )
+    );
   }
 
   Widget _buildSmall(BuildContext context, var currentUserState) {
@@ -436,6 +517,9 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
             'Neighborhood', Icons.house, context),
         ];
       }
+      buttons += [
+        _buildNavButton('/user', 'My Events', Icons.event, context),
+      ];
     }
     Widget content = Scaffold(
       appBar: AppBar(

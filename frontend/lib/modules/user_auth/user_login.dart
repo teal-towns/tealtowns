@@ -7,6 +7,7 @@ import '../../app_scaffold.dart';
 import '../../common/socket_service.dart';
 import './user_class.dart';
 import '../../common/form_input/input_fields.dart';
+import '../../common/style.dart';
 import './current_user_state.dart';
 import '../../routes.dart';
 
@@ -22,6 +23,7 @@ class _UserLoginState extends State<UserLoginComponent> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
+  Style _style = Style();
 
   final _formKey = GlobalKey<FormState>();
   final _formFieldKeyEmail = GlobalKey<FormFieldState>();
@@ -142,6 +144,13 @@ class _UserLoginState extends State<UserLoginComponent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Row(
+              children: [
+                Image.asset('assets/images/logo.png', width: 30, height: 30),
+                SizedBox(width: 10),
+                _style.Text1('Log In', size: 'large', colorKey: 'primary'),
+              ]
+            ),
             _inputFields.inputEmail(formVals, 'email', fieldKey: _formFieldKeyEmail),
             _inputFields.inputPassword(formVals, 'password', minLen: 6),
             _buildSubmitButtons(context),

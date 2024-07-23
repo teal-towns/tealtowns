@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
+import '../../common/layout_service.dart';
 import '../../common/socket_service.dart';
 import './event_class.dart';
 import './event_feedback_class.dart';
 import './user_feedback_class.dart';
+import '../user_auth/current_user_state.dart';
 
 class EventFeedback extends StatefulWidget {
   String weeklyEventId;
@@ -18,7 +22,9 @@ class EventFeedback extends StatefulWidget {
 }
 
 class _EventFeedbackState extends State<EventFeedback> {
+  Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
+  LayoutService _layoutService = LayoutService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
 
@@ -27,6 +33,11 @@ class _EventFeedbackState extends State<EventFeedback> {
   List<UserFeedbackClass> _userFeedbacks = [];
   List<String> _feedbackVoteStrings = [];
   List<String> _positiveVoteStrings = [];
+  Map<String, dynamic> _attendedStats = {
+    'yes': 0,
+    'no': 0,
+  };
+  double _starsAverage = 0.0;
   Map<String, dynamic> _willJoinNextWeekStats = {
     'yes': 0,
     'no': 0,
@@ -38,6 +49,7 @@ class _EventFeedbackState extends State<EventFeedback> {
     'invites': 0,
   };
   bool _show = true;
+  bool _missingUserFeedback = false;
 
   @override
   void initState() {
@@ -61,12 +73,14 @@ class _EventFeedbackState extends State<EventFeedback> {
       }
     }));
 
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    String userId = currentUserState.isLoggedIn ? currentUserState.currentUser.id : '';
     if (widget.eventId.length > 0) {
       _socketService.emit('GetEventFeedbackByEvent',
-        {'eventId': widget.eventId, 'withUserFeedback': 1, 'withEvent': 1});
+        {'eventId': widget.eventId, 'withUserFeedback': 1, 'withEvent': 1, 'withCheckAskForFeedbackUserId': userId});
     } else if (widget.weeklyEventId.length > 0) {
       _socketService.emit('GetEventFeedbackByWeeklyEvent',
-        {'weeklyEventId': widget.weeklyEventId, 'withUserFeedback': 1});
+        {'weeklyEventId': widget.weeklyEventId, 'withUserFeedback': 1, 'withCheckAskForFeedbackUserId': userId});
     }
 
     if (widget.showDetails < 1) {
@@ -77,6 +91,14 @@ class _EventFeedbackState extends State<EventFeedback> {
   void SetData(var data) {
     _eventFeedback = EventFeedbackClass.fromJson(data['eventFeedback']);
     _event = EventClass.fromJson(data['event']);
+    if (data.containsKey('missingFeedbackEventIds')) {
+      for (int i = 0; i < data['missingFeedbackEventIds'].length; i++) {
+        if (data['missingFeedbackEventIds'][i] == _eventFeedback.eventId) {
+          _missingUserFeedback = true;
+          break;
+        }
+      }
+    }
     for (int i = 0; i < _eventFeedback.feedbackVotes.length; i++) {
       int count = _eventFeedback.feedbackVotes[i].userIds.length;
       _feedbackVoteStrings.add('(${count}) ${_eventFeedback.feedbackVotes[i].feedback}');
@@ -88,6 +110,12 @@ class _EventFeedbackState extends State<EventFeedback> {
     }
     _positiveVoteStrings.sort((b, a) => a.compareTo(b));
     _userFeedbacks = [];
+    _attendedStats = {
+      'yes': 0,
+      'no': 0,
+    };
+    _starsAverage = 0.0;
+    double starsSum = 0;
     _willJoinNextWeekStats = {
       'yes': 0,
       'no': 0,
@@ -101,6 +129,8 @@ class _EventFeedbackState extends State<EventFeedback> {
     if (data.containsKey('userFeedbacks')) {
       for (var userFeedback in data['userFeedbacks']) {
         _userFeedbacks.add(UserFeedbackClass.fromJson(userFeedback));
+        _attendedStats[userFeedback['attended']] += 1;
+        starsSum += userFeedback['stars'];
         _willJoinNextWeekStats[userFeedback['willJoinNextWeek']] += 1;
         if (userFeedback['willInvite'].length > 0) {
           _willInviteStats[userFeedback['willInvite']] += 1;
@@ -114,8 +144,11 @@ class _EventFeedbackState extends State<EventFeedback> {
       _feedbackVoteStrings = _feedbackVoteStrings;
       _positiveVoteStrings = _positiveVoteStrings;
       _userFeedbacks = _userFeedbacks;
+      _attendedStats = _attendedStats;
+      _starsAverage = _attendedStats['yes'] > 0 ? starsSum / _attendedStats['yes'] : 0;
       _willJoinNextWeekStats = _willJoinNextWeekStats;
       _willInviteStats = _willInviteStats;
+      _missingUserFeedback = _missingUserFeedback;
     });
   }
 
@@ -132,9 +165,19 @@ class _EventFeedbackState extends State<EventFeedback> {
     }
     String peopleCount = _userFeedbacks.length == 1 ? '1 person' : '${_userFeedbacks.length} people';
     String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
+
+    List<Widget> colsMissingUserFeedback = [];
+    if (_missingUserFeedback) {
+      colsMissingUserFeedback = [
+        _buttons.LinkElevated(context, 'Add Your Feedback', '/event-feedback-save?eventId=${_eventFeedback.eventId}'),
+        SizedBox(height: 10),
+      ];
+    }
+
     List<Widget> colsTitle = [
       Text('Feedback From Past Event (${peopleCount}, ${eventStart})'),
       SizedBox(height: 10),
+      ...colsMissingUserFeedback,
     ];
     if (!_show && _userFeedbacks.length > 0) {
       return Column(
@@ -146,6 +189,7 @@ class _EventFeedbackState extends State<EventFeedback> {
             }
           ),
           SizedBox(height: 10),
+          ...colsMissingUserFeedback,
         ],
       );
     }
@@ -176,6 +220,13 @@ class _EventFeedbackState extends State<EventFeedback> {
         SizedBox(height: 10),
       ];
     }
+    List<Widget> colsStarsAttended = [];
+    if (_attendedStats['yes'] > 0) {
+      colsStarsAttended = [
+        Text('${_starsAverage.toStringAsFixed(1)} stars, ${_attendedStats['yes']} attended'),
+        SizedBox(height: 10),
+      ];
+    }
     List<Widget> colsWillJoin = [];
     if (_willJoinNextWeekStats['yes'] > 0 || _willJoinNextWeekStats['no'] > 0 || _willJoinNextWeekStats['futureWeek'] > 0) {
       colsWillJoin = [
@@ -191,14 +242,26 @@ class _EventFeedbackState extends State<EventFeedback> {
       ];
     }
 
+    List<Widget> images = [];
+    if (_eventFeedback.imageUrls.length > 0) {
+      for (int i = 0; i < _eventFeedback.imageUrls.length; i++) {
+        String url = _eventFeedback.imageUrls[i];
+        images.add(
+          Image.network(url, height: 100, width: 100, fit: BoxFit.cover),
+        );
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...colsTitle,
+        ...colsStarsAttended,
         ...colsImprove,
         ...colsEnjoyed,
         ...colsWillJoin,
         ...colsWillInvite,
+        _layoutService.WrapWidth(images, width: 100,)
       ],
     );
   }

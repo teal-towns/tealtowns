@@ -5,12 +5,15 @@ class UserClass {
   ParseService _parseService = ParseService();
 
   String id = '', email = '', firstName = '', lastName = '', status = '', username = '',
-    sessionId = '', roles = '', createdAt = '', phoneNumber = '', phoneNumberVerificationKey = '';
+    sessionId = '', roles = '', createdAt = '', phoneNumber = '', phoneNumberVerificationKey = '',
+    whatsappNumber = '', whatsappNumberVerificationKey = '';
   //List<String> roles;
-  int emailVerified = 0, phoneNumberVerified = 0;
+  int emailVerified = 0, phoneNumberVerified = 0, whatsappNumberVerified = 0;
   LocationClass location = LocationClass.fromJson({});
   UserClass(this.id, this.email, this.firstName, this.lastName, this.status, this.username, this.sessionId, this.roles,
-    this.createdAt, this.phoneNumber, this.phoneNumberVerificationKey, this.emailVerified, this.phoneNumberVerified,
+    this.createdAt, this.phoneNumber, this.phoneNumberVerificationKey,
+    this.whatsappNumber, this.whatsappNumberVerificationKey,
+    this.emailVerified, this.phoneNumberVerified, this.whatsappNumberVerified,
     this.location);
   UserClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
@@ -34,6 +37,9 @@ class UserClass {
     this.phoneNumber = json['phoneNumber'] ?? '';
     this.phoneNumberVerificationKey = json['phoneNumberVerificationKey'] ?? '';
     this.phoneNumberVerified = json['phoneNumberVerified'] != null ? _parseService.toIntNoNull(json['phoneNumberVerified']) : 0;
+    this.whatsappNumber = json['whatsappNumber'] ?? '';
+    this.whatsappNumberVerificationKey = json['whatsappNumberVerificationKey'] ?? '';
+    this.whatsappNumberVerified = json['whatsappNumberVerified'] != null ? _parseService.toIntNoNull(json['whatsappNumberVerified']) : 0;
     this.emailVerified = json['emailVerified'] != null ? _parseService.toIntNoNull(json['emailVerified']) : 0;
   }
 
@@ -51,6 +57,9 @@ class UserClass {
     'phoneNumber': phoneNumber,
     'phoneNumberVerificationKey': phoneNumberVerificationKey,
     'phoneNumberVerified': phoneNumberVerified,
+    'whatsappNumber': whatsappNumber,
+    'whatsappNumberVerificationKey': whatsappNumberVerificationKey,
+    'whatsappNumberVerified': whatsappNumberVerified,
     'emailVerified': emailVerified,
   };
 

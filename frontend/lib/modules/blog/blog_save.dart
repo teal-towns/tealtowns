@@ -134,7 +134,7 @@ class _BlogSaveState extends State<BlogSave> {
                 Expanded(
                   flex: 1,
                   child: _inputFields.inputText(formVals, 'text', label: 'Text (use Markdown for formatting)',
-                    required: true, minLines: 50, maxLines: 50, debounceChange: 1000, onChange: (String text) {
+                    required: true, minLines: 50, maxLines: 50, debounceChange: 1000, onChanged: (String text) {
                     setState(() {
                       _textPreview = formVals['text'];
                     });

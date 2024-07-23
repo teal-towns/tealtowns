@@ -10,26 +10,32 @@ _users = [
         'password': 'pass12',
         'firstName': 'Bob',
         'lastName': 'Johnson',
-        'roles': ['']
+        'roles': [''],
+        'username': 'bob',
     },
     {
         'email': 'alice@email.com',
         'password': 'pass23',
         'firstName': 'Alice',
         'lastName': 'Souza',
-        'roles': ['']
+        'roles': [''],
+        'username': 'alice',
     }
 ]
 
 def GetDefault():
     return {
         'email': _stubs_data.RandomString() + '@email.com',
+        'emailVerified': random.randint(0, 1),
         'password': _stubs_data.RandomString(),
         'firstName': _stubs_data.RandomWord(),
         'lastName': _stubs_data.RandomWord(),
         'roles': [''],
         'phoneNumber': _stubs_data.RandomPhone(),
         'phoneNumberVerified': random.randint(0, 1),
+        'whatsappNumber': _stubs_data.RandomPhone(),
+        'whatsappNumberVerified': random.randint(0, 1),
+        'username': _stubs_data.RandomString().lower(),
     }
 
 def AddDefault():

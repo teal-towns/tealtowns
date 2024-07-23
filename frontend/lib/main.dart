@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 //if (kIsWeb) {
 //import 'dart:html' if (dart.library.html);
 //}
@@ -72,6 +73,22 @@ main() async {
   _socketService.connect({'default': dotenv.env['SOCKET_URL_PUBLIC']});
 
   setPathUrlStrategy();
+
+  // WidgetsFlutterBinding.ensureInitialized();
+  if (dotenv.env['SENTRY_DSN'] != null &&
+      dotenv.env['SENTRY_DSN']!.length > 0) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = dotenv.env['SENTRY_DSN'];
+        // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+        // We recommend adjusting this value in production.
+        options.tracesSampleRate = 1.0;
+        // The sampling rate for profiling is relative to tracesSampleRate
+        // Setting to 1.0 will profile 100% of sampled transactions:
+        options.profilesSampleRate = 1.0;
+      },
+    );
+  }
   runApp(MultiProvider(
     providers: [
       //ChangeNotifierProvider(create: (context) => AppState()),
@@ -122,6 +139,9 @@ class _MyApp extends State<MyApp> {
         Locale('es'), // Spanish
         Locale('ja'), // Japanese
       ],
+      // navigatorObservers: [
+      //   SentryNavigatorObserver()
+      // ],
     );
     ;
   }

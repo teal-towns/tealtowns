@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 // Note: Must also update custom_theme.dart to match
 Map<String, List<double>> _colorMap = {
-  'primary': [16, 91, 87],
-  'primaryLight': [111, 188, 169],
-  'primaryDark': [0, 45, 40],
-  'primaryTransparent': [16, 91, 87, 0.4],
+  'primary': [44, 163, 134],
+  'primaryLight': [44, 163, 134],
+  'primaryDark': [16, 91, 87],
+  'primaryTransparent': [44, 163, 134, 0.4],
   'accent': [143, 229, 142],
   'accentDark': [143, 229, 142],
   'accentTransparent': [143, 229, 142, 0.4],
-  'secondary': [200, 182, 23],
+  'secondary': [253, 224, 72],
   // 'secondary': [143, 229, 142],
   'text': [124, 124, 124],
   'error': [234, 84, 85],
@@ -25,6 +25,7 @@ Map<String, List<double>> _colorMap = {
   'greyTransparent': [125, 125, 125, 0.4],
   'greyDark': [50, 50, 50],
   'white': [255, 255, 255],
+  'brown': [72, 43, 8],
 };
 List<double> primary = [0, 167, 0];
 List<double> secondary = [15, 69, 194];
@@ -79,6 +80,16 @@ class ColorsService {
       _colors[key] = valsToColor(_colorMap[key]!);
       _colorsStr[key] = valsToString(_colorMap[key]!);
     }
+  }
+
+  List<double> GetRGB(String key) {
+    if (!_inited) {
+      Init();
+    }
+    if (!_colorMap.containsKey(key)) {
+      return [0, 0, 0];
+    }
+    return _colorMap[key]!;
   }
 
   Map<String, Color> GetColors() {

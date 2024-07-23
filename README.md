@@ -30,10 +30,11 @@ Note, may have to replace all `pip` with `pip3` and `python` with `python3`. Typ
 - `cd frontend` then `flutter test`
 
 ## Git Flow (Writting and Pushing Code)
+Note: `git status -s` to see current status/changes.
 - `git checkout main && git pull origin main`
 - `git checkout -b MY-BRANCH`
-- [Write your code]
-- `git commit -am 'SUMMARY OF MY CODE CHANGES'`
+- [Write your code and bump the version in `frontend/pubspec.yml` (e.g. increment `version: 1.0.0+6` to `version: 1.0.0+7`)]
+- `git add . && git commit -am 'SUMMARY OF MY CODE CHANGES'`
 - `git checkout main && git pull origin main && git checkout MY-BRANCH && git rebase main`
 - `git push origin MY-BRANCH`
 - Open a pull request on github.com. Make sure tests pass, then ask for a code review. Once approved, merge it on github.com This will automatically deploy your code.
@@ -48,3 +49,9 @@ Note, may have to replace all `pip` with `pip3` and `python` with `python3`. Typ
 - Android
   - `flutter build appbundle`
   - Use Google Play to upload app bundle & submit for review
+
+## Common actions
+
+### Twilio / whatsapp
+
+- Add WhatsApp message templates on twilio.com Content Template Builder, then add / update the ids in `config.yml`

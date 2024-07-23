@@ -42,9 +42,11 @@ def Save(userEvent: dict, payType: str):
     else:
         event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
         weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
+        user = mongo_db.find_one('user', {'_id': mongo_db.to_object_id(userEvent['userId'])})['item']
         if 'hostGroupSizeMax' not in userEvent:
             userEvent['hostGroupSizeMax'] = 0
-        userEvent = lodash.extend_object({
+        # Override some fields
+        userEvent = lodash.extend_object(userEvent, {
             'hostStatus': 'pending' if userEvent['hostGroupSizeMax'] > 0 else 'complete',
             'hostGroupSize': 0,
             'attendeeStatus': 'pending',
@@ -53,7 +55,9 @@ def Save(userEvent: dict, payType: str):
             'creditsRedeemed': 0,
             'creditsPriceUSD': weeklyEvent['priceUSD'],
             'eventEnd': event['end'],
-        }, userEvent)
+            'weeklyEventUName': weeklyEvent['uName'],
+            'username': user['username'],
+        })
 
     freeEvent = 0
     if payType == 'free' and checkPay:
@@ -74,7 +78,8 @@ def Save(userEvent: dict, payType: str):
         userEvent['attendeeCount'] = userEvent['attendeeCountAsk']
         userEvent['attendeeStatus'] = 'complete'
 
-    ret = _mongo_db_crud.Save('userEvent', userEvent)
+    retOne = _mongo_db_crud.Save('userEvent', userEvent)
+    ret['userEvent'] = retOne['userEvent']
     _user_insight.Save({ 'userId': userEvent['userId'], 'firstEventSignUpAt': date_time.now_string() })
     if checkPay:
         ret['spotsPaidFor'] = retPay['spotsPaidFor']
@@ -342,7 +347,9 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
                 if newAttendeeInfos[hostId]['attendeeCount'] > 1:
                     body += " " + str(newAttendeeInfos[hostId]['attendeeCount'] - 1) + " of your guests are in."
                 body += " " + _weekly_event.GetUrl(weeklyEvent)
-                retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+                messageTemplateVariables = { "1": "$" + str(amount), "2": str(hostGroupSize) + " people", "3": _weekly_event.GetUrl(weeklyEvent) }
+                retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
+                    messageTemplateKey = 'eventHostMoney', messageTemplateVariables = messageTemplateVariables)
                 if retSms['valid']:
                     ret['notifyUserIdsHosts']['sms'].append(hostId)
 
@@ -366,12 +373,15 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
                     retPhone = _user.GetPhone(attendeeId)
                     if retPhone['valid']:
                         body = ""
+                        messageTemplateVariables = { "1": "You", "2": _weekly_event.GetUrl(weeklyEvent) }
                         if newAttendeeInfos[attendeeId]['attendeeCount'] > 1:
                             body += "You and " + str(newAttendeeInfos[attendeeId]['attendeeCount'] - 1) + " of your guests are in for this week's event."
+                            messageTemplateVariables["1"] = "You and " + str(newAttendeeInfos[attendeeId]['attendeeCount'] - 1) + " of your guests"
                         else:
                             body += "You are in for this week's event."
                         body += " " + _weekly_event.GetUrl(weeklyEvent)
-                        retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+                        retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
+                            messageTemplateKey = 'eventAttendConfirmed', messageTemplateVariables = messageTemplateVariables)
                         if retSms['valid']:
                             ret['notifyUserIdsAttendees']['sms'].append(attendeeId)
         
@@ -415,7 +425,9 @@ def GiveUnusedCredits(eventId: str, event: dict, weeklyEvent: dict):
         retPhone = _user.GetPhone(userId)
         if retPhone['valid']:
             body = "Not enough hosts for this week's event; use your new " + str(credits) + " credits to sign up for next week: " + _weekly_event.GetUrl(weeklyEvent)
-            retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+            messageTemplateVariables = { "1": str(credits) + " credits", "2": _weekly_event.GetUrl(weeklyEvent) }
+            retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
+                messageTemplateKey = 'eventNotEnoughHosts', messageTemplateVariables = messageTemplateVariables)
             if retSms['valid']:
                 ret['notifyUserIds']['sms'].append(userId)
     return ret
@@ -442,7 +454,9 @@ def GiveEndSubscriptionCredits(weeklyEventId: str, userId: str):
             if retPhone['valid']:
                 url = _config['web_server']['urls']['base'] + '/weekly-events'
                 body = "Subscription canceled; use your new " + str(credits) + " credits to sign up for new events: " + url
-                retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+                messageTemplateVariables = { "1": str(credits) + " credits", "2": url }
+                retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
+                    messageTemplateKey = 'eventSubscriptionCanceled', messageTemplateVariables = messageTemplateVariables)
                 if retSms['valid']:
                     ret['notifyUserIds']['sms'].append(userId)
     return ret
@@ -475,7 +489,8 @@ def GetUsers(eventId: str, withUsers: int = 1):
             ret['userEvents'][indicesMap[user['_id']]]['user'] = user
     return ret
 
-def NotifyUsers(eventId: str, smsContent: str, minAttendeeCount: int = 0):
+def NotifyUsers(eventId: str, smsContent: str, minAttendeeCount: int = 0,
+    messageTemplateKey: str = '', messageTemplateVariables: dict = {}):
     ret = { 'valid': 1, 'message': '', 'notifyUserIds': { 'sms': [], }, }
     query = { 'eventId': eventId, }
     if minAttendeeCount > 0:
@@ -485,7 +500,8 @@ def NotifyUsers(eventId: str, smsContent: str, minAttendeeCount: int = 0):
         retPhone = _user.GetPhone(userEvent['userId'])
         if retPhone['valid']:
             body = smsContent
-            retSms = _sms_twilio.Send(body, retPhone['phoneNumber'])
+            retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
+                messageTemplateKey = messageTemplateKey, messageTemplateVariables = messageTemplateVariables)
             if retSms['valid']:
                 ret['notifyUserIds']['sms'].append(userEvent['userId'])
     return ret

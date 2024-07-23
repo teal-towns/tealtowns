@@ -11,6 +11,10 @@ import './current_user_state.dart';
 import '../../routes.dart';
 
 class UserEmailVerifyComponent extends StatefulWidget {
+  String verifyKey;
+  String email;
+  UserEmailVerifyComponent({this.verifyKey = '', this.email = '' });
+
   @override
   _UserEmailVerifyState createState() => _UserEmailVerifyState();
 }
@@ -55,6 +59,13 @@ class _UserEmailVerifyState extends State<UserEmailVerifyComponent> {
       }
       setState(() { _loading = false; });
     }));
+
+    if (widget.verifyKey.length > 0) {
+      formVals['emailVerificationKey'] = widget.verifyKey;
+    }
+    if (widget.email.length > 0) {
+      formVals['email'] = widget.email;
+    }
   }
 
   Widget _buildSubmit(BuildContext context) {

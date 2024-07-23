@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/date_time_service.dart';
+import '../../common/form_input/image_save.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/link_service.dart';
+import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import './user_event_class.dart';
 import './event_class.dart';
@@ -27,6 +29,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
   LinkService _linkService = LinkService();
+  ParseService _parseService = ParseService();
 
   Map<String, dynamic> _eventFeedback = {};
   Map<String, dynamic> _formValsEventFeedback = {
@@ -34,9 +37,13 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     'feedback': '',
     'positiveVoteIds': [''],
     'positiveFeedback': '',
+    'imageUrls': [],
   };
+  String _userFeedbackId = '';
   Map<String, dynamic> _formValsUserFeedback = {
     // 'forType': 'event',
+    'attended': '',
+    'stars': 0,
     'willJoinNextWeek': '',
     'willInvite': '',
     'invitesString': '',
@@ -52,12 +59,24 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     {'value': 'no', 'label': 'No one this week'},
     {'value': 'willMeetNewNeighbor', 'label': 'I will meet a new neighbor and invite them!'},
   ];
+  List<Map<String, dynamic>> _optsAttended = [
+    {'value': 'yes', 'label': 'Yes'},
+    {'value': 'no', 'label': 'No'},
+  ];
+  List<Map<String, dynamic>> _optsStars = [
+    {'value': 1, 'label': '1 Star'},
+    {'value': 2, 'label': '2 Stars'},
+    {'value': 3, 'label': '3 Stars'},
+    {'value': 4, 'label': '4 Stars'},
+    {'value': 5, 'label': '5 Stars'},
+  ];
   EventClass _event = EventClass.fromJson({});
   WeeklyEventClass _weeklyEvent = WeeklyEventClass.fromJson({});
   String _socketGroupName = '';
   String _userId = '';
   bool _loadingSubmit = false;
   String _message = '';
+  bool _loading = true;
 
   @override
   void initState() {
@@ -123,12 +142,36 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
       }
     }));
 
+    _routeIds.add(_socketService.onRoute('GetUserFeedback', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1 && data['userFeedback'].containsKey('_id')) {
+        _userFeedbackId = data['userFeedback']['_id'];
+        _formValsUserFeedback['attended'] = data['userFeedback']['attended'];
+        _formValsUserFeedback['stars'] = data['userFeedback']['stars'];
+        _formValsUserFeedback['willJoinNextWeek'] = data['userFeedback']['willJoinNextWeek'];
+        _formValsUserFeedback['willInvite'] = data['userFeedback']['willInvite'];
+        setState(() { _formValsUserFeedback = _formValsUserFeedback; _userFeedbackId = _userFeedbackId; _loading = false; });
+      } else {
+        setState(() { _loading = false; });
+      }
+    }));
+
     _routeIds.add(_socketService.onRoute('SaveUserFeedback', callback: (String resString) {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
+        if (data.containsKey('missingFeedbackEventIds')) {
+          var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+          currentUserState.SetAppData({'eventFeedbackMissingIds': data['missingFeedbackEventIds']});
+        }
         String route = '/home';
-        if (_weeklyEvent.uName.length > 0) {
+        int isAlreadyAmbassador = data.containsKey('isAlreadyAmbassador') ? _parseService.toIntNoNull(data['isAlreadyAmbassador']) : 0;
+        int stars = _parseService.toIntNoNull(data['userFeedback']['stars']);
+        if (isAlreadyAmbassador < 1 && stars >= 4) {
+          String neighborhoodUName = data['neighborhoodUName'];
+          route = '/user-neighborhood-save?neighborhoodUName=${neighborhoodUName}';
+        } else if (_weeklyEvent.uName.length > 0) {
           route = '/we/' + _weeklyEvent.uName;
         }
         context.go(route);
@@ -143,6 +186,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
         _socketService.emit('AddSocketGroupUsers', data);
         _socketService.emit('GetEventFeedbackByEvent', { 'eventId': widget.eventId });
         _socketService.emit('GetEventWithWeekly', { 'eventId': widget.eventId });
+        _socketService.emit('GetUserFeedback', { 'forType': 'event', 'forId': widget.eventId, 'userId': _userId });
       }
     }
   }
@@ -169,7 +213,7 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     if (widget.eventId.length < 1) {
       return Text('No event id');
     }
-    if (!_eventFeedback.containsKey('_id') || _event.id.length < 1 || _event.start.length < 1) {
+    if (!_eventFeedback.containsKey('_id') || _event.id.length < 1 || _event.start.length < 1 || _loading) {
       return Column(children: [ LinearProgressIndicator() ]);
     }
 
@@ -223,11 +267,13 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
     }
 
     String eventStart = _dateTime.Format(_event.start, 'EEEE M/d/y');
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('What is 1 improvement that would make this event better? (${_weeklyEvent.title}, ${eventStart})'),
-        SizedBox(height: 10,),
+    List<Widget> colsAttended = [];
+    if (_formValsUserFeedback['attended'] == 'yes') {
+      colsAttended = [
+        _inputFields.inputSelectButtons(_optsStars, _formValsUserFeedback, 'stars', label: 'How would you rate this event?'),
+        SizedBox(height: 30,),
+        Text('What is 1 improvement that would make this event better?'),
+        // SizedBox(height: 10,),
         ...colsFeedback,
         _inputFields.inputText(_formValsEventFeedback, 'feedback', label: 'Write your feedback',),
         SizedBox(height: 10,),
@@ -241,9 +287,9 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
             _socketService.emit('AddEventFeedbackVote', data);
           }
         },),
-        SizedBox(height: 10,),
+        SizedBox(height: 30,),
         Text('What did you gain or enjoy?'),
-        SizedBox(height: 10,),
+        // SizedBox(height: 10,),
         ...colsPositiveFeedback,
         _inputFields.inputText(_formValsEventFeedback, 'positiveFeedback', label: 'Write what you enjoyed or gained',),
         SizedBox(height: 10,),
@@ -258,6 +304,22 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
           }
         },),
         SizedBox(height: 10,),
+        ImageSaveComponent(formVals: _formValsEventFeedback, formValsKey: 'imageUrls', multiple: true,
+          label: 'Have any event photos?', imageUploadSimple: true,),
+        SizedBox(height: 10,),
+      ];
+    }
+
+    String label = 'Did you attend ${_weeklyEvent.title}, ${eventStart}?';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _inputFields.inputSelectButtons(_optsAttended, _formValsUserFeedback, 'attended', label: label, onChanged: (String val) {
+          _formValsUserFeedback['attended'] = val;
+          setState(() { _formValsUserFeedback = _formValsUserFeedback; });
+        }),
+        SizedBox(height: 10,),
+        ...colsAttended,
         ...colsNextEvent,
         ...colsSubmit,
         SizedBox(height: 50,),
@@ -300,6 +362,13 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
       };
       _socketService.emit('AddEventFeedbackUserVotes', data);
     }
+    if (_formValsEventFeedback['imageUrls'].length > 0) {
+      data = {
+        'eventFeedbackId': _eventFeedback['_id'],
+        'imageUrls': _formValsEventFeedback['imageUrls'],
+      };
+      _socketService.emit('AddEventFeedbackImages', data);
+    }
 
     List<String> invites = [];
     if (_formValsUserFeedback['invitesString'].trim().length > 0) {
@@ -313,11 +382,19 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
         'userId': userId,
         'forType': 'event',
         'forId': widget.eventId,
+        'attended': _formValsUserFeedback['attended'],
+        'stars': _formValsUserFeedback['stars'],
         'willJoinNextWeek': _formValsUserFeedback['willJoinNextWeek'],
         'willInvite': _formValsUserFeedback['willInvite'],
         'invites': invites,
       },
+      'withCheckAskForFeedback': 1,
+      'withCheckNeighborhoodAmbassador': 1,
+      'neighborhoodUName': _weeklyEvent.neighborhoodUName,
     };
+    if (_userFeedbackId.length > 0) {
+      data['userFeedback']['_id'] = _userFeedbackId;
+    }
     _socketService.emit('SaveUserFeedback', data);
 
     setState(() { _loadingSubmit = true; });

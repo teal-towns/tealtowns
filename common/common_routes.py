@@ -1,3 +1,4 @@
+import subprocess
 # from fastapi import APIRouter
 
 from common import socket as _socket
@@ -31,5 +32,17 @@ def addRoutes():
         _websocket_clients.RemoveUsersFromGroup(data['groupName'], data['userIds'])
         return ret
     _socket.add_route('RemoveSocketGroupUsers', RemoveSocketGroupUsers)
+
+    def GetGitSha(data, auth, websocket):
+        gitSha = "unknown"
+        try:
+            process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], shell=False, stdout=subprocess.PIPE)
+            gitHeadHash = process.communicate()[0].strip()
+            gitSha = gitHeadHash.decode('utf-8')
+        except Exception as e:
+            print ('common_routes.GetGitSha error', e)
+        return { 'valid': 1, 'message': '', 'gitSha': gitSha }
+    _socket.add_route('GetGitSha', GetGitSha)
+
 
 addRoutes()
