@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../../app_scaffold.dart';
+import '../../common/buttons.dart';
 import '../../common/currency_service.dart';
 import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
@@ -24,22 +25,24 @@ class SharedItems extends StatefulWidget {
   final double lat;
   final double lng;
   final double maxMeters;
+  String myType;
 
-  SharedItems({ this.lat = -999, this.lng = -999, this.maxMeters = 1500, });
+  SharedItems({ this.lat = -999, this.lng = -999, this.maxMeters = 1500, this.myType = '', });
 
   @override
   _SharedItemsState createState() => _SharedItemsState();
 }
 
 class _SharedItemsState extends State<SharedItems> {
-  List<String> _routeIds = [];
-  SocketService _socketService = SocketService();
+  Buttons _buttons = Buttons();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
   LinkService _linkService = LinkService();
   LocationService _locationService = LocationService();
   CurrencyService _currency = CurrencyService();
   SharedItemService _sharedItemService = SharedItemService();
+  List<String> _routeIds = [];
+  SocketService _socketService = SocketService();
 
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic?> _filters = {
@@ -133,6 +136,9 @@ class _SharedItemsState extends State<SharedItems> {
         break;
       }
     }
+    if (widget.myType.length > 0) {
+      _filters['myType'] = widget.myType;
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _init();
@@ -181,10 +187,10 @@ class _SharedItemsState extends State<SharedItems> {
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               child: _layoutService.WrapWidth([
-                _inputFields.inputSelect(_selectOptsMyType, _filters, 'myType',
-                    label: 'Type', onChanged: (String val) {
-                    _searchSharedItems();
-                  }),
+                // _inputFields.inputSelect(_selectOptsMyType, _filters, 'myType',
+                //     label: 'Type', onChanged: (String val) {
+                //     _searchSharedItems();
+                //   }),
                 InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location',
                   guessLocation: !_skipCurrentLocation, onChanged: (Map<String, dynamic> val) {
                   _searchSharedItems();
@@ -194,13 +200,13 @@ class _SharedItemsState extends State<SharedItems> {
                     _searchSharedItems();
                   }),
                 _inputFields.inputText(_filters, 'title', hint: 'title',
-                    label: 'Filter by Title', debounceChange: 1000, onChanged: (String val) {
+                    label: 'Title', debounceChange: 1000, onChanged: (String val) {
                     _searchSharedItems();
                   }),
-                _inputFields.inputSelect(_selectOptsInvestor, _filters, 'fundingRequired_min',
-                    label: 'Needs Investment', onChanged: (String val) {
-                    _searchSharedItems();
-                  }),
+                // _inputFields.inputSelect(_selectOptsInvestor, _filters, 'fundingRequired_min',
+                //     label: 'Needs Investment', onChanged: (String val) {
+                //     _searchSharedItems();
+                //   }),
                 // _inputFields.inputNumber(_filters, 'fundingRequired_min', hint: '\$1000',
                 //     label: 'Minimum Funding Needed', debounceChange: 1000, onChanged: (double? val) {
                 //     _searchSharedItems();
@@ -256,10 +262,13 @@ class _SharedItemsState extends State<SharedItems> {
   }
 
   _buildSharedItem(SharedItemClass sharedItem, BuildContext context, var currentUserState) {
-    var buttons = [];
+    var buttons = [
+      _buttons.LinkElevated(context, 'View', '/si/${sharedItem.uName}'),
+      SizedBox(width: 10),
+    ];
     if (currentUserState.isLoggedIn && sharedItem.currentOwnerUserId == currentUserState.currentUser.id) {
-      buttons = [
-        ElevatedButton(
+      buttons += [
+        TextButton(
           onPressed: () {
             Provider.of<SharedItemState>(context, listen: false).setSharedItem(sharedItem);
             _linkService.Go('/shared-item-save?id=${sharedItem.id}', context, currentUserState: currentUserState);
@@ -460,7 +469,7 @@ class _SharedItemsState extends State<SharedItems> {
   }
 
   void _searchSharedItems({int lastPageNumber = 0}) {
-    if(mounted){
+    if(mounted) {
       setState(() {
         _loading = true;
         _message = '';
@@ -498,11 +507,16 @@ class _SharedItemsState extends State<SharedItems> {
   }
   
   void _UpdateUrl() {
-    if(kIsWeb) {
+    if(mounted && kIsWeb) {
       String? lng = _filters['inputLocation']['lngLat'][0]?.toString();
       String? lat = _filters['inputLocation']['lngLat'][1]?.toString();
       String? maxMeters = _filters['maxMeters']?.toString();
-      html.window.history.pushState({}, '', '/own?lng=${lng}&lat=${lat}&range=${maxMeters}');
+      String? myType = _filters['myType']?.toString();
+      String url = '/own?lng=${lng}&lat=${lat}&range=${maxMeters}';
+      if (myType != null && myType.length > 0) {
+        url += '&myType=${myType!}';
+      }
+      html.window.history.pushState({}, '', url);
       // final url =  html.window.history.state.toString();
     }
   }

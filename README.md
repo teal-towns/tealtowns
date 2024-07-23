@@ -33,7 +33,7 @@ Note, may have to replace all `pip` with `pip3` and `python` with `python3`. Typ
 Note: `git status -s` to see current status/changes.
 - `git checkout main && git pull origin main`
 - `git checkout -b MY-BRANCH`
-- [Write your code]
+- [Write your code and bump the version in `frontend/pubspec.yml` (e.g. increment `version: 1.0.0+6` to `version: 1.0.0+7`)]
 - `git add . && git commit -am 'SUMMARY OF MY CODE CHANGES'`
 - `git checkout main && git pull origin main && git checkout MY-BRANCH && git rebase main`
 - `git push origin MY-BRANCH`

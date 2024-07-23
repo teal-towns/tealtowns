@@ -248,21 +248,18 @@ class _NeighborhoodState extends State<Neighborhood> {
           _style.Text1('${_neighborhood.title}', size: 'xlarge'),
           ...colsJoin,
           _style.SpacingH('medium'),
-          // _style.Text1('Continue your neighborhood journey; your Weekly Challenge is:',),
+          // NeighborhoodJourney(belongingSteps: _belongingSteps, sustainableSteps: _sustainableSteps,
+          //   currentStepOnly: true, showTitles: false,),
           // _style.SpacingH('medium'),
-          NeighborhoodJourney(belongingSteps: _belongingSteps, sustainableSteps: _sustainableSteps,
-            currentStepOnly: true, showTitles: false,),
-          _style.SpacingH('medium'),
-          // _buttons.Link(context, 'View Full Neighborhood Journey', '/neighborhood-journey'),
-          TextButton(
-            onPressed: () {
-              _showFullNeighborhoodJourney = !_showFullNeighborhoodJourney;
-              setState(() { _showFullNeighborhoodJourney = _showFullNeighborhoodJourney; });
-            },
-            child: Text(_showFullNeighborhoodJourney ? 'Hide Full Neighborhood Journey' : 'View Full Neighborhood Journey'),
-          ),
-          ...colsFullJourney,
-          _style.SpacingH('large'),
+          // TextButton(
+          //   onPressed: () {
+          //     _showFullNeighborhoodJourney = !_showFullNeighborhoodJourney;
+          //     setState(() { _showFullNeighborhoodJourney = _showFullNeighborhoodJourney; });
+          //   },
+          //   child: Text(_showFullNeighborhoodJourney ? 'Hide Full Neighborhood Journey' : 'View Full Neighborhood Journey'),
+          // ),
+          // ...colsFullJourney,
+          // _style.SpacingH('large'),
           Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

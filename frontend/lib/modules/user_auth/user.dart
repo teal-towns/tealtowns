@@ -128,6 +128,13 @@ class _UserState extends State<User> {
         ];
       }
 
+      cols += [
+        _style.Text1('My Shared Items', size: 'large'),
+        _buttons.Link(context, 'Owned', '/own?myType=owner', launchUrl: true),
+        _buttons.Link(context, 'Purchased', '/own?myType=purchaser', launchUrl: true),
+        _style.SpacingH('xlarge'),
+      ];
+
       if (_loadingJoinCollections) {
         cols += [
           _style.SpacingH('medium'),

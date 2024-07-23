@@ -56,11 +56,13 @@ import './modules/neighborhood/user_neighborhood_save.dart';
 import './modules/neighborhood/user_neighborhood_weekly_update_save.dart';
 import './modules/neighborhood/user_neighborhood_weekly_updates.dart';
 
+import './modules/shared_item/shared_item.dart';
 import './modules/shared_item/shared_items.dart';
 import './modules/shared_item/shared_item_save.dart';
 import './modules/shared_item/shared_item_owner_save.dart';
 
 import './modules/user_payment/user_money.dart';
+import './modules/user_payment/mercury_pay_outs.dart';
 
 import './modules/user_auth/current_user_state.dart';
 
@@ -124,11 +126,13 @@ class Routes {
   static const userNeighborhoodWeeklyUpdateSave = '/user-neighborhood-weekly-update-save';
   static const ambassadorsUpdates = '/ambassadors-updates';
 
+  static const sharedItem = '/si/:uName';
   static const sharedItems = '/own';
   static const sharedItemSave = '/shared-item-save';
   static const sharedItemOwnerSave = '/shared-item-owner-save';
 
   static const userMoney = '/user-money';
+  static const mercuryPayOuts = '/mercury-pay-outs';
 }
 
 class AppGoRouter {
@@ -395,11 +399,22 @@ class AppGoRouter {
       ),
 
       GoRoute(
+        path: Routes.sharedItem, name: 'sharedItem',
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters["uName"];
+          if (uName != null) {
+            return SharedItem(uName: uName);
+          }
+          return SharedItems();
+        },
+      ),
+      GoRoute(
         path: Routes.sharedItems, name: 'sharedItems',
         builder: (BuildContext context, GoRouterState state) => SharedItems(
           lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
           lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
           maxMeters: double.parse(state.uri.queryParameters['range'] ?? '1500'),
+          myType: state.uri.queryParameters['myType'] ?? '',
         ),
       ),
       GoRoute(
@@ -423,6 +438,10 @@ class AppGoRouter {
       GoRoute(
         path: Routes.userMoney, name: 'userMoney',
         builder: (BuildContext context, GoRouterState state) => UserMoney(),
+      ),
+      GoRoute(
+        path: Routes.mercuryPayOuts, name: 'mercuryPayOuts',
+        builder: (BuildContext context, GoRouterState state) => MercuryPayOuts(),
       ),
 
       GoRoute(
