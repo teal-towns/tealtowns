@@ -3,8 +3,11 @@ from common import socket as _socket
 import lodash
 from event import weekly_event as _weekly_event
 
-def addRoutes():
-    def GetByIdWithData(data, auth, websocket):
+def AddRoutesAsync():
+    async def GetByIdWithData(data, auth, websocket):
+        async def OnUpdate(data):
+            await _socket.sendAsync(websocket, "GetWeeklyEventByIdWithData", data, auth)
+
         data = lodash.extend_object({
             'withAdmins': 0,
             'withEvent': 0,
@@ -16,23 +19,24 @@ def addRoutes():
             'userOrIP': '',
             'addEventView': 0,
         }, data)
-        return _weekly_event.GetById(data['id'], data['withAdmins'], data['withEvent'],
+        return await _weekly_event.GetById(data['id'], data['withAdmins'], data['withEvent'],
             data['withUserEvents'], data['withUserId'], weeklyEventUName = data['uName'],
             withEventInsight = data['withEventInsight'], userOrIP = data['userOrIP'],
-            addEventView = data['addEventView'])
-    _socket.add_route('GetWeeklyEventByIdWithData', GetByIdWithData)
+            addEventView = data['addEventView'], onUpdate = OnUpdate)
+    _socket.add_route('GetWeeklyEventByIdWithData', GetByIdWithData, 'async')
 
-    def GetById(data, auth, websocket):
+    async def GetById(data, auth, websocket):
         data = lodash.extend_object({
             'id': '',
             'uName': '',
             'userOrIP': '',
             'addEventView': 0,
         }, data)
-        return _weekly_event.GetById(data['id'], weeklyEventUName = data['uName'],
+        return await _weekly_event.GetById(data['id'], weeklyEventUName = data['uName'],
             userOrIP = data['userOrIP'], addEventView = data['addEventView'])
-    _socket.add_route('getWeeklyEventById', GetById)
+    _socket.add_route('getWeeklyEventById', GetById, 'async')
 
+def AddRoutes():
     def Save(data, auth, websocket):
         data['weeklyEvent']['dayOfWeek'] = int(data['weeklyEvent']['dayOfWeek'])
         return _weekly_event.Save(data['weeklyEvent'])
@@ -74,4 +78,5 @@ def addRoutes():
             limit = data['limit'], skip = data['skip'], sortKeys = data['sortKeys'])
     _socket.add_route('SearchWeeklyEvents', Search)
 
-addRoutes()
+AddRoutes()
+AddRoutesAsync()

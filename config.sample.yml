@@ -76,3 +76,6 @@ mercury:
     - key: MercuryUserRevenue
       account_number: 'ACCOUNT-NUMBER'
       routing_number: 'ROUTING-NUMBER'
+sentry:
+  test_mode: 1
+  dsn: URL-HERE

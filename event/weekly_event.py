@@ -1,3 +1,4 @@
+import asyncio
 import threading
 import time
 
@@ -64,9 +65,9 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
 
     return ret
 
-def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUserEvents: int = 0,
+async def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUserEvents: int = 0,
     withUserId: str = '', weeklyEventUName: str = '', withEventInsight: int = 0, userOrIP: str = '',
-    addEventView: int = 1):
+    addEventView: int = 1, onUpdate = None):
     ret = _mongo_db_crud.GetById('weeklyEvent', weeklyEventId, uName = weeklyEventUName)
     if not ret['valid'] or '_id' not in ret['weeklyEvent']:
         return ret
@@ -87,12 +88,18 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
         for userId in ret['weeklyEvent']['adminUserIds']:
             user = usersIdMap[userId] if userId in usersIdMap else {}
             ret['weeklyEvent']['adminUsers'].append(user)
+    if onUpdate:
+        await onUpdate(ret)
+        await asyncio.sleep(0)
 
     if withEvent:
         retEvents = _event.GetNextEvents(weeklyEventId, minHoursBeforeRsvpDeadline = 0)
         ret['event'] = retEvents['nextWeekEvent'] if retEvents['rsvpDeadlinePassed'] else retEvents['thisWeekEvent']
         ret['rsvpDeadlinePassed'] = retEvents['rsvpDeadlinePassed']
         ret['nextEvent'] = retEvents['nextWeekEvent']
+        if onUpdate:
+            await onUpdate(ret)
+            await asyncio.sleep(0)
         if withUserEvents and '_id' in ret['event']:
             retStats = _user_event.GetStats(ret['event']['_id'], withUserId = withUserId)
             ret['attendeesCount'] = retStats['attendeesCount']
@@ -107,6 +114,8 @@ def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, withUse
         else:
             ret['eventInsight'] = {}
 
+    if onUpdate:
+        await onUpdate(ret)
     return ret
 
 def Save(weeklyEvent: dict):
