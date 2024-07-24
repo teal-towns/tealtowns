@@ -169,9 +169,7 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
       List<Widget> colsText = [
         _style.Text1('To be an ambassador, the weekly responsibilities (about 1 hour per week) are:'),
         _style.SpacingH('medium'),
-        _style.Text1('1. Invite 10 neighbors to join an event.'),
-        _style.SpacingH('medium'),
-        _style.Text1('2. Attend 1 event (and fill out feedback).'),
+        _style.Text1('1. Invite 10 neighbors to join your event (and attend yourself and fill out feedback).'),
         _style.SpacingH('medium'),
       ];
       cols += [

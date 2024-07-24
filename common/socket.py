@@ -21,8 +21,10 @@ def socket_router(websocket, route: str, data, auth: dict):
 async def socket_router_async(websocket, route: str, data, auth: dict):
     if route not in _routes_async:
         raise Exception("route not found")
-    with sentry_sdk.start_transaction(op="task", name="socket async route " + route):
-        return await _routes_async[route](data, auth, websocket)
+    # Do NOT track these, as should return piece wise, async, earlier
+    # (these are expected to be slow calls, but the first async callback should be fast).
+    # with sentry_sdk.start_transaction(op="task", name="socket async route " + route):
+    return await _routes_async[route](data, auth, websocket)
 
 def add_route(route: str, func, mode="sync"):
     if mode == "async":
