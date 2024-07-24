@@ -483,7 +483,7 @@ def GetUsers(eventId: str, withUsers: int = 1):
         for index, userEvent in enumerate(ret['userEvents']):
             userObjectIds.append(mongo_db.to_object_id(userEvent['userId']))
             indicesMap[userEvent['userId']] = index
-        fields = { 'firstName': 1, 'lastName': 1, 'username': 1, }
+        fields = { 'firstName': 1, 'lastName': 1, 'username': 1, 'email': 1, 'phoneNumber': 1, 'whatsappNumber': 1, }
         users = mongo_db.find('user', { '_id': { '$in': userObjectIds } }, fields = fields)['items']
         for user in users:
             ret['userEvents'][indicesMap[user['_id']]]['user'] = user

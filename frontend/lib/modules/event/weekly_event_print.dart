@@ -75,8 +75,8 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
             _event = _event;
             _loading = false;
           });
-        } else {
-          context.go('/weekly-events');
+        // } else {
+        //   context.go('/weekly-events');
         }
       } else {
         context.go('/weekly-events');

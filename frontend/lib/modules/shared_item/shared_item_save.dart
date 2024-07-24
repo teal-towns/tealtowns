@@ -37,19 +37,19 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   ];
 
   Map<String, Map<String, dynamic>> _formFields = {
-    'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'title': {},
-    'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
-    'location': { 'type': 'location', 'nestedCoordinates': true },
+    'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'bought': { 'type': 'select', 'label': 'Do you already own this item?', },
+    'location': { 'type': 'location', 'nestedCoordinates': true },
+    'currentPrice': { 'type': 'number', 'min': 1, 'required': true, 'label': 'Price', },
     'minOwners': { 'type': 'number', 'min': 2, 'required': true },
     'maxOwners': { 'type': 'number', 'min': 2, 'required': true },
-    'currentPrice': { 'type': 'number', 'min': 1, 'required': true },
-    // 'originalPrice': { 'type': 'number', 'min': 1, 'required': true },
     'monthsToPayBack': { 'type': 'number', 'min': 0, 'required': true },
+    // 'originalPrice': { 'type': 'number', 'min': 1, 'required': true },
     // 'maintenancePerYear': { 'type': 'number', 'min': 0, 'required': true },
     // 'maxMeters': { 'type': 'select', 'required': true },
     // 'status': { 'type': 'select', 'required': true },
+    'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
   };
   Map<String, dynamic> _formValsDefault = {
     'bought': 0,
@@ -62,8 +62,12 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     'maxMeters': 1500,
     'status': 'available',
   };
-  String _formMode = 'step';
-  List<String> _formStepKeys = ['imageUrls', 'title', 'location', 'bought', 'currentPrice', 'monthsToPayBack', 'minOwners', 'maxOwners'];
+  // String _formMode = 'step';
+  // List<String> _formStepKeys = ['imageUrls', 'title', 'location', 'bought', 'currentPrice', 'monthsToPayBack', 'minOwners', 'maxOwners'];
+  String _formMode = '';
+  List<String> _formStepKeys = [];
+  List<String> _formSeeMoreKeys = ['monthsToPayBack', 'minOwners', 'maxOwners', 'description'];
+  // List<String> _formSeeMoreKeys = [];
 
   @override
   void initState() {
@@ -88,10 +92,11 @@ class _SharedItemSaveState extends State<SharedItemSave> {
     double fieldWidth = 300;
     return AppScaffoldComponent(
       listWrapper: true,
-      width: fieldWidth,
+      width: fieldWidth * 2 + 50,
       body: FormSave(formVals: SharedItemClass.fromJson(_formValsDefault).toJson(), dataName: 'sharedItem',
         routeGet: 'getSharedItemById', routeSave: 'saveSharedItem', id: widget.id, fieldWidth: fieldWidth,
         formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, loggedOutRedirect: '/own',
+        seeMoreKeys: _formSeeMoreKeys,
         parseData: (dynamic data) => SharedItemClass.fromJson(data).toJson(),
         preSave: (dynamic data) {
           data['sharedItem'] = SharedItemClass.fromJson(data['sharedItem']).toJson();

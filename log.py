@@ -28,7 +28,7 @@ def init_logger(config):
     if _logger is None:
         if 'logging_config_file' in config:
             logging.config.fileConfig(config['logging_config_file'])
-        _logger = logging.getLogger('trader-logger')
+        _logger = logging.getLogger('app-logger')
         _logger.setLevel(config['log_level'] or logging.DEBUG)
         _logLevel = config['log_level']
         if config['logging']:

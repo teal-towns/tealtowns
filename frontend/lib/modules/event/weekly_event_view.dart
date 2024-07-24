@@ -325,11 +325,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       List<String> attendeeTexts = [];
       List<String> waitingHostTexts = [];
       List<String> waitingTexts = [];
+      bool showEmail = currentUserState.isLoggedIn && _weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id) ? true : false;
       for (int i = 0; i < _userEvents.length; i++) {
         String rsvpNote = _userEvents[i].rsvpNote;
         String text = '';
         if (_userEvents[i].attendeeCount == 0) {
           text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
+          if (showEmail) {
+            text += ' (${_userEvents[i].user['email']})';
+          }
           if (rsvpNote.length > 0) {
             if (_userEvents[i].hostGroupSizeMax > 0) {
               text += ' (${_userEvents[i].hostGroupSizeMax}, ${rsvpNote})';
@@ -346,6 +350,9 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           }
         } else {
           String text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
+          if (showEmail) {
+            text += ' (${_userEvents[i].user['email']})';
+          }
           if (_userEvents[i].attendeeCount > 1) {
             if (rsvpNote.length > 0) {
               text += ' (+${_userEvents[i].attendeeCount - 1}, ${rsvpNote})';

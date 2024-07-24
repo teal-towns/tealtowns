@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/colors_service.dart';
+import '../../common/config_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/form_input/input_location.dart';
 import '../../common/layout_service.dart';
@@ -32,6 +33,7 @@ class WeeklyEventTemplates extends StatefulWidget {
 
 class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
   ColorsService _colors = ColorsService();
+  ConfigService _configService = ConfigService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
   Style _style = Style();
@@ -43,96 +45,13 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
   String _message = '';
   Map<String, dynamic> _location = { 'coordinates': [0.0, 0.0] };
 
-  List<Map<String, dynamic>> _formValsEventsList = [
-    {
-      'key': 'sandwichSundays',
-      'selected': false,
-      'formVals': {
-        'title': 'Sandwich Sundays',
-        'dayOfWeek': 6,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/sandwich.jpg'],
-        'description': 'Join your neighbors to eat sandwiches and connect. Bring a sandwich, or just yourself!',
-      }
-    },
-    {
-      'key': 'meatlessMondays',
-      'selected': false,
-      'formVals': {
-        'title': 'Meatless Mondays',
-        'dayOfWeek': 0,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/veggie-bowl.jpg'],
-        'description': 'Join your neighbors to eat climate friendly vegetarian food and connect. Bring a veggie dish, or just yourself!',
-      }
-    },
-    {
-      'key': 'tacoTuesdays',
-      'selected': false,
-      'formVals': {
-        'title': 'Taco Tuesdays',
-        'dayOfWeek': 1,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/tacos-people.jpg'],
-        'description': 'Join your neighbors to eat tacos and connect. Bring some tacos, or just yourself!',
-      }
-    },
-    {
-      'key': 'burritoWednesdays',
-      'selected': false,
-      'formVals': {
-        'title': 'Burrito Wednesdays',
-        'dayOfWeek': 2,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/burritos.jpg'],
-        'description': 'Join your neighbors to eat burritos and connect. Bring a burrito, or just yourself!',
-      }
-    },
-    {
-      'key': 'happyHourThursdays',
-      'selected': false,
-      'formVals': {
-        'title': 'Happy Hour Thursdays',
-        'dayOfWeek': 3,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/drinks-people.jpg'],
-        'description': 'Join your neighbors to enjoy drinks and connect. Bring a beverage of your choice, or just yourself!',
-      }
-    },
-    {
-      'key': 'frozenPizzaFridays',
-      'selected': false,
-      'formVals': {
-        'title': 'Frozen Pizza Fridays',
-        'dayOfWeek': 4,
-        'startTime': '18:00',
-        'endTime': '19:00',
-        'imageUrls': ['/assets/assets/images/events/pizza-people.jpg'],
-        'description': 'Join your neighbors to enjoy pizza and connect. Bring some pizza, or just yourself!',
-      }
-    },
-    {
-      'key': 'brunchSaturdays',
-      'selected': false,
-      'formVals': {
-        'title': 'Brunch Saturdays',
-        'dayOfWeek': 5,
-        'startTime': '10:00',
-        'endTime': '11:00',
-        'imageUrls': ['/assets/assets/images/events/waffles-people.jpg'],
-        'description': 'Join your neighbors to enjoy brunch and connect. Bring your favorite brunch item, or just yourself!',
-      }
-    },
-  ];
+  List<Map<String, dynamic>> _formValsEventsList = [];
 
   @override
   void initState() {
     super.initState();
+
+    SetTemplates();
 
     if (widget.location.containsKey('coordinates')) {
       _location = widget.location;
@@ -168,6 +87,112 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
     return _Events();
   }
 
+  void SetTemplates() {
+    _formValsEventsList = [
+      {
+        'key': 'sandwichSundays',
+        'selected': false,
+        'formVals': {
+          'title': 'Sandwich Sundays',
+          'dayOfWeek': 6,
+          'startTime': '18:00',
+          'endTime': '19:00',
+          'imageUrls': ['/assets/assets/images/events/sandwich.jpg'],
+          'description': 'Join your neighbors to eat sandwiches and connect. Bring a sandwich, or just yourself!',
+        }
+      },
+      {
+        'key': 'meatlessMondays',
+        'selected': false,
+        'formVals': {
+          'title': 'Meatless Mondays',
+          'dayOfWeek': 0,
+          'startTime': '18:00',
+          'endTime': '19:00',
+          'imageUrls': ['/assets/assets/images/events/veggie-bowl.jpg'],
+          'description': 'Join your neighbors to eat climate friendly vegetarian food and connect. Bring a veggie dish, or just yourself!',
+        }
+      },
+      {
+        'key': 'tacoTuesdays',
+        'selected': false,
+        'formVals': {
+          'title': 'Taco Tuesdays',
+          'dayOfWeek': 1,
+          'startTime': '18:00',
+          'endTime': '19:00',
+          'imageUrls': ['/assets/assets/images/events/tacos-people.jpg'],
+          'description': 'Join your neighbors to eat tacos and connect. Bring some tacos, or just yourself!',
+        }
+      },
+      {
+        'key': 'burritoWednesdays',
+        'selected': false,
+        'formVals': {
+          'title': 'Burrito Wednesdays',
+          'dayOfWeek': 2,
+          'startTime': '18:00',
+          'endTime': '19:00',
+          'imageUrls': ['/assets/assets/images/events/burritos.jpg'],
+          'description': 'Join your neighbors to eat burritos and connect. Bring a burrito, or just yourself!',
+        }
+      },
+      {
+        'key': 'happyHourThursdays',
+        'selected': false,
+        'formVals': {
+          'title': 'Happy Hour Thursdays',
+          'dayOfWeek': 3,
+          'startTime': '18:00',
+          'endTime': '19:00',
+          'imageUrls': ['/assets/assets/images/events/drinks-people.jpg'],
+          'description': 'Join your neighbors to enjoy drinks and connect. Bring a beverage of your choice, or just yourself!',
+        }
+      },
+      {
+        'key': 'frozenPizzaFridays',
+        'selected': false,
+        'formVals': {
+          'title': 'Frozen Pizza Fridays',
+          'dayOfWeek': 4,
+          'startTime': '18:00',
+          'endTime': '19:00',
+          'imageUrls': ['/assets/assets/images/events/pizza-people.jpg'],
+          'description': 'Join your neighbors to enjoy pizza and connect. Bring some pizza, or just yourself!',
+        }
+      },
+      {
+        'key': 'brunchSaturdays',
+        'selected': false,
+        'formVals': {
+          'title': 'Brunch Saturdays',
+          'dayOfWeek': 5,
+          'startTime': '10:00',
+          'endTime': '11:00',
+          'imageUrls': ['/assets/assets/images/events/waffles-people.jpg'],
+          'description': 'Join your neighbors to enjoy brunch and connect. Bring your favorite brunch item, or just yourself!',
+        }
+      },
+    ];
+    Map<String, dynamic> config = _configService.GetConfig();
+    String ownUrl = '${config['SERVER_URL']}/own';
+    _formValsEventsList += [
+      {
+        'key': 'shareSomethingWalk',
+        'selected': false,
+        'formVals': {
+          'title': 'Share Something Walk',
+          'dayOfWeek': 5,
+          'startTime': '9:00',
+          'endTime': '10:00',
+          'imageUrls': ['/assets/assets/images/events/people-walking-in-park.jpg'],
+          'description': 'Connect with another person or group to share (co-purchase or co-own) 1 item together, while enjoying a walk in nature. Sharing items is easy and accessible to all. Choose a few items you own or want that you would be open to sharing, and make some friends (and save some cash) with them, rather than letting them sit unused for weeks or months. Each item shared is one less item produced and later thrown away. It is better for both the planet and our pockets.\n\n[Add Your Shared Items Here](${ownUrl})',
+          'hostGroupSizeDefault': 0,
+        }
+      },
+    ];
+  }
+
   Widget _Events() {
     List<Map<String, dynamic>> optsDayOfWeek = [
       {'value': 0, 'label': 'Monday'},
@@ -189,9 +214,15 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
       _formValsEventsList[i]['formVals']['location'] = _location;
       _formValsEventsList[i]['formVals']['locationAddress'] = widget.locationAddress;
       _formValsEventsList[i]['formVals']['neighborhoodUName'] = widget.neighborhoodUName;
-      _formValsEventsList[i]['formVals']['hostGroupSizeDefault'] = 10;
-      _formValsEventsList[i]['formVals']['priceUSD'] = 0;
-      _formValsEventsList[i]['formVals']['rsvpDeadlineHours'] = 0;
+      if (!_formValsEventsList[i]['formVals'].containsKey('hostGroupSizeDefault')) {
+        _formValsEventsList[i]['formVals']['hostGroupSizeDefault'] = 10;
+      }
+      if (!_formValsEventsList[i]['formVals'].containsKey('priceUSD')) {
+        _formValsEventsList[i]['formVals']['priceUSD'] = 0;
+      }
+      if (!_formValsEventsList[i]['formVals'].containsKey('rsvpDeadlineHours')) {
+        _formValsEventsList[i]['formVals']['rsvpDeadlineHours'] = 0;
+      }
       _formValsEventsList[i]['formVals']['adminUserIds'] = [ userId ];
 
       items.add(

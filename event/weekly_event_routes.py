@@ -26,6 +26,9 @@ def AddRoutesAsync():
     _socket.add_route('GetWeeklyEventByIdWithData', GetByIdWithData, 'async')
 
     async def GetById(data, auth, websocket):
+        async def OnUpdate(data):
+            await _socket.sendAsync(websocket, "getWeeklyEventById", data, auth)
+
         data = lodash.extend_object({
             'id': '',
             'uName': '',
@@ -33,7 +36,7 @@ def AddRoutesAsync():
             'addEventView': 0,
         }, data)
         return await _weekly_event.GetById(data['id'], weeklyEventUName = data['uName'],
-            userOrIP = data['userOrIP'], addEventView = data['addEventView'])
+            userOrIP = data['userOrIP'], addEventView = data['addEventView'], onUpdate = OnUpdate)
     _socket.add_route('getWeeklyEventById', GetById, 'async')
 
 def AddRoutes():

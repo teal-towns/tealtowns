@@ -30,6 +30,7 @@ class FormSave extends StatefulWidget {
   String align;
   String mode;
   List<String> stepKeys;
+  List<String> seeMoreKeys;
   String loggedOutRedirect;
   String title;
   String saveText;
@@ -38,8 +39,8 @@ class FormSave extends StatefulWidget {
   FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
     this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.align = 'center', this.id = '',
     this.uName = '', this.formFields = null,
-    this.mode = '', this.stepKeys = const [], this.loggedOutRedirect = '/login', this.title = '', this.saveText = 'Save',
-    this.requireLoggedIn = true,});
+    this.mode = '', this.stepKeys = const [], this.seeMoreKeys = const [], this.loggedOutRedirect = '/login',
+    this.title = '', this.saveText = 'Save', this.requireLoggedIn = true,});
 
   @override
   _FormSaveState createState() => _FormSaveState();
@@ -61,6 +62,7 @@ class _FormSaveState extends State<FormSave> {
   bool _loading = false;
   String _message = '';
   Map<String, dynamic> _formValsLocal = {};
+  bool _showSeeMore = false;
 
   int _step = 0;
   int _firstStepIndex = 0;
@@ -83,17 +85,22 @@ class _FormSaveState extends State<FormSave> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        if (widget.parseData != null) {
-          data[widget.dataName] = widget.parseData!(data[widget.dataName]);
+        if (data.containsKey(widget.dataName)) {
+          if (widget.parseData != null) {
+            data[widget.dataName] = widget.parseData!(data[widget.dataName]);
+          }
+          _formVals = data[widget.dataName];
+          setState(() {
+            _formVals = _formVals;
+            _message = '';
+            _loading = false;
+          });
+        // } else {
+        //   setState(() { _message = '${widget.dataName} key does not exist yet.'; });
         }
-        _formVals = data[widget.dataName];
-        setState(() {
-          _formVals = _formVals;
-        });
       } else {
-        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; _loading = false; });
       }
-      setState(() { _loading = false; });
     }));
 
     _routeIds.add(_socketService.onRoute(widget.routeSave, callback: (String resString) {
@@ -343,9 +350,37 @@ class _FormSaveState extends State<FormSave> {
 
   Widget FormFields() {
     List<Widget> inputs = [];
+    List<Widget> inputsSeeMore = [];
     widget.formFields!.forEach((key, value) {
-      inputs.add(FormField(key, value));
+      if (widget.seeMoreKeys.contains(key)) {
+        if (_showSeeMore) {
+          inputsSeeMore.add(FormField(key, value));
+        }
+      } else {
+        inputs.add(FormField(key, value));
+      }
     });
+    List<Widget> colsMore = [];
+    if (widget.seeMoreKeys.length > 0) {
+      colsMore += [
+        SizedBox(height: 10),
+        TextButton(child: Text('See More'), onPressed: () {setState(() { _showSeeMore = !_showSeeMore; });}),
+      ];
+      if (inputsSeeMore.length > 0) {
+        colsMore += [
+          SizedBox(height: 10),
+          _layoutService.WrapWidth(inputsSeeMore, width: widget.fieldWidth, align: widget.align,),
+        ];
+      }
+    }
+    return Column(
+      crossAxisAlignment: widget.align == 'center' ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        _layoutService.WrapWidth(inputs, width: widget.fieldWidth, align: widget.align,),
+        ...colsMore,
+      ]
+    );
+
     return _layoutService.WrapWidth(inputs, width: widget.fieldWidth, align: widget.align,);
   }
 
