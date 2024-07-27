@@ -37,6 +37,11 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     {'value': 5, 'label': 'Saturday'},
     {'value': 6, 'label': 'Sunday'},
   ];
+  List<Map<String, dynamic>> _optsType = [
+    {'value': '', 'label': 'None'},
+    {'value': 'sharedMeal', 'label': 'Shared Meal'},
+    {'value': 'sharedItem', 'label': 'Shared Item'},
+  ];
   List<Map<String, dynamic>> _optsNeighborhood = [];
   Map<String, Map<String, dynamic>> _formFields = {
     'location': { 'type': 'location', 'nestedCoordinates': true, 'guessLocation': true,
@@ -49,6 +54,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     'priceUSD': { 'type': 'number', 'min': 0, 'required': true },
     'rsvpDeadlineHours': { 'type': 'number', 'min': 0, 'required': true },
     'neighborhoodUName': { 'type': 'select', 'label': 'Neighborhood', },
+    'type': { 'type': 'select' },
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
   };
@@ -111,6 +117,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _title = 'Create Shared Meal';
     }
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
+    _formFields['type']!['options'] = _optsType;
 
     // Do not allow changing some fields.
     if (widget.id != null && widget.id!.length > 0) {

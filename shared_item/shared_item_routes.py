@@ -3,6 +3,7 @@
 from common import mongo_db_crud as _mongo_db_crud
 from common import socket as _socket
 import lodash
+from shared_item import amazon_search as _amazon_search
 from shared_item import shared_item as _shared_item
 from shared_item import shared_item_payment as _shared_item_payment
 from shared_item import shared_item_payment_math as _shared_item_payment_math
@@ -68,5 +69,9 @@ def addRoutes():
         # Can not use balance for recurring payments.
         return _shared_item_payment.StripePaymentLinkMonthly(data['sharedItemOwnerId'])
     _socket.add_route('GetSharedItemMonthlyPaymentLink', GetSharedItemMonthlyPaymentLink)
+
+    def AmazonSearch(data, auth, websocket):
+        return _amazon_search.Search(data['search'])
+    _socket.add_route('AmazonSearch', AmazonSearch)
 
 addRoutes()

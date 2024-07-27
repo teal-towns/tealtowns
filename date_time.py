@@ -189,3 +189,9 @@ def ToTimezone(datetime1, timezone: str):
 def GetTimezoneFromLngLat(lngLat):
     timezone = TimezoneFinder().timezone_at(lng=lngLat[0], lat=lngLat[1])
     return timezone
+
+def ToHourMinute(hourMinute: str):
+    posColon = hourMinute.find(':')
+    if posColon == 1:
+        return '0' + hourMinute
+    return hourMinute

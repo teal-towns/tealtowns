@@ -5,19 +5,6 @@ from common import mongo_db_crud as _mongo_db_crud
 from event import user_feedback as _user_feedback
 from stubs import stubs_data as _stubs_data
 
-def test_GuessContactType():
-    ret = _user_feedback.GuessContactType('1-555-123-4567')
-    assert ret == 'phone'
-
-    ret = _user_feedback.GuessContactType('15551234567')
-    assert ret == 'phone'
-
-    ret = _user_feedback.GuessContactType('2rHv0@example.com')
-    assert ret == 'email'
-
-    ret = _user_feedback.GuessContactType('test')
-    assert ret == ''
-
 def test_Save():
     _mongo_mock.InitAllCollections()
     users = _stubs_data.CreateBulk(count = 1, collectionName = 'user')

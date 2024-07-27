@@ -57,7 +57,7 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "uName": "{String}",
         "neighborhoodUName": "{String}",
-        "type": "{String} ''|sharedMeal",
+        "type": "{String} ''|sharedMeal|sharedItem",
         "title": "{String}",
         "description": "{String} @optional",
         "dayOfWeek": "{Int} [0-6, 0 = mon, 1 = tue, 2 = wed, 3 = thu, 4 = fri, 5 = sat, 6 = sun]",
@@ -450,6 +450,11 @@
             "neighborhoodUName": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
             "events": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
             "resources": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
+        },
+        "ambassadorNetworkStepsAt": {
+            "invite": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "events": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]",
+            "confirm": "{String} @optional [timestamp YYYY-MM-DD HH:mm:ss ZZ]"
         }
     },
     "userFollowUp": {

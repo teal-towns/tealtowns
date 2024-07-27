@@ -81,5 +81,9 @@ def AddRoutes():
             limit = data['limit'], skip = data['skip'], sortKeys = data['sortKeys'])
     _socket.add_route('SearchWeeklyEvents', Search)
 
+    def SendWeeklyEventInvites(data, auth, websocket):
+        return _weekly_event.SendInvites(data['invites'], data['weeklyEventUName'], data['userId'])
+    _socket.add_route('SendWeeklyEventInvites', SendWeeklyEventInvites)
+
 AddRoutes()
 AddRoutesAsync()

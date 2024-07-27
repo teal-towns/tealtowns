@@ -24,22 +24,9 @@ def Save(userFeedback: dict, withCheckAskForFeedback: int = 0, withCheckNeighbor
         fields = { 'uName': 1 }
         query = { '_id': mongo_db.to_object_id(event['weeklyEventId']) }
         weeklyEvent = mongo_db.find_one('weeklyEvent', query, fields = fields)['item']
-        query = { '_id': mongo_db.to_object_id(userFeedback['userId']) }
-        fields = { 'firstName': 1, 'lastName': 1 }
-        user = mongo_db.find_one('user', query, fields = fields)['item']
-        body = user['firstName'] + ' invited you to an event! ' + _weekly_event.GetUrl(weeklyEvent)
-        messageTemplateVariables = { "1": user['firstName'], "2": _weekly_event.GetUrl(weeklyEvent) }
-        regex = re.compile('[^0-9 ]')
-        for invite in userFeedback['invites']:
-            contactType = GuessContactType(invite)
-            if contactType == 'phone':
-                phoneNumber = regex.sub('', invite)
-                retSms = _sms_twilio.Send(body, phoneNumber, mode = 'sms',
-                    messageTemplateKey = 'eventInvite', messageTemplateVariables = messageTemplateVariables)
-                ret['smsAttemptCount'] += 1
-            elif contactType == 'email':
-                _email_sendgrid.Send(user['firstName'] + ' invited you to an event!', body, invite)
-                ret['emailAttemptCount'] += 1
+        retInvite = _weekly_event.SendInvites(userFeedback['invites'], weeklyEvent['uName'], userFeedback['userId'])
+        ret['smsAttemptCount'] = retInvite['smsAttemptCount']
+        ret['emailAttemptCount'] = retInvite['emailAttemptCount']
     if withCheckAskForFeedback:
         ret1 = CheckAskForFeedback(userFeedback['userId'], userFeedback['forId'])
         ret['missingFeedbackEventIds'] = ret1['missingFeedbackEventIds']
@@ -52,19 +39,6 @@ def Save(userFeedback: dict, withCheckAskForFeedback: int = 0, withCheckNeighbor
             ret['isAlreadyAmbassador'] = 1
 
     return ret
-
-def GuessContactType(contactText: str):
-    numberCount = 0
-    for char in contactText:
-        if char.isdigit():
-            numberCount += 1
-    if numberCount / len(contactText) > 0.7:
-        return 'phone'
-    posAt = contactText.find('@')
-    posDot = contactText.find('.', posAt)
-    if posAt > 0 and posDot > 0 and posDot > posAt:
-        return 'email'
-    return ''
 
 def CheckAskForFeedback(userId: str, eventId: str = '', daysPast: int = 12, now = None,
     endMinutesBuffer: int = 10):

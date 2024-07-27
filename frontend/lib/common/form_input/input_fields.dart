@@ -258,11 +258,11 @@ class InputFields {
         int posColon = value.indexOf(':');
         if (posColon == 1) {
           value = "0" + value;
-          if (formValsKey == null) {
-            formVals = value;
-          } else {
-            formVals[formValsKey] = value;
-          }
+        }
+        if (formValsKey == null) {
+          formVals = value;
+        } else {
+          formVals[formValsKey] = value;
         }
         if (onChanged != null) {
           onChanged(value);
