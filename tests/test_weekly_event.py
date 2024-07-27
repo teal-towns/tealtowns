@@ -563,7 +563,7 @@ def test_WeeklyEventFlow():
 def test_SaveWeeklyEvent():
     _mongo_mock.InitAllCollections()
 
-    weeklyEvents = _stubs_data.CreateBulk(count = 3, collectionName = 'weeklyEvent', saveInDatabase = 0)
+    weeklyEvents = _stubs_data.CreateBulk(count = 4, collectionName = 'weeklyEvent', saveInDatabase = 0)
     weeklyEvent = weeklyEvents[0]
     # This is an edit since already created it above.
     retWeeklyEvent = _weekly_event.Save(weeklyEvent)
@@ -579,6 +579,14 @@ def test_SaveWeeklyEvent():
     assert retWeeklyEvent['valid'] == 1
     assert retWeeklyEvent['weeklyEvent']['title'] == weeklyEvent['title']
     # assert retWeeklyEvent['weeklyEvent']['priceUSD'] == originalPrice
+
+    # Times should be 2 digits for hour and minute
+    weeklyEvent = weeklyEvents[3]
+    weeklyEvent['startTime'] = '8:00'
+    weeklyEvent['endTime'] = '9:15'
+    retWeeklyEvent = _weekly_event.Save(weeklyEvent)
+    assert retWeeklyEvent['weeklyEvent']['startTime'] == '08:00'
+    assert retWeeklyEvent['weeklyEvent']['endTime'] == '09:15'
 
     # Price must be $0 or $5 minimum
     weeklyEvent = weeklyEvents[1]

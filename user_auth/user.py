@@ -126,6 +126,19 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str, mode: str = 'sms'):
         ret['user'] = _user_auth.getById(userId)
     return ret
 
+def GuessContactType(contactText: str):
+    numberCount = 0
+    for char in contactText:
+        if char.isdigit():
+            numberCount += 1
+    if numberCount / len(contactText) > 0.7:
+        return 'phone'
+    posAt = contactText.find('@')
+    posDot = contactText.find('.', posAt)
+    if posAt > 0 and posDot > 0 and posDot > posAt:
+        return 'email'
+    return ''
+
 def GetUrl(user: dict):
     return _config['web_server']['urls']['base'] + '/u/' + str(user['username'])
 

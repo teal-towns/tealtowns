@@ -21,6 +21,8 @@ def Save(userInsight, skipIfExistsKeys: list = ['firstEventSignUpAt', 'firstNeig
     else:
         if 'ambassadorSignUpStepsAt' not in userInsight:
             userInsight['ambassadorSignUpStepsAt'] = {}
+        if 'ambassadorNetworkStepsAt' not in userInsight:
+            userInsight['ambassadorNetworkStepsAt'] = {}
         if 'username' not in userInsight:
             user = mongo_db.find_one('user', { '_id': userInsight['userId'] })['item']
             userInsight['username'] = user['username']

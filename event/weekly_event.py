@@ -1,4 +1,5 @@
 import asyncio
+import re
 import threading
 import time
 
@@ -11,6 +12,9 @@ from event import event_insight as _event_insight
 from event import event_payment as _event_payment
 from event import user_event as _user_event
 from event import user_weekly_event as _user_weekly_event
+from notifications_all import sms_twilio as _sms_twilio
+from notifications_all import email_sendgrid as _email_sendgrid
+from user_auth import user as _user
 from user_payment import user_payment as _user_payment
 import lodash
 import log
@@ -142,6 +146,10 @@ def Save(weeklyEvent: dict):
         'street' not in weeklyEvent['locationAddress'] or len(weeklyEvent['locationAddress']['street']) < 1:
         weeklyEvent['locationAddress'] = _location.LngLatToAddress(weeklyEvent['location']['coordinates'][0],
             weeklyEvent['location']['coordinates'][1])['address']
+    if 'startTime' in weeklyEvent:
+        weeklyEvent['startTime'] = date_time.ToHourMinute(weeklyEvent['startTime'])
+    if 'endTime' in weeklyEvent:
+        weeklyEvent['endTime'] = date_time.ToHourMinute(weeklyEvent['endTime'])
     payInfo = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
     weeklyEvent['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
     return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)
@@ -232,3 +240,27 @@ def CheckRSVPDeadlineLoop(timeoutMinutes = 15):
 
 def GetUrl(weeklyEvent: dict):
     return _config['web_server']['urls']['base'] + '/we/' + str(weeklyEvent['uName'])
+
+def GetUrlUName(uName: str):
+    return _config['web_server']['urls']['base'] + '/we/' + str(uName)
+
+def SendInvites(invites: list, weeklyEventUName: str, userId: str):
+    ret = { 'valid': 1, 'message': '', 'smsAttemptCount': 0, 'emailAttemptCount': 0 }
+    query = { '_id': mongo_db.to_object_id(userId) }
+    fields = { 'firstName': 1, 'lastName': 1 }
+    user = mongo_db.find_one('user', query, fields = fields)['item']
+    body = user['firstName'] + ' invited you to an event! ' + GetUrlUName(weeklyEventUName)
+    messageTemplateVariables = { "1": user['firstName'], "2": GetUrlUName(weeklyEventUName) }
+    regex = re.compile('[^0-9 ]')
+    for invite in invites:
+        contactType = _user.GuessContactType(invite)
+        if contactType == 'phone':
+            phoneNumber = regex.sub('', invite)
+            retSms = _sms_twilio.Send(body, phoneNumber, mode = 'sms',
+                messageTemplateKey = 'eventInvite', messageTemplateVariables = messageTemplateVariables)
+            ret['smsAttemptCount'] += 1
+        elif contactType == 'email':
+            _email_sendgrid.Send(user['firstName'] + ' invited you to an event!', body, invite)
+            ret['emailAttemptCount'] += 1
+    return ret
+

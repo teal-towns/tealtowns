@@ -21,6 +21,7 @@ import './modules/about/team.dart';
 import './modules/about/privacy_terms.dart';
 
 import './modules/ambassador/ambassador_start.dart';
+import './modules/ambassador/ambassador_network.dart';
 
 import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
@@ -66,6 +67,8 @@ import './modules/user_payment/mercury_pay_outs.dart';
 
 import './modules/user_auth/current_user_state.dart';
 
+import './modules/shared_item/amazon_affiliate.dart';
+
 class Routes {
   static const home = '/home';
   static const notFound = '/route-not-found';
@@ -76,6 +79,7 @@ class Routes {
   static const signup = '/signup';
 
   static const ambassadorStart = '/ambassador';
+  static const ambassadorNetwork = '/ambassador-network';
 
   static const usersSave = '/users-save';
 
@@ -133,6 +137,8 @@ class Routes {
 
   static const userMoney = '/user-money';
   static const mercuryPayOuts = '/mercury-pay-outs';
+
+  static const amazonAffiliate = '/amazon-affiliate';
 }
 
 class AppGoRouter {
@@ -183,6 +189,10 @@ class AppGoRouter {
       GoRoute(
         path: Routes.ambassadorStart, name: 'ambassadorStart',
         builder: (context, state) => AmbassadorStart(),
+      ),
+      GoRoute(
+        path: Routes.ambassadorNetwork, name: 'ambassadorNetwork',
+        builder: (context, state) => AmbassadorNetwork(),
       ),
 
       GoRoute(
@@ -506,6 +516,11 @@ class AppGoRouter {
           eventId: state.uri.queryParameters['eventId'] ?? '',
           weeklyEventId: state.uri.queryParameters['weeklyEventId'] ?? '',
         )
+      ),
+
+      GoRoute(
+        path: Routes.amazonAffiliate, name: 'amazonAffiliate',
+        builder: (BuildContext context, GoRouterState state) => AmazonAffiliate(),
       ),
 
       GoRoute(

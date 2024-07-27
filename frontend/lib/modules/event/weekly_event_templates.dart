@@ -23,9 +23,10 @@ class WeeklyEventTemplates extends StatefulWidget {
   int maxEvents;
   String title;
   List<String> selectedKeys;
+  List<String> types;
   WeeklyEventTemplates({ this.location = const {}, this.locationAddress = const {}, this.neighborhoodUName = '',
     this.onSave = null, this.doSave = true, this.maxEvents = 3, this.title = '',
-    this.selectedKeys = const ['sandwichSundays', 'burritoWednesdays'] });
+    this.selectedKeys = const ['sandwichSundays', 'burritoWednesdays'], this.types = const [], });
 
   @override
   _WeeklyEventTemplatesState createState() => _WeeklyEventTemplatesState();
@@ -88,109 +89,122 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
   }
 
   void SetTemplates() {
-    _formValsEventsList = [
-      {
-        'key': 'sandwichSundays',
-        'selected': false,
-        'formVals': {
-          'title': 'Sandwich Sundays',
-          'dayOfWeek': 6,
-          'startTime': '18:00',
-          'endTime': '19:00',
-          'imageUrls': ['/assets/assets/images/events/sandwich.jpg'],
-          'description': 'Join your neighbors to eat sandwiches and connect. Bring a sandwich, or just yourself!',
-        }
-      },
-      {
-        'key': 'meatlessMondays',
-        'selected': false,
-        'formVals': {
-          'title': 'Meatless Mondays',
-          'dayOfWeek': 0,
-          'startTime': '18:00',
-          'endTime': '19:00',
-          'imageUrls': ['/assets/assets/images/events/veggie-bowl.jpg'],
-          'description': 'Join your neighbors to eat climate friendly vegetarian food and connect. Bring a veggie dish, or just yourself!',
-        }
-      },
-      {
-        'key': 'tacoTuesdays',
-        'selected': false,
-        'formVals': {
-          'title': 'Taco Tuesdays',
-          'dayOfWeek': 1,
-          'startTime': '18:00',
-          'endTime': '19:00',
-          'imageUrls': ['/assets/assets/images/events/tacos-people.jpg'],
-          'description': 'Join your neighbors to eat tacos and connect. Bring some tacos, or just yourself!',
-        }
-      },
-      {
-        'key': 'burritoWednesdays',
-        'selected': false,
-        'formVals': {
-          'title': 'Burrito Wednesdays',
-          'dayOfWeek': 2,
-          'startTime': '18:00',
-          'endTime': '19:00',
-          'imageUrls': ['/assets/assets/images/events/burritos.jpg'],
-          'description': 'Join your neighbors to eat burritos and connect. Bring a burrito, or just yourself!',
-        }
-      },
-      {
-        'key': 'happyHourThursdays',
-        'selected': false,
-        'formVals': {
-          'title': 'Happy Hour Thursdays',
-          'dayOfWeek': 3,
-          'startTime': '18:00',
-          'endTime': '19:00',
-          'imageUrls': ['/assets/assets/images/events/drinks-people.jpg'],
-          'description': 'Join your neighbors to enjoy drinks and connect. Bring a beverage of your choice, or just yourself!',
-        }
-      },
-      {
-        'key': 'frozenPizzaFridays',
-        'selected': false,
-        'formVals': {
-          'title': 'Frozen Pizza Fridays',
-          'dayOfWeek': 4,
-          'startTime': '18:00',
-          'endTime': '19:00',
-          'imageUrls': ['/assets/assets/images/events/pizza-people.jpg'],
-          'description': 'Join your neighbors to enjoy pizza and connect. Bring some pizza, or just yourself!',
-        }
-      },
-      {
-        'key': 'brunchSaturdays',
-        'selected': false,
-        'formVals': {
-          'title': 'Brunch Saturdays',
-          'dayOfWeek': 5,
-          'startTime': '10:00',
-          'endTime': '11:00',
-          'imageUrls': ['/assets/assets/images/events/waffles-people.jpg'],
-          'description': 'Join your neighbors to enjoy brunch and connect. Bring your favorite brunch item, or just yourself!',
-        }
-      },
-    ];
-    Map<String, dynamic> config = _configService.GetConfig();
-    String ownUrl = '${config['SERVER_URL']}/own';
-    _formValsEventsList += [
-      {
-        'key': 'shareSomethingWalk',
-        'selected': false,
-        'formVals': {
-          'title': 'Share Something Walk',
-          'dayOfWeek': 5,
-          'startTime': '9:00',
-          'endTime': '10:00',
-          'imageUrls': ['/assets/assets/images/events/people-walking-in-park.jpg'],
-          'description': 'Connect with another person or group to share (co-purchase or co-own) 1 item together, while enjoying a walk in nature. Sharing items is easy and accessible to all. Choose a few items you own or want that you would be open to sharing, and make some friends (and save some cash) with them, rather than letting them sit unused for weeks or months. Each item shared is one less item produced and later thrown away. It is better for both the planet and our pockets.\n\n[Add Your Shared Items Here](${ownUrl})',
-          'hostGroupSizeDefault': 0,
-        }
-      },
-    ];
+    _formValsEventsList = [];
+    if (widget.types.length < 1 || widget.types.contains('sharedMeal')) {
+      _formValsEventsList += [
+        {
+          'key': 'sandwichSundays',
+          'selected': false,
+          'formVals': {
+            'title': 'Sandwich Sundays',
+            'dayOfWeek': 6,
+            'startTime': '18:00',
+            'endTime': '19:00',
+            'imageUrls': ['/assets/assets/images/events/sandwich.jpg'],
+            'description': 'Join your neighbors to eat sandwiches and connect. Bring a sandwich, or just yourself!',
+            'type': 'sharedMeal',
+          }
+        },
+        {
+          'key': 'meatlessMondays',
+          'selected': false,
+          'formVals': {
+            'title': 'Meatless Mondays',
+            'dayOfWeek': 0,
+            'startTime': '18:00',
+            'endTime': '19:00',
+            'imageUrls': ['/assets/assets/images/events/veggie-bowl.jpg'],
+            'description': 'Join your neighbors to eat climate friendly vegetarian food and connect. Bring a veggie dish, or just yourself!',
+            'type': 'sharedMeal',
+          }
+        },
+        {
+          'key': 'tacoTuesdays',
+          'selected': false,
+          'formVals': {
+            'title': 'Taco Tuesdays',
+            'dayOfWeek': 1,
+            'startTime': '18:00',
+            'endTime': '19:00',
+            'imageUrls': ['/assets/assets/images/events/tacos-people.jpg'],
+            'description': 'Join your neighbors to eat tacos and connect. Bring some tacos, or just yourself!',
+            'type': 'sharedMeal',
+          }
+        },
+        {
+          'key': 'burritoWednesdays',
+          'selected': false,
+          'formVals': {
+            'title': 'Burrito Wednesdays',
+            'dayOfWeek': 2,
+            'startTime': '18:00',
+            'endTime': '19:00',
+            'imageUrls': ['/assets/assets/images/events/burritos.jpg'],
+            'description': 'Join your neighbors to eat burritos and connect. Bring a burrito, or just yourself!',
+            'type': 'sharedMeal',
+          }
+        },
+        {
+          'key': 'happyHourThursdays',
+          'selected': false,
+          'formVals': {
+            'title': 'Happy Hour Thursdays',
+            'dayOfWeek': 3,
+            'startTime': '18:00',
+            'endTime': '19:00',
+            'imageUrls': ['/assets/assets/images/events/drinks-people.jpg'],
+            'description': 'Join your neighbors to enjoy drinks and connect. Bring a beverage of your choice, or just yourself!',
+            'type': 'sharedMeal',
+          }
+        },
+        {
+          'key': 'frozenPizzaFridays',
+          'selected': false,
+          'formVals': {
+            'title': 'Frozen Pizza Fridays',
+            'dayOfWeek': 4,
+            'startTime': '18:00',
+            'endTime': '19:00',
+            'imageUrls': ['/assets/assets/images/events/pizza-people.jpg'],
+            'description': 'Join your neighbors to enjoy pizza and connect. Bring some pizza, or just yourself!',
+            'type': 'sharedMeal',
+          }
+        },
+        {
+          'key': 'brunchSaturdays',
+          'selected': false,
+          'formVals': {
+            'title': 'Brunch Saturdays',
+            'dayOfWeek': 5,
+            'startTime': '10:00',
+            'endTime': '11:00',
+            'imageUrls': ['/assets/assets/images/events/waffles-people.jpg'],
+            'description': 'Join your neighbors to enjoy brunch and connect. Bring your favorite brunch item, or just yourself!',
+            'type': 'sharedMeal',
+          }
+        },
+      ];
+    }
+    if (widget.types.length < 1 || widget.types.contains('sharedItem')) {
+      Map<String, dynamic> config = _configService.GetConfig();
+      String ownUrl = '${config['SERVER_URL']}/own';
+      _formValsEventsList += [
+        {
+          'key': 'shareSomethingWalk',
+          'selected': false,
+          'formVals': {
+            'title': 'Share Something Walk',
+            'dayOfWeek': 5,
+            'startTime': '9:00',
+            'endTime': '10:00',
+            'imageUrls': ['/assets/assets/images/events/people-walking-in-park.jpg'],
+            'description': 'Connect with another person or group to share (co-purchase or co-own) 1 item together, while enjoying a walk in nature. Sharing items is easy and accessible to all. Choose a few items you own or want that you would be open to sharing, and make some friends (and save some cash) with them, rather than letting them sit unused for weeks or months. Each item shared is one less item produced and later thrown away. It is better for both the planet and our pockets.\n\n[Add Your Shared Items Here](${ownUrl})',
+            'hostGroupSizeDefault': 0,
+            'type': 'sharedItem',
+          }
+        },
+      ];
+    }
   }
 
   Widget _Events() {

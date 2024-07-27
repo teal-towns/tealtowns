@@ -6,8 +6,10 @@ import 'package:provider/provider.dart';
 import '../../app_scaffold.dart';
 import '../../common/parse_service.dart';
 import '../../common/form_input/form_save.dart';
+import '../../common/style.dart';
 import '../neighborhood/neighborhood_state.dart';
 import './shared_item_class.dart';
+import './shared_items_search.dart';
 import '../user_auth/current_user_state.dart';
 
 class SharedItemSave extends StatefulWidget {
@@ -20,6 +22,7 @@ class SharedItemSave extends StatefulWidget {
 
 class _SharedItemSaveState extends State<SharedItemSave> {
   ParseService _parseService = ParseService();
+  Style _style = Style();
 
   List<Map<String, String>> _optionsStatus = [
     {'value': 'available', 'label': 'Available'},
@@ -69,6 +72,10 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   List<String> _formSeeMoreKeys = ['monthsToPayBack', 'minOwners', 'maxOwners', 'description'];
   // List<String> _formSeeMoreKeys = [];
 
+  // TODO - once get amazon api working, switch back to search.
+  // String _mode = 'search';
+  String _mode = 'save';
+
   @override
   void initState() {
     super.initState();
@@ -90,32 +97,67 @@ class _SharedItemSaveState extends State<SharedItemSave> {
   @override
   Widget build(BuildContext context) {
     double fieldWidth = 300;
+    List<Widget> cols = [];
+    if (_mode == 'search') {
+      cols = [
+        SharedItemsSearch(onSelected: (data) {
+          _formValsDefault['currentPrice'] = data['currentPrice'];
+          _formValsDefault['title'] = data['title'];
+          _formValsDefault['imageUrls'] = data['imageUrls'];
+          setState(() {
+            _formValsDefault = _formValsDefault;
+            _mode = 'save';
+          });
+        }),
+        _style.SpacingH('medium'),
+        TextButton(child: Text('Or Add Manually'), onPressed: () {
+          setState(() {
+            _mode = 'save';
+          });
+        }),
+      ];
+    } else {
+      cols = [
+        FormSave(formVals: SharedItemClass.fromJson(_formValsDefault).toJson(), dataName: 'sharedItem',
+          routeGet: 'getSharedItemById', routeSave: 'saveSharedItem', id: widget.id, fieldWidth: fieldWidth,
+          formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, loggedOutRedirect: '/own',
+          seeMoreKeys: _formSeeMoreKeys,
+          parseData: (dynamic data) => SharedItemClass.fromJson(data).toJson(),
+          preSave: (dynamic data) {
+            data['sharedItem'] = SharedItemClass.fromJson(data['sharedItem']).toJson();
+            data['sharedItem']['currentOwnerUserId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+            return data;
+          }, onSave: (dynamic data) {
+            String sharedItemId = data['sharedItem']['_id'];
+            String sharedItemOwnerId = '';
+            if (data.containsKey('sharedItemOwner') && data['sharedItemOwner'].containsKey('_id')) {
+              sharedItemOwnerId = data['sharedItemOwner']['_id'];
+            }
+            // If new item that is already bought, user is already an owner and there is nothing to invest, so skip owner page.
+            if (widget.id.length < 1 && _parseService.toIntNoNull(data['sharedItem']['bought']) > 0) {
+              context.go('/own');
+            } else {
+              context.go('/shared-item-owner-save?sharedItemId=${sharedItemId}&id=${sharedItemOwnerId}');
+            }
+          }
+        ),
+        // TODO - once get amazon api working, switch back to search.
+        // _style.SpacingH('medium'),
+        // TextButton(child: Text('Back to Search'), onPressed: () {
+        //   setState(() {
+        //     _mode = 'search';
+        //   });
+        // }),
+      ];
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       width: fieldWidth * 2 + 50,
-      body: FormSave(formVals: SharedItemClass.fromJson(_formValsDefault).toJson(), dataName: 'sharedItem',
-        routeGet: 'getSharedItemById', routeSave: 'saveSharedItem', id: widget.id, fieldWidth: fieldWidth,
-        formFields: _formFields, mode: _formMode, stepKeys: _formStepKeys, loggedOutRedirect: '/own',
-        seeMoreKeys: _formSeeMoreKeys,
-        parseData: (dynamic data) => SharedItemClass.fromJson(data).toJson(),
-        preSave: (dynamic data) {
-          data['sharedItem'] = SharedItemClass.fromJson(data['sharedItem']).toJson();
-          data['sharedItem']['currentOwnerUserId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
-          return data;
-        }, onSave: (dynamic data) {
-          String sharedItemId = data['sharedItem']['_id'];
-          String sharedItemOwnerId = '';
-          if (data.containsKey('sharedItemOwner') && data['sharedItemOwner'].containsKey('_id')) {
-            sharedItemOwnerId = data['sharedItemOwner']['_id'];
-          }
-          // If new item that is already bought, user is already an owner and there is nothing to invest, so skip owner page.
-          if (widget.id.length < 1 && _parseService.toIntNoNull(data['sharedItem']['bought']) > 0) {
-            context.go('/own');
-          } else {
-            context.go('/shared-item-owner-save?sharedItemId=${sharedItemId}&id=${sharedItemOwnerId}');
-          }
-        }
-      )
+      body: Column(
+        children: [
+          ...cols,
+        ]
+      ),
     );
   }
 }

@@ -10,6 +10,7 @@ def GetDefault():
         'ambassadorSignUpStepsAt': {
             'userNeighborhoodSave': _stubs_data.RandomDateTime(),
         },
+        'ambassadorNetworkStepsAt': {},
     }
 
 def AddDefault():

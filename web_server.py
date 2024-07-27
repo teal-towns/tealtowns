@@ -206,7 +206,12 @@ async def static_files(request):
     path = paths_index['files'] + request.path
     if os.path.exists(path):
         with open((path), encoding=encoding) as f:
-            return web.Response(text=f.read(), content_type=contentType)
+            try:
+                return web.Response(text=f.read(), content_type=contentType)
+            except Exception as e:
+                print ('static_files read exception', path, encoding, e)
+                with open(paths_index['files'] + '/index.html') as f:
+                    return web.Response(text=f.read(), content_type='text/html')
     else:
         print ('static_files path does not exist', path)
         with open(paths_index['files'] + '/index.html') as f:
