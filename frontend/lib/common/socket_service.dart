@@ -74,13 +74,17 @@ class SocketService {
     _channels[serverKey].sink.close();
   }
 
-  void emit(String route, var data, {String serverKey = 'default'}) {
+  String emit(String route, var data, {String serverKey = 'default'}) {
+    String emitId = new Random().nextInt(1000000).toString();
+    var auth1 = _auth[serverKey];
+    auth1['_emitId'] = emitId;
     String message = jsonEncode({
       'route': route,
-      'auth': _auth[serverKey],
+      'auth': auth1,
       'data': data,
     });
     _channels[serverKey].sink.add(utf8.encode(message));
+    return emitId;
   }
 
   String onRoute(String route, {Function(String)? callback, String serverKey = 'default'}) {

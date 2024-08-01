@@ -13,15 +13,18 @@ def addRoutes():
         data = lodash.extend_object({
             'userId': '',
             'neighborhoodUName': '',
+            'neighborhoodUNames': [],
+            'roles': '', 
             'status': '',
             'limit': 25,
             'skip': 0,
             'withNeighborhoods': 0,
             'withUsers': 0,
         }, data)
-        return _user_neighborhood.Search(
-            stringKeyVals = { 'userId': data['userId'], 'neighborhoodUName': data['neighborhoodUName'],
-                'status': data['status'], },
+        stringKeyVals = { 'userId': data['userId'], 'neighborhoodUName': data['neighborhoodUName'],
+            'status': data['status'], 'roles': data['roles'], }
+        listKeyVals = { 'neighborhoodUName': data['neighborhoodUNames'], }
+        return _user_neighborhood.Search(stringKeyVals = stringKeyVals, listKeyVals = listKeyVals,
             limit = data['limit'], skip = data['skip'],
             withNeighborhoods = data['withNeighborhoods'], withUsers = data['withUsers'])
     _socket.add_route('SearchUserNeighborhoods', Search)

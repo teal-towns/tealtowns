@@ -14,6 +14,7 @@ from user_payment import user_payment as _user_payment
 def addRoutes():
     def SearchNear(data, auth, websocket):
         data = lodash.extend_object({
+            'maxMeters': 1500,
             'title': '',
             'tags': [],
             # 'currentPrice_min': -1,
@@ -25,12 +26,15 @@ def addRoutes():
             # 'sortKey'
             'withOwnerUserId': '',
             'myType': '',
+            'status': 'available',
+            'currentOwnerUserId': '',
         }, data)
         # lngLat = [data['lng'], data['lat']]
         lngLat = data['lngLat']
         return _shared_item.SearchNear(lngLat, float(data['maxMeters']), data['title'], data['tags'],
             float(data['fundingRequired_min']), float(data['fundingRequired_max']), data['limit'], data['skip'],
-            data['withOwnerUserId'], data['myType'])
+            data['withOwnerUserId'], data['myType'], status = data['status'],
+            currentOwnerUserId = data['currentOwnerUserId'])
     _socket.add_route('searchSharedItems', SearchNear)
 
     def Save(data, auth, websocket):

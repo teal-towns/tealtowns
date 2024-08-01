@@ -42,7 +42,7 @@ _config = ml_config.get_config()
 
 def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [], fundingRequired_min: float = -1,
     fundingRequired_max: float = -1, limit: int = 25, skip: int = 0, withOwnerUserId: str = '',
-    myType: str = '', status: str = 'available'):
+    myType: str = '', status: str = 'available', currentOwnerUserId: str = ''):
     query = {}
     listKeyVals = {}
     useDistance = 0
@@ -73,7 +73,6 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
                     '$maxDistance': maxMeters,
                 }
             },
-            'status': status,
         }
     minKeyVals = {}
     if fundingRequired_min > 0:
@@ -82,7 +81,14 @@ def SearchNear(lngLat: list, maxMeters: float, title: str = '', tags: list = [],
     if fundingRequired_max > 0:
         maxKeyVals['fundingRequired'] = fundingRequired_max
     listKeyVals['tags'] = tags
-    ret = _mongo_db_crud.Search('sharedItem', {'title': title}, listKeyVals = listKeyVals,
+    stringKeyVals = { 'title': title, }
+    equalsKeyVals = {}
+    if len(status) > 0:
+        equalsKeyVals['status'] = status
+    if len(currentOwnerUserId) > 0:
+        equalsKeyVals['currentOwnerUserId'] = currentOwnerUserId
+    ret = _mongo_db_crud.Search('sharedItem', stringKeyVals = stringKeyVals, listKeyVals = listKeyVals,
+        equalsKeyVals = equalsKeyVals,
         minKeyVals = minKeyVals, maxKeyVals = maxKeyVals, limit = limit, skip = skip, query = query)
     sharedItemIds = []
     sharedItemIndexMap = {}

@@ -17,6 +17,7 @@ class NeighborhoodState extends ChangeNotifier {
 
   List<UserNeighborhoodClass> _userNeighborhoods = [];
   UserNeighborhoodClass? _defaultUserNeighborhood = null;
+  Map<String, List<String>> _emitIds = { 'SearchUserNeighborhoods': [], };
 
   get userNeighborhoods => _userNeighborhoods;
   get defaultUserNeighborhood => _defaultUserNeighborhood;
@@ -26,7 +27,9 @@ class NeighborhoodState extends ChangeNotifier {
       _routeIds.add(_socketService.onRoute('SearchUserNeighborhoods', callback: (String resString) {
         var res = json.decode(resString);
         var data = res['data'];
-        if (data['valid'] == 1 && data.containsKey('userNeighborhoods')) {
+        var auth = res['auth'];
+        if (data['valid'] == 1 && data.containsKey('userNeighborhoods') &&
+          _emitIds['SearchUserNeighborhoods']!.contains(auth['_emitId'])) {
           List<UserNeighborhoodClass> userNeighborhoods = [];
           for (var i = 0; i < data['userNeighborhoods'].length; i++) {
             userNeighborhoods.add(UserNeighborhoodClass.fromJson(data['userNeighborhoods'][i]));
@@ -52,7 +55,8 @@ class NeighborhoodState extends ChangeNotifier {
       UserNeighborhoodClass.parseList(_localStorageUserNeighborhoods) : [];
     if (userNeighborhoods.length < 1) {
       // _status = "loading";
-      _socketService.emit('SearchUserNeighborhoods', { 'userId': userId, 'withNeighborhoods': 1, });
+      String emitId = _socketService.emit('SearchUserNeighborhoods', { 'userId': userId, 'withNeighborhoods': 1, });
+      _emitIds['SearchUserNeighborhoods']!.add(emitId);
     } else {
       SetUserNeighborhoods(userNeighborhoods, notify: notify);
     }

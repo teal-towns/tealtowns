@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/buttons.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_service.dart';
 import '../../common/link_service.dart';
@@ -21,11 +22,12 @@ class UserEventSave extends StatefulWidget {
 }
 
 class _UserEventSaveState extends State<UserEventSave> {
-  List<String> _routeIds = [];
+  Buttons _buttons = Buttons();
+  InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
   LinkService _linkService = LinkService();
+  List<String> _routeIds = [];
   SocketService _socketService = SocketService();
-  InputFields _inputFields = InputFields();
 
   bool _loading = true;
   String _message = '';
@@ -39,6 +41,9 @@ class _UserEventSaveState extends State<UserEventSave> {
   double _availableUSD = 0;
   double _availableCredits = 0;
   bool _loadingPayment = false;
+
+  String _mySharedItemsState = '';
+  List<dynamic> _mySharedItems = [];
 
   @override
   void initState() {
@@ -104,6 +109,15 @@ class _UserEventSaveState extends State<UserEventSave> {
       if (data['valid'] == 1) {
         // context.go('/weekly-events');
         GetUserEvent();
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('searchSharedItems', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _mySharedItems = data['sharedItems'];
+        setState(() { _mySharedItems = _mySharedItems; _mySharedItemsState = 'loaded'; });
       }
     }));
   }
@@ -224,36 +238,61 @@ class _UserEventSaveState extends State<UserEventSave> {
       }
     }
 
+    bool showJoin = true;
+    if (_weeklyEvent.type == 'sharedItem') {
+      if (_mySharedItemsState == '') {
+        _mySharedItemsState = 'loading';
+        var data1 = { 'status': 'available', 'currentOwnerUserId': currentUserState.currentUser.id,
+          'lngLat': _weeklyEvent.location.coordinates, 'maxMeters': 8000, };
+        _socketService.emit('searchSharedItems', data1);
+      } else if (_mySharedItemsState == 'loaded' && _mySharedItems.length < 1) {
+        showJoin = false;
+      }
+    }
+
     double fieldWidth = 350;
     List<Widget> colsAttendee = [];
-    if (!alreadySignedUp) {
+    if (!alreadySignedUp && showJoin) {
       colsAttendee += [ _inputFields.inputNumber(_formVals, 'attendeeCountAsk', min: attendeeMin, required: true, label: 'How many total spots would you like (including yourself)?',) ];
     }
-    List<Widget> colsSignUp = [
-      _layoutService.WrapWidth([
-        ...colsAttendee,
-        ...colsHost,
-        _inputFields.inputText(_formVals, 'rsvpNote', label: 'Note (optional)',),
-      ], width: fieldWidth, align: 'left'),
-      SizedBox(height: 10),
-    ];
-    if (!alreadySignedUp) {
-      colsSignUp += [
-        ...colsCreditsMoney,
-        ElevatedButton(
-          onPressed: () {
-            setState(() { _message = ''; });
-            if (_formKey.currentState?.validate() == true) {
-              setState(() { _loading = true; });
-              _formKey.currentState?.save();
-              CheckGetGetPaymentLink(currentUserState);
-            } else {
-              setState(() { _loading = false; });
-            }
-          },
-          child: Text('Join Event'),
-        )
+    List<Widget> colsSignUp = [];
+    if (showJoin) {
+      colsSignUp = [
+        _layoutService.WrapWidth([
+          ...colsAttendee,
+          ...colsHost,
+          _inputFields.inputText(_formVals, 'rsvpNote', label: 'Note (optional)',),
+        ], width: fieldWidth, align: 'left'),
+        SizedBox(height: 10),
       ];
+    }
+    if (!alreadySignedUp) {
+      if (_weeklyEvent.type == 'sharedItem') {
+        if (_mySharedItemsState == 'loaded' && _mySharedItems.length < 1) {
+          colsSignUp += [
+            _buttons.LinkElevated(context, 'Add a Shared Item to Join', '/shared-item-save', launchUrl: true),
+          ];
+        }
+      }
+
+      if (showJoin) {
+        colsSignUp += [
+          ...colsCreditsMoney,
+          ElevatedButton(
+            onPressed: () {
+              setState(() { _message = ''; });
+              if (_formKey.currentState?.validate() == true) {
+                setState(() { _loading = true; });
+                _formKey.currentState?.save();
+                CheckGetGetPaymentLink(currentUserState);
+              } else {
+                setState(() { _loading = false; });
+              }
+            },
+            child: Text('Join Event'),
+          )
+        ];
+      }
     } else {
       colsSignUp += [
         ElevatedButton(

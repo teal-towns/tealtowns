@@ -118,6 +118,13 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
   @override
   Widget build(BuildContext context) {
     var currentUserState = context.watch<CurrentUserState>();
+    if (!currentUserState.isLoggedIn) {
+      return AppScaffoldComponent(
+        listWrapper: true,
+        width: 1200,
+        body: Text("You must be logged in"),
+      );
+    }
     String userId = currentUserState.currentUser!.id;
     Map<String, dynamic> config = _configService.GetConfig();
 
@@ -249,10 +256,15 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
             children: [
               _style.Text1('Event created and invites sent, the last step is to add the first items you would like to share!', size: 'large', colorKey: 'primary'),
               _style.SpacingH('medium'),
-              _style.Text1('Join the Slack and join and post an introduction in #8-ambassadors to get support on your journey.'),
+              // _style.Text1('Join the Slack and join and post an introduction in #8-ambassadors to get support on your journey.'),
+              // _style.SpacingH('medium'),
+              // _buttons.Link(context, 'Join Slack',
+              //   'https://join.slack.com/t/tealtowns/shared_invite/zt-291gxxen8-LRs~9JmLHq8mqYUlzGncIQ', launchUrl: true),
+              // _style.SpacingH('medium'),
+              _style.Text1('Join the Ambassador Circle on WhatsApp to get support on your journey.'),
               _style.SpacingH('medium'),
-              _buttons.Link(context, 'Join Slack',
-                'https://join.slack.com/t/tealtowns/shared_invite/zt-291gxxen8-LRs~9JmLHq8mqYUlzGncIQ', launchUrl: true),
+              _buttons.Link(context, 'Join WhatsApp Ambassador Circle',
+                'https://chat.whatsapp.com/F43i2Nwvhig695B8TN4NNk', launchUrl: true),
               _style.SpacingH('medium'),
               _buttons.LinkElevated(context, 'Sign Up for and Share Your Event', '/we/${_weeklyEvents[0].uName}'),
               _style.SpacingH('medium'),

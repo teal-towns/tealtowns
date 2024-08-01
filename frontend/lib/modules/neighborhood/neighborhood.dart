@@ -53,6 +53,10 @@ class _NeighborhoodState extends State<Neighborhood> {
   List<Map<String, dynamic>> _sustainableSteps = [];
   bool _showFullNeighborhoodJourney = false;
 
+  String _nearbyNeighborhoodsState = '';
+  List<NeighborhoodClass> _nearbyNeighborhoods = [];
+  double _nearbyMeters = 8000.0;
+
   @override
   void initState() {
     super.initState();
@@ -106,6 +110,18 @@ class _NeighborhoodState extends State<Neighborhood> {
           var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
           neighborhoodState.CheckAndGet(userId);
         }
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('SearchNeighborhoods', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _nearbyNeighborhoods = [];
+        for (var i = 0; i < data['neighborhoods'].length; i++) {
+          _nearbyNeighborhoods.add(NeighborhoodClass.fromJson(data['neighborhoods'][i]));
+        }
+        setState(() { _nearbyNeighborhoods = _nearbyNeighborhoods; _nearbyNeighborhoodsState = 'loaded'; });
       }
     }));
   }
@@ -232,6 +248,26 @@ class _NeighborhoodState extends State<Neighborhood> {
           _buttons.LinkElevated(context, 'Ambassador Updates', '/au/${_neighborhood.uName}',),
           SizedBox(height: 10),
         ];
+        if (_nearbyNeighborhoodsState == '') {
+          _nearbyNeighborhoodsState = 'loading';
+          var data = {
+            'location': { 'lngLat': _neighborhood.location.coordinates, 'maxMeters': _nearbyMeters, },
+          };
+          _socketService.emit('SearchNeighborhoods', data);
+        } else if (_nearbyNeighborhoodsState == 'loaded') {
+          if (_nearbyNeighborhoods.length > 0) {
+            String link = '/ambassador-network-view?lng=${_neighborhood.location.coordinates[0]}&lat=${_neighborhood.location.coordinates[1]}&maxMeters=${_nearbyMeters}';
+            colsJoin += [
+              _buttons.LinkElevated(context, 'See ${_nearbyNeighborhoods.length} Nearby Neighborhoods', link,),
+              SizedBox(height: 10),
+            ];
+          } else {
+            colsJoin += [
+              _buttons.LinkElevated(context, 'Build Your Ambassador Network', '/ambassador-network',),
+              SizedBox(height: 10),
+            ];
+          }
+        }
       } else {
         colsJoin += [
           _buttons.LinkElevated(context, 'Become Ambassador', '/user-neighborhood-save?neighborhoodUName=${_neighborhood.uName}',),

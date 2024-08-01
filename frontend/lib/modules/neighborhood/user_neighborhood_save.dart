@@ -30,7 +30,7 @@ class _UserNeighborhoodSaveState extends State<UserNeighborhoodSave> {
 
   Map<String, Map<String, dynamic>> _formFields = {
     'motivations': { 'type': 'multiSelectButtons', 'required': true, 'label': 'What possibilities excite you most? Choose multiple.' },
-    'vision': { 'required': true, 'minLines': 4, 'label': 'What is your vision for your neighborhood? Imagine you are living in your ideal neighborhood 6-12 months from now - describe it!' },
+    'vision': { 'required': false, 'minLines': 4, 'label': 'What is your vision for your neighborhood? Imagine you are living in your ideal neighborhood 6-12 months from now - describe it!' },
   };
   Map<String, dynamic> _formValsDefault = {
     'status': 'default',
