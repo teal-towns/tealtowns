@@ -8,7 +8,7 @@ def RunAll():
     # CleanUpEmptyUsernames()
     # AddUsernames()
     # AddWeeklyEventUName()
-    UserInsightAmbassadorNetworkStepsAt()
+    # UserInsightAmbassadorNetworkStepsAt()
     # UserInsightAmbassadorSignUpStepsAt()
     # UserNeighborhoodVision()
     # UserNeighborhoodToUName()

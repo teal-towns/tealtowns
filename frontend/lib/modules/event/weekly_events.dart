@@ -53,9 +53,9 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   };
   bool _loading = true;
   String _message = '';
-  bool _canLoadMore = false;
-  int _lastPageNumber = 1;
-  int _itemsPerPage = 25;
+  // bool _canLoadMore = false;
+  // int _lastPageNumber = 1;
+  // int _itemsPerPage = 25;
   bool _skipCurrentLocation = false;
   bool _locationLoaded = false;
 
@@ -379,17 +379,17 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       setState(() {
         _loading = true;
         _message = '';
-        _canLoadMore = false;
+        // _canLoadMore = false;
       });
       var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
-      if (lastPageNumber != 0) {
-        _lastPageNumber = lastPageNumber;
-      } else {
-        _lastPageNumber = 1;
-      }
+      // if (lastPageNumber != 0) {
+      //   _lastPageNumber = lastPageNumber;
+      // } else {
+      //   _lastPageNumber = 1;
+      // }
       var data = {
-        'skip': (_lastPageNumber - 1) * _itemsPerPage,
-        'limit': _itemsPerPage,
+        // 'skip': (_lastPageNumber - 1) * _itemsPerPage,
+        // 'limit': _itemsPerPage,
         'lngLat': _filters['inputLocation']['lngLat'],
         'maxMeters': _filters['maxMeters'],
         'withAdmins': 0,

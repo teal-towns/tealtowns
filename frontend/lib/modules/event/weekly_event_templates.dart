@@ -187,7 +187,7 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
     }
     if (widget.types.length < 1 || widget.types.contains('sharedItem')) {
       Map<String, dynamic> config = _configService.GetConfig();
-      String ownUrl = '${config['SERVER_URL']}/own';
+      // String ownUrl = '${config['SERVER_URL']}/own';
       _formValsEventsList += [
         {
           'key': 'shareSomethingWalk',
@@ -198,7 +198,8 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'startTime': '9:00',
             'endTime': '10:00',
             'imageUrls': ['/assets/assets/images/events/people-walking-in-park.jpg'],
-            'description': 'Connect with another person or group to share (co-purchase or co-own) 1 item together, while enjoying a walk in nature. Sharing items is easy and accessible to all. Choose a few items you own or want that you would be open to sharing, and make some friends (and save some cash) with them, rather than letting them sit unused for weeks or months. Each item shared is one less item produced and later thrown away. It is better for both the planet and our pockets.\n\n[Add Your Shared Items Here](${ownUrl})',
+            // 'description': 'Connect with another person or group to share (co-purchase or co-own) 1 item together, while enjoying a walk in nature. Sharing items is easy and accessible to all. Choose a few items you own or want that you would be open to sharing, and make some friends (and save some cash) with them, rather than letting them sit unused for weeks or months. Each item shared is one less item produced and later thrown away. It is better for both the planet and our pockets.\n\n[Add Your Shared Items Here](${ownUrl})',
+            'description': 'Connect with another person or group to share (co-purchase or co-own) 1 item together, while enjoying a walk in nature. Sharing items is easy and accessible to all. Choose a few items you own or want that you would be open to sharing, and make some friends (and save some cash) with them, rather than letting them sit unused for weeks or months. Each item shared is one less item produced and later thrown away. It is better for both the planet and our pockets.',
             'hostGroupSizeDefault': 0,
             'type': 'sharedItem',
           }

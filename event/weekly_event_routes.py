@@ -56,7 +56,7 @@ def AddRoutes():
     def SearchNear(data, auth, websocket):
         data = lodash.extend_object({
             'title': '',
-            'limit': 250,
+            'limit': 1000,
             'skip': 0,
             'withAdmins': 1,
             'type': '',
@@ -71,7 +71,7 @@ def AddRoutes():
             'uName': '',
             'neighborhoodUName': '',
             'title': '',
-            'limit': 250,
+            'limit': 1000,
             'skip': 0,
             'sortKeys': '-createdAt',
         }, data)

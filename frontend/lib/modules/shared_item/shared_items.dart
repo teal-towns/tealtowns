@@ -52,7 +52,7 @@ class _SharedItemsState extends State<SharedItems> {
     'fundingRequired_min': '',
     'fundingRequired_max': '',
     // 'lngLat': [-79.574983, 8.993036],
-    'inputLocation': { 'lngLat': [0, 0], 'address': {} },
+    'inputLocation': { 'lngLat': [0.0, 0.0], 'address': {} },
     'myType': '',
   };
   bool _loading = true;

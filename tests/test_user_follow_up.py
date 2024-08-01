@@ -24,8 +24,9 @@ def test_CheckAndDoFollowUps():
         { 'phoneNumber': '0987654321', 'phoneNumberVerified': 1 },
         { 'whatsappNumber': '1234567890', 'whatsappNumberVerified': 1 },
         { 'whatsappNumber': '0987654321', 'whatsappNumberVerified': 1 },
-        { 'email': '4HJQ4@example.com', 'emailVerified': 1 },
-        { 'email': '4HJQ4@example.com', 'emailVerified': 1 },
+        { 'email': 'email1@example.com', 'emailVerified': 1 },
+        { 'email': 'email2@example.com', 'emailVerified': 1 },
+        # { 'email': 'email3@example.com', 'emailVerified': 1 },
     ]
     users = _stubs_data.CreateBulk(objs = users, collectionName = 'user')
     # 2 ambassador sign ups incomplete
@@ -45,12 +46,17 @@ def test_CheckAndDoFollowUps():
     ]
     neighborhoods = _stubs_data.CreateBulk(objs = neighborhoods, collectionName = 'neighborhood')
 
-    # 1 user not started yet
+    # 2 users not started yet
     userNeighborhoods = [
         { 'userId': users[2]['_id'], 'username': users[2]['username'], 'roles': ['ambassador'],
-         'neighborhoodUName': neighborhoods[1]['uName'] },
+         'neighborhoodUName': neighborhoods[1]['uName'], 'createdAt': '2024-05-01 08:00:00+00:00' },
+        # 1 user signed up within last 4 days, so should be skipped.
+        # { 'userId': users[6]['_id'], 'username': users[6]['username'], 'roles': ['ambassador'],
+        #  'neighborhoodUName': neighborhoods[1]['uName'], 'createdAt': '2024-05-20 08:00:00+00:00', },
     ]
-    userNeighborhoods = _stubs_data.CreateBulk(objs = userNeighborhoods, collectionName = 'userNeighborhood')
+    userNeighborhoods = _stubs_data.CreateBulk(objs = userNeighborhoods, collectionName = 'userNeighborhood', saveInDatabase = 0)
+    for userNeighborhood in userNeighborhoods:
+        mongo_db.insert_one('userNeighborhood', userNeighborhood, now = date_time.from_string(userNeighborhood['createdAt']))
     # 2 users with updates but more than a week behind
     userNeighborhoodWeeklyUpdates = [
         { 'userId': users[3]['_id'], 'username': users[3]['username'], 'start': '2024-05-01 09:00:00+00:00',

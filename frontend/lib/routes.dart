@@ -22,6 +22,7 @@ import './modules/about/privacy_terms.dart';
 
 import './modules/ambassador/ambassador_start.dart';
 import './modules/ambassador/ambassador_network.dart';
+import './modules/ambassador/ambassador_network_view.dart';
 
 import './modules/blog/blog_list.dart';
 import './modules/blog/blog_save.dart';
@@ -80,6 +81,7 @@ class Routes {
 
   static const ambassadorStart = '/ambassador';
   static const ambassadorNetwork = '/ambassador-network';
+  static const ambassadorNetworkView = '/ambassador-network-view';
 
   static const usersSave = '/users-save';
 
@@ -193,6 +195,14 @@ class AppGoRouter {
       GoRoute(
         path: Routes.ambassadorNetwork, name: 'ambassadorNetwork',
         builder: (context, state) => AmbassadorNetwork(),
+      ),
+      GoRoute(
+        path: Routes.ambassadorNetworkView, name: 'ambassadorNetworkView',
+        builder: (BuildContext context, GoRouterState state) => AmbassadorNetworkView(
+          lat: double.parse(state.uri.queryParameters['lat'] ?? '0.0'),
+          lng: double.parse(state.uri.queryParameters['lng'] ?? '0.0'),
+          maxMeters: int.parse(state.uri.queryParameters['maxMeters'] ?? '8000'),
+        ),
       ),
 
       GoRoute(

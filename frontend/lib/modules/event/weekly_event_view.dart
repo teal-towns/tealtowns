@@ -474,6 +474,15 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
+    List<Widget> colsSharedItem = [];
+    if (_weeklyEvent.type == 'sharedItem') {
+      String linkTemp = '/own?lng=${_weeklyEvent.location.coordinates[0]}&lat=${_weeklyEvent.location.coordinates[1]}&range=3500';
+      colsSharedItem += [
+        _buttons.Link(context, 'View and Post Shared Items', linkTemp, launchUrl: true),
+        SizedBox(height: 10),
+      ];
+    }
+
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -506,7 +515,9 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
             h6: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 10),
+        ...colsSharedItem,
+        SizedBox(height: 20),
         Row(
           children: [
             Image.asset('assets/images/logo.png', width: 30, height: 30),

@@ -68,14 +68,17 @@ def SearchNear(stringKeyVals: dict = {}, locationKeyVals: dict = {}, limit: int 
     ret = _mongo_db_crud.Search('neighborhood', stringKeyVals = stringKeyVals,
         locationKeyVals = locationKeyVals, limit = limit, skip = skip,
         withLocationDistance = withLocationDistance)
+
+    neighborhoodUNameIndices = {}
+    if userId:
+        for index, neighborhood in enumerate(ret['neighborhoods']):
+            neighborhoodUNameIndices[neighborhood['uName']] = index
     if userId:
         userNeighborhoods = _mongo_db_crud.Search('userNeighborhood', stringKeyVals = {'userId': userId})['userNeighborhoods']
-        for index, neighborhood in enumerate(ret['neighborhoods']):
-            neighborhoodUName = neighborhood['uName']
-            for userNeighborhood in userNeighborhoods:
-                if neighborhoodUName == userNeighborhood['neighborhoodUName']:
-                    ret['neighborhoods'][index]['userNeighborhood'] = userNeighborhood
-                    break
+        for userNeighborhood in userNeighborhoods:
+            if userNeighborhood['neighborhoodUName'] in neighborhoodUNameIndices:
+                index = neighborhoodUNameIndices[userNeighborhood['neighborhoodUName']]
+                ret['neighborhoods'][index]['userNeighborhood'] = userNeighborhood
 
     return ret
 
