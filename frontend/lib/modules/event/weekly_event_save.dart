@@ -70,9 +70,16 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   String _title = 'Save Event';
   String _step = '';
 
+  bool _redirecting = false;
+
   @override
   void initState() {
     super.initState();
+
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (currentUserState.isLoggedIn == false) {
+      _redirecting = true;
+    }
 
     var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
     if (neighborhoodState.defaultUserNeighborhood != null) {
@@ -89,6 +96,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
         _formFields.remove('neighborhoodUName');
       }
     } else {
+      _redirecting = true;
       Timer(Duration(milliseconds: 200), () {
         context.go('/neighborhoods');
       });
@@ -131,6 +139,12 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
 
   @override
   Widget build(BuildContext context) {
+    if (_redirecting) {
+      return AppScaffoldComponent(
+        body: Column( children: [ LinearProgressIndicator(), ]),
+      );
+    }
+
     if (_step == 'templates') {
       String title = 'Select an event template to start with';
       List<String> selectedKeys = ['sandwichSundays'];
