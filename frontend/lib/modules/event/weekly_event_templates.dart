@@ -220,7 +220,11 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
     ];
 
     int selectedCount = 0;
-    String userId = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+    var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (!currentUserState.isLoggedIn) {
+      return Text("Log in first!");
+    }
+    String userId = currentUserState.currentUser.id;
     List<Widget> items = [];
     for (int i = 0; i < _formValsEventsList.length; i++) {
       if (_formValsEventsList[i]['selected']) {
