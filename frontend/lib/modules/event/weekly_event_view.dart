@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/alert_service.dart';
 import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/date_time_service.dart';
@@ -40,6 +41,7 @@ class WeeklyEventView extends StatefulWidget {
 
 class _WeeklyEventViewState extends State<WeeklyEventView> {
   List<String> _routeIds = [];
+  AlertService _alertService = AlertService();
   Buttons _buttons = Buttons();
   ConfigService _configService = ConfigService();
   DateTimeService _dateTime = DateTimeService();
@@ -130,6 +132,18 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       // setState(() {
       //   _loading = false;
       // });
+    }));
+
+    _routeIds.add(_socketService.onRoute('GetUserEventStats', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        if (data.containsKey('attendeesCount')) {
+          _attendeesCount = data['attendeesCount'];
+          _nonHostAttendeesWaitingCount = data['nonHostAttendeesWaitingCount'];
+          setState(() { _attendeesCount = _attendeesCount; _nonHostAttendeesWaitingCount = _nonHostAttendeesWaitingCount; });
+        }
+      }
     }));
 
     _routeIds.add(_socketService.onRoute('removeWeeklyEvent', callback: (String resString) {
@@ -412,7 +426,11 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         ];
       } else {
         attendeeInfo += [
-          UserEventSave(eventId: _userEvent.eventId),
+          UserEventSave(eventId: _userEvent.eventId, onUpdate: () {
+            _alertService.Show(context, 'RSVP Updated');
+            setState(() { _userEvents = []; });
+            _socketService.emit('GetUserEventStats', { 'eventId': _userEvent.eventId });
+          }),
           SizedBox(height: 10),
         ];
       }

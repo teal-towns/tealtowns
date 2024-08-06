@@ -4,7 +4,7 @@ class SelectButtonsFormField extends FormField<String> {
   SelectButtonsFormField({ var options, String? label,
     FormFieldSetter<String>? onSaved, FormFieldValidator<String>? validator,
     String initialValue = '', ValueChanged<String?>? onChanged, Color colorSelected = Colors.blue,
-    Color color = Colors.grey, Color colorText = Colors.white, }) : super(
+    Color color = Colors.grey, Color colorText = Colors.white, bool allowEmpty = true, }) : super(
       onSaved: onSaved,
       validator: validator,
       initialValue: initialValue,
@@ -26,9 +26,11 @@ class SelectButtonsFormField extends FormField<String> {
                     if (state.value.toString() == newVal) {
                       newVal = '';
                     }
-                    state.didChange(newVal);
-                    if (onChanged != null) {
-                      onChanged!(newVal);
+                    if (allowEmpty || newVal.length > 0) {
+                      state.didChange(newVal);
+                      if (onChanged != null) {
+                        onChanged!(newVal);
+                      }
                     }
                   },
                   style: FilledButton.styleFrom(
