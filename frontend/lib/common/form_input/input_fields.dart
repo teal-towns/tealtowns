@@ -446,7 +446,8 @@ class InputFields {
   }
 
   Widget inputSelectButtons(var options, var formVals, String? formValsKey, { String label = '',
-    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '',}) {
+    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '',
+    bool allowEmpty = true,}) {
     String value = '';
     if (formValsKey == null) {
       value = formVals;
@@ -463,6 +464,7 @@ class InputFields {
       colorText: _colors.colors['brown'],
       label: label,
       initialValue: value,
+      allowEmpty: allowEmpty,
       onSaved: (value) {
         if (formValsKey == null) {
           formVals = value;

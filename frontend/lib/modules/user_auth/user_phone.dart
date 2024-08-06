@@ -32,6 +32,10 @@ class _UserPhoneState extends State<UserPhone> {
     'terms': false,
     'mode': 'whatsapp',
   };
+  List<Map<String, dynamic>> _optsMode = [
+    {'value': 'sms', 'label': 'SMS'},
+    {'value': 'whatsapp', 'label': 'WhatsApp'},
+  ];
   bool _loading = false;
   String _message = '';
   bool _verificationSent = false;
@@ -160,107 +164,100 @@ class _UserPhoneState extends State<UserPhone> {
   Widget build(BuildContext context) {
     double width = 500;
     Widget widgetVerificationKey = SizedBox.shrink();
-    try {
-      String fieldNumber = _fieldsByMode[_formVals['mode']]!['number']!;
-      String fieldVerificationKey = _fieldsByMode[_formVals['mode']]!['verificationKey']!;
-      if (_formVals[fieldNumber]!.length > 8 && _verificationSent) {
-        widgetVerificationKey = Container(width: width, child: _inputFields.inputText(_formVals, fieldVerificationKey, minLen: 2, label: 'Verification Key'));
-      }
-      RegExp pattern = new RegExp(r'^[0-9]*$');
-      List<Map<String, dynamic>> optsMode = [
-        {'value': 'sms', 'label': 'SMS'},
-        {'value': 'whatsapp', 'label': 'WhatsApp'},
+    String fieldNumber = _fieldsByMode[_formVals['mode']]!['number']!;
+    String fieldVerificationKey = _fieldsByMode[_formVals['mode']]!['verificationKey']!;
+    if (_formVals[fieldNumber]!.length > 8 && _verificationSent) {
+      widgetVerificationKey = Container(width: width, child: _inputFields.inputText(_formVals, fieldVerificationKey, minLen: 2, label: 'Verification Key'));
+    }
+    RegExp pattern = new RegExp(r'^[0-9]*$');
+
+    var currentUserState = context.watch<CurrentUserState>();
+    bool verified = false;
+    if ((_formVals['mode'] == 'sms' && currentUserState.currentUser.phoneNumberVerified > 0) ||
+      (_formVals['mode'] == 'whatsapp' && currentUserState.currentUser.whatsappNumberVerified > 0)) {
+      verified = true;
+    }
+    List<Widget> cols = [];
+    if (!verified) {
+      cols += [
+        Container(width: width, child: _inputFields.inputText(_formVals, fieldNumber,
+          label: 'Phone Number, with country code', hint: '15551234567',
+          pattern: pattern, minLen: 8, maxLen: 15,)),
+        Container(width: width, child: _inputFields.inputCheckbox(_formVals, 'terms',
+          label: 'I agree to receive text messages from TealTowns. Consent is not a condition of purchase. Message and data rates may apply. Message frequency varies. Unsubscribe at any time by clicking the unsubscribe link (where available).',
+          onChanged: (bool val) {
+            _formVals['terms'] = val;
+            setState(() { _formVals = _formVals; });
+          },
+        )),
+        widgetVerificationKey,
+        _buildSubmit(context),
+        _buildMessage(context),
+        SizedBox(height: 10),
+        RichText( text: TextSpan(
+          children: [
+            // TextSpan(
+            //   text: 'I agree to receive text messages from TealTowns. Consent is not a condition of purchase. Message and data rates may apply. Message frequency varies. Unsubscribe at any time by clicking the unsubscribe link (where available). ',
+            // ),
+            TextSpan(
+              text: 'Privacy Policy',
+              style: TextStyle(color: Colors.blue),
+              recognizer: TapGestureRecognizer()..onTap = () {
+                _linkService.LaunchURL('/privacy-policy');
+              },
+            ),
+            TextSpan(
+              text: ' | ',
+            ),
+            TextSpan(
+              text: 'Terms of Service',
+              style: TextStyle(color: Colors.blue),
+              recognizer: TapGestureRecognizer()..onTap = () {
+                _linkService.LaunchURL('/terms-of-service');
+              },
+            ),
+          ]
+        )),
       ];
+    } else {
+      cols += [
+        SizedBox(height: 10),
+        Text("${_formVals[fieldNumber]}"),
+        SizedBox(height: 10),
+        TextButton(
+          onPressed: () {
+            setState(() { _message = ''; _loading = true; });
+            var data = {
+              'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
+              'mode': _formVals['mode'],
+            };
+            data[fieldNumber] = '';
+            _socketService.emit('SendPhoneVerificationCode', data);
+          },
+          child: Text('Remove Phone'),
+        ),
+      ];
+    }
 
-      var currentUserState = context.watch<CurrentUserState>();
-      bool verified = false;
-      if ((_formVals['mode'] == 'sms' && currentUserState.currentUser.phoneNumberVerified > 0) ||
-        (_formVals['mode'] == 'whatsapp' && currentUserState.currentUser.whatsappNumberVerified > 0)) {
-        verified = true;
-      }
-      List<Widget> cols = [];
-      if (!verified) {
-        cols += [
-          Container(width: width, child: _inputFields.inputText(_formVals, fieldNumber,
-            label: 'Phone Number, with country code', hint: '15551234567',
-            pattern: pattern, minLen: 8, maxLen: 15,)),
-          Container(width: width, child: _inputFields.inputCheckbox(_formVals, 'terms',
-            label: 'I agree to receive text messages from TealTowns. Consent is not a condition of purchase. Message and data rates may apply. Message frequency varies. Unsubscribe at any time by clicking the unsubscribe link (where available).',
-            onChanged: (bool val) {
-              _formVals['terms'] = val;
-              setState(() { _formVals = _formVals; });
-            },
-          )),
-          widgetVerificationKey,
-          _buildSubmit(context),
-          _buildMessage(context),
-          SizedBox(height: 10),
-          RichText( text: TextSpan(
-            children: [
-              // TextSpan(
-              //   text: 'I agree to receive text messages from TealTowns. Consent is not a condition of purchase. Message and data rates may apply. Message frequency varies. Unsubscribe at any time by clicking the unsubscribe link (where available). ',
-              // ),
-              TextSpan(
-                text: 'Privacy Policy',
-                style: TextStyle(color: Colors.blue),
-                recognizer: TapGestureRecognizer()..onTap = () {
-                  _linkService.LaunchURL('/privacy-policy');
-                },
-              ),
-              TextSpan(
-                text: ' | ',
-              ),
-              TextSpan(
-                text: 'Terms of Service',
-                style: TextStyle(color: Colors.blue),
-                recognizer: TapGestureRecognizer()..onTap = () {
-                  _linkService.LaunchURL('/terms-of-service');
-                },
-              ),
-            ]
-          )),
-        ];
-      } else {
-        cols += [
-          SizedBox(height: 10),
-          Text("${_formVals[fieldNumber]}"),
-          SizedBox(height: 10),
-          TextButton(
-            onPressed: () {
-              setState(() { _message = ''; _loading = true; });
-              var data = {
-                'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
-                'mode': _formVals['mode'],
-              };
-              data[fieldNumber] = '';
-              _socketService.emit('SendPhoneVerificationCode', data);
-            },
-            child: Text('Remove Phone'),
-          ),
-        ];
-      }
-
-      return Container(
-        width: 750,
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(width: width, child: _inputFields.inputSelectButtons(optsMode, _formVals, 'mode', onChanged: (val) {
+    return Container(
+      width: 750,
+      child: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(width: width, child: _inputFields.inputSelectButtons(_optsMode, _formVals, 'mode', allowEmpty: false, onChanged: (val) {
+              if (val.length > 0) {
                 _formVals['mode'] = val;
                 setState(() { _formVals = _formVals; });
-              })),
-              ...cols,
-            ]
-          ),
-        )
-      );
-    } on Exception catch (e) {
-      throw 'UserPhone error _formVals ${_formVals} _fieldsByMode ${_fieldsByMode}';
-      return Text(e.toString());
-    }
+              }
+            })),
+            ...cols,
+          ]
+        ),
+      )
+    );
   }
 
   @override

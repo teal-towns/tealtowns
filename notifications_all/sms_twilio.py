@@ -29,7 +29,7 @@ def Send(body: str, toNumber: str, fromNumber: str = '', mode: str = 'sms',
     if _testMode or ('test_mode' in _config['twilio'] and _config['twilio']['test_mode']):
         return ret
 
-    log.log('info', 'sms_twilio.Send debug', 'toNumber', toNumber, 'body', body, 'fromNumber', fromNumber)
+    log.log('info', 'sms_twilio.Send debug', 'toNumber', toNumber, 'body', body, 'fromNumber', fromNumber, 'mode', mode)
 
     # WhatsApp requires using message templates that are submitted on Twilio, so need to reference them.
     messageTemplateId = None

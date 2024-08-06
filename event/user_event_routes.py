@@ -23,4 +23,9 @@ def addRoutes():
         return _user_event.GetUsers(data['eventId'])
     _socket.add_route('GetUserEventUsers', GetUsers)
 
+    def GetStats(data, auth, websocket):
+        withUserId = data['withUserId'] if 'withUserId' in data else ''
+        return _user_event.GetStats(data['eventId'], withUserId)
+    _socket.add_route('GetUserEventStats', GetStats)
+
 addRoutes()

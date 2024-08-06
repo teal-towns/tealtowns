@@ -15,7 +15,8 @@ import '../user_auth/current_user_state.dart';
 
 class UserEventSave extends StatefulWidget {
   String eventId;
-  UserEventSave({this.eventId = '',});
+  Function()? onUpdate;
+  UserEventSave({this.eventId = '', this.onUpdate = null,});
 
   @override
   _UserEventSaveState createState() => _UserEventSaveState();
@@ -109,6 +110,9 @@ class _UserEventSaveState extends State<UserEventSave> {
       if (data['valid'] == 1) {
         // context.go('/weekly-events');
         GetUserEvent();
+        if (widget.onUpdate != null) {
+          widget.onUpdate!();
+        }
       }
     }));
 
