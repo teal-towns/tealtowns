@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:location/location.dart';
 // import 'package:universal_html/html.dart';
+import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 
 import '../../common/localstorage_service.dart';
 import '../../common/socket_service.dart';
@@ -96,6 +97,7 @@ class CurrentUserState extends ChangeNotifier {
       user.sessionId = _currentUser!.sessionId;
     }
     _currentUser = user;
+    OnSetUser(user);
     _isLoggedIn = true;
     _socketService.setAuth(user.id, user.sessionId);
 
@@ -103,6 +105,21 @@ class CurrentUserState extends ChangeNotifier {
     _localstorage?.setItem('currentUser', user.toJson());
 
     notifyListeners();
+  }
+
+  void OnSetUser(UserClass user) {
+    // if (_mixpanel == null) {
+    if (_socketService.mixpanel != null) {
+      _socketService.mixpanel!.identify(user.id);
+      _socketService.mixpanel!.getPeople().set("\$name", "${user.firstName} ${user.lastName}");
+      _socketService.mixpanel!.getPeople().set("\$email", "${user.email}");
+    }
+  }
+
+  void OnClearUser() {
+    if (_socketService.mixpanel != null) {
+      _socketService.mixpanel!.reset();
+    }
   }
 
   void clearUser() {
@@ -128,6 +145,7 @@ class CurrentUserState extends ChangeNotifier {
       _socketService.emit('getUserSession', {  'userId': user.id, 'sessionId': user.sessionId,
         'withCheckUserFeedback': 1 });
       _currentUser = user;
+      OnSetUser(user);
       _isLoggedIn = true;
     }
   }

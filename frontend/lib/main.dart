@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 //if (kIsWeb) {
 //import 'dart:html' if (dart.library.html);
@@ -70,6 +71,11 @@ main() async {
 
   setPathUrlStrategy();
 
+  Mixpanel? mixpanel = null;
+  if (dotenv.env['MIXPANEL_TOKEN'] != null && dotenv.env['MIXPANEL_TOKEN']!.length > 0) {
+    mixpanel = await Mixpanel.init(dotenv.env['MIXPANEL_TOKEN']!, trackAutomaticEvents: true);
+    _socketService.SetMixpanel(mixpanel);
+  }
   // WidgetsFlutterBinding.ensureInitialized();
   if (dotenv.env['SENTRY_DSN'] != null && dotenv.env['SENTRY_DSN']!.length > 0) {
     await SentryFlutter.init(
@@ -103,6 +109,7 @@ class MyApp extends StatefulWidget {
 
 class _MyApp extends State<MyApp> {
   GoRouter _appRouter = AppGoRouter().router;
+  // bool _inited = false;
 
   @override
   Widget build(BuildContext context) {
