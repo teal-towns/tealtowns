@@ -26,6 +26,10 @@ def ComputeNeighborhoodStats(uName: str, now = None, withPrevious: bool = True, 
         retOne = _neighborhood.GetByUName(uName, withUniqueEventUsersCount = 1, withUsersCount = 1,
             minDateString = start, maxDateString = end, limitCount = 10000, withFreePaidStats = True, 
             withType = 'uName')
+        if not retOne['valid']:
+            ret['valid'] = 0
+            ret['message'] = retOne['message']
+            return ret
         neighborhoodStats = {
             'neighborhoodUName': uName,
             'start': start,
