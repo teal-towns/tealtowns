@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 
 class SocketService {
   SocketService._privateConstructor();
@@ -8,6 +9,9 @@ class SocketService {
   factory SocketService() {
     return _instance;
   }
+
+  Mixpanel? _mixpanel = null;
+  get mixpanel => _mixpanel;
 
   // One of each per server.
   var _channels = {};
@@ -84,6 +88,11 @@ class SocketService {
       'data': data,
     });
     _channels[serverKey].sink.add(utf8.encode(message));
+
+    List<String> skipRoutes = ['GetGitSha', 'getUserSession'];
+    if (_mixpanel != null && !skipRoutes.contains(route)) {
+      _mixpanel!.track(route);
+    }
     return emitId;
   }
 
@@ -128,5 +137,9 @@ class SocketService {
     _auth[serverKey] = {};
     _auth[serverKey]['userId'] = userId;
     _auth[serverKey]['sessionId'] = sessionId;
+  }
+
+  void SetMixpanel(Mixpanel mixpanel) {
+    _mixpanel = mixpanel;
   }
 }
