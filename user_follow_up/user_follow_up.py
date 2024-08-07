@@ -109,11 +109,11 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                 contactType = 'email'
                 if forType == 'ambassadorUpdate':
                     contactOptions = []
-                    if 'phoneNumber' in user and user['phoneNumberVerified'] == 1:
+                    if 'phoneNumber' in user and 'phoneNumberVerified' in user and user['phoneNumberVerified'] == 1:
                         contactOptions.append('sms')
-                    if 'whatsappNumber' in user and user['whatsappNumberVerified'] == 1:
+                    if 'whatsappNumber' in user and 'whatsappNumberVerified' in user and user['whatsappNumberVerified'] == 1:
                         contactOptions.append('whatsapp')
-                    if 'email' in user and user['emailVerified'] == 1:
+                    if 'email' in user and 'emailVerified' in user and user['emailVerified'] == 1:
                         contactOptions.append('email')
                     if len(contactOptions) < 1 and 'email' in user:
                         contactOptions = ['email']
