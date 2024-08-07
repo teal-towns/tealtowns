@@ -106,6 +106,9 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                     _user_neighborhood.RemoveRole(username, neighborhoodUName, 'ambassador')
             else:
                 user = _user_auth.getByUsername(username)
+                if user is None:
+                    log.log('warn', 'user_follow_up.CheckAndDoFollowUps user is None, skipping', username)
+                    continue
                 contactType = 'email'
                 if forType == 'ambassadorUpdate':
                     contactOptions = []

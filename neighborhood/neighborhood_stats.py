@@ -29,6 +29,7 @@ def ComputeNeighborhoodStats(uName: str, now = None, withPrevious: bool = True, 
         if not retOne['valid']:
             ret['valid'] = 0
             ret['message'] = retOne['message']
+            log.log('warn', 'neighborhood_stats.ComputeNeighborhoodStats missing neighborhood ' + uName + ' ' + retOne['message'])
             return ret
         neighborhoodStats = {
             'neighborhoodUName': uName,
