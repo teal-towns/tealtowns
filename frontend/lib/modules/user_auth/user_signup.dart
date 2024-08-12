@@ -53,7 +53,8 @@ class _UserSignupState extends State<UserSignup> {
               widget.onSave!(user);
             }
             if (widget.redirectOnDone) {
-              String route = '/home';
+              // String route = '/home';
+              String route = '/user-interest-save';
               String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
               if (redirectUrl.length > 0) {
                 route = redirectUrl;

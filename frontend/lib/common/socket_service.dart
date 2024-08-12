@@ -89,11 +89,19 @@ class SocketService {
     });
     _channels[serverKey].sink.add(utf8.encode(message));
 
-    List<String> skipRoutes = ['GetGitSha', 'getUserSession'];
-    if (_mixpanel != null && !skipRoutes.contains(route)) {
+    // List<String> skipRoutes = ['GetGitSha', 'getUserSession'];
+    // if (_mixpanel != null && !skipRoutes.contains(route)) {
+    List<String> trackRoutes = ['signup', 'saveWeeklyEvent', 'saveSharedItem'];
+    if (_mixpanel != null && trackRoutes.contains(route)) {
       _mixpanel!.track(route);
     }
     return emitId;
+  }
+
+  void TrackEvent(String eventName, {Map<String, dynamic>? properties = const {}}) {
+    if (_mixpanel != null) {
+      _mixpanel!.track(eventName, properties: properties);
+    }
   }
 
   String onRoute(String route, {Function(String)? callback, String serverKey = 'default'}) {

@@ -497,7 +497,7 @@ class InputFields {
     if (formValsKey == null) {
       values = formVals;
     } else {
-      values = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : [];
+      values = (formVals.containsKey(formValsKey)) ? _parseService.parseListString(formVals[formValsKey]) : [];
     }
     if (options.length < 1) {
       return SizedBox.shrink();

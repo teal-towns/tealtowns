@@ -135,6 +135,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       return ElevatedButton(
         onPressed: () {
           _linkService.Go('', context, currentUserState: currentUserState);
+          _socketService.TrackEvent('Join Event');
         },
         child: Text('Join Event'),
       );
