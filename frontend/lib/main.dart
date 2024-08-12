@@ -14,6 +14,7 @@ import 'package:url_strategy/url_strategy.dart';
 import './common/config_service.dart';
 import './common/localstorage_service.dart';
 import './common/socket_service.dart';
+import './common/track_insight_service.dart';
 import './modules/user_auth/current_user_state.dart';
 import './routes.dart';
 import './styles/custom_theme.dart';
@@ -69,12 +70,15 @@ main() async {
   SocketService _socketService = SocketService();
   _socketService.connect({ 'default': dotenv.env['SOCKET_URL_PUBLIC'] });
 
+  TrackInsightService _trackInsightService = TrackInsightService();
+
   setPathUrlStrategy();
 
   Mixpanel? mixpanel = null;
   if (dotenv.env['MIXPANEL_TOKEN'] != null && dotenv.env['MIXPANEL_TOKEN']!.length > 0) {
     mixpanel = await Mixpanel.init(dotenv.env['MIXPANEL_TOKEN']!, trackAutomaticEvents: true);
     _socketService.SetMixpanel(mixpanel);
+    _trackInsightService.SetMixpanel(mixpanel);
   }
   // WidgetsFlutterBinding.ensureInitialized();
   if (dotenv.env['SENTRY_DSN'] != null && dotenv.env['SENTRY_DSN']!.length > 0) {

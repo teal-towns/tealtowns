@@ -131,6 +131,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     return TextButton(
       onPressed: () {
         context.go(route);
+        _socketService.TrackEvent('NavButton', properties: { 'route': route });
       },
       style: TextButton.styleFrom(
         backgroundColor: Colors.white,

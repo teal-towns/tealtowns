@@ -157,7 +157,8 @@ def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
     sortObj = { 'createdAt': -1 }
 
     query = { 'adminUserIds': userId }
-    fields = { 'uName': 1, 'title': 1, 'createdAt': 1, }
+    fields = { 'uName': 1, 'title': 1, 'createdAt': 1, 'dayOfWeek': 1, 'startTime': 1, 'endTime': 1,
+        'timezone': 1, 'location': 1, 'locationAddress': 1, 'priceUSD': 1, 'imageUrls': 1, 'adminUserIds': 1, }
     ret['weeklyEventsAdmin'] = mongo_db.find('weeklyEvent', query, fields = fields, sort_obj = sortObj,
         limit = limit)['items']
 

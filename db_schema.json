@@ -476,5 +476,32 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "icebreaker": "{String}",
         "details": "{String}"
+    },
+    "userInterest": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "userId": "{String}",
+        "username": "{String}",
+        "interests": [ "{String}" ],
+        "neighborhoodEventAvailabilityMatches": [ "{Int} 0|1 [Whether an event in their default neighborhood exists for this interest and within their available times" ]
+    },
+    "userAvailability": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "userId": "{String}",
+        "username": "{String}",
+        "availableTimesByDay": [
+            {
+                "dayOfWeek": "{Int} [0-6, 0 = mon, 1 = tue, 2 = wed, 3 = thu, 4 = fri, 5 = sat, 6 = sun]",
+                "times": [
+                    {
+                        "start": "{String} [HH:mm]",
+                        "end": "{String} [HH:mm]"
+                    }
+                ]
+            }
+        ]
     }
 }

@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
+import '../../common/card_placeholder.dart';
 import '../../common/date_time_service.dart';
+import '../../common/layout_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './user_class.dart';
@@ -17,6 +19,7 @@ import '../neighborhood/user_neighborhood_class.dart';
 import '../event/user_event_class.dart';
 import '../event/weekly_event_class.dart';
 import '../event/user_feedback_class.dart';
+import '../event/weekly_event_card.dart';
 
 class User extends StatefulWidget {
   String username;
@@ -31,6 +34,7 @@ class User extends StatefulWidget {
 class _UserState extends State<User> {
   Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
+  LayoutService _layoutService = LayoutService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Style _style = Style();
@@ -114,15 +118,20 @@ class _UserState extends State<User> {
 
   @override
   Widget build(BuildContext context) {
+    CurrentUserState currentUserState = context.watch<CurrentUserState>();
     List<Widget> cols = [];
     if (_message.length > 0) {
       cols.add(Text('${_message}'));
     } else {
       if (widget.mode == '') {
+        cols += [
+          _style.Text1('Friendship at the Heart of Sustainable Living', size: 'large'),
+          _style.SpacingH('medium'),
+        ];
         Widget phone = _userIsSelf ? UserPhone() : SizedBox.shrink();
         cols += [
-          _style.Text1('${_user.firstName} ${_user.lastName} (${_user.username})', size: 'large'),
-          _style.SpacingH('medium'),
+          // _style.Text1('${_user.firstName} ${_user.lastName} (${_user.username})', size: 'large'),
+          // _style.SpacingH('medium'),
           phone,
           _style.SpacingH('xlarge'),
         ];
@@ -224,12 +233,20 @@ class _UserState extends State<User> {
         }
 
         if (widget.mode == '') {
+          List<Widget> elementsTemp = [];
+          for (WeeklyEventClass weeklyEvent in _weeklyEventsAdmin) {
+            elementsTemp.add(WeeklyEventCard(weeklyEvent: weeklyEvent, currentUserState: currentUserState, imageHeight: 155,));
+          }
+          // elementsTemp += _weeklyEventsAdmin.map((weeklyEvent) {
+          //   // createdAt = _dateTime.Format(weeklyEvent.createdAt, 'yyyy-MM-dd');
+          //   // return _buttons.LinkInline(context, '${weeklyEvent.title}, ${createdAt}', '/we/${weeklyEvent.uName}');
+          //   return WeeklyEventCard(weeklyEvent: weeklyEvent, currentUserState: currentUserState,);
+          // }).toList();
+          // Widget buttonTemp = _buttons.LinkIcon(context, Icons.add, '/weekly-event-save');
+          elementsTemp.add(CardPlaceholder(text: 'Create an event and lead more neighbors to sustainable life', onPressUrl: '/weekly-event-save',));
           cols += [
             _style.Text1('Weekly Events Admin', size: 'large'),
-            ..._weeklyEventsAdmin.map((weeklyEvent) {
-              createdAt = _dateTime.Format(weeklyEvent.createdAt, 'yyyy-MM-dd');
-              return _buttons.LinkInline(context, '${weeklyEvent.title}, ${createdAt}', '/we/${weeklyEvent.uName}');
-            }),
+            _layoutService.WrapWidth(elementsTemp),
             _style.SpacingH('medium'),
           ];
         }

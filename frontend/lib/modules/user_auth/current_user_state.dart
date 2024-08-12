@@ -8,6 +8,8 @@ import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import '../../common/localstorage_service.dart';
 import '../../common/socket_service.dart';
 import './user_class.dart';
+import './user_availability_class.dart';
+import './user_interest_class.dart';
 
 class CurrentUserState extends ChangeNotifier {
   SocketService _socketService = SocketService();
@@ -22,6 +24,8 @@ class CurrentUserState extends ChangeNotifier {
   String _routerRedirectUrl = '';
   var _routerRedirectTimeout = null;
   Map<String, dynamic> _appData = {};
+  UserAvailabilityClass _userAvailability = UserAvailabilityClass.fromJson({});
+  UserInterestClass _userInterest = UserInterestClass.fromJson({});
 
   get isLoggedIn => _isLoggedIn;
 
@@ -34,6 +38,10 @@ class CurrentUserState extends ChangeNotifier {
   get routerRedirectUrl => _routerRedirectUrl;
 
   get appData => _appData;
+
+  get userAvailability => _userAvailability;
+
+  get userInterest => _userInterest;
 
   void init() {
     if (_routeIds.length == 0) {
@@ -58,6 +66,22 @@ class CurrentUserState extends ChangeNotifier {
               // _routerRedirectTimeout = DateTime.now().add(const Duration(seconds: 5));
               // print ('timeouts ${_routerRedirectTimeout}');
               // notifyListeners();
+            }
+          }
+          if (data.containsKey('userAvailability')) {
+            SetUserAvailability(UserAvailabilityClass.fromJson(data['userAvailability']));
+            int timesCount = 0;
+            for (var day in _userAvailability.availableTimesByDay) {
+              timesCount += day['times'].length as int;
+            }
+            if (timesCount < 3) {
+              _routerRedirectUrl = '/user-availability-save';
+            }
+          }
+          if (data.containsKey('userInterest')) {
+            SetUserInterest(UserInterestClass.fromJson(data['userInterest']));
+            if (_userInterest.interests.length < 3) {
+              _routerRedirectUrl = '/user-interest-save';
             }
           }
         } else {
@@ -89,6 +113,16 @@ class CurrentUserState extends ChangeNotifier {
 
   void ClearAppData() {
     _appData = {};
+    notifyListeners();
+  }
+
+  void SetUserAvailability(UserAvailabilityClass userAvailability) {
+    _userAvailability = userAvailability;
+    notifyListeners();
+  }
+
+  void SetUserInterest(UserInterestClass userInterest) {
+    _userInterest = userInterest;
     notifyListeners();
   }
 
@@ -143,7 +177,7 @@ class CurrentUserState extends ChangeNotifier {
     if (user != null && user.id.length > 0 && user.sessionId.length > 0) {
       _status = "loading";
       _socketService.emit('getUserSession', {  'userId': user.id, 'sessionId': user.sessionId,
-        'withCheckUserFeedback': 1 });
+        'withCheckUserFeedback': 1, 'withUserInterest': 1, 'withUserAvailability': 1, });
       _currentUser = user;
       OnSetUser(user);
       _isLoggedIn = true;

@@ -125,7 +125,7 @@ class _HomeComponentState extends State<HomeComponent> {
                 _style.SpacingH('large'),
                 Align(alignment: Alignment.center,
                   // child: _buttons.LinkElevated(context, 'Join or Create Your TealTown', '/neighborhoods'),
-                  child: _buttons.LinkElevated(context, 'Create Your TealTown', '/ambassador'),
+                  child: _buttons.LinkElevated(context, 'Create Your TealTown', '/ambassador', track: true),
                 ),
                 SizedBox(height: 30),
               ],

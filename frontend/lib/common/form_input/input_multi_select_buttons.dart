@@ -19,6 +19,13 @@ class MultiSelectButtonsFormField extends FormField<List<String>> {
               spacing: 10,
               runSpacing: 10,
               children: options.map<Widget>((opt) {
+                if (state.value != initialValue) {
+                  state.didChange(initialValue);
+                }
+                bool filled = false;
+                if (state.value!.contains(opt['value'].toString())) {
+                  filled = true;
+                }
                 return FilledButton(
                   child: Text(opt['label']),
                   onPressed: () {
@@ -35,7 +42,7 @@ class MultiSelectButtonsFormField extends FormField<List<String>> {
                     }
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: state.value!.contains(opt['value'].toString()) ? colorSelected : color,
+                    backgroundColor: filled ? colorSelected : color,
                     foregroundColor: colorText,
                   ),
                 );
