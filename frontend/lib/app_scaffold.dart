@@ -558,7 +558,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     var currentUserState = context.watch<CurrentUserState>();
     String url = currentUserState.GetRouterRedirectUrl();
     if (url.length > 0) {
-      Timer(Duration(milliseconds: 500), () {
+      Timer(Duration(milliseconds: 200), () {
         context.go(url);
       });
     }

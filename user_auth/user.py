@@ -29,12 +29,15 @@ def SaveUser(user, keys: list = ['first_name', 'last_name', 'lngLat']):
     return ret
 
 def GetPhone(userId: str, requireVerified: int = 0, username: str = ''):
-    ret = { 'valid': 0, 'message': '', 'phoneNumber': '' }
+    ret = { 'valid': 0, 'message': '', 'phoneNumber': '', 'mode': '', 'email': '', 'userId': '', 'username': '', }
     if len(username) > 0:
         user = _user_auth.getByUsername(username)
     else:
         user = _user_auth.getById(userId)
     if user is not None:
+        ret['userId'] = user['_id']
+        ret['username'] = user['username']
+        ret['email'] = user['email']
         if 'phoneNumber' in user and (requireVerified == 0 or user['phoneNumberVerified'] == 1):
             ret['phoneNumber'] = user['phoneNumber']
             ret['mode'] = 'sms'

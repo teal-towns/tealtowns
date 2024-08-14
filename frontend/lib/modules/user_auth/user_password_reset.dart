@@ -42,10 +42,9 @@ class _UserPasswordResetState extends State<UserPasswordResetComponent> {
           if (user.id.length > 0) {
             Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
             String route = '/home';
-            String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
+            String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).GetRedirectUrl();
             if (redirectUrl.length > 0) {
               route = redirectUrl;
-              Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl('');
             }
             context.go(route);
           } else {

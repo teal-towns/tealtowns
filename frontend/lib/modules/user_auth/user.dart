@@ -130,8 +130,18 @@ class _UserState extends State<User> {
         ];
         Widget phone = _userIsSelf ? UserPhone() : SizedBox.shrink();
         cols += [
-          // _style.Text1('${_user.firstName} ${_user.lastName} (${_user.username})', size: 'large'),
-          // _style.SpacingH('medium'),
+          _style.Text1('${_user.firstName} ${_user.lastName} (${_user.username})', size: 'large'),
+          _style.SpacingH('medium'),
+        ];
+        if (_userIsSelf) {
+          cols += [
+            _buttons.Link(context, 'Interests', '/user-interest-save'),
+            _style.SpacingH('medium'),
+            _buttons.Link(context, 'Availability', '/user-availability-save'),
+            _style.SpacingH('medium'),
+          ];
+        }
+        cols += [
           phone,
           _style.SpacingH('xlarge'),
         ];

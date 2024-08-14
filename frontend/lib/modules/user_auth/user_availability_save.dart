@@ -40,7 +40,7 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
     { 'dayOfWeek': 1, 'times': [ { 'start': '07:00', 'end': '09:00' }, { 'start': '17:00', 'end': '20:30' } ] },
     { 'dayOfWeek': 2, 'times': [ { 'start': '07:00', 'end': '09:00' }, { 'start': '17:00', 'end': '20:30' } ] },
     { 'dayOfWeek': 3, 'times': [ { 'start': '07:00', 'end': '09:00' }, { 'start': '17:00', 'end': '20:30' } ] },
-    // { 'dayOfWeek': 4, 'times': [ { 'start': '07:00', 'end': '09:00' }, { 'start': '17:00', 'end': '20:30' } ] },
+    { 'dayOfWeek': 4, 'times': [ { 'start': '07:00', 'end': '09:00' }, { 'start': '17:00', 'end': '20:30' } ] },
     { 'dayOfWeek': 5, 'times': [ { 'start': '08:00', 'end': '21:00' } ] },
     { 'dayOfWeek': 6, 'times': [ { 'start': '08:00', 'end': '20:30' } ] },
   ];
@@ -181,6 +181,8 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
       listWrapper: true,
       body: Column(
         children: [
+          _style.Text1('When are all the times you are generally available for in person neighborhood events?', size: 'large'),
+          _style.SpacingH('medium'),
           _layoutService.WrapWidth(days, width: widget.dayWidth),
           _style.SpacingH('xlarge'),
           ElevatedButton(child: Text('Save'), onPressed: () {

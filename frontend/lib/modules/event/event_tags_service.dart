@@ -36,4 +36,18 @@ class EventTagsService {
   List<String> GetCategories() {
     return _tags.keys.toList();
   }
+
+  List<Map<String, dynamic>> GetTagsOpts() {
+    List<Map<String, dynamic>> optsTags = [];
+    for (String category in _tags.keys) {
+      Map<String, dynamic> opt = {'value': category, 'label': category, };
+      optsTags.add(opt);
+      List<String> subcats = _tags[category]!;
+      for (String subcat in subcats) {
+        Map<String, dynamic> opt = {'value': subcat, 'label': subcat, };
+        optsTags.add(opt);
+      }
+    }
+    return optsTags;
+  }
 }

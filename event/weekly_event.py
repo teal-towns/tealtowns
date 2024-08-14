@@ -127,6 +127,11 @@ def Save(weeklyEvent: dict):
     if '_id' not in weeklyEvent:
         # Many weekly events will have the same title, so just use blank string to keep them shorter.
         weeklyEvent['uName'] = lodash.CreateUName('')
+        weeklyEvent = lodash.extend_object({
+            'type': '',
+            'tags': [],
+            'archived': 0,
+        }, weeklyEvent)
         if weeklyEvent['priceUSD'] > 0 and weeklyEvent['priceUSD'] < 5:
             if weeklyEvent['priceUSD'] < 2.5:
                 weeklyEvent['priceUSD'] = 0
