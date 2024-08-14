@@ -15,6 +15,7 @@ def create_all_indices(db):
     db['weeklyEvent'].create_index([('archived', 1)], unique=False)
     db['weeklyEvent'].create_index([('neighborhoodUName', 1)], unique=False)
     db['weeklyEvent'].create_index([('location', '2dsphere')])
+    db['weeklyEvent'].create_index([('tags', 1)], unique=False)
 
     db['event'].create_index([('weeklyEventId', 1), ('start', 1)], unique=False)
     db['event'].create_index([('neighborhoodUName', 1)], unique=False)

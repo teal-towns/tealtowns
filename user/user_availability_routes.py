@@ -1,10 +1,9 @@
-from common import mongo_db_crud as _mongo_db_crud
 from common import socket as _socket
-# import lodash
+from user import user_availability as _user_availability
 
 def addRoutes():
     def Save(data, auth, websocket):
-        return _mongo_db_crud.Save('userAvailability', data['userAvailability'], checkGetKey = 'username')
+        return _user_availability.Save(data['userAvailability'])
     _socket.add_route('SaveUserAvailability', Save)
 
 addRoutes()

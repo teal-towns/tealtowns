@@ -40,6 +40,9 @@ def sort2D(array1, key, order = 'ascending'):
     def getValue(item):
         return item[key]
 
+    if key[0] == '-':
+        key = key[1:]
+        order = 'descending'
     reverse = True if order == 'descending' else False
     return sorted(array1, key=getValue, reverse=reverse)
 

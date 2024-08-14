@@ -18,6 +18,7 @@ from stubs import stubs_user as _stubs_user
 from stubs import stubs_user_event as _stubs_user_event
 from stubs import stubs_user_feedback as _stubs_user_feedback
 from stubs import stubs_user_insight as _stubs_user_insight
+from stubs import stubs_user_interest as _stubs_user_interest
 from stubs import stubs_user_neighborhood as _stubs_user_neighborhood
 from stubs import stubs_user_neighborhood_weekly_update as _stubs_user_neighborhood_weekly_update
 from stubs import stubs_weekly_event as _stubs_weekly_event
@@ -78,6 +79,7 @@ def InitAllCollections():
         _stubs_user_event.AddDefault()
         _stubs_user_feedback.AddDefault()
         _stubs_user_insight.AddDefault()
+        _stubs_user_interest.AddDefault()
         _stubs_user_neighborhood.AddDefault()
         _stubs_user_neighborhood_weekly_update.AddDefault()
         _stubs_weekly_event.AddDefault()

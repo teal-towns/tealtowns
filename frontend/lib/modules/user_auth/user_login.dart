@@ -42,7 +42,8 @@ class _UserLoginState extends State<UserLoginComponent> {
         var user = UserClass.fromJson(data['user']);
         if (user.id.length > 0) {
           String route = '/home';
-          Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
+          CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+          currentUserState.setCurrentUser(user);
           if (data.containsKey('userNeighborhoods')) {
             List<UserNeighborhoodClass> userNeighborhoods = [];
             for (var i = 0; i < data['userNeighborhoods'].length; i++) {
@@ -54,10 +55,9 @@ class _UserLoginState extends State<UserLoginComponent> {
             }
             Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
           }
-          String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
+          String redirectUrl = currentUserState.GetRedirectUrl();
           if (redirectUrl.length > 0) {
             route = redirectUrl;
-            Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl('');
           }
           context.go(route);
         } else {

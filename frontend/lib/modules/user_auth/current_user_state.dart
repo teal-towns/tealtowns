@@ -20,8 +20,8 @@ class CurrentUserState extends ChangeNotifier {
   LocalStorage? _localstorage = null;
   List<String> _routeIds = [];
   String _status = "done";
-  String _redirectUrl = '';
-  String _routerRedirectUrl = '';
+  List<String> _redirectUrls = [];
+  List<String> _routerRedirectUrls = [];
   var _routerRedirectTimeout = null;
   Map<String, dynamic> _appData = {};
   UserAvailabilityClass _userAvailability = UserAvailabilityClass.fromJson({});
@@ -33,9 +33,9 @@ class CurrentUserState extends ChangeNotifier {
 
   get status => _status;
 
-  get redirectUrl => _redirectUrl;
+  get redirectUrls => _redirectUrls;
 
-  get routerRedirectUrl => _routerRedirectUrl;
+  get routerRedirectUrls => _routerRedirectUrls;
 
   get appData => _appData;
 
@@ -53,19 +53,16 @@ class CurrentUserState extends ChangeNotifier {
           if (user.id.length > 0) {
             setCurrentUser(user);
           }
-          if (data.containsKey('checkUserFeedback')) {
-            // if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0 &&
-            //   (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
-            if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0) {
-              // _routerRedirectUrl = '/event-feedback-save?eventId=' + data['checkUserFeedback']['missingFeedbackEventIds'][0];
-              // SetAppData({ 'eventFeedbackMissingIds': data['checkUserFeedback']['missingFeedbackEventIds'] });
-              // Removing for now.
-              // SetAppData({'eventFeedbackSave': { 'eventId': data['checkUserFeedback']['missingFeedbackEventIds'][0] }});
-
-              // print ('routerRedirectUrl ${_routerRedirectUrl}');
-              // _routerRedirectTimeout = DateTime.now().add(const Duration(seconds: 5));
-              // print ('timeouts ${_routerRedirectTimeout}');
-              // notifyListeners();
+          // if (data.containsKey('checkUserFeedback')) {
+          //   if (data['checkUserFeedback']['missingFeedbackEventIds'].length > 0) {
+          //   }
+          // }
+          bool redirectSet = false;
+          if (data.containsKey('userInterest')) {
+            SetUserInterest(UserInterestClass.fromJson(data['userInterest']));
+            if (_userInterest.interests.length < 3 && !redirectSet) {
+              _routerRedirectUrls.add('/user-interest-save');
+              redirectSet = true;
             }
           }
           if (data.containsKey('userAvailability')) {
@@ -74,14 +71,9 @@ class CurrentUserState extends ChangeNotifier {
             for (var day in _userAvailability.availableTimesByDay) {
               timesCount += day['times'].length as int;
             }
-            if (timesCount < 3) {
-              _routerRedirectUrl = '/user-availability-save';
-            }
-          }
-          if (data.containsKey('userInterest')) {
-            SetUserInterest(UserInterestClass.fromJson(data['userInterest']));
-            if (_userInterest.interests.length < 3) {
-              _routerRedirectUrl = '/user-interest-save';
+            if (timesCount < 3 && !redirectSet) {
+              _routerRedirectUrls.add('/user-availability-save');
+              redirectSet = true;
             }
           }
         } else {
@@ -96,6 +88,10 @@ class CurrentUserState extends ChangeNotifier {
       }));
     }
   }
+
+  // void OnSignUp() {
+  //   AddRedirectUrl('/user-interest-save');
+  // }
 
   void getLocalstorage() {
     if (_localstorage == null) {
@@ -164,7 +160,7 @@ class CurrentUserState extends ChangeNotifier {
     getLocalstorage();
     _localstorage?.deleteItem('currentUser');
 
-    _routerRedirectUrl = '';
+    _routerRedirectUrls = [];
     _routerRedirectTimeout = null;
 
     notifyListeners();
@@ -225,14 +221,42 @@ class CurrentUserState extends ChangeNotifier {
     return 'CurrentUserState{_currentUser: $_currentUser, _isLoggedIn: $_isLoggedIn, _routeIds: $_routeIds, _status: $_status}';
   }
 
-  void SetRedirectUrl(String url) {
-    _redirectUrl = url;
+  void AddRedirectUrl(String url, { bool remove = false}) {
+    if (remove) {
+      _redirectUrls = [];
+    }
+    _redirectUrls.add(url);
   }
 
-  String GetRouterRedirectUrl() {
-    if (_routerRedirectUrl.length > 0 && (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
+  void ClearRedirectUrls() {
+    _redirectUrls = [];
+  }
+
+  String GetRedirectUrl({ bool remove = true}) {
+    if (_redirectUrls.length > 0) {
+      String url = _redirectUrls[0];
+      if (remove) {
+        _redirectUrls.removeAt(0);
+      }
+      return url;
+    }
+    return '';
+  }
+
+  void AddRouterRedirectUrl(String url) {
+    _routerRedirectUrls.add(url);
+  }
+
+  String GetRouterRedirectUrl({ bool remove = true}) {
+    String currentUrl = Uri.base.toString();
+    if (_routerRedirectUrls.length > 0 && (_routerRedirectTimeout == null || DateTime.now().isAfter(_routerRedirectTimeout!))) {
       _routerRedirectTimeout = DateTime.now().add(const Duration(minutes: 5));
-      return _routerRedirectUrl;
+      String url = _routerRedirectUrls[0];
+      // AddRedirectUrl(currentUrl);
+      if (remove) {
+        _routerRedirectUrls.removeAt(0);
+      }
+      return url;
     }
     return '';
   }

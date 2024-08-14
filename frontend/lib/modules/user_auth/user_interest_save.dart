@@ -168,7 +168,7 @@ class _UserInterestSaveState extends State<UserInterestSave> {
           'userId': currentUserState.currentUser.id,
           'username': currentUserState.currentUser.username,
           'interests': tags,
-          'neighborhoodEventAvailabilityMatches': _userInterest.neighborhoodEventAvailabilityMatches,
+          // 'neighborhoodEventAvailabilityMatches': _userInterest.neighborhoodEventAvailabilityMatches,
         }
       };
       if (_userInterest.id.length > 0) {

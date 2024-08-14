@@ -6,7 +6,7 @@ def GetDefault():
     return {
         'uName': _stubs_data.RandomString(6),
         'neighborhoodUName': _stubs_data.RandomString(6),
-        'type': random.choice(['', 'sharedMeal']),
+        'type': random.choice(['', 'sharedMeal', 'sharedItem']),
         'title': _stubs_data.RandomWords(2),
         'description': _stubs_data.RandomWords(10),
         'dayOfWeek': random.randint(0, 6),

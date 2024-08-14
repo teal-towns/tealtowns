@@ -558,16 +558,5 @@ class AppGoRouter {
         builder: (context, state) => RouteNotFoundPage(),
       ),
     ],
-    // Not working well.. Just did in AppScaffoldComponent instead.
-    // redirect: (BuildContext context, GoRouterState state) {
-    //   // var currentUserState = context.watch<CurrentUserState>();
-    //   var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    //   String url = currentUserState.routerRedirectUrl;
-    //   print ('url ${url}');
-    //   if (url != '') {
-    //     return url;
-    //   }
-    //   return null;
-    // }
   );
 }
