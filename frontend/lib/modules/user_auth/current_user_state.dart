@@ -163,6 +163,9 @@ class CurrentUserState extends ChangeNotifier {
     _routerRedirectUrls = [];
     _routerRedirectTimeout = null;
 
+    _userInterest = UserInterestClass.fromJson({});
+    _userAvailability = UserAvailabilityClass.fromJson({});
+
     notifyListeners();
   }
 

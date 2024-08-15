@@ -28,8 +28,9 @@ def addRoutes():
         data = lodash.extend_object({
             'userId': '',
             'username': '',
+            'withWeeklyEvents': 0,
         }, data)
-        return _user.GetJoinCollections(data['userId'], data['username'])
+        return _user.GetJoinCollections(data['userId'], data['username'], withWeeklyEvents = data['withWeeklyEvents'])
     _socket.add_route('GetUserJoinCollections', GetUserJoinCollections)
 
     def HijackLogin(data, auth, websocket):

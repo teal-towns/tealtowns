@@ -1,4 +1,5 @@
 import '../../common/parse_service.dart';
+import './weekly_event_class.dart';
 
 class UserEventClass {
   ParseService _parseService = ParseService();
@@ -10,6 +11,7 @@ class UserEventClass {
   Map<String, dynamic> user = {};
 
   Map<String, dynamic> userFeedback = {};
+  WeeklyEventClass weeklyEvent = WeeklyEventClass.fromJson({});
 
   UserEventClass(this.id, this.eventId, this.userId, this.weeklyEventUName, this.hostStatus, this.attendeeStatus,
     this.eventEnd, this.rsvpNote, this.createdAt,
@@ -36,6 +38,7 @@ class UserEventClass {
     this.user = json['user'] != null ? json['user'] : {};
 
     this.userFeedback = json['userFeedback'] != null ? json['userFeedback'] : {};
+    this.weeklyEvent = json['weeklyEvent'] != null ? WeeklyEventClass.fromJson(json['weeklyEvent']) : WeeklyEventClass.fromJson({});
   }
 
   Map<String, dynamic> toJson() =>
