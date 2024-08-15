@@ -41,7 +41,7 @@ class _UserLoginState extends State<UserLoginComponent> {
       if (data['valid'] == 1 && data.containsKey('user')) {
         var user = UserClass.fromJson(data['user']);
         if (user.id.length > 0) {
-          String route = '/home';
+          String route = '/user';
           CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
           currentUserState.setCurrentUser(user);
           if (data.containsKey('userNeighborhoods')) {
@@ -49,9 +49,9 @@ class _UserLoginState extends State<UserLoginComponent> {
             for (var i = 0; i < data['userNeighborhoods'].length; i++) {
               UserNeighborhoodClass userNeighborhood = UserNeighborhoodClass.fromJson(data['userNeighborhoods'][i]);
               userNeighborhoods.add(userNeighborhood);
-              if (userNeighborhood.status == 'default') {
-                route = '/n/${userNeighborhood.neighborhood.uName}';
-              }
+              // if (userNeighborhood.status == 'default') {
+              //   route = '/n/${userNeighborhood.neighborhood.uName}';
+              // }
             }
             Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
           }

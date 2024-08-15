@@ -55,7 +55,7 @@ class _WeeklyEventCardState extends State<WeeklyEventCard> {
             ]
           ),
           _style.SpacingH('medium'),
-          _buttons.Link(context, '${widget.weeklyEvent.title}', '/we/${widget.weeklyEvent.uName}'),
+          _buttons.Link(context, '${widget.weeklyEvent.title}', '/we/${widget.weeklyEvent.uName}', launchUrl: true,),
           _style.SpacingH('medium'),
           _style.Text1('${widget.weeklyEvent.xDay}'),
         ]

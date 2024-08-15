@@ -145,7 +145,8 @@ def GuessContactType(contactText: str):
 def GetUrl(user: dict):
     return _config['web_server']['urls']['base'] + '/u/' + str(user['username'])
 
-def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
+def GetJoinCollections(userId: str, username: str = '', limit: int = 100,
+    withWeeklyEvents: int = 0):
     ret = { 'valid': 1, 'message': '', }
 
     if len(userId) < 1 and len(username) > 0:
@@ -172,9 +173,22 @@ def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
         limit = limit)['items']
     eventIds = []
     indexMap = {}
+    weeklyEventUNames = []
+    indexMapWeeklyEventUName = {}
     for index, userEvent in enumerate(ret['userEventsAttended']):
         eventIds.append(userEvent['eventId'])
         indexMap[userEvent['eventId']] = index
+        weeklyEventUNames.append(userEvent['weeklyEventUName'])
+        indexMapWeeklyEventUName[userEvent['weeklyEventUName']] = index
+
+    if withWeeklyEvents:
+        query = { 'uName': { '$in': weeklyEventUNames } }
+        fields = { 'uName': 1, 'title': 1, 'createdAt': 1, 'dayOfWeek': 1, 'startTime': 1, 'endTime': 1,
+            'timezone': 1, 'location': 1, 'locationAddress': 1, 'priceUSD': 1, 'imageUrls': 1, 'adminUserIds': 1, }
+        weeklyEvents = mongo_db.find('weeklyEvent', query, fields = fields)['items']
+        for weeklyEvent in weeklyEvents:
+            ret['userEventsAttended'][indexMapWeeklyEventUName[weeklyEvent['uName']]]['weeklyEvent'] = weeklyEvent
+
     query = { 'userId': userId, 'forId': { '$in': eventIds }, 'forType': 'event', }
     fields = { 'forType': 1, 'forId': 1, 'attended': 1, 'stars': 1, 'createdAt': 1, }
     # query = { 'userId': userId }

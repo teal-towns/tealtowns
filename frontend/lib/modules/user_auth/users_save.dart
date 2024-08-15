@@ -74,15 +74,15 @@ class _UsersSaveState extends State<UsersSave> {
         Provider.of<NeighborhoodState>(context, listen: false).ClearUserNeighborhoods();
         var user = UserClass.fromJson(data['user']);
         Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
-        String route = '/home';
+        String route = '/user';
         if (data.containsKey('userNeighborhoods')) {
           List<UserNeighborhoodClass> userNeighborhoods = [];
           for (var i = 0; i < data['userNeighborhoods'].length; i++) {
             UserNeighborhoodClass userNeighborhood = UserNeighborhoodClass.fromJson(data['userNeighborhoods'][i]);
             userNeighborhoods.add(userNeighborhood);
-            if (userNeighborhood.status == 'default') {
-              route = '/n/${userNeighborhood.neighborhood.uName}';
-            }
+            // if (userNeighborhood.status == 'default') {
+            //   route = '/n/${userNeighborhood.neighborhood.uName}';
+            // }
           }
           Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
         }
