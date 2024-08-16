@@ -5,6 +5,7 @@ from event import weekly_event as _weekly_event
 from notifications_all import email_sendgrid as _email_sendgrid
 from notifications_all import sms_twilio as _sms_twilio
 from user_auth import user as _user
+from user import user_interest as _user_interest
 
 def Save(userAvailability: dict):
     userAvailability['availableTimesByDay'] = SortAndMergeTimes(userAvailability['availableTimesByDay'])
@@ -37,6 +38,7 @@ def SortAndMergeTimes(availableTimesByDay: list):
 def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, maxCreatedEvents: int = 1):
     ret = { 'valid': 1, 'message': '', 'matches': [], 'weeklyEventsCreated': [], 'weeklyEventsInvited': [],
         'notifyUserIds': { 'sms': [], 'email': [] }, }
+    eventInterests = _user_interest.GetEventInterests()
     # Check all neighborhoods this user is in.
     query = { 'username': username }
     fields = { 'username': 1, 'neighborhoodUName': 1 }
@@ -109,6 +111,10 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
                     'rsvpDeadlineHours': 0,
                     'imageUrls': [],
                 }
+
+                if 'event_' in interest and interest in eventInterests:
+                    weeklyEvent = lodash.extend_object(weeklyEvent, eventInterests[interest])
+
                 retSave = _weekly_event.Save(weeklyEvent)
                 weeklyEvent = retSave['weeklyEvent']
                 for username1 in retTimes['bestMatchTime']['usernames']:

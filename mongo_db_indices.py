@@ -99,6 +99,7 @@ def create_all_indices(db):
     db['userFollowUp'].create_index([('nextFollowUpAt', 1), ('nextFollowUpDone', 1)], unique=False)
 
     db['userInterest'].create_index([('username', 1)], unique=True)
+    db['userInterest'].create_index([('type', 1)], unique=False)
 
     db['userAvailability'].create_index([('username', 1)], unique=True)
     

@@ -17,4 +17,8 @@ def addRoutes():
             groupByInterest = data['groupByInterest'], groupedSortKey = data['groupedSortKey'])
     _socket.add_route('GetInterestsByNeighborhood', GetInterestsByNeighborhood)
 
+    def GetEventInterests(data, auth, websocket):
+        return _user_interest.GetEventInterests()
+    _socket.add_route('GetEventInterests', GetEventInterests)
+
 addRoutes()
