@@ -4,6 +4,10 @@ import mongo_db
 from user import user_availability as _user_availability
 
 def Save(userInterest: dict):
+    userInterest = _mongo_db_crud.CleanId(userInterest)
+    if '_id' not in userInterest:
+        if 'type' not in userInterest:
+            userInterest['type'] = 'common'
     ret = _mongo_db_crud.Save('userInterest', userInterest, checkGetKey = 'username')
     retCheck =_user_availability.CheckCommonInterestsAndTimesByUser(userInterest['username'])
     ret['weeklyEventsCreated'] = retCheck['weeklyEventsCreated']
@@ -11,10 +15,13 @@ def Save(userInterest: dict):
     ret['notifyUserIds'] = retCheck['notifyUserIds']
     return ret
 
-def GetInterestsByNeighborhood(neighborhoodUName: str, groupByInterest: int = 1, groupedSortKey: str = ''):
-    ret = { 'valid': 1, 'message': '', 'userInterests': [], 'interestsGrouped': [] }
+def GetInterestsByNeighborhood(neighborhoodUName: str, groupByInterest: int = 1, groupedSortKey: str = '',
+    type: str = ''):
+    ret = { 'valid': 1, 'message': '', 'userInterests': [], 'interestsGrouped': [], 'type': type, }
     fields = { 'username': 1, }
     query = { 'neighborhoodUName': neighborhoodUName }
+    if len(type) > 0:
+        query['type'] = type
     items = mongo_db.find('userNeighborhood', query, fields = fields)['items']
     usernames = [ item['username'] for item in items ]
     query = { 'username': { '$in': usernames } }
@@ -37,3 +44,28 @@ def GetInterestsByNeighborhood(neighborhoodUName: str, groupByInterest: int = 1,
         if groupedSortKey in ['count', 'username', 'interest', '-username', '-interest', '-count']:
             ret['interestsGrouped'] = lodash.sort2D(ret['interestsGrouped'], groupedSortKey)
     return ret
+
+def GetEventInterests():
+    default = {
+        'price': 0,
+    }
+    eventInterests = {
+        'event_theWeek': {
+            'title': 'The Week',
+            'description': 'The Week is a 3 part documentary and discussion series. A powerful group experience that sparks courageous conversations about the climate crisis, and what we can do about it. Watch the trailer at https://theweek.ooo then join us to watch 1 episode each week.',
+            'imageUrls': ['/assets/assets/images/events/the-week.jpg'],
+        },
+        'event_onePercentGreenerWalk': {
+            'title': 'One Percent Greener Walk',
+            'description': 'Join neighbors to get outside, be active, and chat about how you can green your neighborhood together.',
+            'imageUrls': ['/assets/assets/images/events/people-walking-in-park.jpg'],
+        },
+        'event_sharedMeal': {
+            'title': 'Shared Meal',
+            'description': 'Join your neighbors to eat a meal together.',
+            'imageUrls': ['/assets/assets/images/shared-meal.jpg'],
+        }
+    }
+    for key in eventInterests:
+        eventInterests[key] = lodash.extend_object(default, eventInterests[key])
+    return { 'valid': 1, 'message': '', 'eventInterests': eventInterests }

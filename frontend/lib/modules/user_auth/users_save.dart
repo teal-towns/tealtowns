@@ -80,9 +80,9 @@ class _UsersSaveState extends State<UsersSave> {
           for (var i = 0; i < data['userNeighborhoods'].length; i++) {
             UserNeighborhoodClass userNeighborhood = UserNeighborhoodClass.fromJson(data['userNeighborhoods'][i]);
             userNeighborhoods.add(userNeighborhood);
-            // if (userNeighborhood.status == 'default') {
-            //   route = '/n/${userNeighborhood.neighborhood.uName}';
-            // }
+            if (userNeighborhood.status == 'default') {
+              route = '/n/${userNeighborhood.neighborhood.uName}';
+            }
           }
           Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
         }

@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/colors_service.dart';
 import '../../common/form_input/input_fields.dart';
+import '../../common/layout_service.dart';
 import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -19,8 +21,10 @@ class UserInterestSave extends StatefulWidget {
 }
 
 class _UserInterestSaveState extends State<UserInterestSave> {
+  ColorsService _colors = ColorsService();
   EventTagsService _eventTags = EventTagsService();
   InputFields _inputFields = InputFields();
+  LayoutService _layoutService = LayoutService();
   ParseService _parseService = ParseService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -32,6 +36,8 @@ class _UserInterestSaveState extends State<UserInterestSave> {
   UserInterestClass _userInterest = UserInterestClass.fromJson({});
   bool _loading = false;
   String _message = '';
+  Map<String, Map<String, dynamic>> _eventInterests = {};
+  List<String> _eventInterestsSelected = [];
 
   @override
   void initState() {
@@ -47,6 +53,18 @@ class _UserInterestSaveState extends State<UserInterestSave> {
       }
     }));
 
+    _routeIds.add(_socketService.onRoute('GetEventInterests', callback: (String resString) {
+      var res = json.decode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1 && data.containsKey('eventInterests')) {
+        _eventInterests = {};
+        for (var key in data['eventInterests'].keys) {
+          _eventInterests[key] = _parseService.parseMapStringDynamic(data['eventInterests'][key]);
+        }
+        setState(() { _eventInterests = _eventInterests; });
+      }
+    }));
+
     CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
     if (!currentUserState.isLoggedIn) {
       Timer(Duration(milliseconds: 200), () {
@@ -55,6 +73,7 @@ class _UserInterestSaveState extends State<UserInterestSave> {
     } else {
       // _userInterest = currentUserState.userInterest;
       _tags = _eventTags.GetTags();
+      _socketService.emit('GetEventInterests', {});
     }
   }
 
@@ -83,6 +102,9 @@ class _UserInterestSaveState extends State<UserInterestSave> {
           _style.Text1('What event types are you interested in?', size: 'xlarge'),
           // _style.SpacingH('medium'),
           ...BuildTagsSelects(),
+          _style.SpacingH('large'),
+          _style.Text1('What events are you interested in?', size: 'xlarge'),
+          ...BuildEventInterestsSelects(),
           _style.SpacingH('xlarge'),
           ElevatedButton(child: Text('Save'), onPressed: () {
             Save();
@@ -129,6 +151,47 @@ class _UserInterestSaveState extends State<UserInterestSave> {
     return cols;
   }
 
+  List<Widget> BuildEventInterestsSelects() {
+    double imageHeight = 150;
+    List<Widget> items = [];
+    for (String interest in _eventInterests.keys) {
+      bool selected = _eventInterestsSelected.contains(interest);
+      items.add(
+        InkWell(
+          onTap: () {
+            if (selected) {
+              _eventInterestsSelected.remove(interest);
+            } else if (!_eventInterestsSelected.contains(interest)) {
+              _eventInterestsSelected.add(interest);
+            }
+            setState(() { _eventInterestsSelected = _eventInterestsSelected; });
+          },
+          child: Container(
+            color: selected ? _colors.colors['secondary'] : null,
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _eventInterests[interest]!['imageUrls'].length <= 0 ?
+                  Image.asset('assets/images/shared-meal.jpg', height: imageHeight, width: double.infinity, fit: BoxFit.cover,)
+                    : Image.network(_eventInterests[interest]!['imageUrls']![0], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
+                _style.SpacingH('medium'),
+                _style.Text1('${_eventInterests[interest]!['title']}'),
+                _style.SpacingH('medium'),
+                _style.Text1('${_eventInterests[interest]!['description']}'),
+                _style.SpacingH('medium'),
+              ]
+            ),
+          ),
+        ),
+      );
+    }
+    List<Widget> cols = [
+      _layoutService.WrapWidth(items,),
+    ];
+    return cols;
+  }
+
   void SetFormVals() {
     List<String> subcategories = [];
     String subcategoryKey = '';
@@ -141,14 +204,20 @@ class _UserInterestSaveState extends State<UserInterestSave> {
       }
       _formVals[subcategoryKey] = [];
       for (String subcategory in subcategories) {
-        if (_userInterest.interests.contains(subcategory)) {
+        if (_userInterest.interests.contains(subcategory) && !_formVals[subcategoryKey].contains(subcategory)) {
           _formVals[subcategoryKey].add(subcategory);
           _categoriesVisible[category] = true;
         }
       }
       _formVals[subcategoryKey] = _parseService.parseListString(_formVals[subcategoryKey]);
+      // event interests too
+      for (String interest in _userInterest.interests) {
+        if (interest.contains("event_") && !_eventInterestsSelected.contains(interest)) {
+          _eventInterestsSelected.add(interest);
+        }
+      }
     }
-    setState(() { _formVals = _formVals; });
+    setState(() { _formVals = _formVals; _eventInterestsSelected = _eventInterestsSelected; });
   }
 
   void Save() {
@@ -161,7 +230,13 @@ class _UserInterestSaveState extends State<UserInterestSave> {
     }
     if (tags.length < 3) {
       setState(() { _message = 'Please select at least 3 interests.'; });
+    } else if (_eventInterestsSelected.length < 1) {
+      setState(() { _message = 'Please select at least 1 event interest.'; });
     } else {
+      // Add in event interests.
+      if (_eventInterestsSelected.length > 0) {
+        tags += _eventInterestsSelected;
+      }
       CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
       var data = {
         'userInterest': {
