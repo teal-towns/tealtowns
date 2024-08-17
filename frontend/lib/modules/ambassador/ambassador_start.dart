@@ -189,7 +189,7 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
       cols += [
         Container(width: 400,
           child: InputLocation(formVals: _formVals, formValsKey: 'inputLocation', label: 'Where will you have your event?', helpText: helpText,
-            nestedCoordinates: true, guessLocation: true, fullScreen: true,
+            nestedCoordinates: true, guessLocation: true, fullScreen: true, doInitialOnchange: false,
             onChanged: (Map<String, dynamic> val) {
               _step = 'neighborhoodUName';
               setState(() { _step = _step; });

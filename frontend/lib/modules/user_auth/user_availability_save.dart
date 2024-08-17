@@ -9,11 +9,13 @@ import '../../common/colors_service.dart';
 import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_service.dart';
+import '../../common/link_service.dart';
 import '../../common/lodash_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './current_user_state.dart';
 import './user_availability_class.dart';
+import '../neighborhood/neighborhood_state.dart';
 
 class UserAvailabilitySave extends StatefulWidget {
   double dayHeight;
@@ -29,6 +31,7 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
   DateTimeService _dateTime = DateTimeService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
+  LinkService _linkService = LinkService();
   LodashService _lodash = LodashService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -58,14 +61,20 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
       if (data['valid'] == 1 && data.containsKey('userAvailability')) {
         CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
         currentUserState.SetUserAvailability(UserAvailabilityClass.fromJson(data['userAvailability']));
-        context.go('/user');
+        String route = '/user';
+        // Go to neighborhoods if no neighborhood yet.
+        var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+        if (neighborhoodState.defaultUserNeighborhood == null) {
+          route = '/neighborhoods';
+        }
+        context.go(route);
       }
     }));
 
     CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
     if (!currentUserState.isLoggedIn) {
       Timer(Duration(milliseconds: 200), () {
-        context.go('/login');
+        _linkService.Go('', context, currentUserState: currentUserState);
       });
     } else {
       _userAvailability = currentUserState.userAvailability;
