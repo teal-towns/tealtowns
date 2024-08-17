@@ -61,7 +61,7 @@ class CurrentUserState extends ChangeNotifier {
           if (data.containsKey('userInterest')) {
             SetUserInterest(UserInterestClass.fromJson(data['userInterest']));
             if (_userInterest.interests.length < 3 && !redirectSet) {
-              _routerRedirectUrls.add('/user-interest-save');
+              _routerRedirectUrls.add('/interests');
               redirectSet = true;
             }
           }
@@ -88,10 +88,6 @@ class CurrentUserState extends ChangeNotifier {
       }));
     }
   }
-
-  // void OnSignUp() {
-  //   AddRedirectUrl('/user-interest-save');
-  // }
 
   void getLocalstorage() {
     if (_localstorage == null) {

@@ -262,7 +262,7 @@ class _UserState extends State<User> {
         ];
         if (_userIsSelf) {
           colsUserBasics += [
-            _buttons.Link(context, 'Interests', '/user-interest-save'),
+            _buttons.Link(context, 'Interests', '/interests'),
             _style.SpacingH('medium'),
             _buttons.Link(context, 'Availability', '/user-availability-save'),
             _style.SpacingH('medium'),

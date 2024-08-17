@@ -81,7 +81,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
           _style.SpacingH('medium'),
           _style.Text1('Pending Events By Interest', size: 'large'),
           _style.SpacingH('medium'),
-          _buttons.Link(context, 'Update Your Interests to Get Events Started!', '/user-interest-save'),
+          _buttons.LinkElevated(context, 'Add Your Interests to Get Events Started!', '/interests'),
           _style.SpacingH('medium'),
           UserInterests(neighborhoodUName: _neighborhood.uName,),
           _style.SpacingH('medium'),

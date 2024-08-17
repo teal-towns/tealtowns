@@ -55,7 +55,7 @@ class _UserSignupState extends State<UserSignup> {
             }
             if (widget.redirectOnDone) {
               // String route = '/home';
-              String route = '/user-interest-save';
+              String route = '/interests';
               String redirectUrl = currentUserState.GetRedirectUrl();
               if (redirectUrl.length > 0) {
                 // currentUserState.AddRouterRedirectUrl(route);
