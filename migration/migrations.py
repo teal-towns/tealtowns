@@ -5,7 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
-    AddInterestType()
+    # AddInterestType()
     # WeeklyEventTags()
     # CleanUpEmptyUsernames()
     # AddUsernames()

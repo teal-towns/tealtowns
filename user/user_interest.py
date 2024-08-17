@@ -1,14 +1,25 @@
+import threading
+
 from common import mongo_db_crud as _mongo_db_crud
 import lodash
 import mongo_db
 from user import user_availability as _user_availability
 
-def Save(userInterest: dict):
+_testMode = 0
+def SetTestMode(testMode: int):
+    global _testMode
+    _testMode = testMode
+
+def Save(userInterest: dict, useThread: int = 1):
     userInterest = _mongo_db_crud.CleanId(userInterest)
     if '_id' not in userInterest:
         if 'type' not in userInterest:
             userInterest['type'] = 'common'
     ret = _mongo_db_crud.Save('userInterest', userInterest, checkGetKey = 'username')
+    if useThread and not _testMode:
+        thread = threading.Thread(target=_user_availability.CheckCommonInterestsAndTimesByUser, args=(userInterest['username'],))
+        thread.start()
+        return ret
     retCheck =_user_availability.CheckCommonInterestsAndTimesByUser(userInterest['username'])
     ret['weeklyEventsCreated'] = retCheck['weeklyEventsCreated']
     ret['weeklyEventsInvited'] = retCheck['weeklyEventsInvited']

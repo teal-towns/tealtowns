@@ -1,3 +1,5 @@
+import threading
+
 from common import mongo_db_crud as _mongo_db_crud
 import lodash
 import mongo_db
@@ -7,9 +9,18 @@ from notifications_all import sms_twilio as _sms_twilio
 from user_auth import user as _user
 from user import user_interest as _user_interest
 
-def Save(userAvailability: dict):
+_testMode = 0
+def SetTestMode(testMode: int):
+    global _testMode
+    _testMode = testMode
+
+def Save(userAvailability: dict, useThread: int = 1):
     userAvailability['availableTimesByDay'] = SortAndMergeTimes(userAvailability['availableTimesByDay'])
     ret = _mongo_db_crud.Save('userAvailability', userAvailability, checkGetKey = 'username')
+    if useThread and not _testMode:
+        thread = threading.Thread(target=CheckCommonInterestsAndTimesByUser, args=(userAvailability['username'],))
+        thread.start()
+        return ret
     retCheck = CheckCommonInterestsAndTimesByUser(userAvailability['username'])
     ret['weeklyEventsCreated'] = retCheck['weeklyEventsCreated']
     ret['weeklyEventsInvited'] = retCheck['weeklyEventsInvited']
@@ -55,6 +66,32 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
     neighborhoodUNames = []
     for userNeighborhood in userNeighborhoods:
         neighborhoodUNames.append(userNeighborhood['neighborhoodUName'])
+    # For performance, make one database call here and group to filter
+    # (otherwise can easily make tens or hundreds of database calls and take tens of seconds total).
+    query = { 'neighborhoodUName': { '$in': neighborhoodUNames }, 'username': { '$ne': username } }
+    fields = { 'username': 1, 'neighborhoodUName': 1 }
+    userNeighborhoodsCheck = mongo_db.find('userNeighborhood', query, fields = fields)['items']
+    usernamesByNeighborhood = {}
+    usernamesAll = []
+    for userNeighborhood in userNeighborhoodsCheck:
+        if userNeighborhood['neighborhoodUName'] not in usernamesByNeighborhood:
+            usernamesByNeighborhood[userNeighborhood['neighborhoodUName']] = []
+        if userNeighborhood['username'] not in usernamesByNeighborhood[userNeighborhood['neighborhoodUName']]:
+            usernamesByNeighborhood[userNeighborhood['neighborhoodUName']].append(userNeighborhood['username'])
+        if userNeighborhood['username'] not in usernamesAll:
+            usernamesAll.append(userNeighborhood['username'])
+
+    query = { 'username': { '$in': usernamesAll }, 'interests': { '$in': interests } }
+    fields = { 'username': 1, 'interests': 1 }
+    userInterestsCheck = mongo_db.find('userInterest', query)['items']
+    usernamesByInterest = {}
+    for userInterest in userInterestsCheck:
+        for interest1 in userInterest['interests']:
+            if interest1 not in usernamesByInterest:
+                usernamesByInterest[interest1] = []
+            if userInterest['username'] not in usernamesByInterest[interest1]:
+                usernamesByInterest[interest1].append(userInterest['username'])
+
     for interest in interests:
         interestMatch = False
         # First check existing events (and just invite to those, if exist with interest and availability match).
@@ -75,12 +112,13 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
         for userNeighborhood in userNeighborhoods:
             # Check all users per each neighborhood
             neighborhoodUName = userNeighborhood['neighborhoodUName']
-            query = { 'neighborhoodUName': neighborhoodUName, 'username': { '$ne': username } }
-            usernames = mongo_db.findDistinct('userNeighborhood', 'username', query)['values']
-
             # Further filter by overlapping interest.
-            query = { 'username': { '$in': usernames }, 'interests': { '$in': [ interest ] } }
-            usernamesFinal = mongo_db.findDistinct('userInterest', 'username', query)['values']
+            usernamesFinal = []
+            if neighborhoodUName in usernamesByNeighborhood:
+                for username1 in usernamesByNeighborhood[neighborhoodUName]:
+                    if interest in usernamesByInterest and username1 in usernamesByInterest[interest]:
+                        usernamesFinal.append(username1)
+
             if len(usernamesFinal) < minMatchedUsers:
                 continue
             # See if any overlapping availability.
