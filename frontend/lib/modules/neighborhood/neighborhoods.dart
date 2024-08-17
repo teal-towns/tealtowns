@@ -72,6 +72,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
           var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
           neighborhoodState.CheckAndGet(userId);
         }
+        context.go('/n/${data['userNeighborhood']['neighborhoodUName']}');
       }
     }));
 
@@ -96,6 +97,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
     List<Widget> colsLoading = [ SizedBox.shrink() ];
     if (_loading) {
       colsLoading = [
+        SizedBox(height: 10),
         LinearProgressIndicator(),
         SizedBox(height: 10),
       ];

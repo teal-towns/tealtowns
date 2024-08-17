@@ -20,7 +20,7 @@ def Save(userInterest: dict, useThread: int = 1):
         thread = threading.Thread(target=_user_availability.CheckCommonInterestsAndTimesByUser, args=(userInterest['username'],))
         thread.start()
         return ret
-    retCheck =_user_availability.CheckCommonInterestsAndTimesByUser(userInterest['username'])
+    retCheck = _user_availability.CheckCommonInterestsAndTimesByUser(userInterest['username'])
     ret['weeklyEventsCreated'] = retCheck['weeklyEventsCreated']
     ret['weeklyEventsInvited'] = retCheck['weeklyEventsInvited']
     ret['notifyUserIds'] = retCheck['notifyUserIds']

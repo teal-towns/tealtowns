@@ -10,6 +10,7 @@ import '../../common/colors_service.dart';
 import '../../common/config_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_service.dart';
+import '../../common/link_service.dart';
 import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -28,6 +29,7 @@ class _UserInterestSaveState extends State<UserInterestSave> {
   EventTagsService _eventTags = EventTagsService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
+  LinkService _linkService = LinkService();
   ParseService _parseService = ParseService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -71,7 +73,7 @@ class _UserInterestSaveState extends State<UserInterestSave> {
     CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
     if (!currentUserState.isLoggedIn) {
       Timer(Duration(milliseconds: 200), () {
-        context.go('/login');
+        _linkService.Go('', context, currentUserState: currentUserState);
       });
     } else {
       // _userInterest = currentUserState.userInterest;

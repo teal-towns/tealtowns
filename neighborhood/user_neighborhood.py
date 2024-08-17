@@ -3,6 +3,7 @@ import date_time
 import mongo_db
 from insight import user_insight as _user_insight
 from user_auth import user_auth as _user_auth
+from user import user_availability as _user_availability
 
 def SetAllStatus(userId: str, status: str = ''):
     mongo_db.update_many('userNeighborhood', {'userId': userId}, {'$set': {'status': status}})
@@ -49,13 +50,16 @@ def Save(userNeighborhood: dict):
         'neighborhoodUName': userNeighborhood['neighborhoodUName'],
     }
     item = mongo_db.find_one('userNeighborhood', query)['item']
+    username = ''
     if item is not None and '_id' in item:
         userNeighborhood['_id'] = item['_id']
+        username = item['username']
         if 'username' in userNeighborhood:
             del userNeighborhood['username']
     else:
         user = mongo_db.find_one('user', { '_id': userNeighborhood['userId'] })['item']
         userNeighborhood['username'] = user['username']
+        username = user['username']
         if 'roles' not in userNeighborhood:
             userNeighborhood['roles'] = []
         if 'motivations' not in userNeighborhood:
@@ -64,6 +68,7 @@ def Save(userNeighborhood: dict):
             userNeighborhood['vision'] = ''
     ret = _mongo_db_crud.Save('userNeighborhood', userNeighborhood)
     _user_insight.Save({ 'userId': userNeighborhood['userId'], 'firstNeighborhoodJoinAt': date_time.now_string() })
+    _user_availability.CheckCommonInterestsAndTimesByUser(username)
     return ret
 
 def RemoveRole(username: str, neighborhoodUName: str, role: str, removeRelated: int = 1):

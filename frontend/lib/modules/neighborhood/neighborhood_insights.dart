@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
+import '../../common/link_service.dart';
 import '../../common/paging.dart';
 import '../../common/style.dart';
 import './neighborhood_stats_class.dart';
@@ -20,6 +21,7 @@ class NeighborhoodInsights extends StatefulWidget {
 class _NeighborhoodInsightsState extends State<NeighborhoodInsights> {
   Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
+  LinkService _linkService = LinkService();
   Style _style = Style();
 
   List<NeighborhoodStatsClass> _neighborhoodInsights = [];
@@ -34,9 +36,10 @@ class _NeighborhoodInsightsState extends State<NeighborhoodInsights> {
   void initState() {
     super.initState();
 
-    if (!Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (!currentUserState.isLoggedIn) {
       Timer(Duration(milliseconds: 500), () {
-        context.go('/login');
+        _linkService.Go('', context, currentUserState: currentUserState);
       });
     }
   }

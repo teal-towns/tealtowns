@@ -9,6 +9,7 @@ import '../../common/buttons.dart';
 import '../../common/card_placeholder.dart';
 import '../../common/date_time_service.dart';
 import '../../common/layout_service.dart';
+import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import './user_class.dart';
@@ -37,6 +38,7 @@ class _UserState extends State<User> {
   Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
   LayoutService _layoutService = LayoutService();
+  LinkService _linkService = LinkService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Style _style = Style();
@@ -99,18 +101,19 @@ class _UserState extends State<User> {
     }));
 
     String username = widget.username;
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
     if (widget.username.length > 0) {
       _socketService.emit('getUserByUsername', {'username': widget.username});
-      if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn && widget.username == Provider.of<CurrentUserState>(context, listen: false).currentUser.username) {
+      if (currentUserState.isLoggedIn && widget.username == Provider.of<CurrentUserState>(context, listen: false).currentUser.username) {
         _userIsSelf = true;
       }
     } else {
-      if (!Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
+      if (!currentUserState.isLoggedIn) {
         Timer(Duration(milliseconds: 500), () {
-          context.go('/login');
+          _linkService.Go('', context, currentUserState: currentUserState);
         });
       } else {
-        _user = Provider.of<CurrentUserState>(context, listen: false).currentUser;
+        _user = currentUserState.currentUser;
         username = _user.username;
         _userIsSelf = true;
       }
