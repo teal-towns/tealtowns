@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../app_scaffold.dart';
 import '../../common/colors_service.dart';
+import '../../common/config_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_service.dart';
 import '../../common/parse_service.dart';
@@ -22,6 +24,7 @@ class UserInterestSave extends StatefulWidget {
 
 class _UserInterestSaveState extends State<UserInterestSave> {
   ColorsService _colors = ColorsService();
+  ConfigService _configService = ConfigService();
   EventTagsService _eventTags = EventTagsService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
@@ -93,6 +96,7 @@ class _UserInterestSaveState extends State<UserInterestSave> {
       _userInterest = currentUserState.userInterest;
       SetFormVals();
     }
+    Map<String, dynamic> config = _configService.GetConfig();
     return AppScaffoldComponent(
       listWrapper: true,
       width: 900,
@@ -104,13 +108,27 @@ class _UserInterestSaveState extends State<UserInterestSave> {
           ...BuildTagsSelects(),
           _style.SpacingH('large'),
           _style.Text1('What events are you interested in?', size: 'xlarge'),
+          _style.SpacingH('medium'),
           ...BuildEventInterestsSelects(),
+          _style.SpacingH('xlarge'),
+          _style.Text1('Share with your neighbors and friends to get your local events started!', size: 'xlarge'),
+          _style.SpacingH('medium'),
+          _style.Text1('Text or email this link to friends, share the QR code with your neighbors, post on social media, and more!'),
+          _style.SpacingH('medium'),
+          _style.Text1('${config['SERVER_URL']}/interests'),
+          _style.SpacingH('medium'),
+          QrImageView(
+            data: '${config['SERVER_URL']}/interests',
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
           _style.SpacingH('xlarge'),
           ElevatedButton(child: Text('Save'), onPressed: () {
             Save();
           },),
           _style.SpacingH('medium'),
           _style.Text1(_message),
+          _style.SpacingH('medium'),
         ],
       ))
     );

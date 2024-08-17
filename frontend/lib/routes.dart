@@ -142,7 +142,7 @@ class Routes {
   static const userMoney = '/user-money';
   static const mercuryPayOuts = '/mercury-pay-outs';
 
-  static const userInterestSave = '/user-interest-save';
+  static const userInterestSave = '/interests';
   static const userAvailabilitySave = '/user-availability-save';
 
   static const amazonAffiliate = '/amazon-affiliate';
