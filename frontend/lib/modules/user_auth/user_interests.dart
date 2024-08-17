@@ -13,7 +13,8 @@ import './current_user_state.dart';
 class UserInterests extends StatefulWidget {
   String neighborhoodUName;
   double imageHeight;
-  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 200, });
+  int minInterested;
+  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 200, this.minInterested = 2, });
 
   @override
   _UserInterestsState createState() => _UserInterestsState();
@@ -86,6 +87,9 @@ class _UserInterestsState extends State<UserInterests> {
     }
     List<Widget> interestsEvents = [];
     for (int i = 0; i < _interestsGroupedEvents.length; i++) {
+      if (_interestsGroupedEvents[i]['count'] < widget.minInterested) {
+        continue;
+      }
       List<Widget> colsTemp = [];
       if (_eventInterests.containsKey(_interestsGroupedEvents[i]['interest'])) {
         Map<String, dynamic> interestDetails = _eventInterests[_interestsGroupedEvents[i]['interest']]!;
@@ -117,6 +121,9 @@ class _UserInterestsState extends State<UserInterests> {
     }
     List<Widget> interests = [];
     for (int i = 0; i < _interestsGrouped.length; i++) {
+      if (_interestsGrouped[i]['count'] < widget.minInterested) {
+        continue;
+      }
       interests.add(Column(
         children: [
           _style.Text1('${_interestsGrouped[i]['interest']}', size: 'large'),
