@@ -30,12 +30,12 @@ def test_CheckCommonInterestsAndTimesByUser():
     weeklyEvents = _stubs_data.CreateBulk(weeklyEvents, collectionName = 'weeklyEvent')
 
     userInterests = [
-        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'interests': [ 'soccer',], 'type': 'common', },
-        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'interests': [ 'baseball',], 'type': 'common', },
-        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'interests': [ 'soccer',], 'type': 'common', },
-        { 'userId': users[3]['_id'], 'username': users[3]['username'], 'interests': [ 'soccer',], 'type': 'common', },
-        { 'userId': users[4]['_id'], 'username': users[4]['username'], 'interests': [ 'soccer',], 'type': 'common', },
-        { 'userId': users[5]['_id'], 'username': users[5]['username'], 'interests': [ 'soccer',], 'type': 'common', },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'interests': [ 'soccer',], },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'interests': [ 'baseball',], },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'interests': [ 'soccer',], },
+        { 'userId': users[3]['_id'], 'username': users[3]['username'], 'interests': [ 'soccer',], },
+        { 'userId': users[4]['_id'], 'username': users[4]['username'], 'interests': [ 'soccer',], },
+        { 'userId': users[5]['_id'], 'username': users[5]['username'], 'interests': [ 'soccer',], },
     ]
     userInterests = _stubs_data.CreateBulk(userInterests, collectionName = 'userInterest')
 

@@ -98,10 +98,10 @@ class _UserInterestsState extends State<UserInterests> {
             Image.asset('assets/images/shared-meal.jpg', height: widget.imageHeight, width: double.infinity, fit: BoxFit.cover,)
               : Image.network(interestDetails['imageUrls']![0], height: widget.imageHeight, width: double.infinity, fit: BoxFit.cover),
           _style.SpacingH('medium'),
-          _style.Text1('${interestDetails[i]['title']}'),
+          _style.Text1('${interestDetails['title']}'),
           _style.SpacingH('medium'),
-          _style.Text1('${interestDetails[i]['description']}'),
-          _style.SpacingH('medium'),
+          // _style.Text1('${interestDetails['description']}'),
+          // _style.SpacingH('medium'),
           _style.Text1('${_interestsGroupedEvents[i]['count']} interested'),
           _style.SpacingH('medium'),
         ];

@@ -12,9 +12,11 @@ def addRoutes():
         data = lodash.extend_object({
             'groupByInterest': 1,
             'groupedSortKey': '',
+            'type': '',
         }, data)
         return _user_interest.GetInterestsByNeighborhood(data['neighborhoodUName'],
-            groupByInterest = data['groupByInterest'], groupedSortKey = data['groupedSortKey'])
+            groupByInterest = data['groupByInterest'], groupedSortKey = data['groupedSortKey'],
+            type = data['type'])
     _socket.add_route('GetInterestsByNeighborhood', GetInterestsByNeighborhood)
 
     def GetEventInterests(data, auth, websocket):
