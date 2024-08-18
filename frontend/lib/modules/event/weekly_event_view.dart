@@ -501,6 +501,13 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
+    List<Widget> colsTags = [];
+    if (_weeklyEvent.tags.length > 0) {
+      colsTags += [
+        Text('Tags: ${_weeklyEvent.tags.join(', ')}'),
+        SizedBox(height: 10),
+      ];
+    }
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -534,6 +541,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           ),
         ),
         SizedBox(height: 10),
+        ...colsTags,
         ...colsSharedItem,
         SizedBox(height: 20),
         Row(

@@ -8,6 +8,8 @@ import notifications
 from notifications_all import email_sendgrid as _email_sendgrid
 from notifications_all import sms_twilio as _sms_twilio
 from pay_mercury import pay_mercury as _pay_mercury
+from user import user_availability as _user_availability
+from user import user_interest as _user_interest
 
 from stubs import stubs_event as _stubs_event
 from stubs import stubs_mercury_pay_out as _stubs_mercury_pay_out
@@ -18,6 +20,7 @@ from stubs import stubs_user as _stubs_user
 from stubs import stubs_user_event as _stubs_user_event
 from stubs import stubs_user_feedback as _stubs_user_feedback
 from stubs import stubs_user_insight as _stubs_user_insight
+from stubs import stubs_user_interest as _stubs_user_interest
 from stubs import stubs_user_neighborhood as _stubs_user_neighborhood
 from stubs import stubs_user_neighborhood_weekly_update as _stubs_user_neighborhood_weekly_update
 from stubs import stubs_weekly_event as _stubs_weekly_event
@@ -39,6 +42,7 @@ _collectionNames = ['user', 'image', 'blog',
     'neighborhoodStatsMonthlyCache', 'eventInsight',
     'icebreaker',
     'appInsight', 'userInsight', 'userFollowUp',
+    'userInterest', 'userAvailability',
 ]
 
 def InitLive():
@@ -77,6 +81,7 @@ def InitAllCollections():
         _stubs_user_event.AddDefault()
         _stubs_user_feedback.AddDefault()
         _stubs_user_insight.AddDefault()
+        _stubs_user_interest.AddDefault()
         _stubs_user_neighborhood.AddDefault()
         _stubs_user_neighborhood_weekly_update.AddDefault()
         _stubs_weekly_event.AddDefault()
@@ -84,6 +89,8 @@ def InitAllCollections():
         _sms_twilio.SetTestMode(1)
         _email_sendgrid.SetTestMode(1)
         _pay_mercury.SetTestMode(1)
+        _user_availability.SetTestMode(1)
+        _user_interest.SetTestMode(1)
 
         _inited = 1
 

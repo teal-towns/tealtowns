@@ -8,9 +8,9 @@ def Get(title = '', tags = [], userIdCreator = '', slug = '', limit = 25, skip =
     if len(tags) > 0:
         query['tags'] = { '$in': tags }
     if len(title) > 0:
-        query['title'] = { '$regex': title, '$options': 'i' };
+        query['title'] = { '$regex': title, '$options': 'i' }
     if len(slug) > 0:
-        query['slug'] = { '$regex': slug, '$options': 'i' };
+        query['slug'] = slug
     if len(userIdCreator) > 0:
         query['userIdCreator'] = userIdCreator
     sort = None

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class MultiSelectButtonsFormField extends FormField<List<String>> {
@@ -19,6 +20,16 @@ class MultiSelectButtonsFormField extends FormField<List<String>> {
               spacing: 10,
               runSpacing: 10,
               children: options.map<Widget>((opt) {
+                if (state.value != initialValue) {
+                  // User timer delay to avoid error of set state being called during build.
+                  Timer(Duration(milliseconds: 50), () {
+                    state.didChange(initialValue);
+                  });
+                }
+                bool filled = false;
+                if (state.value!.contains(opt['value'].toString())) {
+                  filled = true;
+                }
                 return FilledButton(
                   child: Text(opt['label']),
                   onPressed: () {
@@ -35,7 +46,7 @@ class MultiSelectButtonsFormField extends FormField<List<String>> {
                     }
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: state.value!.contains(opt['value'].toString()) ? colorSelected : color,
+                    backgroundColor: filled ? colorSelected : color,
                     foregroundColor: colorText,
                   ),
                 );

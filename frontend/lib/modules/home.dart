@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../app_scaffold.dart';
@@ -125,7 +124,7 @@ class _HomeComponentState extends State<HomeComponent> {
                 _style.SpacingH('large'),
                 Align(alignment: Alignment.center,
                   // child: _buttons.LinkElevated(context, 'Join or Create Your TealTown', '/neighborhoods'),
-                  child: _buttons.LinkElevated(context, 'Create Your TealTown', '/ambassador'),
+                  child: _buttons.LinkElevated(context, 'Create Your TealTown', '/ambassador', track: true),
                 ),
                 SizedBox(height: 30),
               ],

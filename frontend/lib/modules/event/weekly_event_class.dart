@@ -9,7 +9,7 @@ class WeeklyEventClass {
 
   String id = '', uName = '', neighborhoodUName = '', title = '', description = '', startTime = '', endTime = '',
     timezone = '', type = '', createdAt = '';
-  List<String> adminUserIds = [], imageUrls = [];
+  List<String> adminUserIds = [], imageUrls = [], tags = [];
   LocationClass location = LocationClass.fromJson({});
   Map<String, dynamic> locationAddress = {};
   int dayOfWeek = 0, hostGroupSizeDefault = 0, archived = 0;
@@ -18,7 +18,7 @@ class WeeklyEventClass {
   String xDay = '';
 
   WeeklyEventClass(this.id, this.uName, this.neighborhoodUName, this.title, this.description, this.startTime, this.endTime,
-    this.timezone, this.type, this.createdAt, this.adminUserIds,
+    this.timezone, this.type, this.createdAt, this.adminUserIds, this.tags,
     this.imageUrls, this.location, this.locationAddress, this.dayOfWeek, this.hostGroupSizeDefault, this.archived, this.rsvpDeadlineHours, this.priceUSD,
     this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay);
 
@@ -35,6 +35,7 @@ class WeeklyEventClass {
     this.type = json['type'] ?? '';
     this.createdAt = json['createdAt'] ?? '';
     this.adminUserIds = _parseService.parseListString(json['adminUserIds'] != null ? json['adminUserIds'] : []);
+    this.tags = _parseService.parseListString(json['tags'] != null ? json['tags'] : []);
     this.imageUrls = _imageService.GetUrls((_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : [])), replaceLocalhost: imageUrlsReplaceLocalhost);
     this.location = LocationClass.fromJson(json['location'] ?? {});
     this.locationAddress = json['locationAddress'] ?? {};
@@ -60,6 +61,7 @@ class WeeklyEventClass {
       'endTime': endTime,
       'timezone': timezone,
       'type': type,
+      'tags': tags,
       'createdAt': createdAt,
       'adminUserIds': adminUserIds,
       'imageUrls': imageUrls,

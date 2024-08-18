@@ -26,6 +26,7 @@ Map<String, List<double>> _colorMap = {
   'greyDark': [50, 50, 50],
   'white': [255, 255, 255],
   'brown': [72, 43, 8],
+  'black': [0, 0, 0],
 };
 List<double> primary = [0, 167, 0];
 List<double> secondary = [15, 69, 194];

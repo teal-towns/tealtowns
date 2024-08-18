@@ -66,6 +66,8 @@ from shared_item import shared_item_routes as _shared_item_routes
 from shared_item import shared_item_owner_routes as _shared_item_owner_routes
 from pay_stripe import stripe_routes as _stripe_routes
 httpRoutesFunc.append(_stripe_routes.Routes)
+from user import user_availability_routes as _user_availability_routes
+from user import user_interest_routes as _user_interest_routes
 from user_auth import user_auth_routes as _user_auth_routes
 from user_auth import user_routes as _user_routes
 from user_follow_up import user_follow_up_routes as _user_follow_up_routes

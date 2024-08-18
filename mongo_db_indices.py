@@ -15,6 +15,7 @@ def create_all_indices(db):
     db['weeklyEvent'].create_index([('archived', 1)], unique=False)
     db['weeklyEvent'].create_index([('neighborhoodUName', 1)], unique=False)
     db['weeklyEvent'].create_index([('location', '2dsphere')])
+    db['weeklyEvent'].create_index([('tags', 1)], unique=False)
 
     db['event'].create_index([('weeklyEventId', 1), ('start', 1)], unique=False)
     db['event'].create_index([('neighborhoodUName', 1)], unique=False)
@@ -96,6 +97,10 @@ def create_all_indices(db):
     db['userFollowUp'].create_index([('username', 1), ('neighborhoodUName', 1), ('forType', 1),
         ('attempt', 1)], unique=True)
     db['userFollowUp'].create_index([('nextFollowUpAt', 1), ('nextFollowUpDone', 1)], unique=False)
+
+    db['userInterest'].create_index([('username', 1)], unique=True)
+
+    db['userAvailability'].create_index([('username', 1)], unique=True)
     
     db['mercuryPayOut'].create_index([('paidOut', 1), ('createdAt', 1)], unique=False)
 

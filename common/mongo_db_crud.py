@@ -69,7 +69,7 @@ def GetByIds(collection: str, ids: list, db1 = None, fields = None):
 def CleanId(obj: dict):
     return mongo_db.CleanId(obj)
 
-def Save(collection: str, obj, db1 = None, uNameRegex: str = '[^a-zA-Z0-9]'):
+def Save(collection: str, obj, db1 = None, uNameRegex: str = '[^a-zA-Z0-9]', checkGetKey: str = ''):
     ret = {"valid": 1, "message": "", "insert": 0}
     ret[collection] = obj
 
@@ -86,13 +86,22 @@ def Save(collection: str, obj, db1 = None, uNameRegex: str = '[^a-zA-Z0-9]'):
 
     if "_id" not in obj:
         ret["insert"] = 1
-        result = mongo_db.insert_one(collection, obj, db1 = db1)
-        if result["valid"] == 1:
-            # ret[collection]["_id"] = mongo_db.from_object_id(result["item"]["_id"])
-            ret[collection] = result["item"]
-        else:
-            ret["valid"] = 0
-            ret["message"] = result["message"]
+        try:
+            result = mongo_db.insert_one(collection, obj, db1 = db1)
+            if result["valid"] == 1:
+                # ret[collection]["_id"] = mongo_db.from_object_id(result["item"]["_id"])
+                ret[collection] = result["item"]
+            else:
+                ret["valid"] = 0
+                ret["message"] = result["message"]
+        except Exception as e:
+            # Try again with id.
+            if len(checkGetKey) > 0 and checkGetKey in obj:
+                fields = { '_id': 1 }
+                item = mongo_db.find_one(collection, { checkGetKey: obj[checkGetKey] }, fields = fields, db1 = db1)["item"]
+                if item is not None:
+                    obj['_id'] = item['_id']
+                    return Save(collection, obj, db1 = db1, uNameRegex = uNameRegex, checkGetKey = '')
     else:
         ret["insert"] = 0
         query = {"_id": mongo_db.to_object_id(obj["_id"])}

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../common/buttons.dart';
 import '../../common/date_time_service.dart';
+import '../../common/link_service.dart';
 import '../../common/paging.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -21,6 +22,7 @@ class UserPaymentSubscriptions extends StatefulWidget {
 class _UserPaymentSubscriptionsState extends State<UserPaymentSubscriptions> {
   Buttons _buttons = Buttons();
   DateTimeService _dateTime = DateTimeService();
+  LinkService _linkService = LinkService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Style _style = Style();
@@ -35,9 +37,10 @@ class _UserPaymentSubscriptionsState extends State<UserPaymentSubscriptions> {
   void initState() {
     super.initState();
 
-    if (!Provider.of<CurrentUserState>(context, listen: false).isLoggedIn) {
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (!currentUserState.isLoggedIn) {
       Timer(Duration(milliseconds: 500), () {
-        context.go('/login');
+        _linkService.Go('', context, currentUserState: currentUserState);
       });
     } else {
       _dataDefault['stringKeyVals']['userId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;

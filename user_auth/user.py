@@ -29,12 +29,15 @@ def SaveUser(user, keys: list = ['first_name', 'last_name', 'lngLat']):
     return ret
 
 def GetPhone(userId: str, requireVerified: int = 0, username: str = ''):
-    ret = { 'valid': 0, 'message': '', 'phoneNumber': '' }
+    ret = { 'valid': 0, 'message': '', 'phoneNumber': '', 'mode': '', 'email': '', 'userId': '', 'username': '', }
     if len(username) > 0:
         user = _user_auth.getByUsername(username)
     else:
         user = _user_auth.getById(userId)
     if user is not None:
+        ret['userId'] = user['_id']
+        ret['username'] = user['username']
+        ret['email'] = user['email']
         if 'phoneNumber' in user and (requireVerified == 0 or user['phoneNumberVerified'] == 1):
             ret['phoneNumber'] = user['phoneNumber']
             ret['mode'] = 'sms'
@@ -142,7 +145,8 @@ def GuessContactType(contactText: str):
 def GetUrl(user: dict):
     return _config['web_server']['urls']['base'] + '/u/' + str(user['username'])
 
-def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
+def GetJoinCollections(userId: str, username: str = '', limit: int = 100,
+    withWeeklyEvents: int = 0):
     ret = { 'valid': 1, 'message': '', }
 
     if len(userId) < 1 and len(username) > 0:
@@ -157,7 +161,8 @@ def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
     sortObj = { 'createdAt': -1 }
 
     query = { 'adminUserIds': userId }
-    fields = { 'uName': 1, 'title': 1, 'createdAt': 1, }
+    fields = { 'uName': 1, 'title': 1, 'createdAt': 1, 'dayOfWeek': 1, 'startTime': 1, 'endTime': 1,
+        'timezone': 1, 'location': 1, 'locationAddress': 1, 'priceUSD': 1, 'imageUrls': 1, 'adminUserIds': 1, }
     ret['weeklyEventsAdmin'] = mongo_db.find('weeklyEvent', query, fields = fields, sort_obj = sortObj,
         limit = limit)['items']
 
@@ -168,9 +173,22 @@ def GetJoinCollections(userId: str, username: str = '', limit: int = 100):
         limit = limit)['items']
     eventIds = []
     indexMap = {}
+    weeklyEventUNames = []
+    indexMapWeeklyEventUName = {}
     for index, userEvent in enumerate(ret['userEventsAttended']):
         eventIds.append(userEvent['eventId'])
         indexMap[userEvent['eventId']] = index
+        weeklyEventUNames.append(userEvent['weeklyEventUName'])
+        indexMapWeeklyEventUName[userEvent['weeklyEventUName']] = index
+
+    if withWeeklyEvents:
+        query = { 'uName': { '$in': weeklyEventUNames } }
+        fields = { 'uName': 1, 'title': 1, 'createdAt': 1, 'dayOfWeek': 1, 'startTime': 1, 'endTime': 1,
+            'timezone': 1, 'location': 1, 'locationAddress': 1, 'priceUSD': 1, 'imageUrls': 1, 'adminUserIds': 1, }
+        weeklyEvents = mongo_db.find('weeklyEvent', query, fields = fields)['items']
+        for weeklyEvent in weeklyEvents:
+            ret['userEventsAttended'][indexMapWeeklyEventUName[weeklyEvent['uName']]]['weeklyEvent'] = weeklyEvent
+
     query = { 'userId': userId, 'forId': { '$in': eventIds }, 'forType': 'event', }
     fields = { 'forType': 1, 'forId': 1, 'attended': 1, 'stars': 1, 'createdAt': 1, }
     # query = { 'userId': userId }

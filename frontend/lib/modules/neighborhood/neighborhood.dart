@@ -196,7 +196,7 @@ class _NeighborhoodState extends State<Neighborhood> {
                 Image.asset('assets/images/no-image-available-icon-flat-vector.jpeg', height: 300, width: double.infinity, fit: BoxFit.cover,)
                 : Image.network(sharedItem.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
               SizedBox(height: 10),
-              _buttons.Link(context, '${sharedItem.title}', '/shared-item-owner-save?sharedItemId=${sharedItem.id}'),
+              _buttons.Link(context, '${sharedItem.title}', '/shared-item-owner-save?sharedItemId=${sharedItem.id}',),
             ]
           )
         );

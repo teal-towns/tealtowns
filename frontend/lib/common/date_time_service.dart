@@ -99,4 +99,12 @@ class DateTimeService {
       'startTime': '${newHour.toString().padLeft(2, "0")}:${newMinute.toString().padLeft(2, "0")}',
     };
   }
+
+  int timeDiffMinutes(String startTime, String endTime) {
+    int hour = int.parse(startTime.substring(0, 2));
+    int minute = int.parse(startTime.substring(3, 5));
+    int hourEnd = int.parse(endTime.substring(0, 2));
+    int minuteEnd = int.parse(endTime.substring(3, 5));
+    return (hourEnd - hour) * 60 + (minuteEnd - minute);
+  }
 }

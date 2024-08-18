@@ -1,5 +1,6 @@
 # from fastapi import APIRouter
 import date_time
+from common import mongo_db_crud as _mongo_db_crud
 from common import route_parse as _route_parse
 from common import socket as _socket
 import log
@@ -52,6 +53,10 @@ def addRoutes():
                 ret['user']['roles'] = ",".join(ret['user']['roles'])
             if 'withCheckUserFeedback' in data and data['withCheckUserFeedback']:
                 ret['checkUserFeedback'] = _user_feedback.CheckAskForFeedback(data['userId'])
+            if 'withUserInterest' in data and data['withUserInterest']:
+                ret['userInterest'] = _mongo_db_crud.Get('userInterest', { 'userId': data['userId'] })['userInterest']
+            if 'withUserAvailability' in data and data['withUserAvailability']:
+                ret['userAvailability'] = _mongo_db_crud.Get('userAvailability', { 'userId': data['userId'] })['userAvailability']
             _user_insight.Save({ 'userId': data['userId'], 'lastActiveAt': date_time.now_string() })
         return ret
     _socket.add_route('getUserSession', GetUserSession)

@@ -65,6 +65,8 @@ import './modules/shared_item/shared_item_owner_save.dart';
 
 import './modules/user_payment/user_money.dart';
 import './modules/user_payment/mercury_pay_outs.dart';
+import './modules/user_auth/user_availability_save.dart';
+import './modules/user_auth/user_interest_save.dart';
 
 import './modules/user_auth/current_user_state.dart';
 
@@ -139,6 +141,9 @@ class Routes {
 
   static const userMoney = '/user-money';
   static const mercuryPayOuts = '/mercury-pay-outs';
+
+  static const userInterestSave = '/interests';
+  static const userAvailabilitySave = '/user-availability-save';
 
   static const amazonAffiliate = '/amazon-affiliate';
 }
@@ -529,6 +534,15 @@ class AppGoRouter {
       ),
 
       GoRoute(
+        path: Routes.userAvailabilitySave, name: 'userAvailabilitySave',
+        builder: (BuildContext context, GoRouterState state) => UserAvailabilitySave(),
+      ),
+      GoRoute(
+        path: Routes.userInterestSave, name: 'userInterestSave',
+        builder: (BuildContext context, GoRouterState state) => UserInterestSave(),
+      ),
+
+      GoRoute(
         path: Routes.amazonAffiliate, name: 'amazonAffiliate',
         builder: (BuildContext context, GoRouterState state) => AmazonAffiliate(),
       ),
@@ -538,16 +552,5 @@ class AppGoRouter {
         builder: (context, state) => RouteNotFoundPage(),
       ),
     ],
-    // Not working well.. Just did in AppScaffoldComponent instead.
-    // redirect: (BuildContext context, GoRouterState state) {
-    //   // var currentUserState = context.watch<CurrentUserState>();
-    //   var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    //   String url = currentUserState.routerRedirectUrl;
-    //   print ('url ${url}');
-    //   if (url != '') {
-    //     return url;
-    //   }
-    //   return null;
-    // }
   );
 }

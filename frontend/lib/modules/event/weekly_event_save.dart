@@ -8,6 +8,7 @@ import '../../common/alert_service.dart';
 import '../../common/colors_service.dart';
 import '../../common/form_input/form_save.dart';
 import '../../common/style.dart';
+import './event_tags_service.dart';
 import './weekly_event_class.dart';
 import './weekly_event_templates.dart';
 import '../about/welcome_about.dart';
@@ -26,6 +27,7 @@ class WeeklyEventSave extends StatefulWidget {
 class _WeeklyEventSaveState extends State<WeeklyEventSave> {
   AlertService _alertService = AlertService();
   ColorsService _colors = ColorsService();
+  EventTagsService _eventTags = EventTagsService();
   Style _style = Style();
 
   List<Map<String, dynamic>> _optsDayOfWeek = [
@@ -57,6 +59,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     'type': { 'type': 'select' },
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
+    'tags': { 'type': 'multiSelectButtons' },
   };
   Map<String, dynamic> _formValsDefault = {
     'hostGroupSizeDefault': 0,
@@ -126,6 +129,8 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     }
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
     _formFields['type']!['options'] = _optsType;
+    List<Map<String, dynamic>> optsTags = _eventTags.GetTagsOpts();
+    _formFields['tags']!['options'] = optsTags;
 
     // Do not allow changing some fields.
     if (widget.id != null && widget.id!.length > 0) {

@@ -309,6 +309,7 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             } else {
               widget.onSave!(data);
             }
+            _socketService.TrackEvent('Create Event (Template)');
           },
         ),
       ];

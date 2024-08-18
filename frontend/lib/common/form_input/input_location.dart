@@ -21,11 +21,13 @@ class InputLocation extends StatefulWidget {
   bool updateCachedLocation;
   String helpText;
   bool fullScreen;
+  bool doInitialOnchange;
 
   InputLocation({Key? key, this.formVals = null, this.formValsKey = '',
     this.label = '', this.onChanged = null, this.nestedCoordinates = false,
     this.guessLocation = true, this.useUserLocation = false,
-    this.updateCachedLocation = true, this.helpText = '', this.fullScreen = true}) : super(key: key);
+    this.updateCachedLocation = true, this.helpText = '', this.fullScreen = true,
+    this.doInitialOnchange = true}) : super(key: key);
 
   @override
   _InputLocationState createState() => _InputLocationState();
@@ -146,7 +148,7 @@ class _InputLocationState extends State<InputLocation> {
         setState(() {
           _formVals = _formVals;
         });
-        UpdateLngLat(lngLat[0], lngLat[1], doOnChange: false);
+        UpdateLngLat(lngLat[0], lngLat[1], doOnChange: widget.doInitialOnchange);
       }
     }
   }

@@ -152,7 +152,7 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
                 }
                 if (_invites.length > 0) {
                   _step = 'events';
-                  setState(() { _step = _step; });
+                  setState(() { _step = _step; _message = ''; });
                   _socketService.emit('UserInsightSetActionAt', { 'userId': userId, 'field': 'ambassadorNetworkStepsAt.events' });
                 } else {
                   setState(() { _message = 'Please enter at least one invite.'; });
@@ -186,7 +186,7 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
                       ElevatedButton(child: Text('Select'), onPressed: () {
                         _weeklyEvents = [ _existingWeeklyEvents[i], ];
                         _step = 'confirm';
-                        setState(() { _weeklyEvents = _weeklyEvents; _step = _step; });
+                        setState(() { _weeklyEvents = _weeklyEvents; _step = _step; _message = ''; });
                         _socketService.emit('UserInsightSetActionAt', { 'userId': userId, 'field': 'ambassadorNetworkStepsAt.confirm' });
                         var data = { 'invites': _invites, 'weeklyEventUName': _weeklyEvents[0].uName, 'userId': userId };
                         _socketService.emit('SendWeeklyEventInvites', data);
@@ -203,12 +203,12 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
               _style.SpacingH('medium'),
               TextButton(child: Text('OR Create New Event'), onPressed: () {
                 _eventsStep = 'locationSelect';
-                setState(() { _eventsStep = _eventsStep; });
+                setState(() { _eventsStep = _eventsStep; _message = ''; });
               }),
             ];
           } else {
             _eventsStep = 'locationSelect';
-            setState(() { _eventsStep = _eventsStep; });
+            setState(() { _eventsStep = _eventsStep; _message = ''; });
           }
         }
       }
@@ -217,10 +217,10 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
         cols += [
           Container(width: 400,
             child: InputLocation(formVals: _formVals, formValsKey: 'inputLocation', label: 'Where will you have your event?', helpText: helpText,
-              nestedCoordinates: true, guessLocation: true, fullScreen: true,
+              nestedCoordinates: true, guessLocation: true, fullScreen: true, doInitialOnchange: false,
               onChanged: (Map<String, dynamic> val) {
                 _eventsStep = 'eventTemplate';
-                setState(() { _eventsStep = _eventsStep; });
+                setState(() { _eventsStep = _eventsStep; _message = ''; });
               }
             ),
           ),
@@ -240,7 +240,7 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
                 _weeklyEvents.add(WeeklyEventClass.fromJson(weeklyEvent));
               }
               _step = 'confirm';
-              setState(() { _weeklyEvents = _weeklyEvents; _step = _step; _saving = false; });
+              setState(() { _weeklyEvents = _weeklyEvents; _step = _step; _message = ''; _saving = false; });
               _socketService.emit('UserInsightSetActionAt', { 'userId': userId, 'field': 'ambassadorNetworkStepsAt.confirm' });
               var data1 = { 'invites': _invites, 'weeklyEventUName': _weeklyEvents[0].uName, 'userId': userId };
               _socketService.emit('SendWeeklyEventInvites', data1);
@@ -256,11 +256,11 @@ class _AmbassadorNetworkState extends State<AmbassadorNetwork> {
             children: [
               _style.Text1('Event created and invites sent, the last step is to add the first items you would like to share!', size: 'large', colorKey: 'primary'),
               _style.SpacingH('medium'),
-              // _style.Text1('Join the Slack and join and post an introduction in #8-ambassadors to get support on your journey.'),
-              // _style.SpacingH('medium'),
-              // _buttons.Link(context, 'Join Slack',
-              //   'https://join.slack.com/t/tealtowns/shared_invite/zt-291gxxen8-LRs~9JmLHq8mqYUlzGncIQ', launchUrl: true),
-              // _style.SpacingH('medium'),
+              _style.Text1('Join the Slack and join and post an introduction in #8-ambassadors to get support on your journey.'),
+              _style.SpacingH('medium'),
+              _buttons.Link(context, 'Join Slack',
+                'https://join.slack.com/t/tealtowns/shared_invite/zt-291gxxen8-LRs~9JmLHq8mqYUlzGncIQ', launchUrl: true),
+              _style.SpacingH('medium'),
               _style.Text1('Join the Ambassador Circle on WhatsApp to get support on your journey.'),
               _style.SpacingH('medium'),
               _buttons.Link(context, 'Join WhatsApp Ambassador Circle',

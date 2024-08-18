@@ -26,7 +26,7 @@ class LinkService {
       currentUserState = Provider.of<CurrentUserState>(context, listen: false);
     }
     if (!currentUserState.isLoggedIn) {
-      Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl(url);
+      Provider.of<CurrentUserState>(context, listen: false).AddRedirectUrl(url, remove: true);
       context.go('/login');
     } else {
       context.go(url);
