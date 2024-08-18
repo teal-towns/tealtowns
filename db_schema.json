@@ -57,7 +57,8 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "uName": "{String}",
         "neighborhoodUName": "{String}",
-        "type": "{String} ''|sharedMeal|sharedItem",
+        "type": "{String} @optional ''|sharedMeal|sharedItem",
+        "tags": [ "{String} @optional" ],
         "title": "{String}",
         "description": "{String} @optional",
         "dayOfWeek": "{Int} [0-6, 0 = mon, 1 = tue, 2 = wed, 3 = thu, 4 = fri, 5 = sat, 6 = sun]",
@@ -476,5 +477,31 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "icebreaker": "{String}",
         "details": "{String}"
+    },
+    "userInterest": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "userId": "{String}",
+        "username": "{String}",
+        "interests": [ "{String}" ]
+    },
+    "userAvailability": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "userId": "{String}",
+        "username": "{String}",
+        "availableTimesByDay": [
+            {
+                "dayOfWeek": "{Int} [0-6, 0 = mon, 1 = tue, 2 = wed, 3 = thu, 4 = fri, 5 = sat, 6 = sun]",
+                "times": [
+                    {
+                        "start": "{String} [HH:mm]",
+                        "end": "{String} [HH:mm]"
+                    }
+                ]
+            }
+        ]
     }
 }

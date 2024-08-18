@@ -36,18 +36,20 @@ class Style {
   }
 
   Widget Text1(String text, { String size = 'medium', Widget? left = null, Widget? right = null,
-    String colorKey = 'text', FontWeight fontWeight = FontWeight.normal, double fontSize = -1, }) {
+    String colorKey = 'text', FontWeight fontWeight = FontWeight.normal, double fontSize = -1,
+    String align = 'left', }) {
     if (!_fontSizeMap.containsKey(size)) {
       size = 'medium';
     }
     if (fontSize < 0) {
       fontSize = _fontSizeMap[size]!;
     }
+    TextAlign align1 = align == 'right' ? TextAlign.right : align == 'center' ? TextAlign.center : TextAlign.left;
     Widget content = Text(text, style: TextStyle(
       fontSize: fontSize,
       color: _colors.colors[colorKey],
       fontWeight: fontWeight,
-    ));
+    ), textAlign: align1,);
     if (left != null || right != null) {
       List<Widget> rows = [];
       if (left != null) {

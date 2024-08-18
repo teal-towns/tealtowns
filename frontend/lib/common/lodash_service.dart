@@ -22,4 +22,9 @@ class LodashService {
     }
     return text;
   }
+
+  List<Map<String, dynamic>> Sort2D(List<Map<String, dynamic>> items, String key) {
+    items.sort((a, b) => a[key].compareTo(b[key]));
+    return items;
+  }
 }

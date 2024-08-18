@@ -47,18 +47,21 @@ class _UserSignupState extends State<UserSignup> {
         // Email verification skipped, so already are auto logged in.
         if (data.containsKey('user')) {
           var user = UserClass.fromJson(data['user']);
+          CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
           if (user.id.length > 0) {
-            Provider.of<CurrentUserState>(context, listen: false).setCurrentUser(user);
+            currentUserState.setCurrentUser(user);
             if (widget.onSave != null) {
               widget.onSave!(user);
             }
             if (widget.redirectOnDone) {
-              String route = '/home';
-              String redirectUrl = Provider.of<CurrentUserState>(context, listen: false).redirectUrl;
+              // String route = '/home';
+              String route = '/interests';
+              String redirectUrl = currentUserState.GetRedirectUrl();
               if (redirectUrl.length > 0) {
+                // currentUserState.AddRouterRedirectUrl(route);
                 route = redirectUrl;
-                Provider.of<CurrentUserState>(context, listen: false).SetRedirectUrl('');
               }
+              print ('route: $route');
               context.go(route);
             }
           } else {

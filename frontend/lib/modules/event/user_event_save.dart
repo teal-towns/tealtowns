@@ -139,6 +139,7 @@ class _UserEventSaveState extends State<UserEventSave> {
       return ElevatedButton(
         onPressed: () {
           _linkService.Go('', context, currentUserState: currentUserState);
+          _socketService.TrackEvent('Join Event');
         },
         child: Text('Join Event'),
       );
@@ -289,6 +290,7 @@ class _UserEventSaveState extends State<UserEventSave> {
                 setState(() { _loading = true; });
                 _formKey.currentState?.save();
                 CheckGetGetPaymentLink(currentUserState);
+                _socketService.TrackEvent('Join Event');
               } else {
                 setState(() { _loading = false; });
               }

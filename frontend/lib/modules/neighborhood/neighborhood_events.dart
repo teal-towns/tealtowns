@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../event/weekly_events.dart';
 import './neighborhood_class.dart';
+import '../user_auth/user_interests.dart';
 
 class NeighborhoodEvents extends StatefulWidget {
   String uName;
@@ -19,6 +21,7 @@ class NeighborhoodEvents extends StatefulWidget {
 }
 
 class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
+  Buttons _buttons = Buttons();
   ConfigService _configService = ConfigService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -75,6 +78,13 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
         children: [
           WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
             pageWrapper: 0, updateLngLatOnInit: 0,),
+          _style.SpacingH('medium'),
+          _style.Text1('Pending Events By Interest', size: 'large'),
+          _style.SpacingH('medium'),
+          _buttons.LinkElevated(context, 'Add Your Interests to Get Events Started!', '/interests',
+            checkLoggedIn: true,),
+          _style.SpacingH('medium'),
+          UserInterests(neighborhoodUName: _neighborhood.uName,),
           _style.SpacingH('medium'),
           _style.Text1('Share with your neighbors', size: 'large'),
           _style.SpacingH('medium'),

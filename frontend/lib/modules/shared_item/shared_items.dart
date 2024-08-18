@@ -166,6 +166,7 @@ class _SharedItemsState extends State<SharedItems> {
             onPressed: () {
               Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
               _linkService.Go('/shared-item-save', context, currentUserState: currentUserState);
+              _socketService.TrackEvent('Post New Item');
             },
             child: Text('Post New Item'),
           ),
@@ -461,6 +462,7 @@ class _SharedItemsState extends State<SharedItems> {
           onPressed: () {
             Provider.of<SharedItemState>(context, listen: false).clearSharedItem();
             _linkService.Go('/shared-item-save', context, currentUserState: currentUserState);
+            _socketService.TrackEvent('Post First Shared Item');
           },
           child: Text('Post the first Shared Item!'),
         ),
