@@ -5,7 +5,6 @@ import lodash
 import mongo_db
 
 def RunAll():
-    # AddInterestType()
     # WeeklyEventTags()
     # CleanUpEmptyUsernames()
     # AddUsernames()
@@ -31,37 +30,6 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
-
-def AddInterestType():
-    collections = ['userInterest']
-    for collection in collections:
-        limit = 250
-        skip = 0
-        updatedCounter = 0
-        while True:
-            query = {'type': { '$exists': 0} }
-            fields = None
-            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
-            skip += len(items)
-
-            print ('AddInterestType', collection, len(items))
-            for item in items:
-                query = {
-                    '_id': mongo_db.to_object_id(item['_id'])
-                }
-                mutation = {
-                    '$set': {
-                        'type': 'common',
-                    },
-                }
-
-                # print (query, mutation)
-                mongo_db.update_one(collection, query, mutation)
-                updatedCounter += 1
-
-            if len(items) < limit:
-                print('Updated ' + str(updatedCounter) + ' items')
-                break
 
 def WeeklyEventTags():
     collections = ['weeklyEvent']

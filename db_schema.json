@@ -484,8 +484,7 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "userId": "{String}",
         "username": "{String}",
-        "interests": [ "{String}" ],
-        "type": "{String} common|event"
+        "interests": [ "{String}" ]
     },
     "userAvailability": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
