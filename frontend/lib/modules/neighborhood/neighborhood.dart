@@ -9,6 +9,7 @@ import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/layout_service.dart';
 import '../../common/link_service.dart';
+import '../../common/location_service.dart';
 import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -35,6 +36,7 @@ class _NeighborhoodState extends State<Neighborhood> {
   ConfigService _configService = ConfigService();
   LayoutService _layoutService = LayoutService();
   LinkService _linkService = LinkService();
+  LocationService _locationService = LocationService();
   NeighborhoodJourneyService _neighborhoodJourneyService = NeighborhoodJourneyService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -100,6 +102,20 @@ class _NeighborhoodState extends State<Neighborhood> {
     }));
 
     _routeIds.add(_socketService.onRoute('SaveUserNeighborhood', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        GetNeighborhood();
+        String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
+          Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+        if (userId.length > 0) {
+          var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+          neighborhoodState.CheckAndGet(userId);
+        }
+      }
+    }));
+
+    _routeIds.add(_socketService.onRoute('RemoveUserNeighborhood', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
@@ -274,6 +290,29 @@ class _NeighborhoodState extends State<Neighborhood> {
           SizedBox(height: 10),
         ];
       }
+      if (_neighborhood.userNeighborhood['roles'].contains('creator')) {
+        colsJoin += [
+          _buttons.Link(context, 'Update', '/neighborhood-save?uName=${_neighborhood.uName}',),
+          SizedBox(height: 10),
+        ];
+      } else {
+        colsJoin += [
+          TextButton(child: Text('Leave'), onPressed: () {
+            _socketService.emit('RemoveUserNeighborhood',
+              { 'username': currentUserState.currentUser.username, 'neighborhoodUName': _neighborhood.uName });
+          }),
+          SizedBox(height: 10),
+        ];
+      }
+    }
+
+    List<Widget> colsAddress = [];
+    String address = _locationService.JoinAddress(_neighborhood.locationAddress);
+    if (address.length > 0) {
+      colsAddress += [
+        _style.Text1('${address}'),
+        _style.SpacingH('medium'),
+      ];
     }
 
     return AppScaffoldComponent(
@@ -327,6 +366,7 @@ class _NeighborhoodState extends State<Neighborhood> {
             ),
           ),
           _style.SpacingH('medium'),
+          ...colsAddress,
           _style.Text1('Share your neighborhood with your neighbors', size: 'large'),
           _style.SpacingH('medium'),
           QrImageView(

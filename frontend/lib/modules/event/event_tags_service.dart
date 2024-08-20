@@ -8,7 +8,7 @@ class EventTagsService {
   Map<String, List<String>> _tags = {
     'artCrafts': ['ceramic', 'glass', 'textile', 'clothing', 'paper', 'wood', 'stone', 'metal'],
     // 'family': ['infant', 'toddler', 'child', 'preteen', 'teenage', 'parent'],
-    'family': ['kid', 'parent'],
+    'family': ['kid', 'parent', 'moms', 'dads'],
     'fitness': ['strength', 'cardio', 'dance', 'swim', 'run', 'bike', 'yoga', 'pilates', 'stretch'],
     'food': ['breakfast', 'lunch', 'dinner', 'drinks', 'snack', 'cook', 'bake'],
     'games': ['boardGame', 'puzzle', 'lawnGames', 'poolGames', 'cardGames', 'partyGames'],

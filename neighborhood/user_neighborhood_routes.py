@@ -37,4 +37,8 @@ def addRoutes():
         return _user_neighborhood.RemoveRole(data['username'], data['neighborhoodUName'], data['role'])
     _socket.add_route('RemoveUserNeighborhoodRole', RemoveRole)
 
+    def Remove(data, auth, websocket):
+        return _user_neighborhood.Remove(data['username'], data['neighborhoodUName'])
+    _socket.add_route('RemoveUserNeighborhood', Remove)
+
 addRoutes()

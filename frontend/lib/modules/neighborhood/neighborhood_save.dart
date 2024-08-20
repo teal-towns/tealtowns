@@ -22,7 +22,8 @@ class NeighborhoodSave extends StatefulWidget {
 
 class _NeighborhoodSaveState extends State<NeighborhoodSave> {
   Map<String, Map<String, dynamic>> _formFields = {
-    'location': { 'type': 'location', 'nestedCoordinates': true, 'required': true, },
+    'location': { 'type': 'location', 'nestedCoordinates': true, 'required': true,
+      'addressField': 'locationAddress', },
     'uName': { 'type': 'text', 'label': 'Short name', 'required': true, },
     'title': { 'required': true, },
   };
