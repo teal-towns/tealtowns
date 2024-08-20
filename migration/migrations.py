@@ -5,6 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
+    AddLocationAddress()
     # WeeklyEventTags()
     # CleanUpEmptyUsernames()
     # AddUsernames()
@@ -14,7 +15,6 @@ def RunAll():
     # UserNeighborhoodVision()
     # UserNeighborhoodToUName()
     # UserNeighborhoodRoles()
-    # WeeklyEventLocationAddress()
     # EventFeedbackImageUrls()
     # FeedbackStarsAttended()
     # EventViewsAt()
@@ -30,6 +30,37 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def AddLocationAddress():
+    collections = ['weeklyEvent', 'neighborhood']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'locationAddress': { '$exists': 0 } }
+            fields = { '_id': 1, }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('AddLocationAddress', collection, len(items))
+            for item in items:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mutation = {
+                    '$set': {
+                        'locationAddress': {},
+                    }
+                }
+
+                # print (query, mutation)
+                mongo_db.update_one(collection, query, mutation)
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def WeeklyEventTags():
     collections = ['weeklyEvent']
@@ -307,36 +338,6 @@ def UserNeighborhoodRoles():
             mutation = {
                 '$set': {
                     'roles': ['creator', 'ambassador'],
-                }
-            }
-
-            # print (query, mutation)
-            mongo_db.update_one(collection, query, mutation)
-            updatedCounter += 1
-
-        if len(items) < limit:
-            print('Updated ' + str(updatedCounter) + ' items')
-            break
-
-def WeeklyEventLocationAddress():
-    collection = 'weeklyEvent'
-    limit = 250
-    skip = 0
-    updatedCounter = 0
-    while True:
-        query = {'locationAddress': { '$exists': 0 } }
-        fields = { '_id': 1, }
-        items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
-        skip += len(items)
-
-        print ('WeeklyEventLocationAddress', collection, len(items))
-        for item in items:
-            query = {
-                '_id': mongo_db.to_object_id(item['_id'])
-            }
-            mutation = {
-                '$set': {
-                    'locationAddress': {},
                 }
             }
 

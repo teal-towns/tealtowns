@@ -51,7 +51,7 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
         'notifyUserIds': { 'sms': [], 'email': [] }, }
     eventInterests = _user_interest.GetEventInterests()
     # Check all neighborhoods this user is in.
-    query = { 'username': username }
+    query = { 'username': username, 'status': 'default' }
     fields = { 'username': 1, 'neighborhoodUName': 1 }
     userNeighborhoods = mongo_db.find('userNeighborhood', query, fields = fields)['items']
     if len(userNeighborhoods) <= 0:

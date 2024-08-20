@@ -1,9 +1,16 @@
+import threading
+
 from common import mongo_db_crud as _mongo_db_crud
 import date_time
 import mongo_db
 from insight import user_insight as _user_insight
 from user_auth import user_auth as _user_auth
 from user import user_availability as _user_availability
+
+_testMode = 0
+def SetTestMode(testMode: int):
+    global _testMode
+    _testMode = testMode
 
 def SetAllStatus(userId: str, status: str = ''):
     mongo_db.update_many('userNeighborhood', {'userId': userId}, {'$set': {'status': status}})
@@ -38,7 +45,7 @@ def Search(stringKeyVals: dict = {}, limit: int = 250, skip: int = 0, withNeighb
 
     return ret
 
-def Save(userNeighborhood: dict):
+def Save(userNeighborhood: dict, useThread: int = 1):
     if 'userId' not in userNeighborhood or 'neighborhoodUName' not in userNeighborhood:
         return { 'valid': 0, 'message': 'Missing userId or neighborhoodUName' }
     if 'status' in userNeighborhood and userNeighborhood['status'] == 'default':
@@ -68,6 +75,10 @@ def Save(userNeighborhood: dict):
             userNeighborhood['vision'] = ''
     ret = _mongo_db_crud.Save('userNeighborhood', userNeighborhood)
     _user_insight.Save({ 'userId': userNeighborhood['userId'], 'firstNeighborhoodJoinAt': date_time.now_string() })
+    if useThread and not _testMode:
+        thread = threading.Thread(target=_user_availability.CheckCommonInterestsAndTimesByUser, args=(username,))
+        thread.start()
+        return ret
     _user_availability.CheckCommonInterestsAndTimesByUser(username)
     return ret
 
@@ -79,4 +90,16 @@ def RemoveRole(username: str, neighborhoodUName: str, role: str, removeRelated: 
     if removeRelated:
         if role == 'ambassador':
             mongo_db.delete_many('userNeighborhoodWeeklyUpdate', query)
+    return ret
+
+def Remove(username: str, neighborhoodUName: str):
+    ret = { "valid": 1, "message": "" }
+    query = { "username": username, "neighborhoodUName": neighborhoodUName }
+    # Ensure not creator
+    userNeighborhood = mongo_db.find_one('userNeighborhood', query)['item']
+    if userNeighborhood is not None and 'creator' in userNeighborhood['roles']:
+        ret['message'] = 'Cannot remove creator'
+        ret['valid'] = 0
+        return ret
+    mongo_db.delete_one('userNeighborhood', query)
     return ret
