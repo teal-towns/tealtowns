@@ -9,7 +9,8 @@ from neighborhood import user_neighborhood as _user_neighborhood
 def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
     weeklyEventsCount: int = 3, sharedItemsCount: int = 3, maxMeters: float = 500,
     limitCount: int = 250, withUsersCount: int = 0, withUniqueEventUsersCount: int = 0, userId: str = '',
-    minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False, withType: str = 'location'):
+    minDateString: str = '', maxDateString: str = '', withFreePaidStats: bool = False, withType: str = 'location',
+    withAdminContactInfo: int = 0):
     ret = _mongo_db_crud.GetByUName('neighborhood', uName)
     if '_id' not in ret['neighborhood']:
         ret['valid'] = 0
@@ -61,6 +62,16 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
             items = _shared_item.SearchNear(lngLat, maxMeters, limit = limitCount)['sharedItems']
         ret['sharedItemsCount'] = len(items)
         ret['sharedItems'] = items[slice(0, sharedItemsCount)] if len(items) > sharedItemsCount else items
+    if withAdminContactInfo:
+        ret['amdinContactInfo'] = { 'emails': [], }
+        query = {'neighborhoodUName': neighborhoodUName, 'roles': {'$in': ['creator', 'ambassador']}}
+        usernames = mongo_db.findDistinct('userNeighborhood', 'username', query)['values']
+        if len(usernames) > 0:
+            query = {'username': {'$in': usernames}}
+            fields = { 'email': 1, }
+            users = mongo_db.find('user', query, fields = fields)['items']
+            for user in users:
+                ret['amdinContactInfo']['emails'].append(user['email'])
     return ret
 
 def SearchNear(stringKeyVals: dict = {}, locationKeyVals: dict = {}, limit: int = 25, skip: int = 0,
