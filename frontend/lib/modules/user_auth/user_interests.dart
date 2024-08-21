@@ -14,7 +14,7 @@ class UserInterests extends StatefulWidget {
   String neighborhoodUName;
   double imageHeight;
   int minInterested;
-  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 200, this.minInterested = 2, });
+  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 200, this.minInterested = 1, });
 
   @override
   _UserInterestsState createState() => _UserInterestsState();
