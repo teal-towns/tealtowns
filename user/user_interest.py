@@ -71,7 +71,12 @@ def GetEventInterests():
             'title': 'Shared Meal',
             'description': 'Join your neighbors to eat a meal together.',
             'imageUrls': ['/assets/assets/images/shared-meal.jpg'],
-        }
+        },
+        'event_kidPlayDate': {
+            'title': 'Kid Play Date',
+            'description': 'Meet local parents to let kids of all ages play together. Join a hand-me-down tree, form babysitting collectives, share baby food recipes, form Dad and Mom groups, or just take a break and meet other parents while helping your child socialize.',
+            'imageUrls': ['/assets/assets/images/events/children-playing.jpg'],
+        },
     }
     for key in eventInterests:
         eventInterests[key] = lodash.extend_object(default, eventInterests[key])

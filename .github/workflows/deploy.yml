@@ -62,7 +62,8 @@ jobs:
           echo MIXPANEL_TOKEN=${{ secrets.PROD_MIXPANEL_TOKEN }} >> .env
           cat .env
       - name: 'Build Flutter app'
-        run: cd ./frontend && flutter build web --web-renderer canvaskit --source-maps --profile
+        # run: cd ./frontend && flutter build web --web-renderer canvaskit --source-maps --profile
+        run: cd ./frontend && flutter build web --source-maps
       - name: 'Upload Sentry Debug Symbols'
         run: cd ./frontend && SENTRY_AUTH_TOKEN=${{ secrets.PROD_SENTRY_AUTH_TOKEN }} flutter packages pub run sentry_dart_plugin
       - name: 'Upload Flutter app'
