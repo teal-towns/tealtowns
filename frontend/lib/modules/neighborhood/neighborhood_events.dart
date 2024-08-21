@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
 import '../../common/config_service.dart';
+import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../event/weekly_events.dart';
@@ -23,11 +24,13 @@ class NeighborhoodEvents extends StatefulWidget {
 class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
   Buttons _buttons = Buttons();
   ConfigService _configService = ConfigService();
+  ParseService _parseService = ParseService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Style _style = Style();
 
   NeighborhoodClass _neighborhood = NeighborhoodClass.fromJson({});
+  Map<String, dynamic> _adminContactInfo = {};
   bool _loading = true;
 
   @override
@@ -39,8 +42,12 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       var data = res['data'];
       if (data['valid'] == 1) {
         _neighborhood = NeighborhoodClass.fromJson(data['neighborhood']);
+        if (data.containsKey('amdinContactInfo')) {
+          _adminContactInfo = _parseService.parseMapStringDynamic(data['amdinContactInfo']);
+        }
         setState(() {
           _neighborhood = _neighborhood;
+          _adminContactInfo = _adminContactInfo;
           _loading = false;
         });
       } else {
@@ -48,7 +55,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       }
     }));
 
-    var data = { 'uName': widget.uName, };
+    var data = { 'uName': widget.uName, 'withAdminContactInfo': 1, };
     _socketService.emit('GetNeighborhoodByUName', data);
   }
 
@@ -69,6 +76,16 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
           ]
         )
       );
+    }
+
+    List<Widget> colsAdmin = [];
+    if (_adminContactInfo.containsKey('emails') && _adminContactInfo['emails'].length > 0) {
+      colsAdmin += [
+        _style.Text1('Questions? Contact Neighborhood Admins:', size: 'large'),
+        _style.SpacingH('medium'),
+        _style.Text1('${_adminContactInfo['emails'].join(', ')}'),
+        _style.SpacingH('medium'),
+      ];
     }
 
     Map<String, dynamic> config = _configService.GetConfig();
@@ -98,6 +115,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
           _style.SpacingH('large'),
           _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
           _style.SpacingH('medium'),
+          ...colsAdmin,
         ]
       )
     );
