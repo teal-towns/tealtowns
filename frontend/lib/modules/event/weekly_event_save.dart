@@ -56,7 +56,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     'priceUSD': { 'type': 'number', 'min': 0, 'required': true },
     'rsvpDeadlineHours': { 'type': 'number', 'min': 0, 'required': true },
     'neighborhoodUName': { 'type': 'select', 'label': 'Neighborhood', },
-    'type': { 'type': 'select' },
+    'type': { 'type': 'select', 'required': false, },
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
     'tags': { 'type': 'multiSelectButtons' },

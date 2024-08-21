@@ -96,7 +96,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
           _style.SpacingH('medium'),
           Text('${config['SERVER_URL']}/ne/${_neighborhood.uName}'),
           _style.SpacingH('large'),
-          _buttons.LinkElevated(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
+          _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
           _style.SpacingH('medium'),
         ]
       )

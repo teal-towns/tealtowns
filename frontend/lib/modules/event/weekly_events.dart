@@ -154,7 +154,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     columnsCreate = [
       Align(
         alignment: Alignment.topRight,
-        child: ElevatedButton(
+        child: TextButton(
           onPressed: () {
             String url = '/weekly-event-save';
             if (widget.type.length > 0) {
