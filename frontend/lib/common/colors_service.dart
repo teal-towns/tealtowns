@@ -20,6 +20,7 @@ Map<String, List<double>> _colorMap = {
   // 'magenta': [200, 100, 240],
   // 'red': [200, 100, 0],
 
+  'greyLighter': [225, 225, 225],
   'greyLight': [200, 200, 200],
   'grey': [125, 125, 125],
   'greyTransparent': [125, 125, 125, 0.4],
@@ -36,6 +37,7 @@ List<double> text = [90, 90, 90];
 List<double> magentaTransparent = [200, 100, 240, 0.4];
 List<double> magenta = magentaTransparent.sublist(0, magentaTransparent.length - 1);
 List<double> red = [200, 100, 0];
+List<double> greyLighter = [225, 225, 225];
 List<double> greyLight = [200, 200, 200];
 List<double> grey = [125, 125, 125];
 List<double> greyTransparent = [125, 125, 125, 0.4];

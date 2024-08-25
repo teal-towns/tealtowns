@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 // import '../../common/colors_service.dart';
-import '../../common/layout_service.dart';
+import '../../common/layout_wrap.dart';
 import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
@@ -14,14 +14,13 @@ class UserInterests extends StatefulWidget {
   String neighborhoodUName;
   double imageHeight;
   int minInterested;
-  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 200, this.minInterested = 1, });
+  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 150, this.minInterested = 1, });
 
   @override
   _UserInterestsState createState() => _UserInterestsState();
 }
 
 class _UserInterestsState extends State<UserInterests> {
-  LayoutService _layoutService = LayoutService();
   ParseService _parseService = ParseService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
@@ -137,9 +136,9 @@ class _UserInterestsState extends State<UserInterests> {
       children: [
         // _style.Text1('Interests', size: 'large'),
         // _style.SpacingH('medium'),
-        _layoutService.WrapWidth(interestsEvents),
+        LayoutWrap(items: interestsEvents, pageSize: 4, width: 150,),
         _style.SpacingH('medium'),
-        _layoutService.WrapWidth(interests),
+        LayoutWrap(items: interests, pageSize: 4, width: 150,),
       ],
     );
   }

@@ -19,6 +19,7 @@ import './modules/design_library/design_library.dart';
 import './modules/about/about.dart';
 import './modules/about/team.dart';
 import './modules/about/privacy_terms.dart';
+import './modules/about/ai_urban_planner_about.dart';
 
 import './modules/ambassador/ambassador_start.dart';
 import './modules/ambassador/ambassador_network.dart';
@@ -96,6 +97,7 @@ class Routes {
   static const team = '/team'; 
   static const privacyPolicy = '/privacy-policy';
   static const termsOfService = '/terms-of-service';
+  static const aiUrbanPlannerAbout = '/ai-urban-planner';
 
   static const blogList = '/blog';
   static const blogSave = '/blog-save';
@@ -258,6 +260,11 @@ class AppGoRouter {
         builder: (BuildContext context, GoRouterState state) => PrivacyTerms(
           type: 'terms',
         ),
+      ),
+
+      GoRoute(
+        path: Routes.aiUrbanPlannerAbout, name: 'aiUrbanPlannerAbout',
+        builder: (BuildContext context, GoRouterState state) => AIUrbanPlannerAbout(),
       ),
 
       GoRoute(
