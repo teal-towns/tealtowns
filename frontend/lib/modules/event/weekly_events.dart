@@ -180,7 +180,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
             label: 'Range', onChanged: (String val) {
             _search();
           }),
-      ], width: 225);
+      ], width: 150);
     }
 
     Widget body = Column(
@@ -257,6 +257,9 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
 
   _buildWeeklyEventDay(String day, List<WeeklyEventClass> weeklyEvents, BuildContext context, var currentUserState) {
+    if (weeklyEvents.length < 1) {
+      return SizedBox.shrink();
+    }
     return SizedBox(
       width: 300,
       child: Column(

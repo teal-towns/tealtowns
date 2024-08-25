@@ -15,8 +15,9 @@ class Style {
     'small': 12,
     'medium': 15,
     'large': 21,
-    'xlarge': 26,
-    'xxlarge': 32,
+    'xlarge': 30,
+    'xxlarge': 42,
+    'xxxlarge': 57,
   };
   Map<String, double> _spacingMap = {
     'none': 0,
