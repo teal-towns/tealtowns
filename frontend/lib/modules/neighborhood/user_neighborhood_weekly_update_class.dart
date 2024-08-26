@@ -6,9 +6,10 @@ class UserNeighborhoodWeeklyUpdateClass {
   String id = '', userId = '', username = '', neighborhoodUName = '', start = '', end = '';
   int inviteCount = 0, attendedCount = 0;
   int eventsAttendedCount = 0;
+  List<String> actionsComplete = [];
 
   UserNeighborhoodWeeklyUpdateClass(this.id, this.userId, this.username, this.neighborhoodUName, this.start, this.end,
-    this.inviteCount, this.attendedCount, this.eventsAttendedCount);
+    this.inviteCount, this.attendedCount, this.eventsAttendedCount, this.actionsComplete);
 
   UserNeighborhoodWeeklyUpdateClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
@@ -20,6 +21,7 @@ class UserNeighborhoodWeeklyUpdateClass {
     this.inviteCount = json['inviteCount'] != null ? _parseService.toIntNoNull(json['inviteCount']) : 0;
     this.attendedCount = json['attendedCount'] != null ? _parseService.toIntNoNull(json['attendedCount']) : 0;
     this.eventsAttendedCount = json['eventsAttendedCount'] != null ? _parseService.toIntNoNull(json['eventsAttendedCount']) : 0;
+    this.actionsComplete = json['actionsComplete'] != null ? _parseService.parseListString(json['actionsComplete']) : [];
   }
 
   Map<String, dynamic> toJson() =>
@@ -32,5 +34,6 @@ class UserNeighborhoodWeeklyUpdateClass {
       'end': end,
       'inviteCount': inviteCount,
       'attendedCount': attendedCount,
+      'actionsComplete': actionsComplete,
     };
 }

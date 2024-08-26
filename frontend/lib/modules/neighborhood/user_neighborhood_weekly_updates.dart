@@ -132,6 +132,8 @@ class _UserNeighborhoodWeeklyUpdatesState extends State<UserNeighborhoodWeeklyUp
         _style.SpacingH('medium'),
         _style.Text1('${userNeighborhoodWeeklyUpdate.inviteCount} invites (${userNeighborhoodWeeklyUpdate.attendedCount} attended)'),
         _style.SpacingH('medium'),
+        _style.Text1('${userNeighborhoodWeeklyUpdate.actionsComplete.length} actions: ${userNeighborhoodWeeklyUpdate.actionsComplete.join(', ')}'),
+        _style.SpacingH('medium'),
         _style.Text1('${attendedName} attended ${userNeighborhoodWeeklyUpdate.eventsAttendedCount} events'),
         _style.SpacingH('medium'),
         ...colsEdit,

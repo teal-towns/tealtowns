@@ -147,7 +147,7 @@ class _FormSaveState extends State<FormSave> {
           ...cols,
           BuildForm(context),
           _buildMessage(context),
-          SizedBox(height: 50),
+          SizedBox(height: 10),
         ]
       )
     );
@@ -386,6 +386,11 @@ class _FormSaveState extends State<FormSave> {
 
   Widget FormField(key, value) {
     Widget input = SizedBox.shrink();
+    if (value['type'] == 'xText') {
+      String size = value.containsKey('size') ? value['size'] : 'medium';
+      input = _style.Text1(value['text'], size: size);
+      return input;
+    }
     String label = '';
     String helpText = value.containsKey('helpText') ? value['helpText'] : '';
     if (value.containsKey('label')) {
