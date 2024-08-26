@@ -145,60 +145,7 @@ class _AIUrbanPlannerAboutState extends State<AIUrbanPlannerAbout> {
           Container(
             constraints: BoxConstraints(minHeight: height, maxWidth: maxWidth),
             width: double.infinity,
-            child: Row(
-              children: [
-                Expanded(flex: 1,
-                  child: Column(
-                    children: [
-                      Image.asset('assets/images/ai_urban_planner/green-world.png', width: 100, height: 100),
-                      Container(
-                        constraints: BoxConstraints(maxWidth: 300),
-                        child: _style.Text1('AI Sustainable Urban Planner', size: 'xxlarge', align: 'center',),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(flex: 1, child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            color: _colors.colors['greyLighter'],
-                            padding: EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _style.Text1('OUR VISION', colorKey: 'primary', size: 'large',),
-                                _style.SpacingH('medium'),
-                                _style.Text1('Empowered Communities, Greener Cities', size: 'large'),
-                                _style.SpacingH('medium'),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )
-                    ),
-                    _style.SpacingH('large'),
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: _colors.colors['primary'], width: 3),
-                      ),
-                      padding: EdgeInsets.all(20),
-                      child: Column(
-                        children: [
-                          _style.Text1('Imagine a city where every resident has the tools to shape their environment—where sustainability is driven by community action, supported by advanced AI technology. Our vision is to make this a reality.', size: 'large'),
-                          _style.SpacingH('medium'),
-                        ],
-                      ),
-                    ),
-                  ],
-                )),
-              ],
-            )
+            child: BuildSolution1(context),
           ),
           Container(
             constraints: BoxConstraints(minHeight: height),
@@ -225,6 +172,89 @@ class _AIUrbanPlannerAboutState extends State<AIUrbanPlannerAbout> {
           ),
         ]
       )
+    );
+  }
+
+  Widget BuildSolution1(BuildContext context) {
+    Widget logoContent = Column(
+      children: [
+        Image.asset('assets/images/ai_urban_planner/green-world.png', width: 100, height: 100),
+        Container(
+          constraints: BoxConstraints(maxWidth: 300),
+          child: _style.Text1('AI Sustainable Urban Planner', size: 'xxlarge', align: 'center',),
+        ),
+      ],
+    );
+
+    Widget rightContent = Column(
+      children: [
+        Container(
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                color: _colors.colors['greyLighter'],
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _style.Text1('OUR VISION', colorKey: 'primary', size: 'large',),
+                    _style.SpacingH('medium'),
+                    _style.Text1('Empowered Communities, Greener Cities', size: 'large'),
+                    _style.SpacingH('medium'),
+                  ],
+                ),
+              ),
+            ],
+          )
+        ),
+        _style.SpacingH('large'),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: _colors.colors['primary'], width: 3),
+          ),
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              _style.Text1('Imagine a city where every resident has the tools to shape their environment—where sustainability is driven by community action, supported by advanced AI technology. Our vision is to make this a reality.', size: 'large'),
+              _style.SpacingH('medium'),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 700) {
+          return Row(
+            children: [
+              Expanded(flex: 1,
+                child: logoContent,
+              ),
+              Expanded(flex: 1, child: Column(
+                children: [
+                  _style.SpacingH('large'),
+                  rightContent,
+                  _style.SpacingH('medium'),
+                ]
+              )),
+            ],
+          );
+        } else {
+          return Column(
+            children: [
+              _style.SpacingH('large'),
+              logoContent,
+              _style.SpacingH('large'),
+              rightContent,
+              _style.SpacingH('large'),
+            ],
+          );
+        }
+      }
     );
   }
 }

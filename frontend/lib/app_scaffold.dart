@@ -194,6 +194,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       _buildLinkButton(context, '/weekly-events', 'Events'),
       _buildLinkButton(context, '/neighborhoods', 'Neighborhoods'),
       _buildLinkButton(context, '/own', 'Shared Items'),
+      _buildLinkButton(context, '/ai-urban-planner', 'AI Urban Planner'),
     ];
     if (currentUserState.isLoggedIn) {
       columns += [
