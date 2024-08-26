@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:universal_html/html.dart' as html;
@@ -17,12 +18,17 @@ import '../../common/layout_service.dart';
 import '../../common/map/map_it.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
+import '../user_auth/current_user_state.dart';
 import './event_class.dart';
 import './weekly_event_class.dart';
 
 class WeeklyEventPrint extends StatefulWidget {
   String uName;
-  WeeklyEventPrint({this.uName = '',});
+  int rows;
+  int columns;
+  int showImage;
+  int withTearOffs;
+  WeeklyEventPrint({this.uName = '', this.rows = 1, this.columns = 1, this.showImage = 1, this.withTearOffs = 1});
 
   @override
   _WeeklyEventPrintState createState() => _WeeklyEventPrintState();
@@ -45,6 +51,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
   double _widthTotal = 1000;
 
   Map<String, dynamic>_formVals = {
+    'preset': 'largePublic',
     'rows': 1,
     'columns': 1,
     'showImage': 1,
@@ -54,15 +61,28 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     'showInterests': 0,
     'userMessage': '',
     'withTearOffs': 1,
+    'showMessage': 0,
+    'userMessage': '', 
   };
   List<Map<String, dynamic>> _optsYesNo = [
     {'value': 1, 'label': 'Yes'},
     {'value': 0, 'label': 'No'},
   ];
+  List<Map<String, dynamic>> _optsPreset = [
+    {'value': 'largePublic', 'label': 'Large Public'},
+    {'value': 'mediumPublic', 'label': 'Medium Public'},
+    {'value': 'singleNeighbor', 'label': 'Single Neighbor'},
+    {'value': 'custom', 'label': 'Custom'},
+  ];
 
   @override
   void initState() {
     super.initState();
+
+    _formVals['rows'] = widget.rows;
+    _formVals['columns'] = widget.columns;
+    _formVals['showImage'] = widget.showImage;
+    _formVals['withTearOffs'] = widget.withTearOffs;
 
     _routeIds.add(_socketService.onRoute('GetWeeklyEventByIdWithData', callback: (String resString) {
       var res = jsonDecode(resString);
@@ -129,46 +149,95 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       colCopies.add(Row(children: rows));
     }
 
+    List<Widget> inputs = [
+      _inputFields.inputSelect(_optsPreset, _formVals, 'preset', label: 'Preset', onChanged: (val) {
+        _formVals['preset'] = val;
+        if (val == 'largePublic') {
+          _formVals['rows'] = 1;
+          _formVals['columns'] = 1;
+          _formVals['showImage'] = 1;
+          _formVals['showQrCode'] = 1;
+          _formVals['showNeighborhoodEvents'] = 1;
+          _formVals['withTearOffs'] = 1;
+          _formVals['showMessage'] = 0;
+          _formVals['userMessage'] = '';
+        } else if (val == 'mediumPublic') {
+          _formVals['rows'] = 2;
+          _formVals['columns'] = 2;
+          _formVals['showImage'] = 1;
+          _formVals['showQrCode'] = 1;
+          _formVals['showNeighborhoodEvents'] = 1;
+          _formVals['withTearOffs'] = 0;
+          _formVals['showMessage'] = 0;
+          _formVals['userMessage'] = '';
+        } else if (val == 'singleNeighbor') {
+          _formVals['rows'] = 2;
+          _formVals['columns'] = 4;
+          _formVals['showImage'] = 0;
+          _formVals['showQrCode'] = 0;
+          // _formVals['showNeighborhoodEvents'] = 1;
+          _formVals['withTearOffs'] = 0;
+          _formVals['showMessage'] = 1;
+          CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+          if (currentUserState.currentUser != null) {
+            String firstName = currentUserState.currentUser!.firstName;
+            _formVals['userMessage'] = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you! - ${firstName}';
+          }
+        }
+        setState(() { _formVals = _formVals; });
+      }),
+    ];
+    if (_formVals['preset'] == 'custom') {
+      inputs += [
+        _inputFields.inputNumber(_formVals, 'rows', label: 'Rows', min: 1, max: 10, onChanged: (val) {
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputNumber(_formVals, 'columns', label: 'Columns', min: 1, max: 5, onChanged: (val) {
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'showImage', label: 'Show Image?', onChanged: (val) {
+          _formVals['showImage'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+        // _inputFields.inputSelect(_optsYesNo, _formVals, 'showMap', label: 'Show Map?', onChanged: (val) {
+        //   _formVals['showMap'] = int.parse(val);
+        //   setState(() { _formVals = _formVals; });
+        // }),
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'showQrCode', label: 'Show QR Code?', onChanged: (val) {
+          _formVals['showQrCode'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'showNeighborhoodEvents', label: 'Show Neighborhood Events?', onChanged: (val) {
+          _formVals['showNeighborhoodEvents'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'showInterests', label: 'Show Interests?', onChanged: (val) {
+          _formVals['showInterests'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'withTearOffs', label: 'With Tear Offs?', onChanged: (val) {
+          _formVals['withTearOffs'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+      ];
+    }
+
+    List<Widget> colsMessage = [];
+    if (_formVals['showMessage'] == 1) {
+      colsMessage += [
+        _inputFields.inputText(_formVals, 'userMessage', label: 'Message', onChanged: (val) {
+          setState(() { _formVals = _formVals; });
+        }),
+      ];
+    }
+
     return AppScaffoldComponent(
       listWrapper: true,
       body: Column(
         children: [
-          _layoutService.WrapWidth([
-            _inputFields.inputNumber(_formVals, 'rows', label: 'Rows', min: 1, max: 10, onChanged: (val) {
-              setState(() { _formVals = _formVals; });
-            }),
-            _inputFields.inputNumber(_formVals, 'columns', label: 'Columns', min: 1, max: 5, onChanged: (val) {
-              setState(() { _formVals = _formVals; });
-            }),
-            _inputFields.inputSelect(_optsYesNo, _formVals, 'showImage', label: 'Show Image?', onChanged: (val) {
-              _formVals['showImage'] = int.parse(val);
-              setState(() { _formVals = _formVals; });
-            }),
-            // _inputFields.inputSelect(_optsYesNo, _formVals, 'showMap', label: 'Show Map?', onChanged: (val) {
-            //   _formVals['showMap'] = int.parse(val);
-            //   setState(() { _formVals = _formVals; });
-            // }),
-            _inputFields.inputSelect(_optsYesNo, _formVals, 'showQrCode', label: 'Show QR Code?', onChanged: (val) {
-              _formVals['showQrCode'] = int.parse(val);
-              setState(() { _formVals = _formVals; });
-            }),
-            _inputFields.inputSelect(_optsYesNo, _formVals, 'showNeighborhoodEvents', label: 'Show Neighborhood Events?', onChanged: (val) {
-              _formVals['showNeighborhoodEvents'] = int.parse(val);
-              setState(() { _formVals = _formVals; });
-            }),
-            _inputFields.inputSelect(_optsYesNo, _formVals, 'showInterests', label: 'Show Interests?', onChanged: (val) {
-              _formVals['showInterests'] = int.parse(val);
-              setState(() { _formVals = _formVals; });
-            }),
-            _inputFields.inputSelect(_optsYesNo, _formVals, 'withTearOffs', label: 'With Tear Offs?', onChanged: (val) {
-              _formVals['withTearOffs'] = int.parse(val);
-              setState(() { _formVals = _formVals; });
-            }),
-          ]),
+          _layoutService.WrapWidth(inputs),
           SizedBox(height: 10),
-          _inputFields.inputText(_formVals, 'userMessage', label: 'Message (optional)', onChanged: (val) {
-            setState(() { _formVals = _formVals; });
-          }),
+          ...colsMessage,
           // _inputFields.inputText(_formVals, 'outroNote', label: 'Outro Note (optional)', onChanged: (val) {
           //   setState(() { _formVals = _formVals; });
           // }),
@@ -207,10 +276,12 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     String startDate = '${day}s ${time}';
     List<Widget> admins = [];
     if (_weeklyEvent.adminUsers.length > 0) {
-      admins += [
-        _style.Text1('${_weeklyEvent.adminUsers[0].email}', left: Icon(Icons.mail)),
-        SizedBox(height: 10),
-      ];
+      if (_formVals['columns'] < 4) {
+        admins += [ _style.Text1('${_weeklyEvent.adminUsers[0].email}', left: Icon(Icons.mail)), ];
+      } else {
+        admins += [ _style.Text1('${_weeklyEvent.adminUsers[0].email}'), ];
+      }
+      admins += [ SizedBox(height: 10), ];
     }
 
     List<Widget> colsImage = [];
@@ -245,26 +316,32 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     if (_formVals['showNeighborhoodEvents'] == 1) {
       String url = '${config['SERVER_URL']}/ne/${_weeklyEvent.neighborhoodUName}';
       colsNeighborhoodEvents += [
-        // _style.Text1('Other Neighborhood Events', size: 'large', colorKey: 'primary'),
-        // SizedBox(height: 10),
-        _style.Text1('${url}', left: Icon(Icons.link)),
+        _style.Text1('Can\'t make this time or have different interests?'),
         SizedBox(height: 10),
       ];
+      if (_formVals['columns'] < 4) {
+        colsNeighborhoodEvents += [ _style.Text1('${url}', left: Icon(Icons.link)), ];
+      } else {
+        colsNeighborhoodEvents += [ _style.Text1('${url}'), ];
+      }
+      colsNeighborhoodEvents.add(SizedBox(height: 10));
     }
 
     List<Widget> colsInterests = [];
     if (_formVals['showInterests'] == 1) {
       String url = '${config['SERVER_URL']}/interests';
-      colsInterests += [
-        _style.Text1('${url}', left: Icon(Icons.link)),
-        SizedBox(height: 10),
-      ];
+      if (_formVals['columns'] < 4) {
+        colsInterests += [ _style.Text1('${url}', left: Icon(Icons.link)), ];
+      } else {
+        colsInterests += [ _style.Text1('${url}'), ];
+      }
+      colsInterests.add(SizedBox(height: 10));
     }
 
     List<Widget> colsTearOffs = [];
     if (_formVals['withTearOffs'] == 1) {
       int size = 23;
-      int padding = 5;
+      int padding = 10;
       int count = ((_widthTotal / _formVals['columns']).round() / (size + padding * 2)).floor() - 1;
       String url1 = '${config['SERVER_URL']}/we/${_weeklyEvent.uName}';
       List<Widget> rows = [];
@@ -276,7 +353,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
             ),
             padding: EdgeInsets.only(left: padding.toDouble(), right: padding.toDouble()),
             child: RotatedBox(
-              quarterTurns: -1,
+              quarterTurns: 1,
               child: Text('${url1}'),
             ),
           ),
@@ -313,11 +390,13 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       ];
     }
 
+    Widget? iconCalendar = _formVals['columns'] < 4 ? Icon(Icons.calendar_month) : null;
+    Widget? iconLink = _formVals['columns'] < 4 ? Icon(Icons.link) : null;
     List<Widget> colsDetails = [
-      _style.Text1('${startDate}', left: Icon(Icons.calendar_month)),
+      _style.Text1('${startDate}', left: iconCalendar),
       SizedBox(height: 10),
       ...admins,
-      _style.Text1('${shareUrl}', left: Icon(Icons.link)),
+      _style.Text1('${shareUrl}', left: iconLink),
       SizedBox(height: 10),
       ...colsNeighborhoodEvents,
       ...colsInterests,
@@ -347,17 +426,23 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       ];
     }
 
-    return Container(padding: EdgeInsets.all(10), child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...colsImage,
-        _style.Text1('${_weeklyEvent.title}', size: 'large', colorKey: 'primary'),
-        SizedBox(height: 10),
-        ...colsUserMessage,
+    List<Widget> colsDescription = [];
+    if (_formVals['columns'] < 3) {
+      colsDescription += [
         // _style.Text1('Description', size: 'large', colorKey: 'primary'),
         // SizedBox(height: 10),
         Text(_weeklyEvent.description),
         SizedBox(height: 10),
+      ];
+    }
+    return Container(padding: EdgeInsets.all(10), child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...colsUserMessage,
+        ...colsImage,
+        _style.Text1('${_weeklyEvent.title}', size: 'large', colorKey: 'primary'),
+        SizedBox(height: 10),
+        ...colsDescription,
         // _style.Text1('Event Details', size: 'large', colorKey: 'primary'),
         // SizedBox(height: 10),
         ...colsDetailsQR,

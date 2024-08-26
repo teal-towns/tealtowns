@@ -506,7 +506,13 @@ class AppGoRouter {
         builder: (BuildContext context, GoRouterState state) {
           String? uName = state.pathParameters["uName"];
           if (uName != null) {
-            return WeeklyEventPrint(uName: uName);
+            return WeeklyEventPrint(
+              uName: uName,
+              rows: int.parse(state.uri.queryParameters['rows'] ?? '1'),
+              columns: int.parse(state.uri.queryParameters['columns'] ?? '1'),
+              showImage: int.parse(state.uri.queryParameters['showImage'] ?? '1'),
+              withTearOffs: int.parse(state.uri.queryParameters['withTearOffs'] ?? '1'),
+            );
           }
           return WeeklyEvents();
         },
