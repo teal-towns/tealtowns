@@ -80,7 +80,8 @@ def GetAmbassadorInsights(now = None, withUsers: int = 1, activeDaysPast: int = 
     # See which ambassadors who have been active this month, are up to date
     lastWeek = date_time.string(now - datetime.timedelta(days = activeDaysPast))
     # Start with users who have made an update in the past week.
-    query = { 'end': { '$gte': lastWeek }, 'inviteCount': { '$gt': 0 } }
+    # query = { 'end': { '$gte': lastWeek }, 'inviteCount': { '$gt': 0 } }
+    query = { 'end': { '$gte': lastWeek }, 'actionsComplete.6': { '$exists': 1 } }
     userNeighborhoodWeeklyUpdates = mongo_db.find('userNeighborhoodWeeklyUpdate', query)['items']
     userIdsDone = []
     for userNeighborhoodWeeklyUpdate in userNeighborhoodWeeklyUpdates:
@@ -98,14 +99,6 @@ def GetAmbassadorInsights(now = None, withUsers: int = 1, activeDaysPast: int = 
             ret['userNeighborhoodWeeklyUpdatesBehindByUser'][username] = []
             userIdsDone.append(userNeighborhoodWeeklyUpdate['userId'])
         ret['userNeighborhoodWeeklyUpdatesBehindByUser'][username].append(userNeighborhoodWeeklyUpdate)
-    # query = { 'start': { '$gte': lastMonth }, 'inviteCount': { '$gt': 0 }, 'userId': { '$nin': userIdsDone } }
-    # userIds = mongo_db.findDistinct('userNeighborhoodWeeklyUpdate', 'userId', query)['values']
-    # userObjectIds = []
-    # for userId in userIds:
-    #     userObjectIds.append(mongo_db.to_object_id(userId))
-    # query = { '_id': { '$in': userObjectIds } }
-    # fields = { 'firstName': 1, 'lastName': 1, 'username': 1, 'email': 1 }
-    # ret['usersBehind'] = mongo_db.find('user', query, fields = fields)['items']
 
     # Find all ambassadors, not started at all.
     query = { 'userId': { '$nin': userIdsDone }, 'roles': 'ambassador' }

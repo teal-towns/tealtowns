@@ -631,3 +631,59 @@ def test_ArchivedWeeklyEvent():
     assert ret['thisWeekEvent'] == {}
     assert ret['nextWeekEvent'] == {}
     _mongo_mock.CleanUp()
+
+def test_SaveWeeklyEventSubscription():
+    _mongo_mock.InitAllCollections()
+
+    userDefault = { 'phoneNumberVerified': 1, }
+    users = _stubs_data.CreateBulk(count = 2, collectionName = 'user', default = userDefault)
+
+    weeklyEvents = _stubs_data.CreateBulk(count = 1, collectionName = 'weeklyEvent', saveInDatabase = 0)
+    weeklyEvent = weeklyEvents[0]
+    # This is an edit since already created it above.
+    weeklyEvent['priceUSD'] = 10
+    retWeeklyEvent = _weekly_event.Save(weeklyEvent)
+    assert len(retWeeklyEvent['weeklyEvent']['uName']) > 0
+    assert retWeeklyEvent['weeklyEvent']['priceUSD'] == weeklyEvent['priceUSD']
+    weeklyEvent = retWeeklyEvent['weeklyEvent']
+
+    now = date_time.from_string('2024-03-20 09:00:00+00:00')
+    subscriptionPrices = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
+
+    now = now + datetime.timedelta(hours = 1)
+    user0PaymentSubscription = {
+        'userId': users[0]['_id'],
+        'amountUSD': subscriptionPrices['monthlyPrice'],
+        'recurringInterval': 'month',
+        'recurringIntervalCount': 1,
+        'forType': 'weeklyEvent',
+        'forId': weeklyEvent['_id'],
+        'quantity': 1,
+        'status': 'complete',
+        'stripeIds': { 'checkoutSession': 'testCSStripeId' },
+        'credits': 0,
+    }
+    _mongo_db_crud.Save('userPaymentSubscription', user0PaymentSubscription)
+    user0WeeklyEvent = {
+        'weeklyEventId': weeklyEvent['_id'],
+        'userId': users[0]['_id'],
+        'attendeeCountAsk': 1,
+    }
+    retTemp = _user_weekly_event.Save(user0WeeklyEvent, now = now)
+    assert retTemp['valid'] == 1
+    assert len(retTemp['userWeeklyEvent']['_id']) > 0
+    # userEvent = mongo_db.find_one('userEvent', {'eventId': event1['_id'], 'userId': users[2]['_id']})['item']
+    # assert userEvent['attendeeCountAsk'] == 1
+
+    item = mongo_db.find_one('userWeeklyEvent', { 'weeklyEventId': weeklyEvent['_id'], 'userId': users[0]['_id']})['item']
+    assert item['attendeeCountAsk'] == 1
+
+    # Change price; should cancel the subscription
+    weeklyEvent['priceUSD'] = 0
+    retWeeklyEvent = _weekly_event.Save(weeklyEvent)
+    assert retWeeklyEvent['weeklyEvent']['priceUSD'] == weeklyEvent['priceUSD']
+    weeklyEvent = retWeeklyEvent['weeklyEvent']
+    item = mongo_db.find_one('userWeeklyEvent', { 'weeklyEventId': weeklyEvent['_id'], 'userId': users[0]['_id']})['item']
+    assert item == None
+
+    _mongo_mock.CleanUp()

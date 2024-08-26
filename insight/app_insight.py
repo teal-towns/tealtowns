@@ -135,8 +135,9 @@ def GetCoreMetrics(now = None, weekdayStart = 3, pastWeeksCount = 1):
     for i in range(pastWeeksCount):
         start = date_time.string(thisWeek)
         end = date_time.string(thisWeek + datetime.timedelta(days = 7))
-        ret['coreMetricsWeeks'].append({ 'newNeighborhoods': [], 'newInvites': [], 'newInvitesCount': 0,
-            'newEventAttendees': [], 'uniqueEventInviterUsernames': [],
+        ret['coreMetricsWeeks'].append({ 'newNeighborhoods': [], 'newActions': [], 'newActionsCount': 0,
+            'newInvites': [], 'newInvitesCount': 0,
+            'newEventAttendees': [], 'uniqueActionUsernames': [], 'uniqueEventInviterUsernames': [],
             'uniqueEventAttendeeUsernames': [], 'totalNeighborhoodsCount': 0, 'activeNeighborhoodUNames': [],
             'start': start, 'end': end, })
 
@@ -146,16 +147,17 @@ def GetCoreMetrics(now = None, weekdayStart = 3, pastWeeksCount = 1):
         neighborhoods = mongo_db.find('neighborhood', query, fields = fields, limit = limit)['items']
         ret['coreMetricsWeeks'][i]['newNeighborhoods'] = neighborhoods
 
-        # New invites
-        query = { 'inviteCount': { '$gt': 0 }, 'start': { '$gte': start, '$lte': end } }
-        fields = { 'inviteCount': 1, 'attendedCount': 1, 'username': 1, 'neighborhoodUName': 1, }
-        ret['coreMetricsWeeks'][i]['newInvites'] = mongo_db.find('userNeighborhoodWeeklyUpdate', query,
+        # New actions
+        # query = { 'inviteCount': { '$gt': 0 }, 'start': { '$gte': start, '$lte': end } }
+        query = { 'actionsComplete.0': { '$exists': 1 }, 'start': { '$gte': start, '$lte': end } }
+        fields = { 'actionsComplete': 1, 'attendedCount': 1, 'username': 1, 'neighborhoodUName': 1, }
+        ret['coreMetricsWeeks'][i]['newActions'] = mongo_db.find('userNeighborhoodWeeklyUpdate', query,
             fields = fields, limit = limit)['items']
-        for userNeighborhoodWeeklyUpdate in ret['coreMetricsWeeks'][i]['newInvites']:
-            ret['coreMetricsWeeks'][i]['newInvitesCount'] += userNeighborhoodWeeklyUpdate['inviteCount']
-            # Also add to unique event inviters
-            if userNeighborhoodWeeklyUpdate['username'] not in ret['coreMetricsWeeks'][i]['uniqueEventInviterUsernames']:
-                ret['coreMetricsWeeks'][i]['uniqueEventInviterUsernames'].append(userNeighborhoodWeeklyUpdate['username'])
+        for userNeighborhoodWeeklyUpdate in ret['coreMetricsWeeks'][i]['newActions']:
+            ret['coreMetricsWeeks'][i]['newActionsCount'] += len(userNeighborhoodWeeklyUpdate['actionsComplete'])
+            # Also add to unique users
+            if userNeighborhoodWeeklyUpdate['username'] not in ret['coreMetricsWeeks'][i]['uniqueActionUsernames']:
+                ret['coreMetricsWeeks'][i]['uniqueActionUsernames'].append(userNeighborhoodWeeklyUpdate['username'])
 
         # New event attendees
         query = { 'firstEventSignUpAt': { '$gte': start, '$lte': end } }
