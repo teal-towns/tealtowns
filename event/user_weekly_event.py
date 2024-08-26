@@ -80,7 +80,7 @@ def Get(weeklyEventId: str, userId: str, withWeeklyEvent: int = 0, withEvent: in
     query = { 'weeklyEventId': weeklyEventId, 'userId': userId, }
     ret = _mongo_db_crud.Get('userWeeklyEvent', query)
     if '_id' not in ret['userWeeklyEvent'] and checkByPayment:
-        query = { 'userId': userId, 'forType': 'weeklyEvent', 'forId': weeklyEventId }
+        query = { 'userId': userId, 'forType': 'weeklyEvent', 'forId': weeklyEventId, 'status': 'complete', }
         userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
         if userPaymentSubscription is not None:
             weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']

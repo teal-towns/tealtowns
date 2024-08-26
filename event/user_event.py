@@ -438,7 +438,7 @@ def GiveEndSubscriptionCredits(weeklyEventId: str, userId: str):
     userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
     retNext = _event.GetNextEvents(weeklyEventId, autoCreate = 0)
     nextEvent = retNext['nextWeekEvent'] if '_id' in retNext['nextWeekEvent'] else retNext['thisWeekEvent']
-    nextEventStart = nextEvent['start']
+    nextEventStart = nextEvent['start'] if 'start' in nextEvent else ''
     if userPaymentSubscription is not None:
         retRemaining = _user_payment.GetSubscriptionPaymentsRemaining(userPaymentSubscription, nextEventStart)
         if retRemaining['subscriptionPaymentsRemaining'] > 0:
@@ -449,7 +449,8 @@ def GiveEndSubscriptionCredits(weeklyEventId: str, userId: str):
                     'creditsEarned': credits,
                 },
             }
-            retTemp = mongo_db.update_one('userEvent', {'eventId': nextEvent['_id'], 'userId': userId}, mutation)
+            if '_id' in nextEvent:
+                retTemp = mongo_db.update_one('userEvent', {'eventId': nextEvent['_id'], 'userId': userId}, mutation)
             retPhone = _user.GetPhone(userId)
             if retPhone['valid']:
                 url = _config['web_server']['urls']['base'] + '/weekly-events'
@@ -511,7 +512,7 @@ def Get(eventId: str, userId: str, withEvent: int = 0, withUserCheckPayment: int
     query = { 'eventId': eventId, 'userId': userId, }
     ret = _mongo_db_crud.Get('userEvent', query)
     if '_id' not in ret['userEvent'] and checkByPayment:
-        query = { 'userId': userId, 'forType': 'event', 'forId': eventId }
+        query = { 'userId': userId, 'forType': 'event', 'forId': eventId, 'status': 'complete', }
         userPayment = mongo_db.find_one('userPayment', query)['item']
         if userPayment is not None:
             userEvent = {
