@@ -50,7 +50,7 @@ class _AIUrbanPlannerAboutState extends State<AIUrbanPlannerAbout> {
     List<Map<String, dynamic>> solutions = [
       { 'title': 'Computer Vision and Satellite Imagery Analysis', 'details': 'This will allow us to identify underutilized spaces in urban areas, prioritize regions with excessive heat and flood risks, and suggest appropriate solutions to reduce temperature and increase permeability', },
       { 'title': 'Recommendation Algorithms', 'details': 'These will be used to propose specific solutions - planting for food, biodiversity, and cooling, water bioretention and rain gardens, microforests - that align with community needs and environmental conditions.', },
-      { 'title': 'AI Simulation Tools', 'details': ' These tools will help visualize the effectiveness of anti-flooding measures, such as swales or rain gardens, by analyzing factors like sun exposure, wind patterns, soil quality, and flood risk. The AI will also guide users through the implementation process, from identifying required permits to estimating costs', },
+      { 'title': 'AI Simulation Tools', 'details': 'These tools will help visualize the effectiveness of anti-flooding measures, such as swales or rain gardens, by analyzing factors like sun exposure, wind patterns, soil quality, and flood risk. The AI will also guide users through the implementation process, from identifying required permits to estimating costs', },
     ];
     List<Widget> itemsSolutions = [];
     for (var item in solutions) {

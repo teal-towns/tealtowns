@@ -9,6 +9,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../../app_scaffold.dart';
+import '../../common/colors_service.dart';
 import '../../common/config_service.dart';
 import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
@@ -28,6 +29,7 @@ class WeeklyEventPrint extends StatefulWidget {
 }
 
 class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
+  ColorsService _colors = ColorsService();
   ConfigService _configService = ConfigService();
   DateTimeService _dateTime = DateTimeService();
   LayoutService _layoutService = LayoutService();
@@ -49,7 +51,9 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     'showMap': 0,
     'showQrCode': 1,
     'showNeighborhoodEvents': 1,
+    'showInterests': 0,
     'userMessage': '',
+    'withTearOffs': 1,
   };
   List<Map<String, dynamic>> _optsYesNo = [
     {'value': 1, 'label': 'Yes'},
@@ -152,6 +156,14 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
               _formVals['showNeighborhoodEvents'] = int.parse(val);
               setState(() { _formVals = _formVals; });
             }),
+            _inputFields.inputSelect(_optsYesNo, _formVals, 'showInterests', label: 'Show Interests?', onChanged: (val) {
+              _formVals['showInterests'] = int.parse(val);
+              setState(() { _formVals = _formVals; });
+            }),
+            _inputFields.inputSelect(_optsYesNo, _formVals, 'withTearOffs', label: 'With Tear Offs?', onChanged: (val) {
+              _formVals['withTearOffs'] = int.parse(val);
+              setState(() { _formVals = _formVals; });
+            }),
           ]),
           SizedBox(height: 10),
           _inputFields.inputText(_formVals, 'userMessage', label: 'Message (optional)', onChanged: (val) {
@@ -240,6 +252,43 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       ];
     }
 
+    List<Widget> colsInterests = [];
+    if (_formVals['showInterests'] == 1) {
+      String url = '${config['SERVER_URL']}/interests';
+      colsInterests += [
+        _style.Text1('${url}', left: Icon(Icons.link)),
+        SizedBox(height: 10),
+      ];
+    }
+
+    List<Widget> colsTearOffs = [];
+    if (_formVals['withTearOffs'] == 1) {
+      int size = 23;
+      int padding = 5;
+      int count = ((_widthTotal / _formVals['columns']).round() / (size + padding * 2)).floor() - 1;
+      String url1 = '${config['SERVER_URL']}/we/${_weeklyEvent.uName}';
+      List<Widget> rows = [];
+      for (int i = 0; i < count; i++) {
+        rows += [
+          Container(
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(width: 1, color: _colors.colors['grey'],)),
+            ),
+            padding: EdgeInsets.only(left: padding.toDouble(), right: padding.toDouble()),
+            child: RotatedBox(
+              quarterTurns: -1,
+              child: Text('${url1}'),
+            ),
+          ),
+        ];
+      }
+      colsTearOffs += [
+        Row(
+          children: rows,
+        ),
+      ];
+    }
+
     // List<Widget> colsMap = [];
     // if (_formVals['showMap'] == 1) {
     //   colsMap += [
@@ -271,6 +320,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       _style.Text1('${shareUrl}', left: Icon(Icons.link)),
       SizedBox(height: 10),
       ...colsNeighborhoodEvents,
+      ...colsInterests,
     ];
     List<Widget> colsDetailsQR = [
       Row(
@@ -312,6 +362,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         // SizedBox(height: 10),
         ...colsDetailsQR,
         // ...colsMap,
+        ...colsTearOffs,
       ]
     ));
   }

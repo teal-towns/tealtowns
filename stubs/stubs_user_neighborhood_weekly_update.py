@@ -15,6 +15,7 @@ def GetDefault():
         'end': end,
         'inviteCount': random.randint(0, 20),
         'attendedCount': random.randint(0, 20),
+        'actionsComplete': [],
     }
 
 def AddDefault():

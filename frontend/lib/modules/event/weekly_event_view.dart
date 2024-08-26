@@ -309,8 +309,6 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       SizedBox(height: 10),
       Text(shareUrl),
       SizedBox(height: 10),
-      _buttons.Link(context, 'Print Flyer', '/wep/${_weeklyEvent.uName}'),
-      SizedBox(height: 10),
     ];
     List<Widget> colsShare = [
       Text(shareUrl),
@@ -587,6 +585,10 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         Text('Share this event with your neighbors:'),
         SizedBox(height: 10),
         ...colsShareQR,
+        _buttons.Link(context, 'Print Flyer', '/wep/${_weeklyEvent.uName}'),
+        SizedBox(height: 10),
+        Text('Can\'t make this time or interested in other events?'),
+        SizedBox(height: 10),
         _buttons.LinkElevated(context, 'View All Events', '/ne/${_weeklyEvent.neighborhoodUName}'),
         SizedBox(height: 10),
         Row(
