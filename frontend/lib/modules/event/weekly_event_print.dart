@@ -56,9 +56,11 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     'columns': 1,
     'showImage': 1,
     'showMap': 0,
-    'showQrCode': 1,
+    'showQrCodeEvent': 1,
+    'showQrCodeEvents': 0,
     'showNeighborhoodEvents': 1,
     'showEventBasics': 1,
+    'showEmail': 1,
     'showInterests': 0,
     'userMessage': '',
     'showTearOffs': 1,
@@ -158,8 +160,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           _formVals['rows'] = 1;
           _formVals['columns'] = 1;
           _formVals['showImage'] = 1;
-          _formVals['showQrCode'] = 1;
+          _formVals['showQrCodeEvent'] = 1;
+          _formVals['showQrCodeEvents'] = 0;
           _formVals['showEventBasics'] = 1;
+          _formVals['showEmail'] = 1;
           _formVals['showNeighborhoodEvents'] = 1;
           _formVals['showTearOffs'] = 1;
           _formVals['showMessage'] = 0;
@@ -168,8 +172,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           _formVals['rows'] = 2;
           _formVals['columns'] = 2;
           _formVals['showImage'] = 1;
-          _formVals['showQrCode'] = 1;
+          _formVals['showQrCodeEvent'] = 1;
+          _formVals['showQrCodeEvents'] = 0;
           _formVals['showEventBasics'] = 1;
+          _formVals['showEmail'] = 1;
           _formVals['showNeighborhoodEvents'] = 1;
           _formVals['showTearOffs'] = 0;
           _formVals['showMessage'] = 0;
@@ -178,8 +184,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           _formVals['rows'] = 3;
           _formVals['columns'] = 3;
           _formVals['showImage'] = 0;
-          _formVals['showQrCode'] = 0;
+          _formVals['showQrCodeEvent'] = 0;
+          _formVals['showQrCodeEvents'] = 0;
           _formVals['showEventBasics'] = 1;
+          _formVals['showEmail'] = 1;
           // _formVals['showNeighborhoodEvents'] = 1;
           _formVals['showTearOffs'] = 0;
           _formVals['showMessage'] = 1;
@@ -192,8 +200,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           _formVals['rows'] = 7;
           _formVals['columns'] = 3;
           _formVals['showImage'] = 0;
-          _formVals['showQrCode'] = 0;
+          _formVals['showQrCodeEvent'] = 0;
+          _formVals['showQrCodeEvents'] = 0;
           _formVals['showEventBasics'] = 0;
+          _formVals['showEmail'] = 0;
           _formVals['showNeighborhoodEvents'] = 1;
           _formVals['showTearOffs'] = 0;
           _formVals['showMessage'] = 1;
@@ -222,8 +232,12 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         //   _formVals['showMap'] = int.parse(val);
         //   setState(() { _formVals = _formVals; });
         // }),
-        _inputFields.inputSelect(_optsYesNo, _formVals, 'showQrCode', label: 'Show QR Code?', onChanged: (val) {
-          _formVals['showQrCode'] = int.parse(val);
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'showQrCodeEvent', label: 'Event QR Code?', onChanged: (val) {
+          _formVals['showQrCodeEvent'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'showQrCodeEvents', label: 'EventS QR Code?', onChanged: (val) {
+          _formVals['showQrCodeEvents'] = int.parse(val);
           setState(() { _formVals = _formVals; });
         }),
         _inputFields.inputSelect(_optsYesNo, _formVals, 'showNeighborhoodEvents', label: 'Show Neighborhood Events?', onChanged: (val) {
@@ -240,6 +254,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         }),
         _inputFields.inputSelect(_optsYesNo, _formVals, 'showEventBasics', label: 'Show Event Basics?', onChanged: (val) {
           _formVals['showEventBasics'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputSelect(_optsYesNo, _formVals, 'showEmail', label: 'Show Email?', onChanged: (val) {
+          _formVals['showEmail'] = int.parse(val);
           setState(() { _formVals = _formVals; });
         }),
       ];
@@ -298,7 +316,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     String time = _dateTime.Format(_event.start, 'h:mma');
     String startDate = '${day}s ${time}';
     List<Widget> admins = [];
-    if (_weeklyEvent.adminUsers.length > 0 && _formVals['showEventBasics'] == 1) {
+    if (_weeklyEvent.adminUsers.length > 0 && _formVals['showEmail'] == 1) {
       if (_formVals['columns'] < 4) {
         admins += [ _style.Text1('${_weeklyEvent.adminUsers[0].email}', left: Icon(Icons.mail)), ];
       } else {
@@ -322,7 +340,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       colsUserMessage += [
         // _style.Text1('Message From Host', size: 'large', colorKey: 'primary'),
         // SizedBox(height: 10),
-        Text(_formVals['userMessage'], style: GoogleFonts.dancingScript(fontSize: 20),),
+        Text(_formVals['userMessage'], style: GoogleFonts.shadowsIntoLight(fontSize: 20),),
         SizedBox(height: 10),
       ];
     }
@@ -404,8 +422,20 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
 
     String shareUrl = '${config['SERVER_URL']}/we/${_weeklyEvent.uName}';
     List<Widget> colsQrCode = [];
-    if (_formVals['showQrCode'] == 1) {
+    if (_formVals['showQrCodeEvent'] == 1) {
       colsQrCode += [
+        QrImageView(
+          data: shareUrl,
+          version: QrVersions.auto,
+          size: 200.0,
+        ),
+        SizedBox(height: 10),
+      ];
+    }
+    shareUrl = '${config['SERVER_URL']}/ne/${_weeklyEvent.neighborhoodUName}';
+    List<Widget> colsQrCodeEvents = [];
+    if (_formVals['showQrCodeEvents'] == 1 && _formVals['showQrCodeEvent'] != 1) {
+      colsQrCodeEvents += [
         QrImageView(
           data: shareUrl,
           version: QrVersions.auto,
@@ -422,9 +452,13 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       colsDetails += [
         _style.Text1('${startDate}', left: iconCalendar),
         SizedBox(height: 10),
-        ...admins,
         _style.Text1('${shareUrl}', left: iconLink),
         SizedBox(height: 10),
+      ];
+    }
+    if (_formVals['showEmail'] == 1) {
+      colsDetails += [
+        ...admins,
       ];
     }
     colsDetails += [
@@ -444,6 +478,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           Expanded(flex: 1, child: Column(
             children: [
               ...colsQrCode,
+              ...colsQrCodeEvents,
             ]
           )),
         ]
@@ -453,6 +488,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       colsDetailsQR = [
         ...colsDetails,
         ...colsQrCode,
+        ...colsQrCodeEvents,
       ];
     }
 

@@ -14,7 +14,7 @@ class UserInterests extends StatefulWidget {
   String neighborhoodUName;
   double imageHeight;
   int minInterested;
-  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 150, this.minInterested = 1, });
+  UserInterests({ this.neighborhoodUName = '', this.imageHeight = 50, this.minInterested = 1, });
 
   @override
   _UserInterestsState createState() => _UserInterestsState();
@@ -94,8 +94,10 @@ class _UserInterestsState extends State<UserInterests> {
         Map<String, dynamic> interestDetails = _eventInterests[_interestsGroupedEvents[i]['interest']]!;
         colsTemp += [
           interestDetails['imageUrls'].length <= 0 ?
-            Image.asset('assets/images/shared-meal.jpg', height: widget.imageHeight, width: double.infinity, fit: BoxFit.cover,)
-              : Image.network(interestDetails['imageUrls']![0], height: widget.imageHeight, width: double.infinity, fit: BoxFit.cover),
+            Image.asset('assets/images/shared-meal.jpg', height: widget.imageHeight, width: double.infinity,
+              fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(.33),)
+              : Image.network(interestDetails['imageUrls']![0], height: widget.imageHeight, width: double.infinity,
+              fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(.33),),
           _style.SpacingH('medium'),
           _style.Text1('${interestDetails['title']}'),
           _style.SpacingH('medium'),
