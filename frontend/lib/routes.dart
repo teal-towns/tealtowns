@@ -511,7 +511,7 @@ class AppGoRouter {
               rows: int.parse(state.uri.queryParameters['rows'] ?? '1'),
               columns: int.parse(state.uri.queryParameters['columns'] ?? '1'),
               showImage: int.parse(state.uri.queryParameters['showImage'] ?? '1'),
-              withTearOffs: int.parse(state.uri.queryParameters['withTearOffs'] ?? '1'),
+              showTearOffs: int.parse(state.uri.queryParameters['showTearOffs'] ?? '1'),
             );
           }
           return WeeklyEvents();
