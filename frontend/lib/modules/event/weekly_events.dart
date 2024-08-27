@@ -260,6 +260,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     if (weeklyEvents.length < 1) {
       return SizedBox.shrink();
     }
+    bool withImage = weeklyEvents.length <= 3 ? true : false;
     return SizedBox(
       width: 300,
       child: Column(
@@ -268,14 +269,14 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
           Text(day),
           SizedBox(height: 10),
           ...weeklyEvents.map((event) {
-            return _buildWeeklyEvent(event, context, currentUserState);
+            return _buildWeeklyEvent(event, context, currentUserState, withImage: withImage);
           }).toList(),
         ]
       )
     );
   }
 
-  _buildWeeklyEvent(WeeklyEventClass weeklyEvent, BuildContext context, var currentUserState) {
+  _buildWeeklyEvent(WeeklyEventClass weeklyEvent, BuildContext context, var currentUserState, { bool withImage = false,}) {
     List<Widget> buttons = [];
     if (currentUserState.isLoggedIn && weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
       List<Widget> buttons = [
@@ -313,11 +314,21 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     //   ];
     // }
 
+    List<Widget> colsImage = [];
+    if (withImage) {
+      colsImage = [
+        weeklyEvent.imageUrls.length <= 0 ?
+          Image.asset('assets/images/shared-meal.jpg', height: 100, width: double.infinity, fit: BoxFit.cover,)
+          : Image.network(weeklyEvent.imageUrls![0], height: 100, width: double.infinity, fit: BoxFit.cover),
+        // SizedBox(height: 10),
+      ];
+    }
     return SizedBox(
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ...colsImage,
           _buttons.Link(context, '${weeklyEvent.startTime} ${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)', '/we/${weeklyEvent.uName}'),
           ...buttons,
         ]
