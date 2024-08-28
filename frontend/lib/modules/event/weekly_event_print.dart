@@ -310,7 +310,6 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
   }
 
   Widget OneEvent(double imageHeight) {
-    Map<String, dynamic> config = _configService.GetConfig();
     // String startDate = _dateTime.Format(_event.start, 'EEEE HH:mm');
     String day = _dateTime.Format(_event.start, 'EEEE');
     String time = _dateTime.Format(_event.start, 'h:mma');
@@ -355,7 +354,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
 
     List<Widget> colsNeighborhoodEvents = [];
     if (_formVals['showNeighborhoodEvents'] == 1) {
-      String url = '${config['SERVER_URL']}/ne/${_weeklyEvent.neighborhoodUName}';
+      String url = _configService.GetUrl('/ne/${_weeklyEvent.neighborhoodUName}', withScheme: false);
       if (_formVals['showEventBasics'] == 1) {
         colsNeighborhoodEvents += [
           _style.Text1('Can\'t make this time or have different interests?'),
@@ -372,7 +371,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
 
     List<Widget> colsInterests = [];
     if (_formVals['showInterests'] == 1) {
-      String url = '${config['SERVER_URL']}/interests';
+      String url = _configService.GetUrl('/interests', withScheme: false);
       if (_formVals['columns'] < 4) {
         colsInterests += [ _style.Text1('${url}', left: Icon(Icons.link)), ];
       } else {
@@ -386,7 +385,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       int size = 23;
       int padding = 10;
       int count = ((_widthTotal / _formVals['columns']).round() / (size + padding * 2)).floor() - 1;
-      String url1 = '${config['SERVER_URL']}/we/${_weeklyEvent.uName}';
+      String url1 = _configService.GetUrl('/we/${_weeklyEvent.uName}', withScheme: false);
       List<Widget> rows = [];
       for (int i = 0; i < count; i++) {
         rows += [
@@ -420,7 +419,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     //   ];
     // }
 
-    String shareUrl = '${config['SERVER_URL']}/we/${_weeklyEvent.uName}';
+    String shareUrl = _configService.GetUrl('/we/${_weeklyEvent.uName}', withScheme: false);
     List<Widget> colsQrCode = [];
     if (_formVals['showQrCodeEvent'] == 1) {
       colsQrCode += [
@@ -432,7 +431,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         SizedBox(height: 10),
       ];
     }
-    shareUrl = '${config['SERVER_URL']}/ne/${_weeklyEvent.neighborhoodUName}';
+    shareUrl = _configService.GetUrl('/ne/${_weeklyEvent.neighborhoodUName}', withScheme: false);
     List<Widget> colsQrCodeEvents = [];
     if (_formVals['showQrCodeEvents'] == 1 && _formVals['showQrCodeEvent'] != 1) {
       colsQrCodeEvents += [
