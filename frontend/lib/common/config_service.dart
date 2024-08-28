@@ -14,4 +14,14 @@ class ConfigService {
   Map<String, dynamic> GetConfig() {
     return _config;
   }
+
+  String GetUrl(String urlPart, { bool withScheme = true }) {
+    String url = '${_config['SERVER_URL']}${urlPart}';
+    String search = '://';
+    int index = url.indexOf(search);
+    if (!withScheme && index > 0) {
+      url = url.substring(index + search.length);
+    }
+    return url;
+  }
 }
