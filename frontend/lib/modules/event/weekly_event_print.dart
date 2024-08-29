@@ -478,12 +478,12 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         SizedBox(height: 10),
       ];
     }
-    shareUrl = _configService.GetUrl('/ne/${_weeklyEvent.neighborhoodUName}', withScheme: false);
+    String shareUrlEvents = _configService.GetUrl('/ne/${_weeklyEvent.neighborhoodUName}', withScheme: false);
     List<Widget> colsQrCodeEvents = [];
     if (_formVals['showQrCodeEvents'] == 1 && _formVals['showQrCodeEvent'] != 1) {
       colsQrCodeEvents += [
         QrImageView(
-          data: shareUrl,
+          data: shareUrlEvents,
           version: QrVersions.auto,
           size: 200.0,
         ),
