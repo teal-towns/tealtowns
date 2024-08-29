@@ -51,7 +51,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
   double _widthTotal = 1000;
 
   Map<String, dynamic>_formVals = {
-    'preset': 'largePublic',
+    'preset': 'largePublicInkSaver',
     'rows': 1,
     'columns': 1,
     'showImage': 1,
@@ -65,18 +65,27 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     'userMessage': '',
     'showTearOffs': 1,
     'showMessage': 0,
-    'userMessage': '', 
+    'userMessage': '',
+    'imageKey': 'event',
   };
   List<Map<String, dynamic>> _optsYesNo = [
     {'value': 1, 'label': 'Yes'},
     {'value': 0, 'label': 'No'},
   ];
   List<Map<String, dynamic>> _optsPreset = [
-    {'value': 'largePublic', 'label': 'Large Public'},
-    {'value': 'mediumPublic', 'label': 'Medium Public'},
+    {'value': 'largePublicInkSaver', 'label': 'Large Public'},
+    {'value': 'mediumPublicInkSaver', 'label': 'Medium Public'},
+    {'value': 'largePublic', 'label': 'Large Public, Image'},
+    {'value': 'mediumPublic', 'label': 'Medium Public, Image'},
     {'value': 'oneNeighbor', 'label': 'One Neighbor'},
     {'value': 'oneNeighborEvents', 'label': 'One Neighbor Events'},
     {'value': 'custom', 'label': 'Custom'},
+  ];
+  List<Map<String, dynamic>> _optsImage = [
+    {'value': 'event', 'label': 'Event'},
+    {'value': 'logo', 'label': 'Logo'},
+    {'value': 'i_eco', 'label': 'Sustainable - Leaf', 'icon': Icons.eco},
+    {'value': 'i_compost', 'label': 'Sustainable - Plant', 'icon': Icons.compost},
   ];
 
   @override
@@ -87,6 +96,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     _formVals['columns'] = widget.columns;
     _formVals['showImage'] = widget.showImage;
     _formVals['showTearOffs'] = widget.showTearOffs;
+    SetValsFromPreset(_formVals['preset']);
 
     _routeIds.add(_socketService.onRoute('GetWeeklyEventByIdWithData', callback: (String resString) {
       var res = jsonDecode(resString);
@@ -117,6 +127,74 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       'withEvent': 1,
     };
     _socketService.emit('GetWeeklyEventByIdWithData', data);
+  }
+
+  void SetValsFromPreset(String val) {
+    if (val == 'largePublic' || val == 'largePublicInkSaver') {
+      _formVals['rows'] = 1;
+      _formVals['columns'] = 1;
+      _formVals['showImage'] = 1;
+      _formVals['showQrCodeEvent'] = 1;
+      _formVals['showQrCodeEvents'] = 0;
+      _formVals['showEventBasics'] = 1;
+      _formVals['showEmail'] = 1;
+      _formVals['showNeighborhoodEvents'] = 1;
+      _formVals['showTearOffs'] = 1;
+      _formVals['showMessage'] = 0;
+      _formVals['userMessage'] = '';
+      _formVals['imageKey'] = 'event';
+      if (val == 'largePublicInkSaver') {
+        _formVals['imageKey'] = 'logo';
+      }
+    } else if (val == 'mediumPublic' || val == 'mediumPublicInkSaver') {
+      _formVals['rows'] = 2;
+      _formVals['columns'] = 2;
+      _formVals['showImage'] = 1;
+      _formVals['showQrCodeEvent'] = 1;
+      _formVals['showQrCodeEvents'] = 0;
+      _formVals['showEventBasics'] = 1;
+      _formVals['showEmail'] = 1;
+      _formVals['showNeighborhoodEvents'] = 1;
+      _formVals['showTearOffs'] = 0;
+      _formVals['showMessage'] = 0;
+      _formVals['userMessage'] = '';
+      _formVals['imageKey'] = 'event';
+      if (val == 'mediumPublicInkSaver') {
+        _formVals['imageKey'] = 'logo';
+      }
+    } else if (val == 'oneNeighbor') {
+      _formVals['rows'] = 3;
+      _formVals['columns'] = 3;
+      _formVals['showImage'] = 0;
+      _formVals['showQrCodeEvent'] = 0;
+      _formVals['showQrCodeEvents'] = 0;
+      _formVals['showEventBasics'] = 1;
+      _formVals['showEmail'] = 1;
+      // _formVals['showNeighborhoodEvents'] = 1;
+      _formVals['showTearOffs'] = 0;
+      _formVals['showMessage'] = 1;
+      CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+      if (currentUserState.currentUser != null) {
+        String firstName = currentUserState.currentUser!.firstName;
+        _formVals['userMessage'] = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you! - ${firstName}';
+      }
+    } else if (val == 'oneNeighborEvents') {
+      _formVals['rows'] = 7;
+      _formVals['columns'] = 3;
+      _formVals['showImage'] = 0;
+      _formVals['showQrCodeEvent'] = 0;
+      _formVals['showQrCodeEvents'] = 0;
+      _formVals['showEventBasics'] = 0;
+      _formVals['showEmail'] = 0;
+      _formVals['showNeighborhoodEvents'] = 1;
+      _formVals['showTearOffs'] = 0;
+      _formVals['showMessage'] = 1;
+      CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+      if (currentUserState.currentUser != null) {
+        String firstName = currentUserState.currentUser!.firstName;
+        _formVals['userMessage'] = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you! - ${firstName}';
+      }
+    }
   }
 
   @override
@@ -156,63 +234,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     List<Widget> inputs = [
       _inputFields.inputSelect(_optsPreset, _formVals, 'preset', label: 'Preset', onChanged: (val) {
         _formVals['preset'] = val;
-        if (val == 'largePublic') {
-          _formVals['rows'] = 1;
-          _formVals['columns'] = 1;
-          _formVals['showImage'] = 1;
-          _formVals['showQrCodeEvent'] = 1;
-          _formVals['showQrCodeEvents'] = 0;
-          _formVals['showEventBasics'] = 1;
-          _formVals['showEmail'] = 1;
-          _formVals['showNeighborhoodEvents'] = 1;
-          _formVals['showTearOffs'] = 1;
-          _formVals['showMessage'] = 0;
-          _formVals['userMessage'] = '';
-        } else if (val == 'mediumPublic') {
-          _formVals['rows'] = 2;
-          _formVals['columns'] = 2;
-          _formVals['showImage'] = 1;
-          _formVals['showQrCodeEvent'] = 1;
-          _formVals['showQrCodeEvents'] = 0;
-          _formVals['showEventBasics'] = 1;
-          _formVals['showEmail'] = 1;
-          _formVals['showNeighborhoodEvents'] = 1;
-          _formVals['showTearOffs'] = 0;
-          _formVals['showMessage'] = 0;
-          _formVals['userMessage'] = '';
-        } else if (val == 'oneNeighbor') {
-          _formVals['rows'] = 3;
-          _formVals['columns'] = 3;
-          _formVals['showImage'] = 0;
-          _formVals['showQrCodeEvent'] = 0;
-          _formVals['showQrCodeEvents'] = 0;
-          _formVals['showEventBasics'] = 1;
-          _formVals['showEmail'] = 1;
-          // _formVals['showNeighborhoodEvents'] = 1;
-          _formVals['showTearOffs'] = 0;
-          _formVals['showMessage'] = 1;
-          CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-          if (currentUserState.currentUser != null) {
-            String firstName = currentUserState.currentUser!.firstName;
-            _formVals['userMessage'] = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you! - ${firstName}';
-          }
-        } else if (val == 'oneNeighborEvents') {
-          _formVals['rows'] = 7;
-          _formVals['columns'] = 3;
-          _formVals['showImage'] = 0;
-          _formVals['showQrCodeEvent'] = 0;
-          _formVals['showQrCodeEvents'] = 0;
-          _formVals['showEventBasics'] = 0;
-          _formVals['showEmail'] = 0;
-          _formVals['showNeighborhoodEvents'] = 1;
-          _formVals['showTearOffs'] = 0;
-          _formVals['showMessage'] = 1;
-          CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-          if (currentUserState.currentUser != null) {
-            String firstName = currentUserState.currentUser!.firstName;
-            _formVals['userMessage'] = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you! - ${firstName}';
-          }
-        }
+        SetValsFromPreset(val);
         setState(() { _formVals = _formVals; });
       }),
     ];
@@ -258,6 +280,9 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         }),
         _inputFields.inputSelect(_optsYesNo, _formVals, 'showEmail', label: 'Show Email?', onChanged: (val) {
           _formVals['showEmail'] = int.parse(val);
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputSelect(_optsImage, _formVals, 'imageKey', label: 'Image', onChanged: (val) {
           setState(() { _formVals = _formVals; });
         }),
       ];
@@ -326,12 +351,34 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
 
     List<Widget> colsImage = [];
     if (_formVals['showImage'] == 1) {
-      colsImage += [
-        _weeklyEvent.imageUrls.length <= 0 ?
-          Image.asset('assets/images/shared-meal.jpg', height: imageHeight, width: double.infinity, fit: BoxFit.cover,)
-          : Image.network(_weeklyEvent.imageUrls![0], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
-        SizedBox(height: 10),
-      ];
+      if (_formVals['imageKey'] == 'event') {
+        colsImage += [
+          _weeklyEvent.imageUrls.length <= 0 ?
+            Image.asset('assets/images/shared-meal.jpg', height: imageHeight, width: double.infinity, fit: BoxFit.cover,)
+            : Image.network(_weeklyEvent.imageUrls![0], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
+          SizedBox(height: 10),
+        ];
+      } else if (_formVals['imageKey'] == 'logo') {
+        colsImage += [
+          Image.asset('assets/images/logo.png', width: double.infinity, height: imageHeight,),
+          SizedBox(height: 10),
+        ];
+      } else if (_formVals['imageKey'].startsWith('i_')) {
+        for (Map<String, dynamic> opt in _optsImage) {
+          if (_formVals['imageKey'] == opt['value']) {
+            colsImage += [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(opt['icon'], color: _colors.colors['primary'], size: imageHeight,),
+                ]
+              ),
+              SizedBox(height: 10),
+            ];
+            break;
+          }
+        }
+      }
     }
 
     List<Widget> colsUserMessage = [];

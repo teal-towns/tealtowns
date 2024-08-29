@@ -59,7 +59,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
     'type': { 'type': 'select', 'required': false, },
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
-    'tags': { 'type': 'multiSelectButtons', 'required': false, },
+    'tags': { 'type': 'multiSelect', 'required': false, },
   };
   Map<String, dynamic> _formValsDefault = {
     'hostGroupSizeDefault': 0,

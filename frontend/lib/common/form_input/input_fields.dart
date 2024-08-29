@@ -1,9 +1,7 @@
 import 'dart:async';
-//import 'dart:convert';
 import 'package:flutter/material.dart';
-//import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:intl/intl.dart';
-//import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:multiple_search_selection/multiple_search_selection.dart';
 
 import './input_checkbox.dart';
 import './input_select_buttons.dart';
@@ -651,68 +649,123 @@ class InputFields {
     ), helpText: helpText);
   }
 
-  // TODO - fix lint errors
-  //Widget inputMultiSelect(var options, BuildContext context, var formVals, String formValsKey, { String label = '',
-  //  String hint = '', var fieldKey = null, bool required = false, bool scroll = false }) {
-  //  List<MultiSelectItem<dynamic>> items = options.map<MultiSelectItem<dynamic>>((opt) => MultiSelectItem(opt, opt['label'])).toList();
-  //  var values = [];
-  //  if (formVals.containsKey(formValsKey)) {
-  //    for (var opt in options) {
-  //      if (formValsKey == null) {
-  //        if (formVals.contains(opt['value'])) {
-  //          values.add(opt);
-  //        }
-  //      } else {
-  //        if (formVals[formValsKey].contains(opt['value'])) {
-  //          values.add(opt);
-  //        }
-  //      }
-  //    }
-  //  }
-  //  return Column(
-  //    crossAxisAlignment: CrossAxisAlignment.start,
-  //    children: <Widget>[
-  //      SizedBox(height: 5),
-  //      Text(label, style: Theme.of(context).textTheme.subtitle1),
-  //      MultiSelectChipField(
-  //        key: fieldKey,
-  //        initialValue: values,
-  //        onSaved: (items) {
-  //          if (items != null) {
-  //            if (formValsKey == null) {
-  //              formVals = items.map((item) => item['value'] ).toList();
-  //            } else {
-  //              formVals[formValsKey] = items.map((item) => item['value'] ).toList();
-  //            }
-  //          } else {
-  //            if (formValsKey == null) {
-  //              formVals = [];
-  //            } else {
-  //              formVals[formValsKey] = [];
-  //            }
-  //          }
-  //        },
-  //        validator: (values) {
-  //          if (required && (values == null || values?.isEmpty == true)) {
-  //            return 'Select at least one';
-  //          }
-  //          return null;
-  //        },
-  //        items: items,
-  //        //title: Text(label),
-  //        //headerColor: Colors.transparent,
-  //        showHeader: false,
-  //        decoration: BoxDecoration(
-  //          border: Border.all(width: 0),
-  //        ),
-  //        //icon: Icon(Icons.check),
-  //        //height: 40,
-  //        scroll: scroll,
-  //      ),
-  //      SizedBox(height: 5),
-  //    ]
-  //  );
-  //}
+  Widget inputMultiSelect(var options, var formVals, String formValsKey, { String label = '',
+    String hint = '', var fieldKey = null, bool required = false, onChanged = null, String helpText = '', }) {
+    // List<MultiSelectItem<dynamic>> items = options.map<MultiSelectItem<dynamic>>((opt) => MultiSelectItem(opt, opt['label'])).toList();
+    var values = [];
+    if (formVals.containsKey(formValsKey)) {
+      for (var opt in options) {
+        if (formValsKey == null) {
+          if (formVals.contains(opt['value'])) {
+            values.add(opt);
+          }
+        } else {
+          if (formVals[formValsKey].contains(opt['value'])) {
+            values.add(opt);
+          }
+        }
+      }
+    }
+
+    MultipleSearchController controller = MultipleSearchController();
+    return InputWrapper(Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // SizedBox(height: 5),
+        MultipleSearchSelection<dynamic>(
+          initialPickedItems: values,
+          searchField: TextField(
+            decoration: InputDecoration(
+              hintText: hint.length > 0 ? hint : 'Search ${label}..',
+            ),
+          ),
+          // onSearchChanged: (text) {
+          //   print('Text is $text');
+          // },
+          items: options,
+          fieldToCheck: (option) {
+            return option['label'].toString();
+          },
+          itemBuilder: (option,index,isPicked) {
+            // return Padding(
+            //   padding: const EdgeInsets.all(6.0),
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       borderRadius: BorderRadius.circular(6),
+            //       color: Colors.white,
+            //     ),
+            //     child: Padding(
+            //       padding: const EdgeInsets.symmetric(
+            //         vertical: 20.0,
+            //         horizontal: 12,
+            //       ),
+            //       child: Text(option['label']),
+            //     ),
+            //   ),
+            // );
+            return Container(
+              padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+              child: FilledButton(
+                child: Text(option['label']),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _colors.colors['greyLight'],
+                  foregroundColor: _colors.colors['brown'],
+                ),
+                onPressed: () {},
+              )
+            );
+          },
+          pickedItemBuilder: (option) {
+            // return Container(
+            //   decoration: BoxDecoration(
+            //     color: Colors.white,
+            //     border: Border.all(color: Colors.grey[400]!),
+            //   ),
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(8),
+            //     child: Text(option['label']),
+            //   ),
+            // );
+            return FilledButton(
+              child: Text(option['label']),
+              style: FilledButton.styleFrom(
+                backgroundColor: _colors.colors['secondary'],
+                foregroundColor: _colors.colors['brown'],
+              ),
+              onPressed: () {},
+            );
+          },
+          onTapShowedItem: () {},
+          onPickedChange: (items) {
+            print ('onPickedChange ${items}');
+            List<dynamic> values = [];
+            for (var item in items) {
+              values.add(item['value']);
+            }
+            if (formValsKey == null) {
+              formVals = values;
+            } else {
+              formVals[formValsKey] = values;
+            }
+            if (onChanged != null) {
+              onChanged(values!);
+            }
+          },
+          onItemAdded: (item) {},
+          onItemRemoved: (item) {},
+          sortShowedItems: true,
+          sortPickedItems: true,
+          fuzzySearch: FuzzySearch.jaro,
+          itemsVisibility: ShowedItemsVisibility.onType,
+          title: Text(label,),
+          showSelectAllButton: false,
+          showClearAllButton: false,
+          maximumShowItemsHeight: 200,
+        ),
+        // SizedBox(height: 5),
+      ]
+    ), helpText: helpText);
+  }
 
 }
 
