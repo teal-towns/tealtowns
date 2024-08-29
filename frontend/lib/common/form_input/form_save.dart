@@ -60,6 +60,7 @@ class _FormSaveState extends State<FormSave> {
   Map<String, dynamic> _formVals = {};
   bool _firstLoadDone = false;
   bool _loading = false;
+  bool _loadingGet = false;
   String _message = '';
   Map<String, dynamic> _formValsLocal = {};
   bool _showSeeMore = false;
@@ -93,13 +94,13 @@ class _FormSaveState extends State<FormSave> {
           setState(() {
             _formVals = _formVals;
             _message = '';
-            _loading = false;
+            _loadingGet = false;
           });
         // } else {
         //   setState(() { _message = '${widget.dataName} key does not exist yet.'; });
         }
       } else {
-        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; _loading = false; });
+        setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; _loadingGet = false; });
       }
     }));
 
@@ -136,6 +137,9 @@ class _FormSaveState extends State<FormSave> {
         _style.Spacing(height: 'medium'),
       ];
     }
+    if (_loadingGet) {
+      return Column(children: [ LinearProgressIndicator() ]);
+    }
 
     return Form(
       key: _formKey,
@@ -159,11 +163,13 @@ class _FormSaveState extends State<FormSave> {
 
       if (widget.routeGet.length > 0) {
         if (widget.id != null && widget.id!.length > 0) {
+          setState(() { _loadingGet = true; });
           var data = {
             'id': widget.id,
           };
           _socketService.emit(widget.routeGet, data);
         } else if (widget.uName != null && widget.uName!.length > 0) {
+          setState(() { _loadingGet = true; });
           var data = {
             'uName': widget.uName,
           };
@@ -416,6 +422,8 @@ class _FormSaveState extends State<FormSave> {
       input = _inputFields.inputSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'multiSelectButtons') {
       input = _inputFields.inputMultiSelectButtons(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
+    } else if (value['type'] == 'multiSelect') {
+      input = _inputFields.inputMultiSelect(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'time') {
       input = _inputFields.inputTime(_formVals, key, label: label, required: required, helpText: helpText,);
     } else if (value['type'] == 'number') {

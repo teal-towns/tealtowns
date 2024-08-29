@@ -32,7 +32,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
     {'value': 5, 'label': 'Strongly agree'},
   ];
   Map<String, Map<String, dynamic>> _formFields = {
-    'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', },
+    'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', 'required': false, },
     'location': { 'type': 'location', 'nestedCoordinates': true, 'fullScreen': false, },
     'locationFullScreen': { 'type': 'location', 'nestedCoordinates': true },
     'title': {},
@@ -42,11 +42,13 @@ class _DesignLibraryState extends State<DesignLibrary> {
     'hostGroupSizeDefault': { 'type': 'number', 'min': 0, 'required': true },
     'range': { 'type': 'selectButtons', 'label': 'I like food?' },
     'ranges': { 'type': 'multiSelectButtons', 'label': 'Choose multiple', },
+    'days': { 'type': 'multiSelect', 'label': 'Days' },
   };
   Map<String, dynamic>_formVals = {
     'location': { 'coordinates': [0.0,0.0] },
     'locationFullScreen': { 'coordinates': [0.0,0.0] },
     'range': 2,
+    'days': [0,2],
   };
 
   @override
@@ -56,6 +58,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
     _formFields['dayOfWeek']!['options'] = _optsDayOfWeek;
     _formFields['range']!['options'] = _optsRange;
     _formFields['ranges']!['options'] = _optsRange;
+    _formFields['days']!['options'] = _optsDayOfWeek;
   }
 
   @override
@@ -104,7 +107,9 @@ class _DesignLibraryState extends State<DesignLibrary> {
           _style.SpacingH('medium'),
           _style.Text1('Forms', size: 'large'),
           _style.SpacingH('medium'),
-          FormSave(formVals: _formVals, formFields: _formFields, requireLoggedIn: false),
+          FormSave(formVals: _formVals, formFields: _formFields, requireLoggedIn: false, preSave: (dynamic data) {
+            print ('preSave: ${data}');
+          }),
           _style.SpacingH('medium'),
           _style.Text1('Colors', size: 'large'),
           _style.SpacingH('medium'),
