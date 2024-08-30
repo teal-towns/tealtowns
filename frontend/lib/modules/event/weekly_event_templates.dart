@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../app_scaffold.dart';
 import '../../common/colors_service.dart';
 import '../../common/config_service.dart';
+import '../../common/form_input/image_save.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/form_input/input_location.dart';
 import '../../common/layout_service.dart';
@@ -256,11 +257,10 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.network(_formValsEventsList[i]['formVals']!['imageUrls']![0], height: 100, width: double.infinity, fit: BoxFit.cover),
-                // ImageSaveComponent(formVals: _formValsEventsList[i]['formVals'], formValsKey: 'imageUrls', multiple: true,
-                //   label: 'Image', imageUploadSimple: true,),
+                // Image.network(_formValsEventsList[i]['formVals']!['imageUrls']![0], height: 100, width: double.infinity, fit: BoxFit.cover),
+                ImageSaveComponent(formVals: _formValsEventsList[i]['formVals'], formValsKey: 'imageUrls', multiple: true,
+                  label: 'Image', imageUploadSimple: true,),
                 SizedBox(height: 10),
-                // _style.Text1('${_formValsEventsList[i]['formVals']!['title']}', size: 'large'),
                 _inputFields.inputText(_formValsEventsList[i]['formVals'], 'title', label: 'Title', required: true),
                 SizedBox(height: 10),
                 _inputFields.inputSelect(optsDayOfWeek, _formValsEventsList[i]['formVals'], 'dayOfWeek', label: 'Day of Week', required: true,),

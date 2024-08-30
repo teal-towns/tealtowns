@@ -4,10 +4,8 @@ def GetDefault():
     return {
         'userId': '',
         'username': '',
-        'interests': [],
-        'hostInterests': [],
-        'hostInterestsPending': [],
+        'availableTimesByDay': [],
     }
 
 def AddDefault():
-    _stubs_data.AddToNameMap('userInterest', GetDefault)
+    _stubs_data.AddToNameMap('userAvailability', GetDefault)
