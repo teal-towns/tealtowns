@@ -49,8 +49,8 @@ def SortAndMergeTimes(availableTimesByDay: list):
 def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, maxCreatedEvents: int = 1):
     ret = { 'valid': 1, 'message': '', 'matches': [], 'weeklyEventsCreated': [], 'weeklyEventsInvited': [],
         'notifyUserIds': { 'sms': [], 'email': [] }, }
-    eventInterests = _user_interest.GetEventInterests()
-    # Check all neighborhoods this user is in.
+    eventInterests = _user_interest.GetEventInterests()['eventInterests']
+    # Check all neighborhoods this user is in. Update: only check default neighborhood.
     query = { 'username': username, 'status': 'default' }
     fields = { 'username': 1, 'neighborhoodUName': 1 }
     userNeighborhoods = mongo_db.find('userNeighborhood', query, fields = fields)['items']
@@ -63,6 +63,7 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
     if userInterest is None or len(userInterest['interests']) <= 0:
         return ret
     interests = userInterest['interests']
+    hostInterests = userInterest['hostInterests']
     neighborhoodUNames = []
     for userNeighborhood in userNeighborhoods:
         neighborhoodUNames.append(userNeighborhood['neighborhoodUName'])
@@ -82,15 +83,21 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
             usernamesAll.append(userNeighborhood['username'])
 
     query = { 'username': { '$in': usernamesAll }, 'interests': { '$in': interests } }
-    fields = { 'username': 1, 'interests': 1 }
+    fields = { 'username': 1, 'interests': 1, 'hostInterests': 1, }
     userInterestsCheck = mongo_db.find('userInterest', query)['items']
     usernamesByInterest = {}
+    usernamesByHostInterest = {}
     for userInterest in userInterestsCheck:
         for interest1 in userInterest['interests']:
             if interest1 not in usernamesByInterest:
                 usernamesByInterest[interest1] = []
             if userInterest['username'] not in usernamesByInterest[interest1]:
                 usernamesByInterest[interest1].append(userInterest['username'])
+        for interest2 in userInterest['hostInterests']:
+            if interest2 not in usernamesByHostInterest:
+                usernamesByHostInterest[interest2] = []
+            if userInterest['username'] not in usernamesByHostInterest[interest2]:
+                usernamesByHostInterest[interest2].append(userInterest['username'])
 
     for interest in interests:
         interestMatch = False
@@ -109,25 +116,52 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
         if interestMatch:
             break
 
+        minPeople = minMatchedUsers
+        minHosts = 0
+        eventInterest = None
+        if 'event_' in interest and interest in eventInterests:
+            eventInterest = eventInterests[interest]
+            if 'minPeople' in eventInterest:
+                minPeople = eventInterest['minPeople']
+            elif eventInterest['hostGroupSizeDefault'] > minPeople:
+                minPeople = eventInterest['hostGroupSizeDefault']
+            if eventInterest['hostGroupSizeDefault'] > 0:
+                minHosts = 1
+
         for userNeighborhood in userNeighborhoods:
             # Check all users per each neighborhood
             neighborhoodUName = userNeighborhood['neighborhoodUName']
             # Further filter by overlapping interest.
             usernamesFinal = []
+            usernamesHostsFinal = []
             if neighborhoodUName in usernamesByNeighborhood:
                 for username1 in usernamesByNeighborhood[neighborhoodUName]:
                     if interest in usernamesByInterest and username1 in usernamesByInterest[interest]:
                         usernamesFinal.append(username1)
+                    if interest in usernamesByHostInterest and username1 in usernamesByHostInterest[interest]:
+                        usernamesHostsFinal.append(username1)
 
-            if len(usernamesFinal) < minMatchedUsers:
+            userIsHostInterest = True if interest in hostInterests else False
+
+            # +1 for self user
+            if len(usernamesFinal) + 1 < minPeople:
                 continue
+            # Check if hosts are required too.
+            if len(usernamesHostsFinal) < minHosts and not userIsHostInterest:
+                continue
+            # If hosts are required, make sure at least one is available, otherwise skip.
+            requiredUsernames = usernamesHostsFinal if minHosts > 0 else []
+            if userIsHostInterest:
+                requiredUsernames = []
+
             # See if any overlapping availability.
             query = { 'username': { '$in': usernamesFinal } }
             userAvailabilitys = mongo_db.find('userAvailability', query)['items']
             if len(userAvailabilitys) <= 0:
                 continue
-            retTimes = FindTimeOverlaps(userAvailability, userAvailabilitys, minMatchedUsers = minMatchedUsers)
-            if retTimes['maxMatches'] >= minMatchedUsers:
+            retTimes = FindTimeOverlaps(userAvailability, userAvailabilitys, minMatchedUsers = minPeople,
+                requiredUsernames = requiredUsernames)
+            if retTimes['maxMatches'] >= minPeople:
                 ret['matches'].append({ 'neighborhoodUName': neighborhoodUName, 'interest': interest,
                     'matchTime': retTimes['bestMatchTime'] })
                 # Create event and make admin and invite all matching usernames.
@@ -151,7 +185,9 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
                 }
 
                 if 'event_' in interest and interest in eventInterests:
-                    weeklyEvent = lodash.extend_object(weeklyEvent, eventInterests[interest])
+                    eventInterestsToCopy = lodash.omit(eventInterests[interest],
+                        ['minPeople', 'hostRequirements', 'hostDetails'])
+                    weeklyEvent = lodash.extend_object(weeklyEvent, eventInterestsToCopy)
 
                 retSave = _weekly_event.Save(weeklyEvent)
                 weeklyEvent = retSave['weeklyEvent']
@@ -207,7 +243,7 @@ def GetWeeklyEventInUserAvabilability(weeklyEvents: list, userAvailability: dict
     return ret
 
 def FindTimeOverlaps(userAvailability: dict, userAvailabilitys: list, minMatchedUsers: int = 3,
-    minDurationMinutes: int = 60, stepMinutes: int = 30):
+    minDurationMinutes: int = 60, stepMinutes: int = 30, requiredUsernames: list = []):
     ret = { 'valid': 1, 'message': '', 'matchTimes': [], 'maxMatches': 0, 'maxMatchIndex': -1, 'bestMatchTime': {}, }
     if len(userAvailabilitys) <= 0:
         return ret
@@ -250,13 +286,21 @@ def FindTimeOverlaps(userAvailability: dict, userAvailabilitys: list, minMatched
                             break
 
                 if len(matchUsernames) >= minMatchedUsers:
-                    match1 = { 'dayOfWeek': dayOfWeek, 'startTime': startTime, 'endTime': endTime,
-                        'usernames': matchUsernames }
-                    ret['matchTimes'].append(match1)
-                    if len(matchUsernames) > ret['maxMatches']:
-                        ret['maxMatches'] = len(matchUsernames)
-                        ret['maxMatchIndex'] = len(ret['matchTimes']) - 1
-                        ret['bestMatchTime'] = match1
+                    requiredMatch = True
+                    if len(requiredUsernames) > 0:
+                        requiredMatch = False
+                        for requiredUsername in requiredUsernames:
+                            if requiredUsername in matchUsernames:
+                                requiredMatch = True
+                                break
+                    if requiredMatch:
+                        match1 = { 'dayOfWeek': dayOfWeek, 'startTime': startTime, 'endTime': endTime,
+                            'usernames': matchUsernames }
+                        ret['matchTimes'].append(match1)
+                        if len(matchUsernames) > ret['maxMatches']:
+                            ret['maxMatches'] = len(matchUsernames)
+                            ret['maxMatchIndex'] = len(ret['matchTimes']) - 1
+                            ret['bestMatchTime'] = match1
 
             startMinute += stepMinutes
             if startMinute >= 60:

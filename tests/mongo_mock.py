@@ -17,6 +17,7 @@ from stubs import stubs_neighborhood as _stubs_neighborhood
 from stubs import stubs_shared_item as _stubs_shared_item
 from stubs import stubs_shared_item_owner as _stubs_shared_item_owner
 from stubs import stubs_user as _stubs_user
+from stubs import stubs_user_availability as _stubs_user_availability
 from stubs import stubs_user_event as _stubs_user_event
 from stubs import stubs_user_feedback as _stubs_user_feedback
 from stubs import stubs_user_insight as _stubs_user_insight
@@ -78,6 +79,7 @@ def InitAllCollections():
         _stubs_shared_item.AddDefault()
         _stubs_shared_item_owner.AddDefault()
         _stubs_user.AddDefault()
+        _stubs_user_availability.AddDefault()
         _stubs_user_event.AddDefault()
         _stubs_user_feedback.AddDefault()
         _stubs_user_insight.AddDefault()

@@ -12,6 +12,11 @@ def SetTestMode(testMode: int):
 
 def Save(userInterest: dict, useThread: int = 1):
     userInterest = _mongo_db_crud.CleanId(userInterest)
+    if '_id' not in userInterest:
+        if 'hostInterests' not in userInterest:
+            userInterest['hostInterests'] = []
+        if 'hostInterestsPending' not in userInterest:
+            userInterest['hostInterestsPending'] = []
     ret = _mongo_db_crud.Save('userInterest', userInterest, checkGetKey = 'username')
     if useThread and not _testMode:
         thread = threading.Thread(target=_user_availability.CheckCommonInterestsAndTimesByUser, args=(userInterest['username'],))
@@ -54,7 +59,8 @@ def GetInterestsByNeighborhood(neighborhoodUName: str, groupByInterest: int = 1,
 
 def GetEventInterests():
     default = {
-        'price': 0,
+        'priceUSD': 0,
+        'hostGroupSizeDefault': 0,
     }
     eventInterests = {
         'event_theWeek': {
@@ -71,11 +77,34 @@ def GetEventInterests():
             'title': 'Shared Meal',
             'description': 'Join your neighbors to eat a meal together.',
             'imageUrls': ['/assets/assets/images/shared-meal.jpg'],
+            'priceUSD': 10,
+            'hostGroupSizeDefault': 10,
+            'hostDetails': [
+                'Enjoys cooking for 10+ people',
+                'Good hygiene and food safe practices',
+                'Can accommodate (multiple) dietary restrictions or preferences and clearly label all food items',
+            ]
         },
         'event_kidPlayDate': {
             'title': 'Kid Play Date',
             'description': 'Meet local parents to let kids of all ages play together. Join a hand-me-down tree, form babysitting collectives, share baby food recipes, form Dad and Mom groups, or just take a break and meet other parents while helping your child socialize.',
             'imageUrls': ['/assets/assets/images/events/children-playing.jpg'],
+        },
+        'event_circle': {
+            'title': 'Circle',
+            'description': 'Circle is a new group coaching program grounded in cutting-edge research, rooted in the science of positive psychology, and the timeless human need to gather together. Join a supportive community that fosters personal growth, emotional resilience, and meaningful connections.',
+            'imageUrls': ['/assets/assets/images/events/people-smiles-stairs.jpg'],
+            'priceUSD': 34,
+            'hostGroupSizeDefault': 12,
+            'minPeople': 12 * 1.5,
+            'hostRequirements': [
+                '3+ years of progressive experience coaching individuals & groups',
+                'A high degree of emotional intelligence',
+                'An innate desire to build connections with others',
+                'The ability to facilitate sensitive conversations (e.g. delicate, complex, and nuanced)',
+                'The ability to engage and integrate culturally responsive practices and knowledge',
+                'An innate interest in the intersection of one’s life experience (and all that that entails) and its impact on career planning',
+            ],
         },
     }
     for key in eventInterests:

@@ -43,6 +43,9 @@ class _UserInterestSaveState extends State<UserInterestSave> {
   String _message = '';
   Map<String, Map<String, dynamic>> _eventInterests = {};
   List<String> _eventInterestsSelected = [];
+  Map<String, dynamic> _eventInterestsHostCheck = {};
+  List<String> _hostInterests = [];
+  List<String> _hostInterestsPending = [];
 
   @override
   void initState() {
@@ -99,40 +102,123 @@ class _UserInterestSaveState extends State<UserInterestSave> {
       SetFormVals();
     }
     Map<String, dynamic> config = _configService.GetConfig();
+
+    List<Widget> cols = [];
+    if (_eventInterestsHostCheck.keys.length > 0) {
+      cols += [
+        BuildHostsCheck(),
+      ];
+    } else {
+      cols += [
+        _style.Text1('What event types are you interested in?', size: 'xlarge'),
+        // _style.SpacingH('medium'),
+        ...BuildTagsSelects(),
+        _style.SpacingH('large'),
+        _style.Text1('What events are you interested in?', size: 'xlarge'),
+        _style.SpacingH('medium'),
+        ...BuildEventInterestsSelects(),
+        _style.SpacingH('xlarge'),
+        _style.Text1('Share with your neighbors and friends to get your local events started!', size: 'xlarge'),
+        _style.SpacingH('medium'),
+        _style.Text1('Text or email this link to friends, share the QR code with your neighbors, post on social media, and more!'),
+        _style.SpacingH('medium'),
+        _style.Text1('${config['SERVER_URL']}/interests'),
+        _style.SpacingH('medium'),
+        QrImageView(
+          data: '${config['SERVER_URL']}/interests',
+          version: QrVersions.auto,
+          size: 200.0,
+        ),
+        _style.SpacingH('xlarge'),
+        ElevatedButton(child: Text('Save'), onPressed: () {
+          CheckHostThenSave();
+        },),
+        _style.SpacingH('medium'),
+        _style.Text1(_message),
+        _style.SpacingH('medium'),
+      ];
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       width: 900,
       body: Container(width: double.infinity, child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _style.Text1('What event types are you interested in?', size: 'xlarge'),
-          // _style.SpacingH('medium'),
-          ...BuildTagsSelects(),
-          _style.SpacingH('large'),
-          _style.Text1('What events are you interested in?', size: 'xlarge'),
-          _style.SpacingH('medium'),
-          ...BuildEventInterestsSelects(),
-          _style.SpacingH('xlarge'),
-          _style.Text1('Share with your neighbors and friends to get your local events started!', size: 'xlarge'),
-          _style.SpacingH('medium'),
-          _style.Text1('Text or email this link to friends, share the QR code with your neighbors, post on social media, and more!'),
-          _style.SpacingH('medium'),
-          _style.Text1('${config['SERVER_URL']}/interests'),
-          _style.SpacingH('medium'),
-          QrImageView(
-            data: '${config['SERVER_URL']}/interests',
-            version: QrVersions.auto,
-            size: 200.0,
-          ),
-          _style.SpacingH('xlarge'),
-          ElevatedButton(child: Text('Save'), onPressed: () {
-            Save();
-          },),
-          _style.SpacingH('medium'),
-          _style.Text1(_message),
-          _style.SpacingH('medium'),
+          ...cols,
         ],
       ))
+    );
+  }
+
+  Widget BuildHostsCheck() {
+    List<Widget> cols = [];
+    for (String key in _eventInterestsHostCheck.keys) {
+      String keyTitle = key.replaceAll('event_', '');
+      bool selected = false;
+      cols += [
+        _style.Text1('Would you like to be a host for ${keyTitle}?', size: 'large'),
+        _style.SpacingH('medium'),
+      ];
+      Map<String, dynamic> info = _eventInterestsHostCheck[key];
+      if (info.containsKey('hostRequirements')) {
+        if (_hostInterestsPending.contains(key)) {
+          selected = true;
+        }
+        for (int i = 0; i < info['hostRequirements'].length; i++) {
+          cols += [
+            _style.Text1('${info['hostRequirements'][i]}'),
+            _style.SpacingH('medium'),
+          ];
+        }
+      }
+      if (info.containsKey('hostDetails')) {
+        if (_hostInterests.contains(key)) {
+          selected = true;
+        }
+        for (int i = 0; i < info['hostDetails'].length; i++) {
+          cols += [
+            _style.Text1('${info['hostDetails'][i]}'),
+            _style.SpacingH('medium'),
+          ];
+        }
+      }
+      cols += [
+        FilledButton(
+          child: Text('Yes I\'ll host for ${keyTitle}'),
+          onPressed: () {
+            if (selected) {
+              if (_hostInterestsPending.contains(key)) {
+                _hostInterestsPending.remove(key);
+              } else {
+                _hostInterests.remove(key);
+              }
+            } else {
+              if (info.containsKey('hostRequirements')) {
+                _hostInterestsPending.add(key);
+              } else {
+                _hostInterests.add(key);
+              }
+            }
+            setState(() { _hostInterests = _hostInterests; _hostInterestsPending = _hostInterestsPending; });
+          },
+          style: FilledButton.styleFrom(
+            backgroundColor: selected ? _colors.colors['secondary'] : _colors.colors['greyLight'],
+            foregroundColor: _colors.colors['brown'],
+          ),
+        ),
+        _style.SpacingH('large'),
+      ];
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...cols,
+        _style.SpacingH('large'),
+        ElevatedButton(child: Text('Save'), onPressed: () {
+          Save();
+        },),
+      ]
     );
   }
 
@@ -176,6 +262,10 @@ class _UserInterestSaveState extends State<UserInterestSave> {
     List<Widget> items = [];
     for (String interest in _eventInterests.keys) {
       bool selected = _eventInterestsSelected.contains(interest);
+      String title = _eventInterests[interest]!['title'];
+      if (_eventInterests[interest]!['priceUSD'] > 0) {
+        title += ', \$${_eventInterests[interest]!['priceUSD']}';
+      }
       items.add(
         InkWell(
           onTap: () {
@@ -196,7 +286,7 @@ class _UserInterestSaveState extends State<UserInterestSave> {
                   Image.asset('assets/images/shared-meal.jpg', height: imageHeight, width: double.infinity, fit: BoxFit.cover,)
                     : Image.network(_eventInterests[interest]!['imageUrls']![0], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
                 _style.SpacingH('medium'),
-                _style.Text1('${_eventInterests[interest]!['title']}'),
+                _style.Text1('${title}'),
                 _style.SpacingH('medium'),
                 _style.Text1('${_eventInterests[interest]!['description']}'),
                 _style.SpacingH('medium'),
@@ -236,11 +326,15 @@ class _UserInterestSaveState extends State<UserInterestSave> {
           _eventInterestsSelected.add(interest);
         }
       }
+      _hostInterests = _userInterest.hostInterests;
+      _hostInterestsPending = _userInterest.hostInterestsPending;
     }
-    setState(() { _formVals = _formVals; _eventInterestsSelected = _eventInterestsSelected; });
+    setState(() { _formVals = _formVals; _eventInterestsSelected = _eventInterestsSelected;
+      _hostInterests = _hostInterests; _hostInterestsPending = _hostInterestsPending;
+    });
   }
 
-  void Save() {
+  void CheckHostThenSave() {
     // Combine form values into one list of tags.
     List<String> tags = [];
     for (String key in _formVals.keys) {
@@ -253,24 +347,60 @@ class _UserInterestSaveState extends State<UserInterestSave> {
     } else if (_eventInterestsSelected.length < 1) {
       setState(() { _message = 'Please select at least 1 event interest.'; });
     } else {
-      // Add in event interests.
-      if (_eventInterestsSelected.length > 0) {
-        tags += _eventInterestsSelected;
-      }
-      CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-      var data = {
-        'userInterest': {
-          'userId': currentUserState.currentUser.id,
-          'username': currentUserState.currentUser.username,
-          'interests': tags,
-          // 'neighborhoodEventAvailabilityMatches': _userInterest.neighborhoodEventAvailabilityMatches,
+      _eventInterestsHostCheck = {};
+      for (int i = 0; i < _eventInterestsSelected.length; i++) {
+        String interest = _eventInterestsSelected[i];
+        if (_eventInterests.containsKey(interest) && _eventInterests[interest] != null &&
+          (_eventInterests[interest]!.containsKey('hostDetails') ||
+          _eventInterests[interest]!.containsKey('hostRequirements'))) {
+          _eventInterestsHostCheck[interest] = _eventInterests[interest];
         }
-      };
-      if (_userInterest.id.length > 0) {
-        data['userInterest']!['_id'] = _userInterest.id;
       }
-      _socketService.emit('SaveUserInterest', data);
-      setState(() { _loading = true; });
+      if (_eventInterestsHostCheck.keys.length > 0) {
+        setState(() { _eventInterestsHostCheck = _eventInterestsHostCheck; });
+      } else {
+        Save();
+      }
     }
+  }
+
+  void Save() {
+    // Combine form values into one list of tags.
+    List<String> tags = [];
+    for (String key in _formVals.keys) {
+      if (_formVals.containsKey(key) && _formVals[key].length > 0) {
+        tags += _formVals[key];
+      }
+    }
+    // Add in event interests.
+    if (_eventInterestsSelected.length > 0) {
+      tags += _eventInterestsSelected;
+    }
+    // Remove any host interests if not in interests.
+    for (int i = _hostInterests.length - 1; i >= 0; i--) {
+      if (!tags.contains(_hostInterests[i])) {
+        _hostInterests.removeAt(i);
+      }
+    }
+    for (int i = _hostInterestsPending.length - 1; i >= 0; i--) {
+      if (!tags.contains(_hostInterestsPending[i])) {
+        _hostInterestsPending.removeAt(i);
+      }
+    }
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    var data = {
+      'userInterest': {
+        'userId': currentUserState.currentUser.id,
+        'username': currentUserState.currentUser.username,
+        'interests': tags,
+        'hostInterests': _hostInterests,
+        'hostInterestsPending': _hostInterestsPending,
+      }
+    };
+    if (_userInterest.id.length > 0) {
+      data['userInterest']!['_id'] = _userInterest.id;
+    }
+    _socketService.emit('SaveUserInterest', data);
+    setState(() { _loading = true; });
   }
 }
