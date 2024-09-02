@@ -125,9 +125,10 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
                     child: _inputFields.inputTime(_formVals, keyStart, label: 'Start', required: true, onChanged: (String val) {
                       _userAvailability.availableTimesByDay[i]['times'][j]['start'] = val;
                       // ValidateAndUpdateTimes(i);
-                      setState(() {
-                        _userAvailability.availableTimesByDay = _userAvailability.availableTimesByDay;
-                      });
+                      // Calling this will cause a re-build, which will move cursor to the beginning.
+                      // setState(() {
+                      //   _userAvailability.availableTimesByDay = _userAvailability.availableTimesByDay;
+                      // });
                     }),
                   ),
                   SizedBox(width: 10),
@@ -135,9 +136,10 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
                     child: _inputFields.inputTime(_formVals, keyEnd, label: 'End', required: true, onChanged: (String val) {
                       _userAvailability.availableTimesByDay[i]['times'][j]['end'] = val;
                       // ValidateAndUpdateTimes(i);
-                      setState(() {
-                        _userAvailability.availableTimesByDay = _userAvailability.availableTimesByDay;
-                      });
+                      // Calling this will cause a re-build, which will move cursor to the beginning.
+                      // setState(() {
+                      //   _userAvailability.availableTimesByDay = _userAvailability.availableTimesByDay;
+                      // });
                     }),
                   ),
                   SizedBox(width: 10),

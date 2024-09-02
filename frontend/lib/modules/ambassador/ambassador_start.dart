@@ -207,12 +207,14 @@ class _AmbassadorStartState extends State<AmbassadorStart> {
               _inputFields.inputText(_formVals, 'neighborhoodUName', minLen: 2, label: 'Choose a short name for your neighborhood',
                 onChanged: (String val) {
                   val = val.toLowerCase().replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (Match match) => '');
-                  setState(() { _formVals['neighborhoodUName'] = val; });
+                  _formVals['neighborhoodUName'] = val;
+                  // Calling this will re-build and lose cursor position.
+                  // setState(() { _formVals['neighborhoodUName'] = val; });
                 }
               ),
               _style.SpacingH('medium'),
-              Text('${config['SERVER_URL']}/n/${_formVals['neighborhoodUName']} will be your neighborhood link.'),
-              _style.SpacingH('medium'),
+              // Text('${config['SERVER_URL']}/n/${_formVals['neighborhoodUName']} will be your neighborhood link.'),
+              // _style.SpacingH('medium'),
               ElevatedButton(child: Text('Next'), onPressed: () {
                 Map<String, dynamic> data = {
                   'neighborhood': {

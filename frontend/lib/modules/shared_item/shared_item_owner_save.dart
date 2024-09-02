@@ -356,9 +356,10 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
         SizedBox(height: 10),
         _inputFields.inputSelect(_selectOptsInvest, _formValsInfo, 'investTotalPaid', label: 'Will you purchase this item?', onChanged: (String newVal) {
           _formValsInfo['investTotalPaid'] = _parseService.toDoubleNoNull(newVal);
-          setState(() {
-            _formValsInfo = _formValsInfo;
-          });
+          // Causes rebuild that loses cursor position.
+          // setState(() {
+          //   _formValsInfo = _formValsInfo;
+          // });
           SetInvestmentDetails();
         }),
         SizedBox(height: 10),
@@ -366,9 +367,10 @@ class _SharedItemOwnerSaveState extends State<SharedItemOwnerSave> {
         SizedBox(height: 10),
         _inputFields.inputSelect(_selectOptsInvestorOnly, _formVals, 'investorOnly', label: 'Will you co-own (also)?', onChanged: (String newVal) {
           _formVals['investorOnly'] = _parseService.toIntNoNull(newVal);
-          setState(() {
-            _formVals = _formVals;
-          });
+          // Causes rebuild that loses cursor position.
+          // setState(() {
+          //   _formVals = _formVals;
+          // });
         }),
         SizedBox(height: 30),
       ];
