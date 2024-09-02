@@ -94,6 +94,7 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                     userFollowUpsToAdd.pop(index)
 
         for userFollowUp in userFollowUpsToAdd:
+            valid = 1
             username = userFollowUp['username']
             neighborhoodUName = userFollowUp['neighborhoodUName']
             attempt = userFollowUp['attempt'] + 1
@@ -145,24 +146,29 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                 timezone = 'UTC'
                 if forType == 'ambassadorUpdate':
                     neighborhood = mongo_db.find_one('neighborhood', { 'uName': neighborhoodUName })['item']
-                    timezone = neighborhood['timezone']
-                userFollowUpNew = {
-                    'username': username,
-                    'neighborhoodUName': neighborhoodUName,
-                    'forType': forType,
-                    'contactType': contactType,
-                    'followUpAt': date_time.string(now),
-                    'nextFollowUpAt': GetNextFollowUp(timezone, minDays = nextFollowUpMinDays,
-                        maxDays = nextFollowUpMaxDays, hourMin = nextFollowUpHourMin,
-                        hourMax = nextFollowUpHourMax, now = now),
-                    'nextFollowUpDone': 0,
-                    'attempt': attempt,
-                }
-                try:
-                    mongo_db.insert_one('userFollowUp', userFollowUpNew)
-                except Exception as e:
-                    log.log('error', 'user_follow_up.CheckAndDoFollowUps Error inserting userFollowUp: ' + str(e))
-                    pass
+                    if neighborhood is None:
+                        RemoveFollowUps(username, forType, neighborhoodUName)
+                        valid = 0
+                    else:
+                        timezone = neighborhood['timezone']
+                if valid:
+                    userFollowUpNew = {
+                        'username': username,
+                        'neighborhoodUName': neighborhoodUName,
+                        'forType': forType,
+                        'contactType': contactType,
+                        'followUpAt': date_time.string(now),
+                        'nextFollowUpAt': GetNextFollowUp(timezone, minDays = nextFollowUpMinDays,
+                            maxDays = nextFollowUpMaxDays, hourMin = nextFollowUpHourMin,
+                            hourMax = nextFollowUpHourMax, now = now),
+                        'nextFollowUpDone': 0,
+                        'attempt': attempt,
+                    }
+                    try:
+                        mongo_db.insert_one('userFollowUp', userFollowUpNew)
+                    except Exception as e:
+                        log.log('error', 'user_follow_up.CheckAndDoFollowUps Error inserting userFollowUp: ' + str(e))
+                        pass
     
     if len(nextFollowUpDoneObjectIds) > 0:
         query = { '_id': { '$in': nextFollowUpDoneObjectIds } }

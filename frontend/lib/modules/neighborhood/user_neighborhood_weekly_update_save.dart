@@ -32,10 +32,10 @@ class _UserNeighborhoodWeeklyUpdateSaveState extends State<UserNeighborhoodWeekl
   ];
 
   Map<String, Map<String, dynamic>> _formFields = {
-    // 'inviteCount': { 'type': 'number', 'required': true, 'label': 'How many neighbors did you invite to events this week?' },
+    'inviteCount': { 'type': 'number', 'required': true, 'label': 'How many neighbors did you invite (flyer or knock on doors) to events this week?' },
     // 'attendedCount': { 'type': 'number', 'required': false, 'label': 'How many unique neighbors attended events this week?' },
     // 'actionHeader': { 'type': 'xText', 'text': 'Which weekly actions have you completed thus far this week?', 'size': 'large', },
-    'actionsComplete': { 'type': 'multiSelectButtons', 'label': 'Which actions have you completed this week (thus far)?'},
+    'actionsComplete': { 'type': 'multiSelectButtons', 'label': 'Which actions have you completed this week?'},
   };
   Map<String, dynamic> _formValsDefault = {};
   String _title = 'Create a Neighborhood Update';
