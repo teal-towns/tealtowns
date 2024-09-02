@@ -208,7 +208,9 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
               _inputFields.inputNumber(_formVals, 'attendeeCountAsk', required: true,
                 label: 'How many spots (including yourself)?', min: 1, onChanged: (double? val)  {
                   if (val != null && val! >= 1) {
-                    setState(() { _formVals = _formVals;});
+                    _formVals['attendeeCountAsk'] = val.toInt();
+                    // Causes rebuild that loses cursor position.
+                    // setState(() { _formVals = _formVals;});
                   }
                 }),
               ], width: fieldWidth),

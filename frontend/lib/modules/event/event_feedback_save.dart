@@ -316,7 +316,8 @@ class _EventFeedbackSaveState extends State<EventFeedbackSave> {
       children: [
         _inputFields.inputSelectButtons(_optsAttended, _formValsUserFeedback, 'attended', label: label, onChanged: (String val) {
           _formValsUserFeedback['attended'] = val;
-          setState(() { _formValsUserFeedback = _formValsUserFeedback; });
+          // Causes rebuild that loses cursor position.
+          // setState(() { _formValsUserFeedback = _formValsUserFeedback; });
         }),
         SizedBox(height: 10,),
         ...colsAttended,
