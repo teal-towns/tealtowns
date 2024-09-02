@@ -5,7 +5,7 @@ import lodash
 import mongo_db
 
 def RunAll():
-    AddHostInterests()
+    # AddHostInterests()
     # UserNeighborhoodWeeklyUpdateActionsComplete()
     # AddLocationAddress()
     # WeeklyEventTags()

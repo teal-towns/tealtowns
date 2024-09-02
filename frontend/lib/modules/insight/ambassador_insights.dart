@@ -243,7 +243,7 @@ class _AmbassadorInsightsState extends State<AmbassadorInsights> {
             children: [
               Expanded(flex: 1, child: Text('${start} - ${end}')),
               Expanded(flex: 1, child: neighborhood),
-              // Expanded(flex: 1, child: Text('${update['inviteCount']}')),
+              Expanded(flex: 1, child: Text('${update['inviteCount']}')),
               // Expanded(flex: 1, child: Text('${update['attendedCount']}')),
               Expanded(flex: 1, child: Text('${update['actionsComplete'].join(',')}')),
             ]
