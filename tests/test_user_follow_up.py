@@ -60,10 +60,14 @@ def test_CheckAndDoFollowUps():
     # 2 users with updates but more than a week behind
     userNeighborhoodWeeklyUpdates = [
         { 'userId': users[3]['_id'], 'username': users[3]['username'], 'start': '2024-05-01 09:00:00+00:00',
-         'end': '2024-05-08 09:00:00+00:00', 'actionsComplete': ['1', '2', '3', '4', '5', '6', '7'],
+         'end': '2024-05-08 09:00:00+00:00',
+         'inviteCount': 5,
+        #  'actionsComplete': ['1', '2', '3', '4', '5', '6', '7'],
          'attendedCount': 4, 'neighborhoodUName': neighborhoods[0]['uName'] },
         { 'userId': users[4]['_id'], 'username': users[4]['username'], 'start': '2024-05-05 09:00:00+00:00',
-         'end': '2024-05-12 09:00:00+00:00', 'actionsComplete': ['1', '2', '3', '4', '5', '6', '7'],
+         'end': '2024-05-12 09:00:00+00:00',
+         'inviteCount': 3,
+        #  'actionsComplete': ['1', '2', '3', '4', '5', '6', '7'],
          'attendedCount': 2, 'neighborhoodUName': neighborhoods[1]['uName'] },
     ]
     userNeighborhoodWeeklyUpdates = _stubs_data.CreateBulk(objs = userNeighborhoodWeeklyUpdates,
@@ -150,7 +154,9 @@ def test_CheckAndDoFollowUps():
 
     # user 3 submits a weekly update
     userNeighborhoodWeeklyUpdate = { 'userId': users[3]['_id'], 'username': users[3]['username'], 'start': '2024-05-15 09:00:00+00:00',
-     'end': '2024-05-22 09:00:00+00:00', 'actionsComplete': ['1', '2', '3', '4', '5', '6', '7'],
+     'end': '2024-05-22 09:00:00+00:00',
+     'inviteCount': 5,
+    #  'actionsComplete': ['1', '2', '3', '4', '5', '6', '7'],
      'attendedCount': 4,
      'neighborhoodUName': userNeighborhoodWeeklyUpdates[0]['neighborhoodUName'] }
     _user_neighborhood_weekly_update.Save(userNeighborhoodWeeklyUpdate)

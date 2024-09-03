@@ -80,8 +80,8 @@ def GetAmbassadorInsights(now = None, withUsers: int = 1, activeDaysPast: int = 
     # See which ambassadors who have been active this month, are up to date
     lastWeek = date_time.string(now - datetime.timedelta(days = activeDaysPast))
     # Start with users who have made an update in the past week.
-    # query = { 'end': { '$gte': lastWeek }, 'inviteCount': { '$gt': 0 } }
-    query = { 'end': { '$gte': lastWeek }, 'actionsComplete.6': { '$exists': 1 } }
+    query = { 'end': { '$gte': lastWeek }, 'inviteCount': { '$gt': 0 } }
+    # query = { 'end': { '$gte': lastWeek }, 'actionsComplete.6': { '$exists': 1 } }
     userNeighborhoodWeeklyUpdates = mongo_db.find('userNeighborhoodWeeklyUpdate', query)['items']
     userIdsDone = []
     for userNeighborhoodWeeklyUpdate in userNeighborhoodWeeklyUpdates:
