@@ -36,6 +36,7 @@ import './modules/event/weekly_event_print.dart';
 import './modules/event/weekly_events_search.dart';
 import './modules/event/event_feedback_save_page.dart';
 import './modules/event/event_feedback_page.dart';
+import './modules/event/featured_event_photo_save.dart';
 
 import './modules/icebreaker/icebreakers.dart';
 import './modules/icebreaker/icebreaker_save.dart';
@@ -111,6 +112,7 @@ class Routes {
   static const eat = '/eat';
   static const eventFeedbackSave = '/event-feedback-save';
   static const eventFeedback = '/event-feedback';
+  static const featuredEventPhotoSave = '/featured-event-photo-save';
 
   static const icebreakers = '/icebreakers';
   static const icebreakerSave = '/icebreaker-save';
@@ -543,6 +545,11 @@ class AppGoRouter {
         builder: (BuildContext context, GoRouterState state) => EventFeedbackPage(
           eventId: state.uri.queryParameters['eventId'] ?? '',
           weeklyEventId: state.uri.queryParameters['weeklyEventId'] ?? '',
+        )
+      ),
+      GoRoute(
+        path: Routes.featuredEventPhotoSave, name: 'featuredEventPhotoSave',
+        builder: (BuildContext context, GoRouterState state) => FeaturedEventPhotoSave(
         )
       ),
 

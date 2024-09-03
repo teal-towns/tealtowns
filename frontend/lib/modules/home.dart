@@ -11,6 +11,7 @@ import '../common/style.dart';
 import '../common/video.dart';
 import '../modules/neighborhood/neighborhoods.dart';
 import '../modules/neighborhood/neighborhood_state.dart';
+import '../modules/event/featured_event_photos.dart';
 
 class HomeComponent extends StatefulWidget {
   @override
@@ -159,6 +160,8 @@ class _HomeComponentState extends State<HomeComponent> {
       //   child: _video.Youtube('2Rm2kM36c5g'),
       // ),
       // _style.SpacingH('medium'),
+
+      FeaturedEventPhotos(),
     ];
 
     return Column(
