@@ -33,6 +33,8 @@ class _LayoutWrapState extends State<LayoutWrap> {
         hasNextPage = false;
       }
       items = widget.items.sublist(0, maxItems);
+    } else {
+      items = widget.items;
     }
     List<Widget> cols = [
       _layoutService.WrapWidth(items, width: widget.width, spacing: widget.spacing, align: widget.align),
