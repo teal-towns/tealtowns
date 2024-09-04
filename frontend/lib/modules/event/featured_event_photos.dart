@@ -61,7 +61,7 @@ class _FeaturedEventPhotosState extends State<FeaturedEventPhotos> {
     List<Widget> items = [];
     for (var i = 0; i < _featuredEventPhotos.length; i++) {
       List<Widget> cols1 = [
-        Image.network(_featuredEventPhotos[i].imageUrl, height: 100, width: double.infinity, fit: BoxFit.cover),
+        Image.network(_featuredEventPhotos[i].imageUrl, height: 200, width: double.infinity, fit: BoxFit.cover),
         _style.SpacingH('medium'),
         Text(_featuredEventPhotos[i].title),
       ];

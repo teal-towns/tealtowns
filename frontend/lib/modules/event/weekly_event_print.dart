@@ -173,11 +173,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       // _formVals['showNeighborhoodEvents'] = 1;
       _formVals['showTearOffs'] = 0;
       _formVals['showMessage'] = 1;
-      CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-      if (currentUserState.currentUser != null) {
-        String firstName = currentUserState.currentUser!.firstName;
-        _formVals['userMessage'] = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you! - ${firstName}';
-      }
+      _formVals['userMessage'] = FormMessage();
     } else if (val == 'oneNeighborEvents') {
       _formVals['rows'] = 7;
       _formVals['columns'] = 3;
@@ -189,12 +185,18 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       _formVals['showNeighborhoodEvents'] = 1;
       _formVals['showTearOffs'] = 0;
       _formVals['showMessage'] = 1;
-      CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-      if (currentUserState.currentUser != null) {
-        String firstName = currentUserState.currentUser!.firstName;
-        _formVals['userMessage'] = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you! - ${firstName}';
-      }
+      _formVals['userMessage'] = FormMessage();
     }
+  }
+
+  String FormMessage() {
+    String userMessage = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you!';
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (currentUserState.currentUser != null) {
+      String firstName = currentUserState.currentUser!.firstName;
+      userMessage += ' - ${firstName}';
+    }
+    return userMessage;
   }
 
   @override
