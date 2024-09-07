@@ -259,4 +259,18 @@ class CurrentUserState extends ChangeNotifier {
     }
     return '';
   }
+
+  Map<String, dynamic> GetPhoneData() {
+    Map<String, dynamic> phoneData = { 'number': '', 'type': 'phone' };
+    if (_currentUser != null) {
+      if (_currentUser!.phoneNumber!.length > 0) {
+        phoneData['number'] = _currentUser!.phoneNumber!;
+        phoneData['type'] = 'phone';
+      } else if (_currentUser!.whatsappNumber!.length > 0) {
+        phoneData['number'] = _currentUser!.whatsappNumber!;
+        phoneData['type'] = 'whatsapp';
+      }
+    }
+    return phoneData;
+  }
 }

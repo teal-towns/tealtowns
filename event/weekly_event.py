@@ -55,7 +55,8 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
 
     if len(userIds) > 0 and withAdmins:
         listKeyVals = { '_id': userIds }
-        fields = { "firstName": 1, "lastName": 1, "email": 1, }
+        fields = { "firstName": 1, "lastName": 1, "email": 1,
+            'phoneNumber': 1, 'phoneNumberVerified': 1, 'whatsappNumber': 1, 'whatsappNumberVerified': 1, }
         users = _mongo_db_crud.Search('user', listKeyVals = listKeyVals, fields = fields, limit = limit * 10)['users']
         usersIdMap = {}
         for user in users:
@@ -83,7 +84,8 @@ async def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, w
             if userId not in userIds:
                 userIds.append(userId)
         listKeyVals = { '_id': userIds }
-        fields = { "firstName": 1, "lastName": 1, "email": 1, }
+        fields = { "firstName": 1, "lastName": 1, "email": 1,
+            'phoneNumber': 1, 'phoneNumberVerified': 1, 'whatsappNumber': 1, 'whatsappNumberVerified': 1, }
         users = _mongo_db_crud.Search('user', listKeyVals = listKeyVals, fields = fields)['users']
         usersIdMap = {}
         for user in users:

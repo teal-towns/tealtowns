@@ -87,7 +87,10 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                 if username not in usernamesDue:
                     usernamesDue.append(username)
                 keyTemp = username + '_' + userFollowUp['neighborhoodUName']
-                userFollowUpsToAdd[userFollowUpMap[keyTemp]] = userFollowUp
+                if keyTemp in userFollowUpMap:
+                    userFollowUpsToAdd[userFollowUpMap[keyTemp]] = userFollowUp
+                else:
+                    log.log('warn', 'user_follow_up.CheckAndDoFollowUps userFollowUpMap keyTemp not in userFollowUpMap', keyTemp)
             # Now REMOVE any that are not either in the not started OR due lists.
             for index, item in reversed(list(enumerate(userFollowUpsToAdd))):
                 if item['username'] not in usernamesDue and item['username'] not in usernamesToStart:
