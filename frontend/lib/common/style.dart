@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import './colors_service.dart';
 
@@ -38,7 +39,7 @@ class Style {
 
   Widget Text1(String text, { String size = 'medium', Widget? left = null, Widget? right = null,
     String colorKey = 'text', FontWeight fontWeight = FontWeight.normal, double fontSize = -1,
-    String align = 'left', }) {
+    String align = 'left', String fontFamily = '', String googleFontFamily = '', }) {
     if (!_fontSizeMap.containsKey(size)) {
       size = 'medium';
     }
@@ -46,11 +47,18 @@ class Style {
       fontSize = _fontSizeMap[size]!;
     }
     TextAlign align1 = align == 'right' ? TextAlign.right : align == 'center' ? TextAlign.center : TextAlign.left;
-    Widget content = Text(text, style: TextStyle(
+    TextStyle textStyle = TextStyle(
       fontSize: fontSize,
       color: _colors.colors[colorKey],
       fontWeight: fontWeight,
-    ), textAlign: align1,);
+    );
+    if (fontFamily.length > 0) {
+      textStyle = textStyle.copyWith(fontFamily: fontFamily);
+    }
+    if (googleFontFamily.length > 0) {
+      textStyle = textStyle.copyWith(fontFamily: GoogleFonts.getFont(googleFontFamily).fontFamily);
+    }
+    Widget content = Text(text, style: textStyle, textAlign: align1,);
     if (left != null || right != null) {
       List<Widget> rows = [];
       if (left != null) {

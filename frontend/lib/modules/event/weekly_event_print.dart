@@ -67,6 +67,12 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     'showMessage': 0,
     'userMessage': '',
     'imageKey': 'event',
+    'showIcons': 0,
+    'showDescription': 0,
+    // 'googleFontFamily': '',
+    // 'googleFontFamily': 'Shadows Into Light',
+    'googleFontFamily': 'Handlee',
+    'fontSize': 'large',
   };
   List<Map<String, dynamic>> _optsYesNo = [
     {'value': 1, 'label': 'Yes'},
@@ -182,19 +188,30 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       _formVals['showQrCodeEvents'] = 0;
       _formVals['showEventBasics'] = 0;
       _formVals['showEmail'] = 0;
-      _formVals['showNeighborhoodEvents'] = 1;
+      _formVals['showNeighborhoodEvents'] = 0;
       _formVals['showTearOffs'] = 0;
       _formVals['showMessage'] = 1;
       _formVals['userMessage'] = FormMessage();
     }
   }
 
-  String FormMessage() {
+  String FormMessage({ String type = 'phone'}) {
     String userMessage = 'Hey neighbor! I\'m hosting community events for our neighborhood and wanted to invite you!';
     CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
     if (currentUserState.currentUser != null) {
       String firstName = currentUserState.currentUser!.firstName;
-      userMessage += ' - ${firstName}';
+      if (type == 'name') {
+        userMessage += ' - ${firstName}';
+      } else if (type == 'phone') {
+        Map<String, dynamic> phoneData = currentUserState.GetPhoneData();
+        if (phoneData['number'].length > 0) {
+          if (phoneData['type'] == 'phone') {
+            userMessage += ' Text ${firstName} @ ${phoneData['number']} to learn more & RSVP';
+          } else if (phoneData['type'] == 'whatsapp') {
+            userMessage += ' WhatsApp ${firstName} @ ${phoneData['number']} to learn more & RSVP';
+          }
+        }
+      }
     }
     return userMessage;
   }
@@ -343,10 +360,12 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     String startDate = '${day}s ${time}';
     List<Widget> admins = [];
     if (_weeklyEvent.adminUsers.length > 0 && _formVals['showEmail'] == 1) {
-      if (_formVals['columns'] < 4) {
-        admins += [ _style.Text1('${_weeklyEvent.adminUsers[0].email}', left: Icon(Icons.mail)), ];
+      if (_formVals['columns'] < 4 && _formVals['showIcons'] > 0) {
+        admins += [ _style.Text1('${_weeklyEvent.adminUsers[0].email}', left: Icon(Icons.mail),
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']) ];
       } else {
-        admins += [ _style.Text1('${_weeklyEvent.adminUsers[0].email}'), ];
+        admins += [ _style.Text1('${_weeklyEvent.adminUsers[0].email}',
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']) ];
       }
       admins += [ SizedBox(height: 10), ];
     }
@@ -372,7 +391,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(opt['icon'], color: _colors.colors['primary'], size: imageHeight,),
+                  Icon(opt['icon'], size: imageHeight,),
                 ]
               ),
               SizedBox(height: 10),
@@ -386,34 +405,28 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     List<Widget> colsUserMessage = [];
     if (_formVals['userMessage'].length > 0) {
       colsUserMessage += [
-        // _style.Text1('Message From Host', size: 'large', colorKey: 'primary'),
-        // SizedBox(height: 10),
-        Text(_formVals['userMessage'], style: GoogleFonts.shadowsIntoLight(fontSize: 20),),
+        _style.Text1(_formVals['userMessage'], googleFontFamily: _formVals['googleFontFamily'],
+          size: _formVals['fontSize']),
         SizedBox(height: 10),
       ];
     }
-
-    // List<Widget> colsOutro = [];
-    // if (_formVals['outroNote'].length > 0) {
-    //   colsOutro += [
-    //     Text(_formVals['outroNote']),
-    //     SizedBox(height: 10),
-    //   ];
-    // }
 
     List<Widget> colsNeighborhoodEvents = [];
     if (_formVals['showNeighborhoodEvents'] == 1) {
       String url = _configService.GetUrl('/ne/${_weeklyEvent.neighborhoodUName}', withScheme: false);
       if (_formVals['showEventBasics'] == 1) {
         colsNeighborhoodEvents += [
-          _style.Text1('Can\'t make this time or have different interests?'),
+          _style.Text1('Can\'t make this time or have different interests?',
+            googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']),
           SizedBox(height: 10),
         ];
       }
-      if (_formVals['columns'] < 4) {
-        colsNeighborhoodEvents += [ _style.Text1('${url}', left: Icon(Icons.link)), ];
+      if (_formVals['columns'] < 4 && _formVals['showIcons'] > 0) {
+        colsNeighborhoodEvents += [ _style.Text1('${url}', left: Icon(Icons.link),
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']), ];
       } else {
-        colsNeighborhoodEvents += [ _style.Text1('${url}'), ];
+        colsNeighborhoodEvents += [ _style.Text1('${url}',
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']), ];
       }
       colsNeighborhoodEvents.add(SizedBox(height: 10));
     }
@@ -421,17 +434,20 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     List<Widget> colsInterests = [];
     if (_formVals['showInterests'] == 1) {
       String url = _configService.GetUrl('/interests', withScheme: false);
-      if (_formVals['columns'] < 4) {
-        colsInterests += [ _style.Text1('${url}', left: Icon(Icons.link)), ];
+      if (_formVals['columns'] < 4 && _formVals['showIcons'] > 0) {
+        colsInterests += [ _style.Text1('${url}', left: Icon(Icons.link),
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']), ];
       } else {
-        colsInterests += [ _style.Text1('${url}'), ];
+        colsInterests += [ _style.Text1('${url}',
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']), ];
       }
       colsInterests.add(SizedBox(height: 10));
     }
 
     List<Widget> colsTearOffs = [];
     if (_formVals['showTearOffs'] == 1) {
-      int size = 23;
+      // int size = 23;
+      int size = 30;
       int padding = 10;
       int count = ((_widthTotal / _formVals['columns']).round() / (size + padding * 2)).floor() - 1;
       String url1 = _configService.GetUrl('/we/${_weeklyEvent.uName}', withScheme: false);
@@ -445,7 +461,8 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
             padding: EdgeInsets.only(left: padding.toDouble(), right: padding.toDouble()),
             child: RotatedBox(
               quarterTurns: 1,
-              child: Text('${url1}'),
+              child: _style.Text1('${url1}', googleFontFamily: _formVals['googleFontFamily'],
+                size: _formVals['fontSize']),
             ),
           ),
         ];
@@ -493,14 +510,16 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       ];
     }
 
-    Widget? iconCalendar = _formVals['columns'] < 4 ? Icon(Icons.calendar_month) : null;
-    Widget? iconLink = _formVals['columns'] < 4 ? Icon(Icons.link) : null;
+    Widget? iconCalendar = (_formVals['columns'] < 4 && _formVals['showIcons'] > 0) ? Icon(Icons.calendar_month) : null;
+    Widget? iconLink = (_formVals['columns'] < 4 && _formVals['showIcons'] > 0) ? Icon(Icons.link) : null;
     List<Widget> colsDetails = [];
     if (_formVals['showEventBasics'] == 1) {
       colsDetails += [
-        _style.Text1('${startDate}', left: iconCalendar),
+        _style.Text1('${startDate}', left: iconCalendar,
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']),
         SizedBox(height: 10),
-        _style.Text1('${shareUrl}', left: iconLink),
+        _style.Text1('${shareUrl}', left: iconLink,
+          googleFontFamily: _formVals['googleFontFamily'], size: _formVals['fontSize']),
         SizedBox(height: 10),
       ];
     }
@@ -541,21 +560,21 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     }
 
     List<Widget> colsDescription = [];
-    if (_formVals['columns'] < 3) {
+    if (_formVals['columns'] < 3 && _formVals['showDescription'] == 1) {
       colsDescription += [
-        // _style.Text1('Description', size: 'large', colorKey: 'primary'),
-        // SizedBox(height: 10),
-        Text(_weeklyEvent.description),
+        _style.Text1(_weeklyEvent.description, googleFontFamily: _formVals['googleFontFamily'],
+          size: _formVals['fontSize']),
         SizedBox(height: 10),
       ];
     }
     List<Widget> colsTitle = [];
     if (_formVals['showEventBasics'] == 1) {
       colsTitle += [
-        _style.Text1('${_weeklyEvent.title}', size: 'large', colorKey: 'primary'),
+        _style.Text1('${_weeklyEvent.title}', size: 'xlarge', googleFontFamily: _formVals['googleFontFamily']),
         SizedBox(height: 10),
       ];
     }
+
     return Container(padding: EdgeInsets.all(10), child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -563,8 +582,6 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         ...colsImage,
         ...colsTitle,
         ...colsDescription,
-        // _style.Text1('Event Details', size: 'large', colorKey: 'primary'),
-        // SizedBox(height: 10),
         ...colsDetailsQR,
         // ...colsMap,
         ...colsTearOffs,
