@@ -38,17 +38,28 @@ class _DesignLibraryState extends State<DesignLibrary> {
     'title': {},
     'description': { 'type': 'text', 'minLines': 4, 'required': false, 'label': 'Description (optional)' },
     'dayOfWeek': { 'type': 'select' },
-    'startTime': { 'type': 'time' },
-    'hostGroupSizeDefault': { 'type': 'number', 'min': 0, 'required': true },
+    'startTime': { 'type': 'time',},
+    'hostGroupSizeDefault': { 'type': 'number', 'min': 0,},
     'range': { 'type': 'selectButtons', 'label': 'I like food?' },
     'ranges': { 'type': 'multiSelectButtons', 'label': 'Choose multiple', },
     'days': { 'type': 'multiSelect', 'label': 'Days' },
+    'phone': { 'type': 'phone', 'countryISOCodeField': 'phoneCountryISOCode' },
+    'phone2': { 'type': 'phone', 'countryISOCodeField': 'phoneCountryISOCode2' },
   };
   Map<String, dynamic>_formVals = {
+    'title': 'My Title',
     'location': { 'coordinates': [0.0,0.0] },
     'locationFullScreen': { 'coordinates': [0.0,0.0] },
     'range': 2,
+    'ranges': ['1','3'],
     'days': [0,2],
+    'dayOfWeek': 0,
+    'hostGroupSizeDefault': 0,
+    // 'phone': '15551234567',
+    'phone': '447891234467',
+    'phoneCountryISOCode': 'GB',
+    'phone2': '5551234567',
+    'phoneCountryISOCode2': 'US',
   };
 
   @override
@@ -107,8 +118,9 @@ class _DesignLibraryState extends State<DesignLibrary> {
           _style.SpacingH('medium'),
           _style.Text1('Forms', size: 'large'),
           _style.SpacingH('medium'),
-          FormSave(formVals: _formVals, formFields: _formFields, requireLoggedIn: false, preSave: (dynamic data) {
+          FormSave(formVals: _formVals, formFields: _formFields, dataName: 'dataKey', requireLoggedIn: false, preSave: (dynamic data) {
             print ('preSave: ${data}');
+            return data;
           }),
           _style.SpacingH('medium'),
           _style.Text1('Colors', size: 'large'),

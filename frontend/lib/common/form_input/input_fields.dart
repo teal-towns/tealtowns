@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:multiple_search_selection/multiple_search_selection.dart';
 
 import './input_checkbox.dart';
@@ -18,6 +19,43 @@ class InputFields {
 
   ColorsService _colors = ColorsService();
   ParseService _parseService = ParseService();
+
+  Widget inputPhoneNumber(var formVals, String? formValsKey, { String label = '', String hint = '',
+    Function(Map<String, dynamic>)? onChanged = null, bool required = false, String helpText = '', String countryISOCode = '', }) {
+    String? initialVal = '';
+    if (formValsKey == null) {
+      initialVal = formVals == null ? '' : formVals.toString();
+    } else {
+      initialVal = (formVals.containsKey(formValsKey)) ? formVals[formValsKey].toString() : '';
+    }
+    if (initialVal == 'null') {
+      initialVal = '';
+    }
+    if (initialVal.length <= 0) {
+      initialVal = null;
+    }
+    return InputWrapper(
+      IntlPhoneField(
+        initialValue: initialVal,
+        decoration: InputDecoration(
+          labelText: label,
+        ),
+        initialCountryCode: countryISOCode,
+        onChanged: (phone) {
+          Map<String, dynamic> value = { 'completeNumber': phone.completeNumber, 'countryISOCode': phone.countryISOCode };
+          if (formValsKey == null) {
+            formVals = value;
+          } else {
+            formVals[formValsKey] = value;
+          }
+          if (onChanged != null) {
+            onChanged!(value);
+          }
+        },
+      ),
+      helpText: helpText
+    );
+  }
 
   Widget inputEmail(var formVals, String? formValsKey, { String label = 'Email',
     String hint = 'your@email.com', var fieldKey = null, bool required = false,

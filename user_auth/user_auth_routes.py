@@ -108,8 +108,11 @@ def addRoutes():
     def SendPhoneVerificationCode(data, auth, websocket):
         mode = data['mode'] if 'mode' in data else 'sms'
         numberField = 'whatsappNumber' if mode == 'whatsapp' else 'phoneNumber'
-        log.log('user_auth_routes.SendPhoneVerificationCode', data['userId'], data[numberField], mode)
-        return _user.SendPhoneVerificationCode(data['userId'], data[numberField], mode = mode)
+        countryISOCodeField = 'whatsappNumberCountryISOCode' if mode == 'whatsapp' else 'phoneNumberCountryISOCode'
+        log.log('user_auth_routes.SendPhoneVerificationCode', data['userId'], data[numberField], mode,
+            data[countryISOCodeField])
+        return _user.SendPhoneVerificationCode(data['userId'], data[numberField], mode = mode,
+            countryISOCode = data[countryISOCodeField])
     _socket.add_route('SendPhoneVerificationCode', SendPhoneVerificationCode)
 
     def VerifyPhone(data, auth, websocket):

@@ -27,8 +27,10 @@ class _UserPhoneState extends State<UserPhone> {
   Map<String, dynamic> _formVals = {
     'phoneNumber': '',
     'phoneNumberVerificationKey': '',
+    'phoneNumberCountryISOCode': 'US',
     'whatsappNumber': '',
     'whatsappNumberVerificationKey': '',
+    'whatsappNumberCountryISOCode': '',
     'terms': false,
     'mode': 'whatsapp',
   };
@@ -43,10 +45,12 @@ class _UserPhoneState extends State<UserPhone> {
     'sms': {
       'number': 'phoneNumber',
       'verificationKey': 'phoneNumberVerificationKey',
+      'countryISOCode': 'phoneNumberCountryISOCode',
     },
     'whatsapp': {
       'number': 'whatsappNumber',
       'verificationKey': 'whatsappNumberVerificationKey',
+      'countryISOCode': 'whatsappNumberCountryISOCode',
     },
   };
 
@@ -64,9 +68,11 @@ class _UserPhoneState extends State<UserPhone> {
         if (_formVals['mode'] == 'sms') {
           _formVals['phoneNumberVerificationKey'] = '';
           _formVals['phoneNumber'] = data['phoneNumber'];
+          _formVals['phoneNumberCountryISOCode'] = data['phoneNumberCountryISOCode'];
         } else if (_formVals['mode'] == 'whatsapp') {
           _formVals['whatsappNumberVerificationKey'] = '';
           _formVals['whatsappNumber'] = data['whatsappNumber'];
+          _formVals['whatsappNumberCountryISOCode'] = data['whatsappNumberCountryISOCode'];
         }
         _formVals['terms'] = true;
         String phoneField = _formVals['mode'] == 'sms' ? 'phoneNumber' : 'whatsappNumber';
@@ -99,7 +105,9 @@ class _UserPhoneState extends State<UserPhone> {
 
     UserClass user = Provider.of<CurrentUserState>(context, listen: false).currentUser;
     _formVals['phoneNumber'] = user.phoneNumber;
+    _formVals['phoneNumberCountryISOCode'] = user.phoneNumberCountryISOCode;
     _formVals['whatsappNumber'] = user.whatsappNumber;
+    _formVals['whatsappNumberCountryISOCode'] = user.whatsappNumberCountryISOCode;
     setState(() { _formVals = _formVals; });
   }
 
@@ -114,6 +122,7 @@ class _UserPhoneState extends State<UserPhone> {
 
     String fieldNumber = _fieldsByMode[_formVals['mode']]!['number']!;
     String fieldVerificationKey = _fieldsByMode[_formVals['mode']]!['verificationKey']!;
+    String fieldCountryISOCode = _fieldsByMode[_formVals['mode']]!['countryISOCode']!;
     String buttonText = (_formVals[fieldVerificationKey]!.length > 0 || _verificationSent) ? 'Verify Phone' : 'Send Verification Code';
     List<Widget> buttons = [
       ElevatedButton(
@@ -130,12 +139,17 @@ class _UserPhoneState extends State<UserPhone> {
               data[fieldVerificationKey] = _formVals[fieldVerificationKey];
               _socketService.emit('VerifyPhone', data);
             } else if (_formVals['phoneNumber']!.length >= 8) {
-              var data = {
-                'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
-                'mode': _formVals['mode'],
-              };
-              data[fieldNumber] = _formVals[fieldNumber];
-              _socketService.emit('SendPhoneVerificationCode', data);
+              if (_formVals['mode'] == 'sms' && !['US'].contains(_formVals[fieldCountryISOCode])) {
+                setState(() { _loading = false; _message = "We currently only accept US phone numbers, please try WhatsApp."; });
+              } else {
+                var data = {
+                  'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
+                  'mode': _formVals['mode'],
+                };
+                data[fieldNumber] = _formVals[fieldNumber];
+                data[fieldCountryISOCode] = _formVals[fieldCountryISOCode];
+                _socketService.emit('SendPhoneVerificationCode', data);
+              }
             }
           } else {
             setState(() { _loading = false; _message = "Please fill out all fields."; });
@@ -166,6 +180,7 @@ class _UserPhoneState extends State<UserPhone> {
     Widget widgetVerificationKey = SizedBox.shrink();
     String fieldNumber = _fieldsByMode[_formVals['mode']]!['number']!;
     String fieldVerificationKey = _fieldsByMode[_formVals['mode']]!['verificationKey']!;
+    String fieldCountryISOCode = _fieldsByMode[_formVals['mode']]!['countryISOCode']!;
     if (_formVals[fieldNumber]!.length > 8 && _verificationSent) {
       widgetVerificationKey = Container(width: width, child: _inputFields.inputText(_formVals, fieldVerificationKey, minLen: 2, label: 'Verification Key'));
     }
@@ -179,10 +194,37 @@ class _UserPhoneState extends State<UserPhone> {
     }
     List<Widget> cols = [];
     if (!verified) {
+      Widget inputSms = _inputFields.inputPhoneNumber(_formVals, 'phoneNumber', label: 'Phone number',
+        countryISOCode: _formVals[fieldCountryISOCode], onChanged: (Map<String, dynamic> val) {
+          _formVals[fieldNumber] = val['completeNumber'];
+          _formVals[fieldCountryISOCode] = val['countryISOCode'];
+        }
+      );
+      Widget inputWhatsapp = _inputFields.inputPhoneNumber(_formVals, 'whatsappNumber', label: 'Phone number',
+        countryISOCode: _formVals[fieldCountryISOCode], onChanged: (Map<String, dynamic> val) {
+          _formVals[fieldNumber] = val['completeNumber'];
+          _formVals[fieldCountryISOCode] = val['countryISOCode'];
+        }
+      );
+      if (_formVals['mode'] == 'sms') {
+        inputWhatsapp = SizedBox.shrink();
+      }
+      if (_formVals['mode'] == 'whatsapp') {
+        inputSms = SizedBox.shrink();
+      }
       cols += [
-        Container(width: width, child: _inputFields.inputText(_formVals, fieldNumber,
-          label: 'Phone Number, with country code', hint: '15551234567',
-          pattern: pattern, minLen: 8, maxLen: 15,)),
+        Container(width: width,
+          // child: _inputFields.inputText(_formVals, fieldNumber,
+          //   label: 'Phone Number, with country code', hint: '15551234567',
+          //   pattern: pattern, minLen: 8, maxLen: 15,)
+          child: inputSms,
+        ),
+        Container(width: width,
+          // child: _inputFields.inputText(_formVals, fieldNumber,
+          //   label: 'Phone Number, with country code', hint: '15551234567',
+          //   pattern: pattern, minLen: 8, maxLen: 15,)
+          child: inputWhatsapp,
+        ),
         Container(width: width, child: _inputFields.inputCheckbox(_formVals, 'terms',
           label: 'I agree to receive text messages from TealTowns. Consent is not a condition of purchase. Message and data rates may apply. Message frequency varies. Unsubscribe at any time by clicking the unsubscribe link (where available).',
           onChanged: (bool val) {
@@ -232,6 +274,7 @@ class _UserPhoneState extends State<UserPhone> {
               'mode': _formVals['mode'],
             };
             data[fieldNumber] = '';
+            data[fieldCountryISOCode] = '';
             _socketService.emit('SendPhoneVerificationCode', data);
           },
           child: Text('Remove Phone'),

@@ -81,7 +81,7 @@ def VerifyPhone(userId: str, phoneNumberVerificationKey: str, mode: str = 'sms')
         ret['user'] = user
     return ret
 
-def SendPhoneVerificationCode(userId: str, phoneNumber: str, mode: str = 'sms'):
+def SendPhoneVerificationCode(userId: str, phoneNumber: str, mode: str = 'sms', countryISOCode: str = ''):
     ret = { 'valid': 0, 'message': '', 'user': {}, }
     regex = re.compile('[^0-9 ]')
     phoneNumber = regex.sub('', phoneNumber)
@@ -90,13 +90,16 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str, mode: str = 'sms'):
         'verification': 'phoneNumberVerificationKey',
         'verified': 'phoneNumberVerified',
         'number': 'phoneNumber',
+        'countryISOCode': 'phoneNumberCountryISOCode',
     }
     if mode == 'whatsapp':
         fields['verification'] = 'whatsappNumberVerificationKey'
         fields['verified'] = 'whatsappNumberVerified'
         fields['number'] = 'whatsappNumber'
+        fields['countryISOCode'] = 'whatsappNumberCountryISOCode'
 
     ret[fields['number']] = phoneNumber
+    ret[fields['countryISOCode']] = countryISOCode
 
     user = mongo_db.find_one('user', { '_id': mongo_db.to_object_id(userId) })['item']
     if user is not None:
@@ -107,6 +110,7 @@ def SendPhoneVerificationCode(userId: str, phoneNumber: str, mode: str = 'sms'):
             '$set': {}
         }
         mutation['$set'][fields['number']] = phoneNumber
+        mutation['$set'][fields['countryISOCode']] = countryISOCode
         mutation['$set'][fields['verified']] = 0
         mutation['$set'][fields['verification']] = phoneNumberVerificationKey
         result = mongo_db.update_one('user', { '_id': mongo_db.to_object_id(userId) }, mutation)

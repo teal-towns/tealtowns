@@ -36,7 +36,7 @@ class FormSave extends StatefulWidget {
   String saveText;
   bool requireLoggedIn;
 
-  FormSave({required this.formVals, this.dataName= '', this.routeGet = '', this.routeSave = '', this.preSave = null,
+  FormSave({required this.formVals, this.dataName = '', this.routeGet = '', this.routeSave = '', this.preSave = null,
     this.onSave = null, this.parseData = null, this.fieldWidth = 250, this.align = 'center', this.id = '',
     this.uName = '', this.formFields = null,
     this.mode = '', this.stepKeys = const [], this.seeMoreKeys = const [], this.loggedOutRedirect = '/login',
@@ -426,6 +426,20 @@ class _FormSaveState extends State<FormSave> {
       input = _inputFields.inputMultiSelect(value['options'], _formVals, key, label: label, helpText: helpText, required: required,);
     } else if (value['type'] == 'time') {
       input = _inputFields.inputTime(_formVals, key, label: label, required: required, helpText: helpText,);
+    } else if (value['type'] == 'phone') {
+      String countryISOCode = '';
+      if (widget.formFields![key]!.containsKey('countryISOCodeField') &&
+        _formVals.containsKey(widget.formFields![key]!['countryISOCodeField'])) {
+        countryISOCode = _formVals[widget.formFields![key]!['countryISOCodeField']];
+      }
+      input = _inputFields.inputPhoneNumber(_formVals, key, label: label, required: required, helpText: helpText,
+        countryISOCode: countryISOCode, onChanged: (Map<String, dynamic> val) {
+          _formVals[key] = val['completeNumber'];
+          if (widget.formFields![key]!.containsKey('countryISOCodeField') &&
+            _formVals.containsKey(widget.formFields![key]!['countryISOCodeField'])) {
+            _formVals[widget.formFields![key]!['countryISOCodeField']] = val['countryISOCode'];
+          }
+        },);
     } else if (value['type'] == 'number') {
       double? min = value.containsKey('min') ? value['min'] : null;
       double? max = value.containsKey('max') ? value['max'] : null;
