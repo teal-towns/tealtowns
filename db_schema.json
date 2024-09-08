@@ -25,9 +25,11 @@
         "phoneNumber": "{String} @optional",
         "phoneNumberVerificationKey": "{String} @optional",
         "phoneNumberVerified": "{Int} 1 or 0",
+        "phoneNumberCountryISOCode": "{String} @optional",
         "whatsappNumber": "{String} @optional",
         "whatsappNumberVerified": "{Int} 1 or 0",
-        "whatsappNumberVerificationKey": "{String} @optional"
+        "whatsappNumberVerificationKey": "{String} @optional",
+        "whatsappNumberCountryISOCode": "{String} @optional"
     },
     "image": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

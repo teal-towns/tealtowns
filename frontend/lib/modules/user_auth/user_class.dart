@@ -6,13 +6,14 @@ class UserClass {
 
   String id = '', email = '', firstName = '', lastName = '', status = '', username = '',
     sessionId = '', roles = '', createdAt = '', phoneNumber = '', phoneNumberVerificationKey = '',
-    whatsappNumber = '', whatsappNumberVerificationKey = '';
+    phoneNumberCountryISOCode = '',
+    whatsappNumber = '', whatsappNumberVerificationKey = '', whatsappNumberCountryISOCode = '';
   //List<String> roles;
   int emailVerified = 0, phoneNumberVerified = 0, whatsappNumberVerified = 0;
   LocationClass location = LocationClass.fromJson({});
   UserClass(this.id, this.email, this.firstName, this.lastName, this.status, this.username, this.sessionId, this.roles,
-    this.createdAt, this.phoneNumber, this.phoneNumberVerificationKey,
-    this.whatsappNumber, this.whatsappNumberVerificationKey,
+    this.createdAt, this.phoneNumber, this.phoneNumberVerificationKey, this.phoneNumberCountryISOCode,
+    this.whatsappNumber, this.whatsappNumberVerificationKey, this.whatsappNumberCountryISOCode,
     this.emailVerified, this.phoneNumberVerified, this.whatsappNumberVerified,
     this.location);
   UserClass.fromJson(Map<String, dynamic> json) {
@@ -37,9 +38,11 @@ class UserClass {
     this.phoneNumber = json['phoneNumber'] ?? '';
     this.phoneNumberVerificationKey = json['phoneNumberVerificationKey'] ?? '';
     this.phoneNumberVerified = json['phoneNumberVerified'] != null ? _parseService.toIntNoNull(json['phoneNumberVerified']) : 0;
+    this.phoneNumberCountryISOCode = json['phoneNumberCountryISOCode'] ?? '';
     this.whatsappNumber = json['whatsappNumber'] ?? '';
     this.whatsappNumberVerificationKey = json['whatsappNumberVerificationKey'] ?? '';
     this.whatsappNumberVerified = json['whatsappNumberVerified'] != null ? _parseService.toIntNoNull(json['whatsappNumberVerified']) : 0;
+    this.whatsappNumberCountryISOCode = json['whatsappNumberCountryISOCode'] ?? '';
     this.emailVerified = json['emailVerified'] != null ? _parseService.toIntNoNull(json['emailVerified']) : 0;
   }
 
@@ -57,9 +60,11 @@ class UserClass {
     'phoneNumber': phoneNumber,
     'phoneNumberVerificationKey': phoneNumberVerificationKey,
     'phoneNumberVerified': phoneNumberVerified,
+    'phoneNumberCountryISOCode': phoneNumberCountryISOCode,
     'whatsappNumber': whatsappNumber,
     'whatsappNumberVerificationKey': whatsappNumberVerificationKey,
     'whatsappNumberVerified': whatsappNumberVerified,
+    'whatsappNumberCountryISOCode': whatsappNumberCountryISOCode,
     'emailVerified': emailVerified,
   };
 

@@ -31,8 +31,10 @@ def getUserFields():
         'updatedAt': True,
         'phoneNumber': True,
         'phoneNumberVerified': True,
+        'phoneNumberCountryISOCode': True,
         'whatsappNumber': True,
         'whatsappNumberVerified': True,
+        'whatsappNumberCountryISOCode': True,
         'emailVerified': True,
     }
 
