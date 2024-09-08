@@ -90,8 +90,11 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
   List<Map<String, dynamic>> _optsImage = [
     {'value': 'event', 'label': 'Event'},
     {'value': 'logo', 'label': 'Logo'},
-    {'value': 'i_eco', 'label': 'Sustainable - Leaf', 'icon': Icons.eco},
-    {'value': 'i_compost', 'label': 'Sustainable - Plant', 'icon': Icons.compost},
+    // {'value': 'i_eco', 'label': 'Sustainable - Leaf', 'icon': Icons.eco},
+    // {'value': 'i_compost', 'label': 'Sustainable - Plant', 'icon': Icons.compost},
+    {'value': 'image_shared_meal', 'label': 'Shared Meal', 'url': 'assets/images/events/line_art/shared-meal.png'},
+    {'value': 'image_standing_nature', 'label': 'Standing in Nature', 'url': 'assets/images/events/line_art/people-standing-nature.jpg'},
+    {'value': 'image_walking_park', 'label': 'Walking in Park', 'url': 'assets/images/events/line_art/people-walking-in-park.jpg'},
   ];
 
   @override
@@ -140,7 +143,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       _formVals['rows'] = 1;
       _formVals['columns'] = 1;
       _formVals['showImage'] = 1;
-      _formVals['showQrCodeEvent'] = 1;
+      _formVals['showQrCodeEvent'] = 0;
       _formVals['showQrCodeEvents'] = 0;
       _formVals['showEventBasics'] = 1;
       _formVals['showEmail'] = 1;
@@ -148,15 +151,15 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       _formVals['showTearOffs'] = 1;
       _formVals['showMessage'] = 0;
       _formVals['userMessage'] = '';
-      _formVals['imageKey'] = 'event';
-      if (val == 'largePublicInkSaver') {
-        _formVals['imageKey'] = 'logo';
-      }
+      // _formVals['imageKey'] = 'event';
+      // if (val == 'largePublicInkSaver') {
+      //   _formVals['imageKey'] = 'logo';
+      // }
     } else if (val == 'mediumPublic' || val == 'mediumPublicInkSaver') {
       _formVals['rows'] = 2;
       _formVals['columns'] = 2;
       _formVals['showImage'] = 1;
-      _formVals['showQrCodeEvent'] = 1;
+      _formVals['showQrCodeEvent'] = 0;
       _formVals['showQrCodeEvents'] = 0;
       _formVals['showEventBasics'] = 1;
       _formVals['showEmail'] = 1;
@@ -164,10 +167,10 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       _formVals['showTearOffs'] = 0;
       _formVals['showMessage'] = 0;
       _formVals['userMessage'] = '';
-      _formVals['imageKey'] = 'event';
-      if (val == 'mediumPublicInkSaver') {
-        _formVals['imageKey'] = 'logo';
-      }
+      // _formVals['imageKey'] = 'event';
+      // if (val == 'mediumPublicInkSaver') {
+      //   _formVals['imageKey'] = 'logo';
+      // }
     } else if (val == 'oneNeighbor') {
       _formVals['rows'] = 3;
       _formVals['columns'] = 3;
@@ -256,6 +259,9 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         SetValsFromPreset(val);
         setState(() { _formVals = _formVals; });
       }),
+      _inputFields.inputSelect(_optsImage, _formVals, 'imageKey', label: 'Image', onChanged: (val) {
+        setState(() { _formVals = _formVals; });
+      }),
     ];
     if (_formVals['preset'] == 'custom') {
       inputs += [
@@ -299,9 +305,6 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         }),
         _inputFields.inputSelect(_optsYesNo, _formVals, 'showEmail', label: 'Show Email?', onChanged: (val) {
           _formVals['showEmail'] = int.parse(val);
-          setState(() { _formVals = _formVals; });
-        }),
-        _inputFields.inputSelect(_optsImage, _formVals, 'imageKey', label: 'Image', onChanged: (val) {
           setState(() { _formVals = _formVals; });
         }),
       ];
@@ -384,6 +387,16 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           Image.asset('assets/images/logo.png', width: double.infinity, height: imageHeight,),
           SizedBox(height: 10),
         ];
+      } else if (_formVals['imageKey'].startsWith('image_')) {
+        for (Map<String, dynamic> opt in _optsImage) {
+          if (_formVals['imageKey'] == opt['value']) {
+            colsImage += [
+              Image.asset(opt['url'], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
+              SizedBox(height: 10),
+            ];
+            break;
+          }
+        }
       } else if (_formVals['imageKey'].startsWith('i_')) {
         for (Map<String, dynamic> opt in _optsImage) {
           if (_formVals['imageKey'] == opt['value']) {
@@ -532,31 +545,37 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       ...colsNeighborhoodEvents,
       ...colsInterests,
     ];
-    List<Widget> colsDetailsQR = [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(flex: 1, child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...colsDetails,
-            ]
-          )),
-          Expanded(flex: 1, child: Column(
-            children: [
-              ...colsQrCode,
-              ...colsQrCodeEvents,
-            ]
-          )),
-        ]
-      )
-    ];
+    List<Widget> colsDetailsQR = [];
     if (_formVals['columns'] > 2) {
       colsDetailsQR = [
         ...colsDetails,
         ...colsQrCode,
         ...colsQrCodeEvents,
       ];
+    } else {
+      if (_formVals['showQrCodeEvent'] > 0 || _formVals['showQrCodeEvents'] > 0) {
+        colsDetailsQR = [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 1, child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...colsDetails,
+                ]
+              )),
+              Expanded(flex: 1, child: Column(
+                children: [
+                  ...colsQrCode,
+                  ...colsQrCodeEvents,
+                ]
+              )),
+            ]
+          )
+        ];
+      } else {
+        colsDetailsQR = colsDetails;
+      }
     }
 
     List<Widget> colsDescription = [];
