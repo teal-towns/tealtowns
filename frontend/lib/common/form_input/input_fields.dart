@@ -775,7 +775,6 @@ class InputFields {
           },
           onTapShowedItem: () {},
           onPickedChange: (items) {
-            print ('onPickedChange ${items}');
             List<dynamic> values = [];
             for (var item in items) {
               values.add(item['value']);
