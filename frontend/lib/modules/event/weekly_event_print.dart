@@ -114,6 +114,15 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
         if (data.containsKey('weeklyEvent') && data['weeklyEvent'].containsKey('_id') &&
           data.containsKey('event') && data['event'].containsKey('_id')) {
           _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
+          if (_weeklyEvent.tags.contains('walk')) {
+            _formVals['imageKey'] = 'image_walking_park';
+          }
+          for (String tag in ['food', 'breakfast', 'lunch', 'dinner']) {
+            if (_weeklyEvent.tags.contains(tag)) {
+              _formVals['imageKey'] = 'image_shared_meal';
+              break;
+            }
+          }
           if (data.containsKey('event')) {
             _event = EventClass.fromJson(data['event']);
           }
