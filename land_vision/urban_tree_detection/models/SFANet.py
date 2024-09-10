@@ -3,9 +3,9 @@
 
 
 import numpy as np 
-from tensorflow.keras import Model, layers, initializers, losses
+from keras import Model, layers, initializers, losses
 from .VGG import VGG, BaseConv
-from tensorflow.keras import backend as K
+from keras import backend as K
 import tensorflow as tf
 
 class BackEnd(Model):

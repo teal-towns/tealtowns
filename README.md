@@ -10,7 +10,6 @@ Python (with sockets) + MongoDB + Flutter
 
 Note, may have to replace all `pip` with `pip3` and `python` with `python3`. Type `python -V` to see your version of python. If it is not 3.11, try `python3 -V` instead.
 - `pip install -r ./requirements.txt`
-  - For Mac: `pip install tensorflow-macos tensorflow-metal`
 - Download and copy over `config.yml` and `frontend/.env`
   - https://drive.google.com/drive/u/0/folders/1jfnFmkQUZ0YpXnDtyy8Zk9y7CplBja2Y
 - `cd frontend && flutter build web` (for frontend)

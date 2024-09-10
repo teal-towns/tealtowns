@@ -1,7 +1,7 @@
 import numpy as np 
-from tensorflow.keras import Model, layers, initializers, losses
-from tensorflow.keras.applications import VGG16
-from tensorflow.keras import backend as K
+from keras import Model, layers, initializers, losses
+from keras.applications import VGG16
+from keras import backend as K
 import tensorflow as tf
 
 class BaseConv(layers.Layer):
