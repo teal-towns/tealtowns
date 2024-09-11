@@ -55,6 +55,11 @@ class _TeamState extends State<Team> {
       name: 'Alyssa Montero',
       role: '',
     ),
+    ImageData(
+      imagePath: 'assets/images/team/rebecca-odim.jpg',
+      name: 'Rebecca Odim',
+      role: '',
+    ),
   ];
   double _imageSize = 200.0;
 
