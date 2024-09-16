@@ -130,9 +130,11 @@ def CheckAndDoFollowUps(now = None, maxAttempts: int = 6, nextFollowUpMinDays: i
                     retEmail = _email_sendgrid.Send(messageInfo['subject'], messageInfo['body'], user['email'])
                     ret['notifyUsernamesByType'][forType]['email'].append(username)
                 else:
-                    number = user['phoneNumber']
+                    number = None
                     messageTemplateKey = ''
                     messageTemplateVariables = {}
+                    if contactType == 'sms':
+                        number = user['phoneNumber']
                     if contactType == 'whatsapp':
                         number = user['whatsappNumber']
                         messageTemplateKey = messageInfo['messageTemplateKey']
