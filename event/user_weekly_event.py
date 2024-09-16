@@ -17,7 +17,9 @@ def Save(userWeeklyEvent: dict, now = None):
     query = { 'userId': userWeeklyEvent['userId'], 'forType': 'weeklyEvent', 'forId': weeklyEvent['_id'] }
     userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
     if userPaymentSubscription is not None and userPaymentSubscription['status'] == 'complete':
-        pricePerSpot = retPay['yearlyPrice'] if userPaymentSubscription['recurringInterval'] == 'year' else retPay['monthlyPrice']
+        pricePerSpot = retPay['monthlyPrice']
+        if userPaymentSubscription['recurringIntervalCount'] == 3:
+            pricePerSpot = retPay['monthly3Price']
         amountOwed = pricePerSpot * userWeeklyEvent['attendeeCountAsk']
         if abs(userPaymentSubscription['amountUSD']) < amountOwed:
             ret['valid'] = 0

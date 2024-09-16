@@ -78,23 +78,43 @@ def CancelSubscription(userPaymentSubscriptionId: str):
         mongo_db.update_one('userPaymentSubscription', query, mutation)
     return ret
 
-def GetSubscriptionPaymentsRemaining(userPaymentSubscription: dict, mostRecentPaidDate: str, now = None,
+def GetSubscriptionPaymentsRemaining(userPaymentSubscription: dict, mostRecentPaidDate: str = None, now = None,
     payPeriodDays: int = 7):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'subscriptionPaymentsRemaining': 0, }
     daysRemaining = 0
     paymentDate = date_time.from_string(userPaymentSubscription['createdAt'])
+    intervalCount = userPaymentSubscription['recurringIntervalCount']
     if userPaymentSubscription['recurringInterval'] == 'month':
         nextPaymentDay = paymentDate.day
-        if nextPaymentDay > now.day:
-            daysRemaining = nextPaymentDay - now.day
+        daysRemaining = nextPaymentDay - now.day
+        if intervalCount > 1:
+            nextPaymentMonth = paymentDate.month
+            if nextPaymentMonth < now.month:
+                while nextPaymentMonth < now.month:
+                    nextPaymentMonth += intervalCount
+            else:
+                while (nextPaymentMonth - intervalCount) > now.month:
+                    nextPaymentMonth -= intervalCount
+            if nextPaymentMonth == now.month and nextPaymentDay < now.day:
+                nextPaymentMonth += intervalCount
+            extraMonths = nextPaymentMonth - now.month
+            daysRemaining += extraMonths * 30
         else:
-            daysRemaining = nextPaymentDay - now.day + 30
+            if nextPaymentDay > now.day:
+                daysRemaining = nextPaymentDay - now.day
+            else:
+                daysRemaining = nextPaymentDay - now.day + 30
     elif userPaymentSubscription['recurringInterval'] == 'year':
         nextPaymentDate = date_time.create(now.year, paymentDate.month, paymentDate.day)
         if nextPaymentDate < now:
             nextPaymentDate = date_time.create(now.year + 1, paymentDate.month, paymentDate.day)
         daysRemaining = date_time.diff(now, nextPaymentDate, unit = 'days')
+        if intervalCount > 1:
+            offset = (paymentDate.year - now.year)
+            if offset < 0:
+                offset += 12
+            daysRemaining += (offset % intervalCount) * 365
     ret['subscriptionPaymentsRemaining'] = round(daysRemaining / payPeriodDays)
     return ret
 

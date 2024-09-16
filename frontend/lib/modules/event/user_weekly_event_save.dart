@@ -51,6 +51,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
   final _formKey = GlobalKey<FormState>();
   Map<String, double> _subscriptionPrices = {
     'month': 0,
+    '3month': 0,
     'year': 0,
   };
   bool _loadingPayment = false;
@@ -209,8 +210,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
                 label: 'How many spots (including yourself)?', min: 1, onChanged: (double? val)  {
                   if (val != null && val! >= 1) {
                     _formVals['attendeeCountAsk'] = val.toInt();
-                    // Causes rebuild that loses cursor position.
-                    // setState(() { _formVals = _formVals;});
+                    setState(() { _formVals = _formVals;});
                   }
                 }),
               ], width: fieldWidth),
@@ -261,12 +261,15 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     double spots = _formVals['attendeeCountAsk'];
     double singlePrice = _weeklyEvent.priceUSD * spots;
     double monthlyPrice = prices['monthlyPrice']! * spots;
-    double yearlyPrice = prices['yearlyPrice']! * spots;
     double monthlySavingsPerYear = prices['monthlySavingsPerYear']! * spots;
-    double yearlySavingsPerYear = prices['yearlySavingsPerYear']! * spots;
+    double monthly3Price = prices['monthly3Price']! * spots;
+    double monthly3SavingsPerYear = prices['monthly3SavingsPerYear']! * spots;
+    // double yearlyPrice = prices['yearlyPrice']! * spots;
+    // double yearlySavingsPerYear = prices['yearlySavingsPerYear']! * spots;
 
     _subscriptionPrices['month'] = monthlyPrice;
-    _subscriptionPrices['year'] = yearlyPrice;
+    _subscriptionPrices['3month'] = monthly3Price;
+    // _subscriptionPrices['year'] = yearlyPrice;
 
     Map<String, Map<String, dynamic>> vals = {
       'single': {
@@ -277,10 +280,14 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
         'header': 'Monthly Subscription: \$${monthlyPrice}',
         'body': 'Savings: \$${monthlySavingsPerYear} / year',
       },
-      'year': {
-        'header': 'Yearly Subscription: \$${yearlyPrice}',
-        'body': 'Savings: \$${yearlySavingsPerYear} / year',
+      '3month': {
+        'header': '3 Month Subscription: \$${monthly3Price}',
+        'body': 'Savings: \$${monthly3SavingsPerYear} / year',
       },
+      // 'year': {
+      //   'header': 'Yearly Subscription: \$${yearlyPrice}',
+      //   'body': 'Savings: \$${yearlySavingsPerYear} / year',
+      // },
     };
     List<Widget> contents = [];
     for (var keyVal in vals.entries) {
@@ -319,42 +326,6 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
             ...contents,
           ],
         ),
-        // SegmentedButton<String>(
-        //   segments: [
-        //     ButtonSegment<String>(
-        //       value: 'single',
-        //       label: Text('Single Event: \$${singlePrice}'),
-        //     ),
-        //     ButtonSegment<String>(
-        //       value: 'month',
-        //       label: Column(
-        //         children: [
-        //           Text('Monthly: \$${monthlyPrice}'),
-        //           Text('Save \$${monthlySavingsPerYear} per year'),
-        //         ]
-        //       ),
-        //     ),
-        //     ButtonSegment<String>(
-        //       value: 'year',
-        //       label: Column(
-        //         children: [
-        //           Text('Yearly: \$${yearlyPrice}'),
-        //           Text('Save \$${yearlySavingsPerYear} per year'),
-        //         ]
-        //       ),
-        //     ),
-        //   ],
-        //   selected: <String>{_formValsPay['subscription']},
-        //   onSelectionChanged: (Set<String> newSelection) {
-        //     // By default there is only a single segment that can be
-        //     // selected at one time, so its value is always the first
-        //     // item in the selected set.
-        //     _formValsPay['subscription'] = newSelection.first;
-        //     setState(() {
-        //       _formValsPay = _formValsPay;
-        //     });
-        //   },
-        // ),
         SizedBox(height: 10),
       ]
     );
@@ -364,6 +335,12 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     double price = _subscriptionPrices[_formValsPay['subscription']]!;
     String title = _formVals['attendeeCountAsk'] > 1 ?
         '${_formVals['attendeeCountAsk']} spots: ${_weeklyEvent.title}' : _weeklyEvent.title;
+    int recurringIntervalCount = 1;
+    String interval = _formValsPay['subscription'];
+    if (_formValsPay['subscription'] == '3month') {
+      recurringIntervalCount = 3;
+      interval = 'month';
+    }
     var data = {
       'amountUSD': price,
       'userId': currentUserState.currentUser.id,
@@ -371,7 +348,8 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       'forId': _weeklyEvent.id!,
       'forType': 'weeklyEvent',
       'quantity': _formVals['attendeeCountAsk'],
-      'recurringInterval': _formValsPay['subscription'],
+      'recurringInterval': interval,
+      'recurringIntervalCount': recurringIntervalCount,
     };
     _socketService.emit('StripeGetPaymentLink', data);
     setState(() { _loadingPayment = true; });
