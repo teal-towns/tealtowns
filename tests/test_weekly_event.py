@@ -64,7 +64,7 @@ def test_WeeklyEventFlow():
     # - User 1 creates weekly event, then signs up (pays with money balance) for a single event (this auto creates an event for this week).
     # - User 2 signs up (pays) for a monthly subscription to the weekly event; user 2 is added to this week's event
     # - User 3 signs up as a host; pays for a single event
-    # - User 4 signs up for a yearly subscription with 2 guests on the subscription.
+    # - User 4 signs up for a 3 monthly subscription with 2 guests on the subscription.
     #     - This triggers: there is a host, so User 3 is paid $16 and given 1 credit (cooks for 4 people).
     # - RSVP Deadline passes.
     #     - User 4 gets 2 credits (since 2 guests could not join)
@@ -163,9 +163,9 @@ def test_WeeklyEventFlow():
     attendeeCountAsk = 3
     user4PaymentSubscription = {
         'userId': users[4]['_id'],
-        'amountUSD': subscriptionPrices['yearlyPrice'] * attendeeCountAsk,
-        'recurringInterval': 'year',
-        'recurringIntervalCount': 1,
+        'amountUSD': subscriptionPrices['monthly3Price'] * attendeeCountAsk,
+        'recurringInterval': 'month',
+        'recurringIntervalCount': 3,
         'forType': 'weeklyEvent',
         'forId': weeklyEvent['_id'],
         'quantity': attendeeCountAsk,

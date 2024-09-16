@@ -120,7 +120,7 @@ class _UserPaymentSubscriptionsState extends State<UserPaymentSubscriptions> {
       child: Row(
         children: [
           Expanded(flex: 1, child: Text('-${userPaymentSubscription.amountUSD}')),
-          Expanded(flex: 1, child: Text('${userPaymentSubscription.recurringInterval}')),
+          Expanded(flex: 1, child: Text('${userPaymentSubscription.recurringIntervalCount} ${userPaymentSubscription.recurringInterval}')),
           Expanded(flex: 1, child: forLink),
           Expanded(flex: 1, child: status),
           Expanded(flex: 1, child: Text('${createdAt}')),
