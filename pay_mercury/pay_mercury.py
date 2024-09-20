@@ -129,6 +129,7 @@ def GetRecipientByKey(key: str):
 def MakeTransaction(accountKey: str, recipientKey: str, amountUSD: float, transactionKey: str):
     ret = { 'valid': 0, 'message': '', 'transaction': {}, }
     if _testMode or ('test_mode' in _config['mercury'] and _config['mercury']['test_mode']):
+        print ('pay_mercury.MakeTransaction TEST MODE, skipping', accountKey, recipientKey, amountUSD, transactionKey)
         ret['valid'] = 1
         return ret
     retAccount = GetAccountByKey(accountKey)

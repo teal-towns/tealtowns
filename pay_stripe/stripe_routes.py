@@ -72,12 +72,12 @@ async def StripeWebhook(request):
                         }
                         _user_payment.AddPaymentSubscription(userPaymentSubscription)
                     else:
-                        _user_payment.AddPayment(data1['userId'], amount, data1['forType'],
+                        _user_payment.AddPayment(data1['userId'], -1 * amount, data1['forType'],
                             data1['forId'], 'complete', quantity = data1['quantity'])
                 else:
                     withoutPayFee = _shared_item_payment_math.RemoveFee(amount, withCut = False)
                     withoutFees = _shared_item_payment_math.RemoveFee(amount)
-                    _user_payment.AddPayment(data['metadata']['userId'], withoutPayFee, 'sharedItem',
+                    _user_payment.AddPayment(data['metadata']['userId'], -1 * withoutPayFee, 'sharedItem',
                         data['metadata']['sharedItemId'], 'complete', notes = 'Stripe down payment',
                         amountUSDPreFee = amount)
                     data1['totalPaid'] = withoutFees
@@ -117,7 +117,7 @@ async def StripeWebhook(request):
                 amount = data['amount'] / 100
                 withoutPayFee = _shared_item_payment_math.RemoveFee(amount, withCut = False)
                 withoutFees = _shared_item_payment_math.RemoveFee(amount)
-                _user_payment.AddPayment(data['metadata']['userId'], withoutPayFee, 'sharedItemOwner',
+                _user_payment.AddPayment(data['metadata']['userId'], -1 * withoutPayFee, 'sharedItemOwner',
                     data['metadata']['sharedItemOwnerId'], 'complete', notes = 'Stripe monthly payment',
                     amountUSDPreFee = amount)
                 _shared_item_payment.MakeOwnerPayment(data['metadata']['sharedItemOwnerId'], withoutFees)

@@ -61,7 +61,6 @@ class _UserSignupState extends State<UserSignup> {
                 // currentUserState.AddRouterRedirectUrl(route);
                 route = redirectUrl;
               }
-              print ('route: $route');
               context.go(route);
             }
           } else {
