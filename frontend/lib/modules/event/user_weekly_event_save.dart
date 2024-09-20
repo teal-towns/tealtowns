@@ -97,7 +97,10 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        _linkService.LaunchURL(data['url']);
+        if (data.containsKey('forId') && data.containsKey('forType') &&
+          data['forType'] == 'weeklyEvent' && data['forId'] == _weeklyEvent.id) {
+          _linkService.LaunchURL(data['url']);
+        }
       } else {
         setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; });
       }

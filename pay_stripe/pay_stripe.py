@@ -10,7 +10,8 @@ _config = ml_config.get_config()
 
 def StripePaymentLink(amountUSD: float, userId: str, title: str, forId: str, forType: str,
     recurringInterval: str = '', recurringIntervalCount: int = 1, quantity: int = 1):
-    ret = { 'valid': 1, 'message': '', 'url': '', 'priceId': '', }
+    ret = { 'valid': 1, 'message': '', 'url': '', 'priceId': '',
+        'userId': userId, 'forId': forId, 'forType': forType, }
     # title = GetPaymentName(title, '')
     stripe.api_key = _config['stripe']['secret']
     res = None
@@ -76,7 +77,7 @@ def StripePaymentLink(amountUSD: float, userId: str, title: str, forId: str, for
 
 # https://docs.stripe.com/connect/add-and-pay-out-guide?dashboard-or-api=api
 def StripeAccountLink(userId: str):
-    ret = { 'valid': 1, 'message': '', 'url': '', 'userStripeAccount': {} }
+    ret = { 'valid': 1, 'message': '', 'url': '', 'userStripeAccount': {}, 'userId': userId, }
     stripe.api_key = _config['stripe']['secret']
     # First see if user already has one.
     userStripeAccount = mongo_db.find_one('userStripeAccount', { 'userId': userId })['item']

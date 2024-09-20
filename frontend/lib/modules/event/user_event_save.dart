@@ -88,7 +88,10 @@ class _UserEventSaveState extends State<UserEventSave> {
       var res = jsonDecode(resString);
       var data = res['data'];
       if (data['valid'] == 1) {
-        _linkService.LaunchURL(data['url']);
+        if (data.containsKey('forId') && data.containsKey('forType') &&
+          data['forType'] == 'event' && data['forId'] == _event.id!) {
+          _linkService.LaunchURL(data['url']);
+        }
       } else {
         setState(() { _message = data['message'].length > 0 ? data['message'] : 'Error, please try again.'; });
       }

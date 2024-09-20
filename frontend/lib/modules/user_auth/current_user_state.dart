@@ -26,6 +26,10 @@ class CurrentUserState extends ChangeNotifier {
   Map<String, dynamic> _appData = {};
   UserAvailabilityClass _userAvailability = UserAvailabilityClass.fromJson({});
   UserInterestClass _userInterest = UserInterestClass.fromJson({});
+  Map<String, bool> _flagsRedirect = {
+    'userInterest': false,
+    'userAvailability': false,
+  };
 
   get isLoggedIn => _isLoggedIn;
 
@@ -58,14 +62,14 @@ class CurrentUserState extends ChangeNotifier {
           //   }
           // }
           bool redirectSet = false;
-          if (data.containsKey('userInterest')) {
+          if (_flagsRedirect['userInterest']! && data.containsKey('userInterest')) {
             SetUserInterest(UserInterestClass.fromJson(data['userInterest']));
             if (_userInterest.interests.length < 3 && !redirectSet) {
               _routerRedirectUrls.add('/interests');
               redirectSet = true;
             }
           }
-          if (data.containsKey('userAvailability')) {
+          if (_flagsRedirect['userAvailability']! && data.containsKey('userAvailability')) {
             SetUserAvailability(UserAvailabilityClass.fromJson(data['userAvailability']));
             int timesCount = 0;
             for (var day in _userAvailability.availableTimesByDay) {
