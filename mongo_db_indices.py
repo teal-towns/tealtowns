@@ -26,7 +26,8 @@ def create_all_indices(db):
     db['userWeeklyEvent'].create_index([('weeklyEventUName', 1)], unique=False)
 
     db['userEvent'].create_index([('userId', 1), ('eventId', 1)], unique=True)
-    db['userEvent'].create_index([('creditsPriceUSD', 1), ('hostStatus', 1), ('attendeeStatus', 1)], unique=False)
+    db['userEvent'].create_index([('hostStatus', 1), ('attendeeStatus', 1)], unique=False)
+    db['userEvent'].create_index([('priceUSD', 1)], unique=False)
     db['userEvent'].create_index([('weeklyEventUName', 1)], unique=False)
 
     # db['sharedItem'].drop_indexes()
@@ -47,6 +48,8 @@ def create_all_indices(db):
 
     db['userPaymentSubscription'].create_index([('userId', 1), ('forType', 1), ('forId', 1), \
         ('status', 1)], unique=False)
+    
+    db['userCreditPayment'].create_index([('userId', 1), ('forType', 1), ('forId', 1)], unique=False)
     
     db['userStripeAccount'].create_index([('userId', 1)], unique=True)
 

@@ -20,7 +20,7 @@ from user_payment import user_payment as _user_payment
 # - event sign up
 #     - host & guest options
 #     - on sign up, check next host & if have enough attendees, add them & give host money and event credit
-#     - payment: subscriptions vs single events vs credits vs money balance
+#     - payment: subscriptions vs single events vs credit vs money balance
 # - rsvpDeadlineHours
 #     - auto create new event & add weekly event (subscribers) (who have active payment status) to new event
 #        - note: signs up after this will go to next week event
@@ -58,7 +58,7 @@ def test_WeeklyEventFlow():
     for index, userAmount in enumerate(userAmountsCurrent):
         if userAmount > 0:
             _user_payment.AddPayment(users[index]['_id'], userAmount, 'testType', 'testId')
-    userCreditsCurrent = [0,0,0,0,0,0,0,0,0]
+    userCreditCurrent = [0,0,0,0,0,0,0,0,0]
 
     # Week 1:
     # - User 1 creates weekly event, then signs up (pays with money balance) for a single event (this auto creates an event for this week).
@@ -67,7 +67,7 @@ def test_WeeklyEventFlow():
     # - User 4 signs up for a 3 monthly subscription with 2 guests on the subscription.
     #     - This triggers: there is a host, so User 3 is paid $16 and given 1 credit (cooks for 4 people).
     # - RSVP Deadline passes.
-    #     - User 4 gets 2 credits (since 2 guests could not join)
+    #     - User 4 gets 2 * price credit (since 2 guests could not join)
     #     - Since there are subscription users, a new event for next week is auto created and Users 2 and 4 (with 2 guests too) are signed up (added to userEvent).
     weeklyEvent['adminUserIds'] = [ users[1]['_id'] ]
     retWeeklyEvent = _weekly_event.Save(weeklyEvent)
@@ -100,7 +100,7 @@ def test_WeeklyEventFlow():
     assert len(retUserEvent['userEvent']['_id']) > 0
     userAmountsCurrent[1] -= weeklyEvent['priceUSD']
     assert retUserEvent['availableUSD'] == userAmountsCurrent[1]
-    assert retUserEvent['availableCredits'] == 0
+    assert retUserEvent['availableCreditUSD'] == 0
     assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
     assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
 
@@ -116,7 +116,7 @@ def test_WeeklyEventFlow():
         'quantity': 1,
         'status': 'complete',
         'stripeIds': { 'checkoutSession': 'testCSStripeId' },
-        'credits': 0,
+        'creditUSD': 0,
     }
     _mongo_db_crud.Save('userPaymentSubscription', user2PaymentSubscription)
     user2WeeklyEvent = {
@@ -171,7 +171,7 @@ def test_WeeklyEventFlow():
         'quantity': attendeeCountAsk,
         'status': 'complete',
         'stripeIds': { 'checkoutSession': 'testCSStripeId' },
-        'credits': 0,
+        'creditUSD': 0,
     }
     _mongo_db_crud.Save('userPaymentSubscription', user4PaymentSubscription)
     user4WeeklyEvent = {
@@ -202,14 +202,15 @@ def test_WeeklyEventFlow():
             assert userEvent['attendeeStatus'] == 'complete'
             assert userEvent['hostStatus'] == 'complete'
             assert userEvent['hostGroupSize'] == 4
-            assert userEvent['creditsEarned'] == 1
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': userEvent['eventId'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == 1 * weeklyEvent['priceUSD']
         elif userEvent['userId'] in [users[4]['_id']]:
             assert userEvent['attendeeCount'] == 1
             assert userEvent['attendeeStatus'] == 'pending'
     userMoney = mongo_db.find_one('userMoney', {'userId': users[3]['_id']})['item']
     userAmountsCurrent[3] += weeklyEvent['hostMoneyPerPersonUSD'] * 4
     assert userMoney['balanceUSD'] == userAmountsCurrent[3]
-    userCreditsCurrent[3] += 1
+    userCreditCurrent[3] += 1 * weeklyEvent['priceUSD']
 
     # RSVP Deadline
     # Saturday, so passed deadline.
@@ -224,9 +225,9 @@ def test_WeeklyEventFlow():
     assert len(retWeekly['notifyUserIdsHosts']['sms']) == 0
     assert len(retWeekly['notifyUserIdsAttendees']['sms']) == 0
 
-    credits = _user_event.GetUserEventCredits(users[4]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[4] += 2
-    assert credits == userCreditsCurrent[4]
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[4]['_id']})['item']
+    userCreditCurrent[4] += 2 * weeklyEvent['priceUSD']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[4]
     retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
     event2 = retEvent['event']
     # assert event2['start'] == '2024-03-31T17:00:00+00:00'
@@ -246,7 +247,7 @@ def test_WeeklyEventFlow():
     # - User 3 signs up again this week to host. Has 1 credit, so that is used instead of payment.
     # - User 5 signs up.
     # - User 6 signs up for a monthly subscription
-    # - RSVP deadline passes; User 3 hosts 3 people and gets 0.75 credits (and $12).
+    # - RSVP deadline passes; User 3 hosts 3 people and gets 0.75 * price credit (and $12).
     #     - A new event for next week is auto created with Users 2, 4 (plus 2 guests) and 6 added.
     # User 2
     # Sunday night
@@ -271,20 +272,21 @@ def test_WeeklyEventFlow():
             assert userEvent['attendeeStatus'] == 'complete'
             assert userEvent['hostStatus'] == 'complete'
             assert userEvent['hostGroupSize'] == 4
-            assert userEvent['creditsEarned'] == 1
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': userEvent['eventId'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == 1 * weeklyEvent['priceUSD']
         elif userEvent['userId'] in [users[4]['_id']]:
             assert userEvent['attendeeCount'] == 3
             assert userEvent['attendeeStatus'] == 'complete'
     userMoney = mongo_db.find_one('userMoney', {'userId': users[2]['_id']})['item']
     userAmountsCurrent[2] += weeklyEvent['hostMoneyPerPersonUSD'] * 4
     assert userMoney['balanceUSD'] == userAmountsCurrent[2]
-    userCreditsCurrent[2] += 1
+    userCreditCurrent[2] += 1 * weeklyEvent['priceUSD']
 
     # User 3
     now = now + datetime.timedelta(days = 1)
     retPay = _user_event.CheckAndTakePayment(users[3]['_id'], event2['_id'], 1)
     assert retPay['spotsToPayFor'] == 1
-    assert retPay['availableCredits'] == userCreditsCurrent[3]
+    assert retPay['availableCreditUSD'] == userCreditCurrent[3]
     user3Event = {
         'eventId': event2['_id'],
         'userId': users[3]['_id'],
@@ -292,16 +294,15 @@ def test_WeeklyEventFlow():
         'attendeeCountAsk': 1,
         'eventEnd': event2['end'],
     }
-    retUserEvent = _user_event.Save(user3Event, 'credits')
+    retUserEvent = _user_event.Save(user3Event, 'creditUSD')
     assert retUserEvent['valid'] == 1
     assert retUserEvent['spotsPaidFor'] == 1
-    assert retUserEvent['userEvent']['creditsRedeemed'] == 1
     assert len(retUserEvent['userEvent']['_id']) > 0
     assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 0
     assert len(retUserEvent['notifyUserIdsAttendees']['sms']) == 0
-    credits = _user_event.GetUserEventCredits(users[3]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[3] -= 1
-    assert credits == userCreditsCurrent[3]
+    userCreditCurrent[3] -= 1 * weeklyEvent['priceUSD']
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[3]['_id']})['item']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[3]
 
     # User 5
     now = now + datetime.timedelta(hours = 1)
@@ -340,7 +341,7 @@ def test_WeeklyEventFlow():
         'quantity': 1,
         'status': 'complete',
         'stripeIds': { 'checkoutSession': 'testCSStripeId' },
-        'credits': 0,
+        'creditUSD': 0,
     }
     _mongo_db_crud.Save('userPaymentSubscription', user6PaymentSubscription)
     user6WeeklyEvent = {
@@ -371,9 +372,9 @@ def test_WeeklyEventFlow():
     for userId in retWeekly['notifyUserIdsAttendees']['sms']:
         assert userId in [users[5]['_id'], users[6]['_id']]
 
-    credits = _user_event.GetUserEventCredits(users[3]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[3] += 0.75
-    assert credits == userCreditsCurrent[3]
+    userCreditCurrent[3] += 0.75 * weeklyEvent['priceUSD']
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[3]['_id']})['item']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[3]
     userMoney = mongo_db.find_one('userMoney', {'userId': users[3]['_id']})['item']
     userAmountsCurrent[3] += weeklyEvent['hostMoneyPerPersonUSD'] * 3
     assert userMoney['balanceUSD'] == userAmountsCurrent[3]
@@ -427,7 +428,7 @@ def test_WeeklyEventFlow():
     now = now + datetime.timedelta(days = 1)
     retPay = _user_event.CheckAndTakePayment(users[3]['_id'], event3['_id'], 1)
     assert retPay['spotsToPayFor'] == 1
-    assert retPay['availableCredits'] == userCreditsCurrent[3]
+    assert retPay['availableCreditUSD'] == userCreditCurrent[3]
     user3Payment = {
         'userId': users[3]['_id'],
         'amountUSD': -1 * weeklyEvent['priceUSD'],
@@ -448,7 +449,6 @@ def test_WeeklyEventFlow():
     retUserEvent = _user_event.Save(user3Event, 'paid')
     assert retUserEvent['valid'] == 1
     assert retUserEvent['spotsPaidFor'] == 1
-    assert retUserEvent['userEvent']['creditsRedeemed'] == 0
     assert len(retUserEvent['userEvent']['_id']) > 0
     assert len(retUserEvent['notifyUserIdsHosts']['sms']) == 1
     for userId in retUserEvent['notifyUserIdsHosts']['sms']:
@@ -463,7 +463,8 @@ def test_WeeklyEventFlow():
             assert userEvent['attendeeStatus'] == 'complete'
             assert userEvent['hostStatus'] == 'complete'
             assert userEvent['hostGroupSize'] == 4
-            assert userEvent['creditsEarned'] == 1
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': userEvent['eventId'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == 1 * weeklyEvent['priceUSD']
         elif userEvent['userId'] in [users[4]['_id']]:
             assert userEvent['attendeeCount'] == 2
             assert userEvent['attendeeStatus'] == 'pending'
@@ -476,9 +477,9 @@ def test_WeeklyEventFlow():
     userMoney = mongo_db.find_one('userMoney', {'userId': users[3]['_id']})['item']
     userAmountsCurrent[3] += weeklyEvent['hostMoneyPerPersonUSD'] * 4
     assert userMoney['balanceUSD'] == userAmountsCurrent[3]
-    credits = _user_event.GetUserEventCredits(users[3]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[3] += 1
-    assert credits == userCreditsCurrent[3]
+    userCreditCurrent[3] += 1 * weeklyEvent['priceUSD']
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[3]['_id']})['item']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[3]
 
     # User 8
     now = now + datetime.timedelta(hours = 1)
@@ -519,34 +520,37 @@ def test_WeeklyEventFlow():
     assert len(retWeekly['notifyUserIdsHosts']['sms']) == 0
     assert len(retWeekly['notifyUserIdsAttendees']['sms']) == 0
 
-    credits = _user_event.GetUserEventCredits(users[4]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[4] += 1
-    assert credits == userCreditsCurrent[4]
-    credits = _user_event.GetUserEventCredits(users[6]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[6] += 1
-    assert credits == userCreditsCurrent[6]
-    credits = _user_event.GetUserEventCredits(users[7]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[7] += 1
-    assert credits == userCreditsCurrent[7]
-    credits = _user_event.GetUserEventCredits(users[8]['_id'], weeklyEvent['_id'])
-    userCreditsCurrent[8] += 2
-    assert credits == userCreditsCurrent[8]
-    userEvents = mongo_db.find('userEvent', {'eventId': event3['_id']})['items']
-    # - RSVP deadline passes; not enough hosts so Users 6, 7, 8 (and 1 guest) and User 4 guest 2 may not join and each gets 1 event credit (User 8 gets 2 - for self and 1 guest) for the future.
+    userCreditCurrent[4] += 1 * weeklyEvent['priceUSD']
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[4]['_id']})['item']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[4]
+    userCreditCurrent[6] += 1 * weeklyEvent['priceUSD']
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[6]['_id']})['item']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[6]
+    userCreditCurrent[7] += 1 * weeklyEvent['priceUSD']
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[7]['_id']})['item']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[7]
+    userCreditCurrent[8] += 2 * weeklyEvent['priceUSD']
+    userMoney = mongo_db.find_one('userMoney', {'userId': users[8]['_id']})['item']
+    assert userMoney['creditBalanceUSD'] == userCreditCurrent[8]
 
+    # - RSVP deadline passes; not enough hosts so Users 6, 7, 8 (and 1 guest) and User 4 guest 2 may not join and each gets 1 event credit (User 8 gets 2 - for self and 1 guest) for the future.
+    userEvents = mongo_db.find('userEvent', {'eventId': event3['_id']})['items']
     for userEvent in userEvents:
         if userEvent['userId'] in [users[6]['_id'], users[7]['_id']]:
             assert userEvent['attendeeCount'] == 0
             assert userEvent['attendeeStatus'] == 'complete'
-            assert userEvent['creditsEarned'] == 1
+            userCreditPayment = mongo_db.find_one('userCreditPayment', {'userId': userEvent['userId'], 'forType': 'event', 'forId': userEvent['eventId']})['item']
+            assert userCreditPayment['amountUSD'] == 1 * weeklyEvent['priceUSD']
         elif userEvent['userId'] in [users[4]['_id']]:
             assert userEvent['attendeeCount'] == 2
             assert userEvent['attendeeStatus'] == 'complete'
-            assert userEvent['creditsEarned'] == 1
+            userCreditPayment = mongo_db.find_one('userCreditPayment', {'userId': userEvent['userId'], 'forType': 'event', 'forId': userEvent['eventId']})['item']
+            assert userCreditPayment['amountUSD'] == 1 * weeklyEvent['priceUSD']
         elif userEvent['userId'] in [users[8]['_id']]:
             assert userEvent['attendeeCount'] == 0
             assert userEvent['attendeeStatus'] == 'complete'
-            assert userEvent['creditsEarned'] == 2
+            userCreditPayment = mongo_db.find_one('userCreditPayment', {'userId': userEvent['userId'], 'forType': 'event', 'forId': userEvent['eventId']})['item']
+            assert userCreditPayment['amountUSD'] == 2 * weeklyEvent['priceUSD']
     retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
     event4 = retEvent['event']
     # assert event4['start'] == '2024-04-14T17:00:00+00:00'
@@ -661,7 +665,7 @@ def test_SaveWeeklyEventSubscription():
         'quantity': 1,
         'status': 'complete',
         'stripeIds': { 'checkoutSession': 'testCSStripeId' },
-        'credits': 0,
+        'creditUSD': 0,
     }
     _mongo_db_crud.Save('userPaymentSubscription', user0PaymentSubscription)
     user0WeeklyEvent = {

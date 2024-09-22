@@ -40,7 +40,7 @@ class _UserEventSaveState extends State<UserEventSave> {
   final _formKey = GlobalKey<FormState>();
   int _spotsPaidFor = 0;
   double _availableUSD = 0;
-  double _availableCredits = 0;
+  double _availableCreditUSD = 0;
   bool _loadingPayment = false;
 
   String _mySharedItemsState = '';
@@ -76,7 +76,7 @@ class _UserEventSaveState extends State<UserEventSave> {
             setState(() {
               _spotsPaidFor = data['userCheckPayment']['spotsPaidFor'];
               _availableUSD = data['userCheckPayment']['availableUSD'];
-              _availableCredits = data['userCheckPayment']['availableCredits'];
+              _availableCreditUSD = data['userCheckPayment']['availableCreditUSD'];
               _weeklyEvent = WeeklyEventClass.fromJson(data['userCheckPayment']['weeklyEvent']);
             });
         }
@@ -186,17 +186,17 @@ class _UserEventSaveState extends State<UserEventSave> {
     }
     double attendeeMin = _userEvent.attendeeCount > 0 ? _userEvent.attendeeCount.toDouble() : 1;
 
-    List<Widget> colsCreditsMoney = [];
+    List<Widget> colsCreditMoney = [];
     if (_weeklyEvent.priceUSD > 0) {
-      if (_availableUSD >= _weeklyEvent.priceUSD || _availableCredits >= 1) {
+      if (_availableUSD >= _weeklyEvent.priceUSD || _availableCreditUSD >= 1) {
         String text = '';
-        if (_availableCredits >= 1) {
-          text += 'You have ${_availableCredits.toStringAsFixed(2)} credits. ';
+        if (_availableCreditUSD >= 1) {
+          text += 'You have \$${_availableCreditUSD.toStringAsFixed(2)} credit. ';
         }
         if (_availableUSD >= _weeklyEvent.priceUSD) {
           text += 'You have \$${_availableUSD.toStringAsFixed(2)}. ';
         }
-        colsCreditsMoney = [
+        colsCreditMoney = [
           Text(text),
           SizedBox(height: 10),
         ];
@@ -228,19 +228,6 @@ class _UserEventSaveState extends State<UserEventSave> {
       } else {
         attendeeInfo += [
           Text('You are waiting on ${_userEvent.attendeeCountAsk} more spots.'),
-          SizedBox(height: 10),
-        ];
-      }
-      if (_userEvent.creditsEarned > 0 || _userEvent.creditsRedeemed > 0) {
-        String text1 = '';
-        if (_userEvent.creditsEarned > 0) {
-          text1 += '${_userEvent.creditsEarned} credits earned. ';
-        }
-        if (_userEvent.creditsRedeemed > 0) {
-          text1 += '${_userEvent.creditsRedeemed} credits redeemed. ';
-        }
-        attendeeInfo += [
-          Text(text1),
           SizedBox(height: 10),
         ];
       }
@@ -285,7 +272,7 @@ class _UserEventSaveState extends State<UserEventSave> {
 
       if (showJoin) {
         colsSignUp += [
-          ...colsCreditsMoney,
+          ...colsCreditMoney,
           ElevatedButton(
             onPressed: () {
               setState(() { _message = ''; });
@@ -355,8 +342,8 @@ class _UserEventSaveState extends State<UserEventSave> {
     double price = _weeklyEvent.priceUSD * _formVals['attendeeCountAsk'];
     if (_weeklyEvent.priceUSD == 0) {
       _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'free' });
-    } else if (_availableCredits >= _formVals['attendeeCountAsk']) {
-      _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'credits' });
+    } else if (_availableCreditUSD >= price) {
+      _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'creditUSD' });
     } else if (_availableUSD >= price) {
       _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'userMoney' });
     } else {

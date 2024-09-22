@@ -3,8 +3,10 @@ import datetime
 import date_time
 import lodash
 import mongo_db
+from user_payment import user_payment as _user_payment
 
 def RunAll():
+    ToCreditUSD()
     # AddHostInterests()
     # UserNeighborhoodWeeklyUpdateActionsComplete()
     # AddLocationAddress()
@@ -32,6 +34,123 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def ToCreditUSD():
+    collections = ['userMoney']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'creditBalanceUSD': { '$exists': 0 } }
+            fields = { '_id': 1, }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('ToCreditUSD', collection, len(items))
+            for item in items:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mutation = {
+                    '$set': {
+                        'creditBalanceUSD': 0,
+                    }
+                }
+
+                # print (query, mutation)
+                mongo_db.update_one(collection, query, mutation)
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
+    
+    collections = ['userPaymentSubscription']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'creditUSD': { '$exists': 0 } }
+            fields = { '_id': 1, 'userId': 1, 'forType': 1, 'forId': 1, 'quantity': 1, 'credits': 1, 'amountUSD': 1 }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('ToCreditUSD', collection, len(items))
+            for item in items:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                creditUSD = 0
+                if 'credits' in item and item['credits'] != 0:
+                    fields = { 'priceUSD': 1, }
+                    weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(item['forId'])}, fields = fields)['item']
+                    creditUSD = item['credits'] * weeklyEvent['priceUSD']
+                    if creditUSD > item['amountUSD']:
+                        creditUSD = item['amountUSD']
+                    print (collection, item['credits'], 'AddCreditPayment', item['userId'], creditUSD, 'weeklyEvent', item['forId'])
+                    retPay = _user_payment.AddCreditPayment(item['userId'], creditUSD, 'weeklyEvent', item['forId'])
+                mutation = {
+                    '$unset': {
+                        'credits': 1,
+                    },
+                    '$set': {
+                        'creditUSD': creditUSD,
+                    }
+                }
+
+                # print (query, mutation)
+                mongo_db.update_one(collection, query, mutation)
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
+
+    collections = ['userEvent']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'creditsEarned': { '$exists': 1 } }
+            fields = { '_id': 1, 'userId': 1, 'eventId': 1, 'creditsPriceUSD': 1, 'creditsEarned': 1,
+                'creditsRedeemed': 1, }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('ToCreditUSD', collection, len(items))
+            for item in items:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                credits = item['creditsEarned'] - item['creditsRedeemed']
+                # We previously added canceled subscription credits to events, so this will double count them..
+                # For now just limit to credits of 1 or less (this is not perfect and will over-award some money
+                # but only affects ~1 live user so it is okay).
+                if credits != 0 and credits <= 1:
+                    creditUSD = float(credits * item['creditsPriceUSD'])
+                    print (collection, credits, 'AddCreditPayment', item['userId'], creditUSD, 'event', item['eventId'])
+                    _user_payment.AddCreditPayment(item['userId'], creditUSD, 'event', item['eventId'])
+                mutation = {
+                    '$unset': {
+                        'creditsEarned': 1,
+                        'creditsRedeemed': 1,
+                        'creditsPriceUSD': 1,
+                    },
+                    '$set': {
+                        'priceUSD': item['creditsPriceUSD'],
+                    }
+                }
+
+                # print (query, mutation)
+                mongo_db.update_one(collection, query, mutation)
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def AddHostInterests():
     collections = ['userInterest']

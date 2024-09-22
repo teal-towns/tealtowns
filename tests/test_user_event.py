@@ -16,7 +16,7 @@ def CreateEvent():
 
     userEventDefault = {
         'eventId': event['_id'],
-        'creditsPriceUSD': weeklyEvent['priceUSD'],
+        'priceUSD': weeklyEvent['priceUSD'],
         'attendeeCountAsk': 1,
         'hostGroupSizeMax': 0,
     }
@@ -39,9 +39,9 @@ def test_CheckAddHostsAndAttendees():
     # No hosts, so do nothing.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'attendeeCountAsk': 3, },
-        { 'userId': users[1]['_id'], },
-        { 'userId': users[2]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'attendeeCountAsk': 3, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'])
@@ -56,9 +56,9 @@ def test_CheckAddHostsAndAttendees():
     # Host for 4, but only 3 attendees, so do nothing.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'hostGroupSizeMax': 4, },
-        { 'userId': users[1]['_id'], },
-        { 'userId': users[2]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'hostGroupSizeMax': 4, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'])
@@ -73,14 +73,14 @@ def test_CheckAddHostsAndAttendees():
     # 3 hosts at 3 each, 5 non host attendees, so 1st & 2nd hosts are filled, 3rd is not, 5th attendee waiting.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'hostGroupSizeMax': 3, },
-        { 'userId': users[1]['_id'], 'hostGroupSizeMax': 3, },
-        { 'userId': users[2]['_id'], 'hostGroupSizeMax': 3, },
-        { 'userId': users[3]['_id'], },
-        { 'userId': users[4]['_id'], },
-        { 'userId': users[5]['_id'], },
-        { 'userId': users[6]['_id'], },
-        { 'userId': users[7]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'hostGroupSizeMax': 3, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'hostGroupSizeMax': 3, },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'hostGroupSizeMax': 3, },
+        { 'userId': users[3]['_id'], 'username': users[3]['username'], },
+        { 'userId': users[4]['_id'], 'username': users[4]['username'], },
+        { 'userId': users[5]['_id'], 'username': users[5]['username'], },
+        { 'userId': users[6]['_id'], 'username': users[6]['username'], },
+        { 'userId': users[7]['_id'], 'username': users[7]['username'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'])
@@ -91,7 +91,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 3
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == 1
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -101,7 +102,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'pending'
             assert userEventTemp['hostGroupSize'] == 0
             assert userEventTemp['hostStatus'] == 'pending'
-            assert userEventTemp['creditsEarned'] == 0
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment == None
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
             assert userMoney is None
         elif userEvent['userId'] in [users[3]['_id'], users[4]['_id'], users[5]['_id'], users[6]['_id']]:
@@ -118,13 +120,13 @@ def test_CheckAddHostsAndAttendees():
     # so 2nd host does attendee 2 guest 1 and hosts 5 and 4, and host 3 does self.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'hostGroupSizeMax': 4, },
-        { 'userId': users[1]['_id'], 'hostGroupSizeMax': 4, },
-        { 'userId': users[2]['_id'], 'hostGroupSizeMax': 4, },
-        { 'userId': users[3]['_id'], 'hostGroupSizeMax': 4, },
-        { 'userId': users[4]['_id'], 'hostGroupSizeMax': 4, },
-        { 'userId': users[5]['_id'], 'attendeeCountAsk': 2, },
-        { 'userId': users[6]['_id'], 'attendeeCountAsk': 2, },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'hostGroupSizeMax': 4, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'hostGroupSizeMax': 4, },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'hostGroupSizeMax': 4, },
+        { 'userId': users[3]['_id'], 'username': users[3]['username'], 'hostGroupSizeMax': 4, },
+        { 'userId': users[4]['_id'], 'username': users[4]['username'], 'hostGroupSizeMax': 4, },
+        { 'userId': users[5]['_id'], 'username': users[5]['username'], 'attendeeCountAsk': 2, },
+        { 'userId': users[6]['_id'], 'username': users[6]['username'], 'attendeeCountAsk': 2, },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'], fillAll = 1)
@@ -135,7 +137,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 4
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault']
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -145,7 +148,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 1
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault']
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -155,7 +159,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 0
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == 0
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment == None
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
             assert userMoney is None
         elif userEvent['userId'] in [users[5]['_id'], users[6]['_id']]:
@@ -168,12 +173,12 @@ def test_CheckAddHostsAndAttendees():
     # 1 host at 3 each with 1 guest, 5 non host attendees, so 1st host is filled, attendees 2-5 waiting.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'hostGroupSizeMax': 3, 'attendeeCountAsk': 2, },
-        { 'userId': users[1]['_id'], },
-        { 'userId': users[2]['_id'], },
-        { 'userId': users[3]['_id'], },
-        { 'userId': users[4]['_id'], },
-        { 'userId': users[5]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'hostGroupSizeMax': 3, 'attendeeCountAsk': 2, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], },
+        { 'userId': users[3]['_id'], 'username': users[3]['username'], },
+        { 'userId': users[4]['_id'], 'username': users[4]['username'], },
+        { 'userId': users[5]['_id'], 'username': users[5]['username'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'])
@@ -184,7 +189,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 3
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault']
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -194,7 +200,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 0
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == 0
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment == None
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
             assert userMoney is None
         elif userEvent['userId'] in [users[2]['_id'], users[3]['_id'], users[4]['_id'], users[5]['_id']]:
@@ -205,13 +212,13 @@ def test_CheckAddHostsAndAttendees():
 
 
     # fillAll: 1 hosts at 3 each with 1 guest, 6 non host attendees (attendee 1 with 2 guests, attendee 2 with 1 guest),
-    # so 1st host is filled, attendee 1 gets 2 credits, attendee 2 gets 2 credits, attendee 3 gets 1 credit.
+    # so 1st host is filled, attendee 1 gets 2 * price credit, attendee 2 gets 2 * price credit, attendee 3 gets 1 credit.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'hostGroupSizeMax': 3, 'attendeeCountAsk': 2, },
-        { 'userId': users[1]['_id'], 'attendeeCountAsk': 3, },
-        { 'userId': users[2]['_id'], 'attendeeCountAsk': 2, },
-        { 'userId': users[3]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'hostGroupSizeMax': 3, 'attendeeCountAsk': 2, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'attendeeCountAsk': 3, },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], 'attendeeCountAsk': 2, },
+        { 'userId': users[3]['_id'], 'username': users[3]['username'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'], fillAll = 1)
@@ -222,7 +229,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 3
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault']
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -232,25 +240,28 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 0
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == 2
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == 2 * weeklyEvent['priceUSD']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
-            assert userMoney is None
+            assert userMoney['balanceUSD'] == 0
         elif userEvent['userId'] in [users[2]['_id']]:
             assert userEventTemp['attendeeCount'] == 0
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 0
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == 2
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == 2 * weeklyEvent['priceUSD']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
-            assert userMoney is None
+            assert userMoney['balanceUSD'] == 0
         elif userEvent['userId'] in [users[3]['_id']]:
             assert userEventTemp['attendeeCount'] == 0
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 0
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == 1
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == 1 * weeklyEvent['priceUSD']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
-            assert userMoney is None
+            assert userMoney['balanceUSD'] == 0
     _weekly_event.Remove(weeklyEvent['_id'])
     _mongo_mock.CleanUp()
 
@@ -259,12 +270,12 @@ def test_CheckAddHostsAndAttendees():
     # 5 attendees and host 1 guest waiting.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'hostGroupSizeMax': 4, 'attendeeCountAsk': 5, },
-        { 'userId': users[1]['_id'], },
-        { 'userId': users[2]['_id'], },
-        { 'userId': users[3]['_id'], },
-        { 'userId': users[4]['_id'], },
-        { 'userId': users[5]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'hostGroupSizeMax': 4, 'attendeeCountAsk': 5, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], },
+        { 'userId': users[3]['_id'], 'username': users[3]['username'], },
+        { 'userId': users[4]['_id'], 'username': users[4]['username'], },
+        { 'userId': users[5]['_id'], 'username': users[5]['username'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'])
@@ -275,7 +286,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'pending'
             assert userEventTemp['hostGroupSize'] == 4
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault']
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -283,7 +295,8 @@ def test_CheckAddHostsAndAttendees():
         elif userEvent['userId'] in [users[1]['_id'], users[2]['_id'], users[3]['_id'], users[4]['_id']]:
             assert userEventTemp['attendeeCount'] == 0
             assert userEventTemp['attendeeStatus'] == 'pending'
-            assert userEventTemp['creditsEarned'] == 0
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment == None
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
             assert userMoney is None
     _weekly_event.Remove(weeklyEvent['_id'])
@@ -294,9 +307,9 @@ def test_CheckAddHostsAndAttendees():
     # 2nd host has attendee1 and host 1 guest.
     weeklyEvent, event, userEventDefault, users = CreateEvent()
     userEvents = [
-        { 'userId': users[0]['_id'], 'hostGroupSizeMax': 4, 'attendeeCountAsk': 5, },
-        { 'userId': users[1]['_id'], 'hostGroupSizeMax': 4, },
-        { 'userId': users[2]['_id'], },
+        { 'userId': users[0]['_id'], 'username': users[0]['username'], 'hostGroupSizeMax': 4, 'attendeeCountAsk': 5, },
+        { 'userId': users[1]['_id'], 'username': users[1]['username'], 'hostGroupSizeMax': 4, },
+        { 'userId': users[2]['_id'], 'username': users[2]['username'], },
     ]
     userEvents = _stubs_data.CreateBulk(objs = userEvents, default = userEventDefault, collectionName = 'userEvent')
     _user_event.CheckAddHostsAndAttendees(event['_id'], fillAll = 1)
@@ -307,7 +320,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 4
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault']
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -317,7 +331,8 @@ def test_CheckAddHostsAndAttendees():
             assert userEventTemp['attendeeStatus'] == 'complete'
             assert userEventTemp['hostGroupSize'] == 3
             assert userEventTemp['hostStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault']
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment['amountUSD'] == userEventTemp['hostGroupSize'] / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
             userPayment = mongo_db.find_one('userPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
             assert userPayment['amountUSD'] == weeklyEvent['hostMoneyPerPersonUSD'] * userEventTemp['hostGroupSize']
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
@@ -325,7 +340,8 @@ def test_CheckAddHostsAndAttendees():
         elif userEvent['userId'] in [users[2]['_id']]:
             assert userEventTemp['attendeeCount'] == 1
             assert userEventTemp['attendeeStatus'] == 'complete'
-            assert userEventTemp['creditsEarned'] == 0
+            userCreditPayment = mongo_db.find_one('userCreditPayment', { 'forType': 'event', 'forId': event['_id'], 'userId': userEvent['userId'] })['item']
+            assert userCreditPayment == None
             userMoney = mongo_db.find_one('userMoney', { 'userId': userEvent['userId'] })['item']
             assert userMoney is None
     _weekly_event.Remove(weeklyEvent['_id'])

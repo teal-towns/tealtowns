@@ -13,7 +13,7 @@ from shared_item import shared_item as _shared_item
 from user_auth import user as _user
 
 def AddPayment(userId: str, amountUSD: float, forType: str, forId: str, status: str = 'complete', notes: str = '',
-    removeCutFromBalance: int = 0, amountUSDPreFee: float = 0, quantity: int = 1):
+    removeCutFromBalance: int = 0, amountUSDPreFee: float = 0, quantity: int = 1, directPayment: int = 0):
     amountUSDPreFee = amountUSDPreFee if amountUSDPreFee != 0 else amountUSD
     ret = _mongo_db_crud.Save('userPayment', {
         'userId': userId,
@@ -25,9 +25,26 @@ def AddPayment(userId: str, amountUSD: float, forType: str, forId: str, status: 
         'status': status,
         'notes': notes,
     })
+    ret['revenueUSD'] = 0
     if status == 'complete':
-        UpdateBalance(userId, amountUSD, removeCutFromBalance = removeCutFromBalance)
-        CheckMoveRevenueToBank(amountUSDPreFee, forType, forId, quantity = quantity)
+        if not directPayment:
+            UpdateBalance(userId, amountUSD, removeCutFromBalance = removeCutFromBalance)
+        revenueAmount = amountUSDPreFee
+        if directPayment and amountUSDPreFee > 0:
+            revenueAmount = -1 * amountUSDPreFee
+        retRevenue = CheckMoveRevenueToBank(revenueAmount, forType, forId, quantity = quantity)
+        ret['revenueUSD'] = retRevenue['revenueUSD']
+    return ret
+
+def AddCreditPayment(userId: str, amountUSD: float, forType: str, forId: str, quantity: int = 1):
+    ret = _mongo_db_crud.Save('userCreditPayment', {
+        'userId': userId,
+        'amountUSD': amountUSD,
+        'forType': forType,
+        'forId': forId,
+        'quantity': quantity,
+    })
+    UpdateCreditBalance(userId, amountUSD)
     return ret
 
 def UpdatePayment(userPaymentId: str, status: str, removeCutFromBalance: int = 0):
@@ -52,7 +69,7 @@ def AddPaymentSubscription(userPaymentSubscription: dict):
     return ret
 
 def CancelSubscription(userPaymentSubscriptionId: str):
-    ret = { 'valid': 1, 'message': '', 'credits': 0 }
+    ret = { 'valid': 1, 'message': '', 'creditUSD': 0 }
     query = { '_id': mongo_db.to_object_id(userPaymentSubscriptionId) }
     userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
     if userPaymentSubscription is not None and userPaymentSubscription['status'] == 'complete':
@@ -67,11 +84,11 @@ def CancelSubscription(userPaymentSubscriptionId: str):
 
         # Cancel / update any related data too.
         if userPaymentSubscription['forType'] == 'weeklyEvent':
-            retCredits = _user_event.GiveEndSubscriptionCredits(userPaymentSubscription['forId'],
-                userPaymentSubscription['userId'])
-            ret['credits'] = retCredits['credits']
-            if retCredits['credits'] > 0:
-                mutation['$set']['credits'] = retCredits['credits']
+            retCredit = _user_event.GiveEndSubscriptionCredit(userPaymentSubscription['forId'],
+                userPaymentSubscription['userId'], maxAmountUSD = userPaymentSubscription['amountUSD'])
+            ret['creditUSD'] = retCredit['creditUSD']
+            if retCredit['creditUSD'] > 0:
+                mutation['$set']['creditUSD'] = retCredit['creditUSD']
             mongo_db.delete_one('userWeeklyEvent', { 'weeklyEventId': userPaymentSubscription['forId'],
                 'userId': userPaymentSubscription['userId'] })
 
@@ -134,7 +151,8 @@ def CheckMoveRevenueToBank(amountUSDPreFee: float, forType: str, forId: str, rec
                 weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(forId)})['item']
             if weeklyEvent is not None:
                 ret['revenueUSD'] = _event_payment.GetRevenue(amount, weeklyEvent['hostMoneyPerPersonUSD'],
-                    recurringInterval, recurringIntervalCount, quantity)
+                    recurringInterval, recurringIntervalCount, quantity,
+                    hostGroupSize = weeklyEvent['hostGroupSizeDefault'], fullPriceSingleEvent = weeklyEvent['priceUSD'])
         elif forType == 'sharedItem' or forType == 'sharedItemOwner':
             ret['revenueUSD'] = _shared_item_payment_math.GetRevenue(amount)
 
@@ -157,6 +175,7 @@ def UpdateBalance(userId: str, amountUSD: float, removeCutFromBalance: int = 0):
         ret = _mongo_db_crud.Save('userMoney', {
             'userId': userId,
             'balanceUSD': amountFinal,
+            'creditBalanceUSD': 0,
         })
     else:
         query = {
@@ -165,6 +184,29 @@ def UpdateBalance(userId: str, amountUSD: float, removeCutFromBalance: int = 0):
         mutation = {
             '$inc': {
                 'balanceUSD': amountFinal,
+            }
+        }
+        ret = mongo_db.update_one('userMoney', query, mutation)
+    return ret
+
+def UpdateCreditBalance(userId: str, amountUSD: float):
+    query = {
+        'userId': userId,
+    }
+    item = mongo_db.find_one('userMoney', query)["item"]
+    if item is None:
+        ret = _mongo_db_crud.Save('userMoney', {
+            'userId': userId,
+            'balanceUSD': 0,
+            'creditBalanceUSD': amountUSD,
+        })
+    else:
+        query = {
+            'userId': userId,
+        }
+        mutation = {
+            '$inc': {
+                'creditBalanceUSD': amountUSD,
             }
         }
         ret = mongo_db.update_one('userMoney', query, mutation)
@@ -182,7 +224,8 @@ def UpdateBalance(userId: str, amountUSD: float, removeCutFromBalance: int = 0):
 #     return ret
 
 def GetUserMoneyAndPending(userId: str):
-    ret = { 'valid': 1, 'message': '', 'userMoney': {}, 'userPayments': [], 'availableUSD': 0 }
+    ret = { 'valid': 1, 'message': '', 'userMoney': {}, 'userPayments': [], 'availableUSD': 0,
+        'availableCreditUSD': 0, }
     query = {
         'userId': userId,
     }
@@ -197,6 +240,7 @@ def GetUserMoneyAndPending(userId: str):
         retPayments = _mongo_db_crud.Search('userPayment', query = query)
         ret['userPayments'] = retPayments['userPayments']
         ret['availableUSD'] = ret['userMoney']['balanceUSD']
+        ret['availableCreditUSD'] = ret['userMoney']['creditBalanceUSD']
         for payment in ret['userPayments']:
             ret['availableUSD'] += payment['amountUSD']
 

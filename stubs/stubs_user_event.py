@@ -12,9 +12,7 @@ def GetDefault():
         'attendeeCountAsk': random.randint(1, 5),
         'attendeeCount': 0,
         'attendeeStatus': 'pending',
-        'creditsEarned': 0,
-        'creditsRedeemed': 0,
-        'creditsPriceUSD': random.randint(10, 20),
+        'priceUSD': random.randint(10, 20),
         'eventEnd': _stubs_data.RandomTime(),
     }
 
