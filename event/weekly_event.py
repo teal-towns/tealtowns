@@ -143,7 +143,7 @@ def Save(weeklyEvent: dict):
         # Some field changes require other updates.
         weeklyEventExisting = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEvent['_id'])})['item']
         if weeklyEventExisting:
-            # Give credits to existing users who have subscribed.
+            # Give credit to existing users who have subscribed.
             if weeklyEvent['priceUSD'] != weeklyEventExisting['priceUSD'] and \
                 weeklyEventExisting['priceUSD'] > 0:
                 EndSubscriptions(weeklyEventExisting['_id'])

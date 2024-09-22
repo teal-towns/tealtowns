@@ -17,7 +17,7 @@ _config = ml_config.get_config()
 
 def Save(userEvent: dict, payType: str):
     userEvent = _mongo_db_crud.CleanId(userEvent)
-    ret = { 'valid': 1, 'message': '', 'userEvent': {}, 'spotsPaidFor': 0, 'availableUSD': 0, 'availableCredits': 0,
+    ret = { 'valid': 1, 'message': '', 'userEvent': {}, 'spotsPaidFor': 0, 'availableUSD': 0, 'availableCreditUSD': 0,
         'notifyUserIdsHosts': {}, 'notifyUserIdsAttendees': {}, }
 
     checkPay = 1
@@ -51,9 +51,7 @@ def Save(userEvent: dict, payType: str):
             'hostGroupSize': 0,
             'attendeeStatus': 'pending',
             'attendeeCount': 0,
-            'creditsEarned': 0,
-            'creditsRedeemed': 0,
-            'creditsPriceUSD': weeklyEvent['priceUSD'],
+            'priceUSD': weeklyEvent['priceUSD'],
             'eventEnd': event['end'],
             'weeklyEventUName': weeklyEvent['uName'],
             'username': user['username'],
@@ -68,12 +66,10 @@ def Save(userEvent: dict, payType: str):
             checkPay = 0
             freeEvent = 1
 
-    userEvent['creditsRedeemed'] = 0
     if checkPay:
         retPay = CheckAndTakePayment(userEvent['userId'], userEvent['eventId'], userEvent['attendeeCountAsk'], payType)
         if not retPay['valid']:
             return retPay
-        userEvent['creditsRedeemed'] = retPay['creditsRedeemed']
     elif freeEvent:
         userEvent['attendeeCount'] = userEvent['attendeeCountAsk']
         userEvent['attendeeStatus'] = 'complete'
@@ -84,7 +80,7 @@ def Save(userEvent: dict, payType: str):
     if checkPay:
         ret['spotsPaidFor'] = retPay['spotsPaidFor']
         ret['availableUSD'] = retPay['availableUSD']
-        ret['availableCredits'] = retPay['availableCredits']
+        ret['availableCreditUSD'] = retPay['availableCreditUSD']
 
     if not freeEvent:
         retCheck = CheckAddHostsAndAttendees(userEvent['eventId'])
@@ -98,7 +94,7 @@ def Save(userEvent: dict, payType: str):
 
 def CheckAndTakePayment(userId: str, eventId: str, attendeeCountAsk: int, payType: str = ''):
     ret = { 'valid': 0, 'message': '', 'spotsPaidFor': 0, 'spotsToPayFor': 0, 'amountToPay': 0,
-        'availableUSD': 0, 'availableCredits': 0, 'creditsRedeemed': 0, 'weeklyEvent': {} }
+        'availableUSD': 0, 'availableCreditUSD': 0, 'weeklyEvent': {} }
     event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(eventId)})['item']
     weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
     ret['weeklyEvent'] = weeklyEvent
@@ -132,8 +128,7 @@ def CheckAndTakePayment(userId: str, eventId: str, attendeeCountAsk: int, payTyp
     ret['amountToPay'] = amountToPay
     retMoney = _user_payment.GetUserMoneyAndPending(userId)
     ret['availableUSD'] = retMoney['availableUSD']
-    userCredits = GetUserEventCredits(userId, eventId = eventId)
-    ret['availableCredits'] = userCredits
+    ret['availableCreditUSD'] = retMoney['availableCreditUSD']
 
     # If pay type is not blank, actually take payment (otherwise it is just read only).
     if payType == 'userMoney':
@@ -150,14 +145,17 @@ def CheckAndTakePayment(userId: str, eventId: str, attendeeCountAsk: int, payTyp
         ret['spotsToPayFor'] = 0
         ret['amountToPay'] = 0
         ret['spotsPaidFor'] = attendeeCountAsk
-    elif payType == 'credits':
-        if userCredits < ret['spotsToPayFor']:
+    elif payType == 'creditUSD':
+        if retMoney['availableCreditUSD'] < amountToPay:
             ret['valid'] = 0
-            ret['message'] = 'User has insufficient credits.'
+            ret['message'] = 'User has insufficient credit balance.'
             return ret
-        # Update user credits as redeemed.
-        ret['creditsRedeemed'] = ret['spotsToPayFor']
-        ret['availableCredits'] -= ret['spotsToPayFor']
+        # Deduct payment from user balance.
+        retPay = _user_payment.AddCreditPayment(userId, -1 * amountToPay, 'event', eventId,
+            quantity = ret['spotsToPayFor'])
+        if not retPay['valid']:
+            return retPay
+        ret['availableCreditUSD'] -= amountToPay
         ret['spotsToPayFor'] = 0
         ret['amountToPay'] = 0
         ret['spotsPaidFor'] = attendeeCountAsk
@@ -167,23 +165,6 @@ def CheckAndTakePayment(userId: str, eventId: str, attendeeCountAsk: int, payTyp
         return ret
     
     return ret
-
-def GetUserEventCredits(userId: str, weeklyEventId: str = '', eventId: str = '', minPrice: float = -1):
-    price = 0
-    if minPrice >= 0:
-        price = minPrice
-    else:
-        if not weeklyEventId:
-            event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(eventId)})['item']
-            weeklyEventId = event['weeklyEventId']
-        weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
-        price = weeklyEvent['priceUSD']
-    query = { 'userId': userId, 'creditsPriceUSD': { '$gte': price } }
-    userEvents = mongo_db.find('userEvent', query)['items']
-    credits = 0
-    for userEvent in userEvents:
-        credits += userEvent['creditsEarned'] - userEvent['creditsRedeemed']
-    return credits
 
 def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
     ret = { 'valid': 1, 'message': '', 'userIdsUpdated': [],
@@ -211,7 +192,7 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
     if len(userEventsAttendees) == 0 and not fillAll:
         return ret
     
-    # Get weekly event for awarding credits to host.
+    # Get weekly event for awarding credit to host.
     event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(eventId)})['item']
     weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
 
@@ -321,15 +302,13 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
 
         if hostSpotsLeft == 0 or fillAll:
             hostGroupSize = hostSpotsAdded
-            credits = hostGroupSize / weeklyEvent['hostGroupSizeDefault']
+            creditUSD = hostGroupSize / weeklyEvent['hostGroupSizeDefault'] * weeklyEvent['priceUSD']
+            retPay = _user_payment.AddCreditPayment(hostId, creditUSD, 'event', eventId)
             mutation = {
                 '$set': {
                     'hostStatus': 'complete',
                     'hostGroupSize': hostGroupSize,
                     'attendeeCount': newAttendeeInfos[hostId]['attendeeCount'],
-                },
-                '$inc': {
-                    'creditsEarned': credits,
                 },
             }
             if newAttendeeInfos[hostId]['attendeeCount'] == userEventHost['attendeeCountAsk']:
@@ -390,14 +369,14 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
 
         hostIndex += 1
 
-    # If more attendees who could not join, give them event credits.
+    # If more attendees who could not join, give them credit.
     if fillAll:
-        retUnused = GiveUnusedCredits(eventId, event = event, weeklyEvent = weeklyEvent)
+        retUnused = GiveUnusedCredit(eventId, event = event, weeklyEvent = weeklyEvent)
         ret['notifyUserIdsUnused'] = retUnused['notifyUserIds']
     
     return ret
 
-def GiveUnusedCredits(eventId: str, event: dict, weeklyEvent: dict):
+def GiveUnusedCredit(eventId: str, event: dict, weeklyEvent: dict):
     ret = { 'valid': 1, 'message': '', 'userIdsUpdated': [], 'notifyUserIds': { 'sms': [], }, }
     if '_id' not in event or '_id' not in weeklyEvent:
         event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(eventId)})['item']
@@ -409,31 +388,29 @@ def GiveUnusedCredits(eventId: str, event: dict, weeklyEvent: dict):
     }
     userEvents = mongo_db.find('userEvent', query)['items']
     for userEvent in userEvents:
-        credits = userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
+        creditUSD = (userEvent['attendeeCountAsk'] - userEvent['attendeeCount']) * weeklyEvent['priceUSD']
+        retPay = _user_payment.AddCreditPayment(userEvent['userId'], creditUSD, 'event', eventId)
         userId = userEvent['userId']
         mutation = {
             '$set': {
                 'attendeeStatus': 'complete',
                 'hostStatus': 'complete',
             },
-            '$inc': {
-                'creditsEarned': credits,
-            },
         }
         mongo_db.update_one('userEvent', {'eventId': eventId, 'userId': userEvent['userId']}, mutation)
         ret['userIdsUpdated'].append(userEvent['userId'])
         retPhone = _user.GetPhone(userId)
         if retPhone['valid']:
-            body = "Not enough hosts for this week's event; use your new " + str(credits) + " credits to sign up for next week: " + _weekly_event.GetUrl(weeklyEvent)
-            messageTemplateVariables = { "1": str(credits) + " credits", "2": _weekly_event.GetUrl(weeklyEvent) }
+            body = "Not enough hosts for this week's event; use your new $" + str(creditUSD) + " credit to sign up for next week: " + _weekly_event.GetUrl(weeklyEvent)
+            messageTemplateVariables = { "1": "$" + str(creditUSD) + " credit", "2": _weekly_event.GetUrl(weeklyEvent) }
             retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
                 messageTemplateKey = 'eventNotEnoughHosts', messageTemplateVariables = messageTemplateVariables)
             if retSms['valid']:
                 ret['notifyUserIds']['sms'].append(userId)
     return ret
 
-def GiveEndSubscriptionCredits(weeklyEventId: str, userId: str):
-    ret = { 'valid': 1, 'message': '', 'credits': 0, 'notifyUserIds': { 'sms': [], } }
+def GiveEndSubscriptionCredit(weeklyEventId: str, userId: str, maxAmountUSD: float = -1):
+    ret = { 'valid': 1, 'message': '', 'creditUSD': 0, 'notifyUserIds': { 'sms': [], } }
     query = { 'forType': 'weeklyEvent', 'forId': weeklyEventId, 'userId': userId }
     userPaymentSubscription = mongo_db.find_one('userPaymentSubscription', query)['item']
     retNext = _event.GetNextEvents(weeklyEventId, autoCreate = 0)
@@ -442,20 +419,17 @@ def GiveEndSubscriptionCredits(weeklyEventId: str, userId: str):
     if userPaymentSubscription is not None:
         retRemaining = _user_payment.GetSubscriptionPaymentsRemaining(userPaymentSubscription, nextEventStart)
         if retRemaining['subscriptionPaymentsRemaining'] > 0:
-            credits = retRemaining['subscriptionPaymentsRemaining'] * userPaymentSubscription['quantity']
-            ret['credits'] = credits
-            mutation = {
-                '$inc': {
-                    'creditsEarned': credits,
-                },
-            }
-            if '_id' in nextEvent:
-                retTemp = mongo_db.update_one('userEvent', {'eventId': nextEvent['_id'], 'userId': userId}, mutation)
+            weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEventId)})['item']
+            creditUSD = (retRemaining['subscriptionPaymentsRemaining'] * userPaymentSubscription['quantity']) * weeklyEvent['priceUSD']
+            if maxAmountUSD > 0 and creditUSD > maxAmountUSD:
+                creditUSD = maxAmountUSD
+            ret['creditUSD'] = creditUSD
+            retPay = _user_payment.AddCreditPayment(userId, creditUSD, 'weeklyEvent', weeklyEventId)
             retPhone = _user.GetPhone(userId)
             if retPhone['valid']:
                 url = _config['web_server']['urls']['base'] + '/weekly-events'
-                body = "Subscription canceled; use your new " + str(credits) + " credits to sign up for new events: " + url
-                messageTemplateVariables = { "1": str(credits) + " credits", "2": url }
+                body = "Subscription canceled; use your new $" + str(creditUSD) + " credit to sign up for new events: " + url
+                messageTemplateVariables = { "1": "$" + str(creditUSD) + " credit", "2": url }
                 retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
                     messageTemplateKey = 'eventSubscriptionCanceled', messageTemplateVariables = messageTemplateVariables)
                 if retSms['valid']:

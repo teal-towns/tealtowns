@@ -39,14 +39,6 @@ def addRoutes():
         return ret
     _socket.add_route('SearchUserPaymentSubscriptions', SearchUserPaymentSubscriptions)
 
-    def GetUserCredits(data, auth, websocket):
-        data = lodash.extend_object({
-            'minPrice': 5,
-        }, data)
-        credits = _user_event.GetUserEventCredits(data['userId'], minPrice = data['minPrice'])
-        return { 'valid': 1, 'message': '', 'credits': credits }
-    _socket.add_route('GetUserCredits', GetUserCredits)
-
     def CancelSubscription(data, auth, websocket):
         return _user_payment.CancelSubscription(data['userPaymentSubscriptionId'])
     _socket.add_route('CancelUserPaymentSubscription', CancelSubscription)

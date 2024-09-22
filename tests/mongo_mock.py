@@ -35,7 +35,7 @@ _initedLive = 0
 _collectionNames = ['user', 'image', 'blog',
     'weeklyEvent', 'event', 'userWeeklyEvent', 'userEvent',
     'sharedItem', 'sharedItemOwner',
-    'userMoney', 'userPayment', 'userPaymentSubscription', 'userStripeAccount', 'mercuryPayOut',
+    'userMoney', 'userPayment', 'userPaymentSubscription', 'userCreditPayment', 'userStripeAccount', 'mercuryPayOut',
     'neighborhood', 'userNeighborhood', 'neighborhoodGroup', 'userNeighborhoodWeeklyUpdate',
     'certificationLevel', 'journeyStep', 'neighborhoodCertificationLevel', 'neighborhoodJourneyStep',
     'userMessage',

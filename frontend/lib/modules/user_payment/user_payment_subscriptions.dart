@@ -114,7 +114,7 @@ class _UserPaymentSubscriptionsState extends State<UserPaymentSubscriptions> {
         ]
       );
     } else if (userPaymentSubscription.status == 'canceled') {
-      status = Text('${userPaymentSubscription.status} (${userPaymentSubscription.credits} credits)');
+      status = Text('${userPaymentSubscription.status} (\$${userPaymentSubscription.creditUSD} credit)');
     }
     return Container(
       child: Row(

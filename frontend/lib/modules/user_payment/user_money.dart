@@ -27,6 +27,7 @@ class _UserMoneyState extends State<UserMoney> {
   UserMoneyClass _userMoney = UserMoneyClass.fromJson({});
   List<UserPaymentClass> _userPayments = [];
   double _availableUSD = 0;
+  double _availableCreditUSD = 0;
   bool _loading = false;
   String _message = '';
 
@@ -44,6 +45,7 @@ class _UserMoneyState extends State<UserMoney> {
           _userPayments.add(UserPaymentClass.fromJson(userPayment));
         }
         _availableUSD = _parseService.toDoubleNoNull(data['availableUSD']);
+        _availableCreditUSD = _parseService.toDoubleNoNull(data['availableCreditUSD']);
       } else {
         _message = data['message'].length > 0 ? data['message'] : 'Error.';
       }
@@ -73,6 +75,8 @@ class _UserMoneyState extends State<UserMoney> {
         children: [
           Text('${_currency.Format(_availableUSD, 'USD')} available'),
           // TODO - display (pending) payments
+          SizedBox(height: 10),
+          Text('${_currency.Format(_availableCreditUSD, 'USD')} credit available'),
           SizedBox(height: 10),
           UserPayout(),
           SizedBox(height: 10),

@@ -43,7 +43,8 @@ def GetPayInfo(funds: float, eventsPerPayPeriod: float = 1):
     return { 'eventFunds': eventFunds }
 
 def GetRevenue(paymentUSD: float, singleEventFunds: float, recurringInterval: str = '',
-    recurringIntervalCount: int = 1, quantity: int = 1):
+    recurringIntervalCount: int = 1, quantity: int = 1, hostGroupSize: int = 0,
+    fullPriceSingleEvent: float = 0):
     paymentUSD = abs(paymentUSD)
     eventsPerPayPeriod = 1
     if recurringInterval == 'month':
@@ -54,6 +55,11 @@ def GetRevenue(paymentUSD: float, singleEventFunds: float, recurringInterval: st
     payFee = paymentUSD * _payFeeFactor + _payFeeFixed
     payFee = math.ceil(payFee * 100) / 100.0
     revenue = paymentUSD - payFee - totalEventFunds
+    # If host group size, we need to save money to pay for the host (future credit money, which is amount minus fees).
+    if hostGroupSize > 0 and fullPriceSingleEvent > 0:
+        amountWithoutFees = GetPayInfo(fullPriceSingleEvent, 1)['eventFunds']
+        sharePerGroupMember = amountWithoutFees / hostGroupSize
+        revenue = revenue - (sharePerGroupMember * eventsPerPayPeriod * quantity)
     # Round down to 2 digits (cents)
     revenue = math.floor(revenue * 100) / 100.0
     return revenue

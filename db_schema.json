@@ -79,7 +79,7 @@
             "country": "{String}"
         },
         "adminUserIds": [ "{String}" ],
-        "hostGroupSizeDefault": "{Int} [(minimum) People per each host. This will also be used to calculate credits per event type.]",
+        "hostGroupSizeDefault": "{Int} [(minimum) People per each host. This will also be used to calculate credit per event type.]",
         "hostMoneyPerPersonUSD": "{Float}",
         "priceUSD": "{Float} [0 if free. This is the single event price, which will be discounted for monthly and yearly subscriptions.]",
         "rsvpDeadlineHours": "{Float} [How many hours before event to allow rsvp, otherwise the sign up is for NEXT week]",
@@ -105,7 +105,7 @@
             "coordinates": ["{Float} [lng]", "{Float} [lat]"]
         },
         "adminUserIds": [ "{String} @optional" ],
-        "hostGroupSizeDefault": "{Int} @optional [(minimum) People per each host. This will also be used to calculate credits per event type.]",
+        "hostGroupSizeDefault": "{Int} @optional [(minimum) People per each host. This will also be used to calculate credit per event type.]",
         "hostMoneyPerPersonUSD": "{Float} @optional",
         "priceUSD": "{Float} @optional [0 if free.]",
         "rsvpDeadlineHours": "{Float} @optional [How many hours before event to allow rsvp]",
@@ -134,9 +134,7 @@
         "attendeeCountAsk": "{Int} [1 or 2+ if bringing guests]",
         "attendeeCount": "{Int} [The final attendee count (1 for self), in case not enough hosts for all]",
         "attendeeStatus": "{String} pending|complete",
-        "creditsEarned": "{Float} [if host, which could be fractional credits; if get 1 credit for every 10 people and hosted 5 would be 0.5 credits]",
-        "creditsRedeemed": "{Float}",
-        "creditsPriceUSD": "{Float} [the price copied from the weeklyEvent.priceUSD to compute remaining credits per event type (price). Also for stats.]",
+        "priceUSD": "{Float} [the price copied from the weeklyEvent.priceUSD for stats.]",
         "eventEnd": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Copied from event for userFeedback look ups performance]",
         "rsvpNote": "{String} @optional [What host is cooking for shared meal, etc.]"
     },
@@ -206,7 +204,8 @@
         "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "userId": "{String}",
-        "balanceUSD": "{Float}"
+        "balanceUSD": "{Float}",
+        "creditBalanceUSD": "{Float}"
     },
     "userPayment": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
@@ -237,7 +236,17 @@
             "checkoutSession": "{String}",
             "subscription": "{String}"
         },
-        "credits": "{Int} [Credits given for cancel or ended early subscription]"
+        "creditUSD": "{Float} [credit money given for cancel or ended early subscription]"
+    },
+    "userCreditPayment": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "userId": "{String}",
+        "amountUSD": "{Float} [positive to increase credit balance, negative to reduce]",
+        "forType": "{String} event|weeklyEvent",
+        "forId": "{String} [eventId]|[weeklyEventId]",
+        "quantity": "{Int}"
     },
     "userStripeAccount": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
