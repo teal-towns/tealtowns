@@ -224,6 +224,14 @@ class _AppInsightsState extends State<AppInsights> {
           _buttons.Link(context, 'Neighborhood Insights', '/neighborhood-insights'),
           _style.SpacingH('medium'),
           _buttons.Link(context, 'Weekly Events Search', '/weekly-events-search'),
+          _style.SpacingH('xlarge'),
+          _buttons.Link(context, 'Design Library', '/design-library', launchUrl: true),
+          _style.SpacingH('medium'),
+          _buttons.Link(context, 'Featured Event Photo Save', '/featured-event-photo-save', launchUrl: true),
+          _style.SpacingH('medium'),
+          _buttons.Link(context, 'Icebreakers', '/icebreakers', launchUrl: true),
+          _style.SpacingH('medium'),
+          _buttons.Link(context, 'Land', '/land', launchUrl: true),
           _style.SpacingH('medium'),
         ]
       ) 
