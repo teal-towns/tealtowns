@@ -6,7 +6,7 @@ import mongo_db
 from user_payment import user_payment as _user_payment
 
 def RunAll():
-    ToCreditUSD()
+    # ToCreditUSD()
     # AddHostInterests()
     # UserNeighborhoodWeeklyUpdateActionsComplete()
     # AddLocationAddress()
