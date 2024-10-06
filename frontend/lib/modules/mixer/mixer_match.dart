@@ -36,7 +36,6 @@ class _MixerMatchState extends State<MixerMatch> {
   List<MixerMatchPlayerClass> _mixerMatchPlayers = [];
   // key is player id, value is { name, answer }
   Map<String, dynamic> _answers = {};
-  // String _socketGroupName = '';
   String _userId = '';
   int _selectedNameIndex = -1;
   int _selectedAnswerIndex = -1;
@@ -49,9 +48,7 @@ class _MixerMatchState extends State<MixerMatch> {
   String _messageJoin = '';
 
   Timer? _timer;
-  // int _countdown = 60;
-  // TESTING
-  int _countdown = 1;
+  int _countdown = 60;
   String _gameState = ''; // 'countdown'
   String _nameMode = 'loginSignup';
 
@@ -76,8 +73,6 @@ class _MixerMatchState extends State<MixerMatch> {
   @override
   void initState() {
     super.initState();
-
-    // _socketGroupName = 'mixerGame_' + widget.mixerGame.uName;
 
     _routeIds.add(_socketService.onRoute('OnMixerMatchPlayers', callback: (String resString) {
       var res = json.decode(resString);
@@ -140,17 +135,9 @@ class _MixerMatchState extends State<MixerMatch> {
     if (currentUserState.isLoggedIn) {
       _socketService.emit('GetMixerMatchPlayerByUserId', { 'mixerGameUName': widget.mixerGame.uName,
         'userId': currentUserState.currentUser.id});
+    // } else if (_mixerMatchPlayers.length == 0) {
+    //   _socketService.emit('GetMixerMatchPlayers', { 'mixerGameUName': widget.mixerGame.uName, });
     }
-
-    // var data = { 'groupName': _socketGroupName, 'userIds': [], 'generateUserId': 0, };
-    // var currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-    // if (currentUserState.isLoggedIn) {
-    //   _userId = currentUserState.currentUser.id;
-    //   data['userIds'] = [ _userId ];
-    // } else {
-    //   data['generateUserId'] = 1;
-    // }
-    // _socketService.emit('AddSocketGroupUsers', data);
 
     _formVals['mixerGameUName'] = widget.mixerGame.uName;
   }
@@ -160,10 +147,6 @@ class _MixerMatchState extends State<MixerMatch> {
     if (_timer != null) {
       _timer!.cancel(); 
     }
-    // if (_userId.length > 0) {
-    //   var data = { 'groupName': _socketGroupName, 'userIds': [ _userId ] };
-    //   _socketService.emit('RemoveSocketGroupUsers', data);
-    // }
     _socketService.offRouteIds(_routeIds);
     super.dispose();
   }
@@ -193,13 +176,10 @@ class _MixerMatchState extends State<MixerMatch> {
       );
     }
 
-    // CheckSubmitAnswers(widget.mixerGame);
-
     // To begin, user adds their answer and name to start playing.
     bool showJoinButton = true;
-    if (_selfPlayer.id.length == 0) {
+    if (_selfPlayer.id.length == 0 && widget.mixerGame.state != 'gameOver') {
       List<Widget> colsJoinGame = [];
-      // CurrentUserState currentUserState = context.watch<CurrentUserState>();
       CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
       if (currentUserState.isLoggedIn) {
         _formVals['userId'] = currentUserState.currentUser.id;
@@ -291,8 +271,6 @@ class _MixerMatchState extends State<MixerMatch> {
       List<Widget> colsAnswers = [];
       List<Widget> colsAnsweredNames = [];
       List<Widget> colsAnsweredAnswers = [];
-      // for (int i = 0; i < _mixerMatchPlayers.length; i++) {
-      //   MixerMatchPlayerClass item = _mixerMatchPlayers[i];
       for (String playerId in _answers.keys) {
         String name = _answers[playerId]['name'];
         String answer = _answers[playerId]['answer'];
@@ -481,7 +459,7 @@ class _MixerMatchState extends State<MixerMatch> {
           _style.Text1('You got ${score} of ${_mixerMatchPlayers.length} correct (${score / _mixerMatchPlayers.length * 100}%)', size: 'large'),
           _style.SpacingH('medium'),
         ];
-      } else {
+      } else if (_mixerMatchPlayers.length > 0) {
         colsSubmitted += [
           _style.Text1('Answers:', size: 'large'),
           _style.SpacingH('medium'),

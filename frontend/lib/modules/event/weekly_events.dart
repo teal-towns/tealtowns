@@ -376,8 +376,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
           Row(
             children: [
               joinButton,
-              _style.SpacingV('medium'),
-              _buttons.Link(context, 'View', '/we/${weeklyEvent.uName}', launchUrl: newPage),
+              // _style.SpacingV('medium'),
+              // _buttons.Link(context, 'View', '/we/${weeklyEvent.uName}', launchUrl: newPage),
             ]
           ),
           _style.SpacingH('medium'),

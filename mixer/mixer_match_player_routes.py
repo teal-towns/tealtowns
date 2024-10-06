@@ -38,5 +38,15 @@ def addRoutesAsync():
             await _socket.sendAsync(websocket, 'SaveMixerMatchPlayer', ret, auth)
     _socket.add_route('GetMixerMatchPlayerByUserId', GetByUserId, 'async')
 
+    # async def GetPlayers(data, auth, websocket):
+    #     ret = { 'valid': 1, 'message': '' }
+    #     query = { 'mixerGameUName': data['mixerGameUName'] }
+    #     ret['mixerMatchPlayers'] = mongo_db.find('mixerMatchPlayer', query, sort_obj = { 'name': 1 })['items']
+    #     dataSend = { 'route': 'OnMixerMatchPlayers', 'auth': auth,
+    #         'data': { 'valid': 1, 'message': '', 'mixerMatchPlayers': ret['mixerMatchPlayers'] } }
+    #     groupName = 'mixerGame_' + data['mixerGameUName']
+    #     await _websocket_clients.SendToGroupsJson(dataSend, [groupName])
+    # _socket.add_route('GetMixerMatchPlayers', GetPlayers, 'async')
+
 # addRoutes()
 addRoutesAsync()
