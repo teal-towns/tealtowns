@@ -151,7 +151,7 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 0, no
     now = now if now is not None else date_time.now()
     now = date_time.ToTimezone(now, weeklyEvent['timezone'])
 
-    hour = int(weeklyEvent['startTime'][0:2])
+    hour = int(weeklyEvent['startTime'][0:2].replace(':', ''))
     minute = int(weeklyEvent['startTime'][3:5])
     thisWeek = date_time.create(now.year, now.month, now.day, hour, minute, tz = weeklyEvent['timezone'])
     # Add difference between weekdays.
@@ -160,7 +160,7 @@ def GetNextEventStart(weeklyEvent: dict, minHoursBeforeRsvpDeadline: int = 0, no
         thisWeek += datetime.timedelta(days = 7)
     thisWeek = date_time.toUTC(thisWeek)
     ret['thisWeekStart'] = date_time.string(thisWeek)
-    hourEnd = int(weeklyEvent['endTime'][0:2])
+    hourEnd = int(weeklyEvent['endTime'][0:2].replace(':', ''))
     minuteEnd = int(weeklyEvent['endTime'][3:5])
     durationHours = hourEnd - hour
     if durationHours < 0:

@@ -28,6 +28,7 @@ import './user_weekly_event_save.dart';
 import './user_event_save.dart';
 import './weekly_event_class.dart';
 import '../icebreaker/icebreaker_class.dart';
+import '../mixer/mixer_game.dart';
 import '../user_auth/current_user_state.dart';
 
 class WeeklyEventView extends StatefulWidget {
@@ -477,6 +478,12 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     if (_icebreakers.length > 0 && alreadySignedUp) {
       colsIcebreakers += [
         Text('Icebreaker: ${_icebreakers[0].icebreaker}'),
+        SizedBox(height: 10),
+      ];
+    }
+    if (alreadySignedUp) {
+      colsIcebreakers += [
+        _buttons.Link(context, 'Play Mixer Game', '/mixer-game', launchUrl: true),
         SizedBox(height: 10),
       ];
     }

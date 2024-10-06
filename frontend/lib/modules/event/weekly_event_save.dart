@@ -84,7 +84,7 @@ class _WeeklyEventSaveState extends State<WeeklyEventSave> {
       _redirecting = true;
     }
 
-    var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+    NeighborhoodState neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
     if (neighborhoodState.defaultUserNeighborhood != null) {
       _formValsDefault['neighborhoodUName'] = neighborhoodState.defaultUserNeighborhood!.neighborhood.uName;
 

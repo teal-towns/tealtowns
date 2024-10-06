@@ -23,7 +23,9 @@ def addRoutes():
 
     def AddSocketGroupUsers(data, auth, websocket):
         ret = { 'valid': '1', 'message': '' }
-        _websocket_clients.AddUsersToGroup(data['groupName'], data['userIds'], ws = websocket)
+        generateUserId = data['generateUserId'] if 'generateUserId' in data else 0
+        _websocket_clients.AddUsersToGroup(data['groupName'], data['userIds'], ws = websocket,
+            generateUserId = generateUserId)
         return ret
     _socket.add_route('AddSocketGroupUsers', AddSocketGroupUsers)
 
@@ -32,6 +34,12 @@ def addRoutes():
         _websocket_clients.RemoveUsersFromGroup(data['groupName'], data['userIds'])
         return ret
     _socket.add_route('RemoveSocketGroupUsers', RemoveSocketGroupUsers)
+
+    def RemoveSocketGroup(data, auth, websocket):
+        ret = { 'valid': '1', 'message': '' }
+        _websocket_clients.RemoveGroup(data['groupName'])
+        return ret
+    _socket.add_route('RemoveSocketGroup', RemoveSocketGroup)
 
     def GetGitSha(data, auth, websocket):
         gitSha = "unknown"

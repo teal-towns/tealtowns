@@ -10,16 +10,16 @@ import '../../common/form_input/input_fields.dart';
 import './current_user_state.dart';
 import '../../routes.dart';
 
-class UserEmailVerifyComponent extends StatefulWidget {
+class UserEmailVerify extends StatefulWidget {
   String verifyKey;
   String email;
-  UserEmailVerifyComponent({this.verifyKey = '', this.email = '' });
+  UserEmailVerify({this.verifyKey = '', this.email = '' });
 
   @override
   _UserEmailVerifyState createState() => _UserEmailVerifyState();
 }
 
-class _UserEmailVerifyState extends State<UserEmailVerifyComponent> {
+class _UserEmailVerifyState extends State<UserEmailVerify> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();

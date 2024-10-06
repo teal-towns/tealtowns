@@ -12,6 +12,7 @@ Map<String, List<double>> _colorMap = {
   'secondary': [253, 224, 72],
   // 'secondary': [143, 229, 142],
   'text': [124, 124, 124],
+  'success': [44, 163, 134],
   'error': [234, 84, 85],
   'warning': [220, 145, 110],
   'transparent': [0,0,0,0],
@@ -29,20 +30,20 @@ Map<String, List<double>> _colorMap = {
   'brown': [72, 43, 8],
   'black': [0, 0, 0],
 };
-List<double> primary = [0, 167, 0];
-List<double> secondary = [15, 69, 194];
-List<double> primaryLight = [0, 167, 0, 0.5];
-List<double> text = [90, 90, 90];
+// List<double> primary = [0, 167, 0];
+// List<double> secondary = [15, 69, 194];
+// List<double> primaryLight = [0, 167, 0, 0.5];
+// List<double> text = [90, 90, 90];
 
-List<double> magentaTransparent = [200, 100, 240, 0.4];
-List<double> magenta = magentaTransparent.sublist(0, magentaTransparent.length - 1);
-List<double> red = [200, 100, 0];
-List<double> greyLighter = [225, 225, 225];
-List<double> greyLight = [200, 200, 200];
-List<double> grey = [125, 125, 125];
-List<double> greyTransparent = [125, 125, 125, 0.4];
-List<double> greyDark = [50, 50, 50];
-List<double> white = [255, 255, 255];
+// List<double> magentaTransparent = [200, 100, 240, 0.4];
+// List<double> magenta = magentaTransparent.sublist(0, magentaTransparent.length - 1);
+// List<double> red = [200, 100, 0];
+// List<double> greyLighter = [225, 225, 225];
+// List<double> greyLight = [200, 200, 200];
+// List<double> grey = [125, 125, 125];
+// List<double> greyTransparent = [125, 125, 125, 0.4];
+// List<double> greyDark = [50, 50, 50];
+// List<double> white = [255, 255, 255];
 
 String valsToString(List<double> vals) {
   String str = 'rgba(';

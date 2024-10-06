@@ -13,12 +13,12 @@ import '../modules/neighborhood/neighborhoods.dart';
 import '../modules/neighborhood/neighborhood_state.dart';
 import '../modules/event/featured_event_photos.dart';
 
-class HomeComponent extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
-  _HomeComponentState createState() => _HomeComponentState();
+  _HomeState createState() => _HomeState();
 }
 
-class _HomeComponentState extends State<HomeComponent> {
+class _HomeState extends State<Home> {
   Buttons _buttons = Buttons();
   ColorsService _colors = ColorsService();
   // ConfigService _configService = ConfigService();

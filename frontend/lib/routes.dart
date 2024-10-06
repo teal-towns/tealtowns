@@ -40,6 +40,7 @@ import './modules/event/featured_event_photo_save.dart';
 
 import './modules/icebreaker/icebreakers.dart';
 import './modules/icebreaker/icebreaker_save.dart';
+import './modules/mixer/mixer_game.dart';
 
 import './modules/insight/app_insights.dart';
 import './modules/insight/ambassador_insights.dart';
@@ -116,6 +117,8 @@ class Routes {
 
   static const icebreakers = '/icebreakers';
   static const icebreakerSave = '/icebreaker-save';
+  static const mixerGame = '/mixer-game';
+  static const mixerGameJoin = '/mg/:uName';
 
   static const appInsights = '/app-insights';
   static const ambassadorInsights = '/ambassador-insights';
@@ -149,7 +152,7 @@ class Routes {
   static const userInterestSave = '/interests';
   static const userAvailabilitySave = '/user-availability-save';
 
-  static const amazonAffiliate = '/amazon-affiliate';
+  static const amazonAffiliate = '/products';
 }
 
 class AppGoRouter {
@@ -163,15 +166,15 @@ class AppGoRouter {
     routes: [
       GoRoute(
         path: Routes.home, name: 'home',
-        builder: (BuildContext context, GoRouterState state) => HomeComponent(),
+        builder: (BuildContext context, GoRouterState state) => Home(),
       ),
       GoRoute(
         path: Routes.login, name: 'login',
-        builder: (context, state) => UserLoginComponent(),
+        builder: (context, state) => UserLogin(),
       ),
       GoRoute(
         path: Routes.logout, name: 'logout',
-        builder: (context, state) => UserLogoutComponent(),
+        builder: (context, state) => UserLogout(),
       ),
       GoRoute(
         path: Routes.signup, name: 'signup',
@@ -179,14 +182,14 @@ class AppGoRouter {
       ),
       GoRoute(
         path: Routes.emailVerify, name: 'emailVerify',
-        builder: (context, state) => UserEmailVerifyComponent(
+        builder: (context, state) => UserEmailVerify(
           verifyKey: state.uri.queryParameters['key'] ?? '',
           email: state.uri.queryParameters['email'] ?? '',
         ),
       ),
       GoRoute(
         path: Routes.passwordReset, name: 'passwordReset',
-        builder: (BuildContext context, GoRouterState state) => UserPasswordResetComponent(
+        builder: (BuildContext context, GoRouterState state) => UserPasswordReset(
           resetKey: state.uri.queryParameters['key'] ?? '',
           email: state.uri.queryParameters['email'] ?? '',
         ),
@@ -309,6 +312,21 @@ class AppGoRouter {
       ),
 
       GoRoute(
+        path: Routes.mixerGame, name: 'mixerGame',
+        builder: (context, state) => MixerGame(),
+      ),
+      GoRoute(
+        path: Routes.mixerGameJoin, name: 'mixerGameJoin',
+        builder: (BuildContext context, GoRouterState state) {
+          String? uName = state.pathParameters['uName'];
+          if (uName != null) {
+            return MixerGame(uName: uName);
+          }
+          return MixerGame();
+        },
+      ),
+
+      GoRoute(
         path: Routes.land, name: 'land',
         builder: (BuildContext context, GoRouterState state) => LandPage(
             goRouterState: state,
@@ -362,7 +380,7 @@ class AppGoRouter {
           if (uName != null) {
             return NeighborhoodGroup(uName: uName);
           }
-          return HomeComponent();
+          return Home();
         },
       ),
       GoRoute(

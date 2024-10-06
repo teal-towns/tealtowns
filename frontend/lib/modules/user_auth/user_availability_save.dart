@@ -20,7 +20,9 @@ import '../neighborhood/neighborhood_state.dart';
 class UserAvailabilitySave extends StatefulWidget {
   double dayHeight;
   double dayWidth;
-  UserAvailabilitySave({ this.dayHeight = 250, this.dayWidth = 250,});
+  bool withAppScaffold;
+  Function(Map<String, dynamic>)? onSave;
+  UserAvailabilitySave({ this.dayHeight = 250, this.dayWidth = 250, this.withAppScaffold = true, this.onSave = null});
 
   @override
   _UserAvailabilitySaveState createState() => _UserAvailabilitySaveState();
@@ -61,13 +63,17 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
       if (data['valid'] == 1 && data.containsKey('userAvailability')) {
         CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
         currentUserState.SetUserAvailability(UserAvailabilityClass.fromJson(data['userAvailability']));
-        String route = '/user';
-        // Go to neighborhoods if no neighborhood yet.
-        var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
-        if (neighborhoodState.defaultUserNeighborhood == null) {
-          route = '/neighborhoods';
+        if (widget.onSave != null) {
+          widget.onSave!({ 'userAvailability':data['userAvailability'] });
+        } else {
+          String route = '/user';
+          // Go to neighborhoods if no neighborhood yet.
+          var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+          if (neighborhoodState.defaultUserNeighborhood == null) {
+            route = '/neighborhoods';
+          }
+          context.go(route);
         }
-        context.go(route);
       }
     }));
 
@@ -94,7 +100,11 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
   Widget build(BuildContext context) {
     CurrentUserState currentUserState = context.watch<CurrentUserState>();
     if (!currentUserState.isLoggedIn || _loading) {
-      return AppScaffoldComponent(listWrapper: true, body: Column(children: [ LinearProgressIndicator() ]) );
+      Widget content = Column( children: [ LinearProgressIndicator(), ] );
+      if (widget.withAppScaffold) {
+        return AppScaffoldComponent(listWrapper: true, body: content);
+      }
+      return content;
     }
 
     if (currentUserState.userAvailability.id != _userAvailability.id) {
@@ -188,38 +198,42 @@ class _UserAvailabilitySaveState extends State<UserAvailabilitySave> {
       ));
     }
 
-    return AppScaffoldComponent(
-      listWrapper: true,
-      body: Column(
-        children: [
-          _style.Text1('When are all the times you are generally available for in person neighborhood events?', size: 'large'),
-          _style.SpacingH('medium'),
-          _layoutService.WrapWidth(days, width: widget.dayWidth),
-          _style.SpacingH('xlarge'),
-          ElevatedButton(child: Text('Save'), onPressed: () {
-            ValidateAndUpdateAllTimes();
-            int timesCount = 0;
-            for (var day in _userAvailability.availableTimesByDay) {
-              timesCount += day['times'].length as int;
-            }
-            if (timesCount >= 3) {
-              var data = {
-                'userAvailability': _userAvailability.toJson(),
-              };
-              CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
-              data['userAvailability']!['userId'] = currentUserState.currentUser.id;
-              data['userAvailability']!['username'] = currentUserState.currentUser.username;
-              _socketService.emit('SaveUserAvailability', data);
-              setState(() { _loading = true; });
-            } else {
-              setState(() { _message = 'Please add at least 3 availability times.'; });
-            }
-          },),
-          _style.SpacingH('medium'),
-          _style.Text1(_message),
-        ],
-      ),
+    Widget content = Column(
+      children: [
+        _style.Text1('When are all the times you are generally available for in person neighborhood events?', size: 'large'),
+        _style.SpacingH('medium'),
+        _layoutService.WrapWidth(days, width: widget.dayWidth),
+        _style.SpacingH('xlarge'),
+        ElevatedButton(child: Text('Save'), onPressed: () {
+          ValidateAndUpdateAllTimes();
+          int timesCount = 0;
+          for (var day in _userAvailability.availableTimesByDay) {
+            timesCount += day['times'].length as int;
+          }
+          if (timesCount >= 3) {
+            var data = {
+              'userAvailability': _userAvailability.toJson(),
+            };
+            CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+            data['userAvailability']!['userId'] = currentUserState.currentUser.id;
+            data['userAvailability']!['username'] = currentUserState.currentUser.username;
+            _socketService.emit('SaveUserAvailability', data);
+            setState(() { _loading = true; });
+          } else {
+            setState(() { _message = 'Please add at least 3 availability times.'; });
+          }
+        },),
+        _style.SpacingH('medium'),
+        _style.Text1(_message),
+      ],
     );
+    if (widget.withAppScaffold) {
+      return AppScaffoldComponent(
+        listWrapper: true,
+        body: content,
+      );
+    }
+    return content;
   }
 
   void ValidateAndUpdateAllTimes() {

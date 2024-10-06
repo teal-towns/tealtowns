@@ -48,7 +48,6 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
   WeeklyEventClass _weeklyEvent = WeeklyEventClass.fromJson({});
   EventClass _event = EventClass.fromJson({});
   bool _loading = true;
-  double _widthTotal = 1000;
 
   Map<String, dynamic>_formVals = {
     'preset': 'largePublicInkSaver',
@@ -73,6 +72,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     // 'googleFontFamily': 'Shadows Into Light',
     'googleFontFamily': 'Handlee',
     'fontSize': 'large',
+    'widthTotal': 1000,
   };
   List<Map<String, dynamic>> _optsYesNo = [
     {'value': 1, 'label': 'Yes'},
@@ -250,7 +250,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     if (_formVals['rows'] == null || _formVals['rows'] < 1) {
       _formVals['rows'] = 1;
     }
-    double size = (_widthTotal / _formVals['columns']) - buffer;
+    double size = (_formVals['widthTotal'] / _formVals['columns']) - buffer;
     double imageHeight = size / 2;
     List<Widget> rows = [];
     for (int i = 0; i < _formVals['columns']; i++) {
@@ -278,6 +278,9 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
           setState(() { _formVals = _formVals; });
         }),
         _inputFields.inputNumber(_formVals, 'columns', label: 'Columns', min: 1, max: 5, onChanged: (val) {
+          setState(() { _formVals = _formVals; });
+        }),
+        _inputFields.inputNumber(_formVals, 'widthTotal', label: 'Width', min: 250, onChanged: (val) {
           setState(() { _formVals = _formVals; });
         }),
         _inputFields.inputSelect(_optsYesNo, _formVals, 'showImage', label: 'Show Image?', onChanged: (val) {
@@ -320,7 +323,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
     }
 
     List<Widget> colsMessage = [];
-    if (_formVals['showMessage'] == 1) {
+    if (_formVals['showMessage'] == 1 || _formVals['preset'] == 'custom') {
       colsMessage += [
         _inputFields.inputText(_formVals, 'userMessage', label: 'Message', onChanged: (val) {
           setState(() { _formVals = _formVals; });
@@ -471,7 +474,7 @@ class _WeeklyEventPrintState extends State<WeeklyEventPrint> {
       // int size = 23;
       int size = 30;
       int padding = 10;
-      int count = ((_widthTotal / _formVals['columns']).round() / (size + padding * 2)).floor() - 1;
+      int count = ((_formVals['widthTotal'] / _formVals['columns']).round() / (size + padding * 2)).floor() - 1;
       String url1 = _configService.GetUrl('/we/${_weeklyEvent.uName}', withScheme: false);
       List<Widget> rows = [];
       for (int i = 0; i < count; i++) {

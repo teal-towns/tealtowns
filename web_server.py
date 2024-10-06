@@ -57,6 +57,8 @@ from icebreaker import icebreaker_routes as _icebreaker_routes
 from image import image_routes as _image_routes
 from insight import app_insight_routes as _app_insight_routes
 from insight import user_insight_routes as _user_insight_routes
+from mixer import mixer_game_routes as _mixer_game_routes
+from mixer import mixer_match_player_routes as _mixer_match_player_routes
 from neighborhood import neighborhood_routes as _neighborhood_routes
 from neighborhood import neighborhood_group_routes as _neighborhood_group_routes
 from neighborhood import neighborhood_stats_routes as _neighborhood_stats_routes
@@ -128,7 +130,10 @@ async def websocket_handler(request):
                 ret = _socket.form_send_data(dataRaw["route"], retData, auth)
                 # await websocket.send_text(json.dumps(ret))
                 utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
-                await websocket.send_bytes(utf8Bytes)
+                try:
+                    await websocket.send_bytes(utf8Bytes)
+                except Exception as e:
+                    print ("web_server.websocket_handler send exception", e)
 
                 # data = json.loads(dataString)
 
