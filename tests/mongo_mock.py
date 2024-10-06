@@ -10,6 +10,7 @@ from notifications_all import sms_twilio as _sms_twilio
 from pay_mercury import pay_mercury as _pay_mercury
 from user import user_availability as _user_availability
 from user import user_interest as _user_interest
+import websocket_clients as _websocket_clients
 
 from stubs import stubs_event as _stubs_event
 from stubs import stubs_mercury_pay_out as _stubs_mercury_pay_out
@@ -41,7 +42,7 @@ _collectionNames = ['user', 'image', 'blog',
     'userMessage',
     'eventFeedback', 'userFeedback', 'featuredEventPhoto',
     'neighborhoodStatsMonthlyCache', 'eventInsight',
-    'icebreaker',
+    'icebreaker', 'mixerGame', 'mixerMatchPlayer',
     'appInsight', 'userInsight', 'userFollowUp',
     'userInterest', 'userAvailability',
 ]
@@ -93,6 +94,7 @@ def InitAllCollections():
         _pay_mercury.SetTestMode(1)
         _user_availability.SetTestMode(1)
         _user_interest.SetTestMode(1)
+        _websocket_clients.SetTestMode(1)
 
         _inited = 1
 

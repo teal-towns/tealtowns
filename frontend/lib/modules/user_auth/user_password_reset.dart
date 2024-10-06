@@ -10,16 +10,16 @@ import '../../common/form_input/input_fields.dart';
 import './current_user_state.dart';
 import '../../routes.dart';
 
-class UserPasswordResetComponent extends StatefulWidget {
+class UserPasswordReset extends StatefulWidget {
   String resetKey;
   String email;
-  UserPasswordResetComponent({this.resetKey = '', this.email = '' });
+  UserPasswordReset({this.resetKey = '', this.email = '' });
 
   @override
   _UserPasswordResetState createState() => _UserPasswordResetState();
 }
 
-class _UserPasswordResetState extends State<UserPasswordResetComponent> {
+class _UserPasswordResetState extends State<UserPasswordReset> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();

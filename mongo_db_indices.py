@@ -92,6 +92,9 @@ def create_all_indices(db):
 
     db['icebreaker'].create_index([('icebreaker', 1)], unique=True)
 
+    db['mixerGame'].create_index([('uName', 1)], unique=True)
+    db['mixerMatchPlayer'].create_index([('mixerGameUName', 1)], unique=False)
+
     db['appInsight'].create_index([('start', 1), ('end', 1)], unique=True)
 
     db['userInsight'].create_index([('userId', 1)], unique=True)

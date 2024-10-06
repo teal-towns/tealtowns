@@ -15,8 +15,13 @@ import '../../routes.dart';
 class UserSignup extends StatefulWidget {
   bool withScaffold;
   bool redirectOnDone;
+  bool withHeaderImage;
+  bool withHeader;
+  String signUpText;
   Function(dynamic)? onSave;
-  UserSignup({this.withScaffold = true, this.redirectOnDone = true, this.onSave = null});
+  Function(dynamic)? onShowLogin;
+  UserSignup({this.withScaffold = true, this.redirectOnDone = true, this.withHeaderImage = true,
+    this.withHeader = true, this.onSave = null, this.onShowLogin = null, this.signUpText = 'Sign Up'});
 
   @override
   _UserSignupState createState() => _UserSignupState();
@@ -51,7 +56,7 @@ class _UserSignupState extends State<UserSignup> {
           if (user.id.length > 0) {
             currentUserState.setCurrentUser(user);
             if (widget.onSave != null) {
-              widget.onSave!(user);
+              widget.onSave!(user.toJson());
             }
             if (widget.redirectOnDone) {
               // String route = '/home';
@@ -104,7 +109,7 @@ class _UserSignupState extends State<UserSignup> {
             setState(() { _loading = false; });
           }
         },
-        child: Text('Start my TealTown!'),
+        child: Text(widget.signUpText),
       ),
     );
   }
@@ -134,6 +139,18 @@ class _UserSignupState extends State<UserSignup> {
       _socketService.emit('AddAppInsightView', data);
     }
 
+    List<Widget> colsHeader = [];
+    if (widget.withHeaderImage) {
+      colsHeader = [
+        Image.asset('assets/images/logo.png', width: 30, height: 30),
+        SizedBox(width: 10),
+      ];
+    }
+    if (widget.withHeader) {
+      colsHeader += [
+        _style.Text1('Sign Up', size: 'large', colorKey: 'primary'),
+      ];
+    }
     Widget content = Form(
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -142,9 +159,7 @@ class _UserSignupState extends State<UserSignup> {
         children: <Widget>[
           Row(
             children: [
-              Image.asset('assets/images/logo.png', width: 30, height: 30),
-              SizedBox(width: 10),
-              _style.Text1('Registration', size: 'large', colorKey: 'primary'),
+              ...colsHeader,
             ]
           ),
           _inputFields.inputEmail(formVals, 'email'),
@@ -155,7 +170,11 @@ class _UserSignupState extends State<UserSignup> {
           _buildMessage(context),
           TextButton(
             onPressed: () {
-              context.go(Routes.login);
+              if (widget.onShowLogin != null) {
+                widget.onShowLogin!({});
+              } else {
+                context.go(Routes.login);
+              }
             },
             child: Text('Already have an account? Log in.'),
           ),

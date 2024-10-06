@@ -19,6 +19,10 @@ import './current_user_state.dart';
 import './user_interest_class.dart';
 
 class UserInterestSave extends StatefulWidget {
+  bool withAppScaffold;
+  Function(Map<String, dynamic>)? onSave;
+  UserInterestSave({this.withAppScaffold = true, this.onSave = null});
+
   @override
   _UserInterestSaveState createState() => _UserInterestSaveState();
 }
@@ -57,7 +61,11 @@ class _UserInterestSaveState extends State<UserInterestSave> {
       if (data['valid'] == 1 && data.containsKey('userInterest')) {
         CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
         currentUserState.SetUserInterest(UserInterestClass.fromJson(data['userInterest']));
-        context.go('/user-availability-save');
+        if (widget.onSave != null) {
+          widget.onSave!({ 'userInterest': data['userInterest'] });
+        } else {
+          context.go('/user-availability-save');
+        }
       }
     }));
 
@@ -95,7 +103,11 @@ class _UserInterestSaveState extends State<UserInterestSave> {
   Widget build(BuildContext context) {
     CurrentUserState currentUserState = context.watch<CurrentUserState>();
     if (!currentUserState.isLoggedIn || _loading) {
-      return AppScaffoldComponent(listWrapper: true, body: Column(children: [ LinearProgressIndicator() ]) );
+      Widget content = Column( children: [ LinearProgressIndicator(), ] );
+      if (widget.withAppScaffold) {
+        return AppScaffoldComponent(listWrapper: true, body: content);
+      }
+      return content;
     }
     if (currentUserState.userInterest.id != _userInterest.id) {
       _userInterest = currentUserState.userInterest;
@@ -118,18 +130,24 @@ class _UserInterestSaveState extends State<UserInterestSave> {
         _style.SpacingH('medium'),
         ...BuildEventInterestsSelects(),
         _style.SpacingH('xlarge'),
-        _style.Text1('Share with your neighbors and friends to get your local events started!', size: 'xlarge'),
-        _style.SpacingH('medium'),
-        _style.Text1('Text or email this link to friends, share the QR code with your neighbors, post on social media, and more!'),
-        _style.SpacingH('medium'),
-        _style.Text1('${config['SERVER_URL']}/interests'),
-        _style.SpacingH('medium'),
-        QrImageView(
-          data: '${config['SERVER_URL']}/interests',
-          version: QrVersions.auto,
-          size: 200.0,
-        ),
-        _style.SpacingH('xlarge'),
+      ];
+      if (widget.withAppScaffold) {
+        cols += [
+          _style.Text1('Share with your neighbors and friends to get your local events started!', size: 'xlarge'),
+          _style.SpacingH('medium'),
+          _style.Text1('Text or email this link to friends, share the QR code with your neighbors, post on social media, and more!'),
+          _style.SpacingH('medium'),
+          _style.Text1('${config['SERVER_URL']}/interests'),
+          _style.SpacingH('medium'),
+          QrImageView(
+            data: '${config['SERVER_URL']}/interests',
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
+          _style.SpacingH('xlarge'),
+        ];
+      }
+      cols += [
         ElevatedButton(child: Text('Save'), onPressed: () {
           CheckHostThenSave();
         },),
@@ -138,16 +156,20 @@ class _UserInterestSaveState extends State<UserInterestSave> {
         _style.SpacingH('medium'),
       ];
     }
-    return AppScaffoldComponent(
-      listWrapper: true,
-      width: 900,
-      body: Container(width: double.infinity, child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...cols,
-        ],
-      ))
-    );
+    Widget content = Container(width: double.infinity, child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...cols,
+      ],
+    ));
+    if (widget.withAppScaffold) {
+      return AppScaffoldComponent(
+        listWrapper: true,
+        width: 900,
+        body: content,
+      );
+    }
+    return content;
   }
 
   Widget BuildHostsCheck() {

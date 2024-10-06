@@ -37,7 +37,8 @@ class LinkService {
     // Check for local url and prepend domain if so.
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       Map<String, dynamic> config = _configService.GetConfig();
-      url = '${config['SERVER_URL']}${url}';
+      String serverUrl = config['APP_URL'] ?? config['SERVER_URL'];
+      url = '${serverUrl}${url}';
     }
     if (await canLaunch(url)) {
       await launch(url);

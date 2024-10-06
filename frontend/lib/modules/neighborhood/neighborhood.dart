@@ -322,6 +322,8 @@ class _NeighborhoodState extends State<Neighborhood> {
         children: [
           _style.Text1('${_neighborhood.title}', size: 'xlarge'),
           ...colsJoin,
+          // _style.SpacingH('medium'),
+          _buttons.Link(context, 'Play Mixer Game', '/mixer-game',),
           _style.SpacingH('medium'),
           // NeighborhoodJourney(belongingSteps: _belongingSteps, sustainableSteps: _sustainableSteps,
           //   currentStepOnly: true, showTitles: false,),
@@ -359,7 +361,7 @@ class _NeighborhoodState extends State<Neighborhood> {
           _buttons.Link(context, 'See All Stats', '/neighborhood-stats/${_neighborhood.uName}'),
           _style.SpacingH('medium'),
           Container(
-            width: 300,
+            // width: 300,
             child: MapIt(mapHeight: 300,
               longitude: _neighborhood.location.coordinates[0], latitude: _neighborhood.location.coordinates[1],
               zoom: 15, markerLngLat: [_neighborhood.location.coordinates[0], _neighborhood.location.coordinates[1]],

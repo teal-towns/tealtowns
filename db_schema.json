@@ -244,8 +244,8 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "userId": "{String}",
         "amountUSD": "{Float} [positive to increase credit balance, negative to reduce]",
-        "forType": "{String} event|weeklyEvent",
-        "forId": "{String} [eventId]|[weeklyEventId]",
+        "forType": "{String} event|weeklyEvent|mixerGame",
+        "forId": "{String} [eventId]|[weeklyEventId]|[mixerGameId]",
         "quantity": "{Int}"
     },
     "userStripeAccount": {
@@ -508,6 +508,38 @@
         "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
         "icebreaker": "{String}",
         "details": "{String}"
+    },
+    "mixerGame": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "uName":"{String}",
+        "neighborhoodUName": "{String}",
+        "gameType": "{String} match",
+        "hostUserIds": ["{String}"],
+        "state": "{String} playing|gameOver",
+        "gameDetails": {
+            "question": "{String} @optional [match type only]"
+        },
+        "players": [
+            {
+                "playerId": "{String} [matches the collection for this gameType, e.g. mixerMatchPlayer._id for match gameType]",
+                "playerName": "{String}",
+                "userId": "{String} @optional [none if guest]",
+                "score": "{Int}",
+                "scoreState": "{String} waiting|submitted [so can know when all players have submitted scores]",
+                "reward": "{String} @optional winner|random [if this player earned a reward]"
+            }
+        ]
+    },
+    "mixerMatchPlayer": {
+        "_id": "{ObjectId} ObjectId('123l4k234l')",
+        "createdAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "updatedAt": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ] 2024-06-13T15:30:00+00:00",
+        "mixerGameUName": "{String}",
+        "userId": "{String} @optional [none if guest]",
+        "name": "{String}",
+        "answer": "{String}"
     },
     "userInterest": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

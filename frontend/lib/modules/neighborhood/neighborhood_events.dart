@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../app_scaffold.dart';
@@ -11,11 +12,18 @@ import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../event/weekly_events.dart';
 import './neighborhood_class.dart';
+import '../user_auth/current_user_state.dart';
+import '../user_auth/user_availability_save.dart';
 import '../user_auth/user_interests.dart';
+import '../user_auth/user_interest_save.dart';
 
 class NeighborhoodEvents extends StatefulWidget {
   String uName;
-  NeighborhoodEvents({this.uName = '',});
+  bool withAppScaffold;
+  int withWeeklyEventFilters;
+  int inlineMode;
+  NeighborhoodEvents({this.uName = '', this.withAppScaffold = true, this.withWeeklyEventFilters = 1,
+    this.inlineMode = 0,});
 
   @override
   _NeighborhoodEventsState createState() => _NeighborhoodEventsState();
@@ -32,6 +40,8 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
   NeighborhoodClass _neighborhood = NeighborhoodClass.fromJson({});
   Map<String, dynamic> _adminContactInfo = {};
   bool _loading = true;
+  bool _showUserInterestSave = false;
+  bool _showUserAvailabilitySave = false;
 
   @override
   void initState() {
@@ -68,14 +78,14 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return AppScaffoldComponent(
-        listWrapper: true,
-        body: Column(
-          children: [
-            LinearProgressIndicator(),
-          ]
-        )
-      );
+      Widget content = Column( children: [ LinearProgressIndicator(), ] );
+      if (widget.withAppScaffold) {
+        return AppScaffoldComponent(
+          listWrapper: true,
+          body: content,
+        );
+      }
+      return content;
     }
 
     List<Widget> colsAdmin = [];
@@ -88,36 +98,78 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       ];
     }
 
+    CurrentUserState currentUserState = context.watch<CurrentUserState>();
     Map<String, dynamic> config = _configService.GetConfig();
-    return AppScaffoldComponent(
-      listWrapper: true,
-      body: Column(
-        children: [
-          WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
-            pageWrapper: 0, updateLngLatOnInit: 0,),
-          _style.SpacingH('medium'),
-          _style.Text1('Pending Events By Interest', size: 'large'),
-          _style.SpacingH('medium'),
-          _buttons.LinkElevated(context, 'Add Your Interests to Get Events Started!', '/interests',
-            checkLoggedIn: true,),
-          _style.SpacingH('medium'),
-          UserInterests(neighborhoodUName: _neighborhood.uName,),
-          _style.SpacingH('medium'),
-          _style.Text1('Share with your neighbors', size: 'large'),
-          _style.SpacingH('medium'),
-          QrImageView(
-            data: '${config['SERVER_URL']}/ne/${_neighborhood.uName}',
-            version: QrVersions.auto,
-            size: 200.0,
-          ),
-          _style.SpacingH('medium'),
-          Text('${config['SERVER_URL']}/ne/${_neighborhood.uName}'),
-          _style.SpacingH('large'),
-          _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
-          _style.SpacingH('medium'),
-          ...colsAdmin,
-        ]
-      )
+    List<Widget> cols = [
+      WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
+        pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters, showCreateButton: 0,),
+      _style.SpacingH('medium'),
+      _style.Text1('Pending Events By Interest', size: 'large'),
+      _style.SpacingH('medium'),
+    ];
+    if (widget.inlineMode == 0) {
+      cols += [
+        _buttons.LinkElevated(context, 'Add Your Interests to Start More Events!', '/interests',
+          checkLoggedIn: true,),
+      ];
+    } else {
+      cols += [
+        ElevatedButton(child: Text('Add Your Interests to Start More Events!'), onPressed: () {
+          setState(() { _showUserInterestSave = true; });
+        },),
+      ];
+    }
+    if (_showUserInterestSave) {
+      cols += [
+        UserInterestSave(withAppScaffold: false, onSave: (Map<String, dynamic> data) {
+          setState(() { _showUserInterestSave = false; _showUserAvailabilitySave = true; });
+        }),
+        _style.SpacingH('xLarge'),
+      ];
+    }
+    if (_showUserAvailabilitySave) {
+      cols += [
+        UserAvailabilitySave(withAppScaffold: false, onSave: (Map<String, dynamic> data) {
+          setState(() { _showUserAvailabilitySave = false; });
+        }),
+        _style.SpacingH('xLarge'),
+      ];
+    }
+    cols += [
+      _style.SpacingH('medium'),
+      UserInterests(neighborhoodUName: _neighborhood.uName,),
+      _style.SpacingH('medium'),
+    ];
+    if (widget.withAppScaffold) {
+      cols += [
+        _style.Text1('Share with your neighbors', size: 'large'),
+        _style.SpacingH('medium'),
+        QrImageView(
+          data: '${config['SERVER_URL']}/ne/${_neighborhood.uName}',
+          version: QrVersions.auto,
+          size: 200.0,
+        ),
+        _style.SpacingH('medium'),
+        Text('${config['SERVER_URL']}/ne/${_neighborhood.uName}'),
+        _style.SpacingH('large'),
+        _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
+        _style.SpacingH('medium'),
+        _buttons.Link(context, 'Play Mixer Game', '/mixer-game', checkLoggedIn: true,),
+        _style.SpacingH('medium'),
+        ...colsAdmin,
+      ];
+    }
+    Widget content = Column(
+      children: [
+        ...cols,
+      ]
     );
+    if (widget.withAppScaffold) {
+      return AppScaffoldComponent(
+        listWrapper: true,
+        body: content,
+      );
+    }
+    return content;
   }
 }

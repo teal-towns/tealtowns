@@ -14,12 +14,22 @@ import '../../routes.dart';
 import '../neighborhood/neighborhood_state.dart';
 import '../neighborhood/user_neighborhood_class.dart';
 
-class UserLoginComponent extends StatefulWidget {
+class UserLogin extends StatefulWidget {
+  bool withScaffold;
+  bool redirectOnDone;
+  bool withHeaderImage;
+  bool withHeader;
+  String logInText;
+  Function(dynamic)? onSave;
+  Function(dynamic)? onShowSignup;
+  UserLogin({this.withScaffold = true, this.redirectOnDone = true, this.withHeaderImage = true,
+    this.withHeader = true,this.onSave = null, this.onShowSignup = null, this.logInText = 'Log In',});
+
   @override
   _UserLoginState createState() => _UserLoginState();
 }
 
-class _UserLoginState extends State<UserLoginComponent> {
+class _UserLoginState extends State<UserLogin> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   InputFields _inputFields = InputFields();
@@ -39,7 +49,7 @@ class _UserLoginState extends State<UserLoginComponent> {
       var res = json.decode(resString);
       var data = res['data'];
       if (data['valid'] == 1 && data.containsKey('user')) {
-        var user = UserClass.fromJson(data['user']);
+        UserClass user = UserClass.fromJson(data['user']);
         if (user.id.length > 0) {
           String route = '/home';
           CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
@@ -55,11 +65,16 @@ class _UserLoginState extends State<UserLoginComponent> {
             }
             Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
           }
-          String redirectUrl = currentUserState.GetRedirectUrl();
-          if (redirectUrl.length > 0) {
-            route = redirectUrl;
+          if (widget.onSave != null) {
+            widget.onSave!(user.toJson());
           }
-          context.go(route);
+          if (widget.redirectOnDone) {
+            String redirectUrl = currentUserState.GetRedirectUrl();
+            if (redirectUrl.length > 0) {
+              route = redirectUrl;
+            }
+            context.go(route);
+          }
         } else {
           setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid login, please try again'; });
         }
@@ -105,7 +120,7 @@ class _UserLoginState extends State<UserLoginComponent> {
                 setState(() { _loading = false; });
               }
             },
-            child: Text('Log In'),
+            child: Text(widget.logInText),
           ),
           SizedBox(width: 15),
           ElevatedButton(
@@ -135,35 +150,53 @@ class _UserLoginState extends State<UserLoginComponent> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> colsHeader = [];
+    if (widget.withHeaderImage) {
+      colsHeader = [
+        Image.asset('assets/images/logo.png', width: 30, height: 30),
+        SizedBox(width: 10),
+      ];
+    }
+    if (widget.withHeader) {
+      colsHeader += [
+        _style.Text1('Log In', size: 'large', colorKey: 'primary'),
+      ];
+    }
+    Widget content = Form(
+      key: _formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: [
+              ...colsHeader,
+            ]
+          ),
+          _inputFields.inputEmail(formVals, 'email', fieldKey: _formFieldKeyEmail),
+          _inputFields.inputPassword(formVals, 'password', minLen: 6),
+          _buildSubmitButtons(context),
+          _buildMessage(context),
+          TextButton(
+            onPressed: () {
+              if (widget.onShowSignup != null) {
+                widget.onShowSignup!({});
+              } else {
+                context.go(Routes.signup);
+              }
+            },
+            child: Text('No account? Sign up.'),
+          ),
+        ]
+      ),
+    );
+    if (!widget.withScaffold) {
+      return content;
+    }
     return AppScaffoldComponent(
       listWrapper: true,
       width: 600,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: [
-                Image.asset('assets/images/logo.png', width: 30, height: 30),
-                SizedBox(width: 10),
-                _style.Text1('Log In', size: 'large', colorKey: 'primary'),
-              ]
-            ),
-            _inputFields.inputEmail(formVals, 'email', fieldKey: _formFieldKeyEmail),
-            _inputFields.inputPassword(formVals, 'password', minLen: 6),
-            _buildSubmitButtons(context),
-            _buildMessage(context),
-            TextButton(
-              onPressed: () {
-                context.go(Routes.signup);
-              },
-              child: Text('No account? Sign up.'),
-            ),
-          ]
-        ),
-      ),
+      body: content,
     );
   }
 

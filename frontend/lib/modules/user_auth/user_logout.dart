@@ -12,12 +12,12 @@ import '../../routes.dart';
 import '../neighborhood/neighborhood_state.dart';
 import '../neighborhood/user_neighborhood_class.dart';
 
-class UserLogoutComponent extends StatefulWidget {
+class UserLogout extends StatefulWidget {
   @override
   _UserLogoutState createState() => _UserLogoutState();
 }
 
-class _UserLogoutState extends State<UserLogoutComponent> {
+class _UserLogoutState extends State<UserLogout> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
 

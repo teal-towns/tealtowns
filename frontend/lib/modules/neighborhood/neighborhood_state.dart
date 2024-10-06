@@ -14,6 +14,7 @@ class NeighborhoodState extends ChangeNotifier {
   LocalStorage? _localstorage = null;
   List<String> _routeIds = [];
   // String _status = "done";
+  String _userId = '';
 
   List<UserNeighborhoodClass> _userNeighborhoods = [];
   UserNeighborhoodClass? _defaultUserNeighborhood = null;
@@ -37,6 +38,16 @@ class NeighborhoodState extends ChangeNotifier {
           SetUserNeighborhoods(userNeighborhoods);
         }
         // _status = "done";
+      }));
+
+      _routeIds.add(_socketService.onRoute('SaveUserNeighborhood', callback: (String resString) {
+        var res = jsonDecode(resString);
+        var data = res['data'];
+        if (data['valid'] == 1) {
+          if (_userId.length > 0) {
+            CheckAndGet(_userId);
+          }
+        }
       }));
     }
   }
@@ -88,5 +99,18 @@ class NeighborhoodState extends ChangeNotifier {
     if (notify) {
       notifyListeners();
     }
+  }
+
+  void SaveUserNeighborhood(String neighborhoodUName, String userId, { String status = 'default', }) {
+    _userId = userId;
+    ClearUserNeighborhoods();
+    var data = {
+      'userNeighborhood': {
+        'neighborhoodUName': neighborhoodUName,
+        'userId': userId,
+        'status': status,
+      },
+    };
+    _socketService.emit('SaveUserNeighborhood', data);
   }
 }

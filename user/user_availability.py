@@ -229,8 +229,8 @@ def GetWeeklyEventInUserAvabilability(weeklyEvents: list, userAvailability: dict
                 for time in day['times']:
                     # Handle end in next day.
                     eventEnd = weeklyEvent['endTime']
-                    startHour = int(weeklyEvent['startTime'][0:2])
-                    endHour = int(weeklyEvent['endTime'][0:2])
+                    startHour = int(weeklyEvent['startTime'][0:2].replace(':', ''))
+                    endHour = int(weeklyEvent['endTime'][0:2].replace(':', ''))
                     if endHour < startHour:
                         endHour += 24
                         eventEnd = '24:00'

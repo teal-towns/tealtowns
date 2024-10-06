@@ -48,4 +48,7 @@ async def sendAsync(websocket, route, data, auth):
     ret = form_send_data(route, data, auth)
     # await websocket.send_text(json.dumps(ret))
     utf8Bytes = json.dumps(ret).encode(encoding='utf-8')
-    await websocket.send_bytes(utf8Bytes)
+    try:
+        await websocket.send_bytes(utf8Bytes)
+    except Exception as e:
+        print ("socket.sendAsync exception", e)

@@ -1,5 +1,7 @@
 import json
 
+import lodash
+
 # One per user (assume each websocket client connection is from one user).
 # If the same user is connected multiple times (e.g. from multiple devices or
 # browsers) then there will be multiple websockets per that user.
@@ -33,6 +35,11 @@ _wsUsers = {}
 # }
 _wsGroups = {}
 
+_testMode = 0
+def SetTestMode(testMode: int):
+    global _testMode
+    _testMode = testMode
+
 def AddClient(userId, ws):
     if len(userId) < 1:
         print ('AddClient empty userId', userId)
@@ -40,7 +47,7 @@ def AddClient(userId, ws):
     # Allow multiple connections for the same user.
     socketObj = {
         'ws': ws,
-        'id': id(ws)
+        'id': id(ws) if not _testMode else lodash.random_string()
     }
     if userId in _wsUsers:
         # Prevent duplicates.
@@ -83,7 +90,9 @@ def RemoveClient(wsId):
             break
     return {}
 
-def AddUsersToGroup(groupName, userIds, ws: None):
+def AddUsersToGroup(groupName, userIds, ws: None, generateUserId: int = 0):
+    if len(userIds) < 1 and generateUserId:
+        userIds = [ lodash.random_string() ]
     if groupName not in _wsGroups:
         _wsGroups[groupName] = { 'userIds': userIds }
         if ws is not None:
@@ -127,13 +136,14 @@ def GetUserIdsInGroup(groupName, skipUserIds=[]):
 async def SendToUsers(sendBytes, userIds: list, skipUserIds=[]):
     for userId in userIds:
         if userId not in skipUserIds and userId in _wsUsers:
-            for socket in _wsUsers[userId]['sockets']:
-                socketId = socket['id']
-                try:
-                    await socket['ws'].send_bytes(sendBytes)
-                except Exception as e:
-                    print ("websocket_client.SendToUsers exception, removing socket", e, socketId)
-                    RemoveClient(socketId)
+            if not _testMode:
+                for socket in _wsUsers[userId]['sockets']:
+                    socketId = socket['id']
+                    try:
+                        await socket['ws'].send_bytes(sendBytes)
+                    except Exception as e:
+                        print ("websocket_client.SendToUsers exception, removing socket", e, socketId)
+                        RemoveClient(socketId)
     return {}
 
 async def SendToUsersJson(jsonData, userIds: list, skipUserIds = []):
