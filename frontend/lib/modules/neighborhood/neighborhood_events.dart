@@ -21,9 +21,10 @@ class NeighborhoodEvents extends StatefulWidget {
   String uName;
   bool withAppScaffold;
   int withWeeklyEventFilters;
+  int withWeeklyEventsCreateButton;
   int inlineMode;
   NeighborhoodEvents({this.uName = '', this.withAppScaffold = true, this.withWeeklyEventFilters = 1,
-    this.inlineMode = 0,});
+    this.inlineMode = 0, this.withWeeklyEventsCreateButton = 1, });
 
   @override
   _NeighborhoodEventsState createState() => _NeighborhoodEventsState();
@@ -102,7 +103,8 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
     Map<String, dynamic> config = _configService.GetConfig();
     List<Widget> cols = [
       WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
-        pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters, showCreateButton: 0,),
+        pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters,
+        showCreateButton: widget.withWeeklyEventsCreateButton,),
       _style.SpacingH('medium'),
       _style.Text1('Pending Events By Interest', size: 'large'),
       _style.SpacingH('medium'),

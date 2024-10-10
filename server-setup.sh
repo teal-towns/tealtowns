@@ -1,14 +1,15 @@
 #!/bin/bash
 
 SERVER_IP=[ip]
-GITHUB_TOKEN=[token]
-
+# GITHUB_TOKEN=[token]
+# Set up a Github deploy key (add ssh public key to github and private to the server) so can clone repo.
 
 cd /var && mkdir www && cd /var/www && \
     # Install python3 and pip3
     apt-get -y update && apt-get -y upgrade && python3 -V && apt -y install python3-pip && \
     # Clone repo
-git clone https://$GITHUB_TOKEN@github.com/teal-towns/tealtowns.git && \
+# git clone https://$GITHUB_TOKEN@github.com/teal-towns/tealtowns.git && \
+git clone https://github.com/teal-towns/tealtowns.git && \
     cd tealtowns
 
 # Update configs and copy prod version to server.

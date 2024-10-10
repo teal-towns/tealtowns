@@ -265,8 +265,10 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     double singlePrice = _weeklyEvent.priceUSD * spots;
     double monthlyPrice = prices['monthlyPrice']! * spots;
     double monthlySavingsPerYear = prices['monthlySavingsPerYear']! * spots;
+    double monthlyPricePerEvent = prices['monthlyPricePerEvent']! * spots;
     double monthly3Price = prices['monthly3Price']! * spots;
     double monthly3SavingsPerYear = prices['monthly3SavingsPerYear']! * spots;
+    double montly3PricePerEvent = prices['monthly3PricePerEvent']! * spots;
     // double yearlyPrice = prices['yearlyPrice']! * spots;
     // double yearlySavingsPerYear = prices['yearlySavingsPerYear']! * spots;
 
@@ -281,11 +283,11 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       },
       'month': {
         'header': 'Monthly Subscription: \$${monthlyPrice}',
-        'body': 'Savings: \$${monthlySavingsPerYear} / year',
+        'body': '\$${monthlyPricePerEvent.toStringAsFixed(2)} / event; save \$${monthlySavingsPerYear} / year',
       },
       '3month': {
         'header': '3 Month Subscription: \$${monthly3Price}',
-        'body': 'Savings: \$${monthly3SavingsPerYear} / year',
+        'body': '\$${montly3PricePerEvent.toStringAsFixed(2)} / event; save \$${monthly3SavingsPerYear} / year',
       },
       // 'year': {
       //   'header': 'Yearly Subscription: \$${yearlyPrice}',

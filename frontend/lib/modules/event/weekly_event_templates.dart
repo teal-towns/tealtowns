@@ -99,11 +99,13 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
           'formVals': {
             'title': 'Sandwich Sundays',
             'dayOfWeek': 6,
-            'startTime': '18:00',
-            'endTime': '19:00',
+            'startTime': '17:00',
+            'endTime': '18:00',
             'imageUrls': ['/assets/assets/images/events/sandwich.jpg'],
             'description': 'Join your neighbors to eat sandwiches and connect. Bring a sandwich, or just yourself!',
             'type': 'sharedMeal',
+            'priceUSD': 10,
+            'rsvpDeadlineHours': 24,
           }
         },
         {
@@ -117,6 +119,8 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'imageUrls': ['/assets/assets/images/events/veggie-bowl.jpg'],
             'description': 'Join your neighbors to eat climate friendly vegetarian food and connect. Bring a veggie dish, or just yourself!',
             'type': 'sharedMeal',
+            'priceUSD': 10,
+            'rsvpDeadlineHours': 24,
           }
         },
         {
@@ -130,6 +134,8 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'imageUrls': ['/assets/assets/images/events/tacos-people.jpg'],
             'description': 'Join your neighbors to eat tacos and connect. Bring some tacos, or just yourself!',
             'type': 'sharedMeal',
+            'priceUSD': 10,
+            'rsvpDeadlineHours': 24,
           }
         },
         {
@@ -143,6 +149,8 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'imageUrls': ['/assets/assets/images/events/burritos.jpg'],
             'description': 'Join your neighbors to eat burritos and connect. Bring a burrito, or just yourself!',
             'type': 'sharedMeal',
+            'priceUSD': 10,
+            'rsvpDeadlineHours': 24,
           }
         },
         {
@@ -156,6 +164,8 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'imageUrls': ['/assets/assets/images/events/drinks-people.jpg'],
             'description': 'Join your neighbors to enjoy drinks and connect. Bring a beverage of your choice, or just yourself!',
             'type': 'sharedMeal',
+            'priceUSD': 10,
+            'rsvpDeadlineHours': 24,
           }
         },
         {
@@ -169,6 +179,8 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'imageUrls': ['/assets/assets/images/events/pizza-people.jpg'],
             'description': 'Join your neighbors to enjoy pizza and connect. Bring some pizza, or just yourself!',
             'type': 'sharedMeal',
+            'priceUSD': 10,
+            'rsvpDeadlineHours': 24,
           }
         },
         {
@@ -182,6 +194,8 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'imageUrls': ['/assets/assets/images/events/waffles-people.jpg'],
             'description': 'Join your neighbors to enjoy brunch and connect. Bring your favorite brunch item, or just yourself!',
             'type': 'sharedMeal',
+            'priceUSD': 10,
+            'rsvpDeadlineHours': 24,
           }
         },
       ];
@@ -203,6 +217,36 @@ class _WeeklyEventTemplatesState extends State<WeeklyEventTemplates> {
             'description': 'Connect with another person or group to share (co-purchase or co-own) 1 item together, while enjoying a walk in nature. Sharing items is easy and accessible to all. Choose a few items you own or want that you would be open to sharing, and make some friends (and save some cash) with them, rather than letting them sit unused for weeks or months. Each item shared is one less item produced and later thrown away. It is better for both the planet and our pockets.',
             'hostGroupSizeDefault': 0,
             'type': 'sharedItem',
+          }
+        },
+      ];
+    }
+    if (widget.types.length < 1) {
+      _formValsEventsList += [
+        {
+          'key': 'parkSports',
+          'selected': false,
+          'formVals': {
+            'title': 'Park / Sports Day',
+            'dayOfWeek': 6,
+            'startTime': '15:00',
+            'endTime': '17:00',
+            'imageUrls': ['/assets/assets/images/events/park-sports.jpg'],
+            'description': 'Join neighbors to enjoy the fresh air and nature.',
+            'hostGroupSizeDefault': 0,
+          }
+        },
+        {
+          'key': 'volunteersPlanting',
+          'selected': false,
+          'formVals': {
+            'title': 'Volunteering / Green (Planting) Project',
+            'dayOfWeek': 5,
+            'startTime': '08:15',
+            'endTime': '09:30',
+            'imageUrls': ['/assets/assets/images/events/volunteers-planting.jpg'],
+            'description': 'Help green your neighborhood.',
+            'hostGroupSizeDefault': 0,
           }
         },
       ];
