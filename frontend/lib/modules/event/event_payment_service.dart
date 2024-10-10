@@ -24,8 +24,8 @@ class EventPaymentService {
     double yearlySavingsPerYear = yearlyFullPrice - yearlyPrice;
     double monthlySavingsPerYear = ((monthlyFullPrice - monthlyPrice) * 12).floor().toDouble();
     double monthly3SavingsPerYear = ((monthly3FullPrice - monthly3Price) * 12 / 3).floor().toDouble();
-    double montlyPricePerEvent = weeklyPrice * (1 - _monthlyDiscount).toDouble();
-    double montly3PricePerEvent = weeklyPrice * (1 - _monthly3Discount).toDouble();
+    double montlyPricePerEvent = double.parse((weeklyPrice * (1 - _monthlyDiscount)).toDouble().toStringAsFixed(2));
+    double montly3PricePerEvent = double.parse((weeklyPrice * (1 - _monthly3Discount)).toDouble().toStringAsFixed(2));
 
     // double minFunds = yearlyPrice;
     // double eventsPerPeriod = 52;
