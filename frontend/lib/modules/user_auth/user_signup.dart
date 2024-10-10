@@ -18,10 +18,13 @@ class UserSignup extends StatefulWidget {
   bool withHeaderImage;
   bool withHeader;
   String signUpText;
+  String firstName;
+  String lastName;
   Function(dynamic)? onSave;
   Function(dynamic)? onShowLogin;
   UserSignup({this.withScaffold = true, this.redirectOnDone = true, this.withHeaderImage = true,
-    this.withHeader = true, this.onSave = null, this.onShowLogin = null, this.signUpText = 'Sign Up'});
+    this.withHeader = true, this.onSave = null, this.onShowLogin = null, this.signUpText = 'Sign Up',
+    this.firstName = '', this.lastName = ''});
 
   @override
   _UserSignupState createState() => _UserSignupState();
@@ -44,6 +47,13 @@ class _UserSignupState extends State<UserSignup> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.firstName.length > 0) {
+      formVals['firstName'] = widget.firstName;
+    }
+    if (widget.lastName.length > 0) {
+      formVals['lastName'] = widget.lastName;
+    }
 
     _routeIds.add(_socketService.onRoute('signup', callback: (String resString) {
       var res = jsonDecode(resString);

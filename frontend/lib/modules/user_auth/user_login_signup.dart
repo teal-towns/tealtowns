@@ -10,8 +10,10 @@ class UserLoginSignup extends StatefulWidget {
   String mode;
   String logInText;
   String signUpText;
+  String firstName;
+  String lastName;
   UserLoginSignup({required this.onSave, this.withHeader = true, this.mode = 'login',
-  this.logInText = 'Log In', this.signUpText = 'Sign Up'});
+  this.logInText = 'Log In', this.signUpText = 'Sign Up', this.firstName = '', this.lastName = ''});
 
   @override
   _UserLoginSignupState createState() => _UserLoginSignupState();
@@ -44,7 +46,8 @@ class _UserLoginSignupState extends State<UserLoginSignup> {
     } else if (_mode == 'signup') {
       cols += [
         UserSignup(withScaffold: false, redirectOnDone: false, withHeaderImage: false,
-          withHeader: widget.withHeader, signUpText: widget.signUpText, onSave: (dynamic user) {
+          withHeader: widget.withHeader, signUpText: widget.signUpText, firstName: widget.firstName,
+          lastName: widget.lastName, onSave: (dynamic user) {
           widget.onSave({ 'user': user, 'mode': 'signup' });
         }, onShowLogin: (dynamic data) {
           setState(() {

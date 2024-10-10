@@ -372,7 +372,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         children: [
           ...colsImage,
           _style.Text1('${weeklyEvent.startTime} ${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)'),
-          _style.SpacingH('medium'),
+          // _style.SpacingH('medium'),
           Row(
             children: [
               joinButton,

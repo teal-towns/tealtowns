@@ -43,6 +43,9 @@ class _MixerMatchState extends State<MixerMatch> {
   List<Map<String, dynamic>> _playerNames = [];
   List<Map<String, dynamic>> _playerAnswers = [];
   Map<String, dynamic> _formVals = {
+    'firstName': '',
+    'lastName': '',
+    'name': '',
     'answer': '',
   };
   String _messageJoin = '';
@@ -50,7 +53,7 @@ class _MixerMatchState extends State<MixerMatch> {
   Timer? _timer;
   int _countdown = 60;
   String _gameState = ''; // 'countdown'
-  String _nameMode = 'loginSignup';
+  String _nameMode = 'guest';
 
   void startTimer() {
     const oneSec = const Duration(seconds: 1);
@@ -171,7 +174,7 @@ class _MixerMatchState extends State<MixerMatch> {
           _style.Text1('Check out these other local events while you wait'),
           _style.SpacingH('medium'),
           NeighborhoodEvents(uName: widget.mixerGame.neighborhoodUName, withAppScaffold: false,
-            withWeeklyEventFilters: 0, inlineMode: 1),
+            withWeeklyEventFilters: 0, withWeeklyEventsCreateButton: 0, inlineMode: 1),
         ]
       );
     }
@@ -183,7 +186,10 @@ class _MixerMatchState extends State<MixerMatch> {
       CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
       if (currentUserState.isLoggedIn) {
         _formVals['userId'] = currentUserState.currentUser.id;
-        _formVals['name'] = currentUserState.currentUser.firstName + ' (' + currentUserState.currentUser.username + ')';
+        // name will be created later, so just set first and last name.
+        // _formVals['name'] = currentUserState.currentUser.firstName + ' (' + currentUserState.currentUser.username + ')';
+        _formVals['firstName'] = currentUserState.currentUser.firstName;
+        _formVals['lastName'] = '(' + currentUserState.currentUser.username + ')';
       } else if (widget.mixerGame.state == 'playing') {
         if (_nameMode == 'loginSignup') {
           showJoinButton = false;
@@ -192,7 +198,8 @@ class _MixerMatchState extends State<MixerMatch> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 UserLoginSignup(withHeader: false, mode: 'signup', logInText: 'Log In to Join Game',
-                  signUpText: 'Sign Up and Join Game', onSave: (Map<String, dynamic> data) {
+                  signUpText: 'Sign Up and Join Game', firstName: _formVals['firstName'],
+                  lastName: _formVals['lastName'], onSave: (Map<String, dynamic> data) {
                   String userId = data['user']['_id'];
                   // Add (new) user to this neighborhood.
                   if (data['mode'] == 'signup') {
@@ -220,7 +227,8 @@ class _MixerMatchState extends State<MixerMatch> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _inputFields.inputText(_formVals, 'name', label: 'What is your name?'),
+                _inputFields.inputText(_formVals, 'firstName', label: 'What is your first name?',),
+                _inputFields.inputText(_formVals, 'lastName', label: 'Your last name?',),
                 _style.SpacingH('medium'),
                 TextButton(child: Text('Or Log In / Sign Up'), onPressed: () {
                   setState(() { _nameMode = 'loginSignup'; });
@@ -236,6 +244,7 @@ class _MixerMatchState extends State<MixerMatch> {
             _style.SpacingH('medium'),
             ElevatedButton(child: Text('Join Game'), onPressed: () {
               if (_formVals['answer'].length > 1) {
+                _formVals['name'] = _formVals['firstName'] + ' ' + _formVals['lastName'];
                 _socketService.emit('SaveMixerMatchPlayer', { 'mixerMatchPlayer': _formVals });
                 setState(() { _messageJoin = ''; });
               } else {
@@ -471,7 +480,7 @@ class _MixerMatchState extends State<MixerMatch> {
         _style.Text1('Join other local events to play more!', size: 'large'),
         _style.SpacingH('medium'),
         NeighborhoodEvents(uName: widget.mixerGame.neighborhoodUName, withAppScaffold: false,
-          withWeeklyEventFilters: 0, inlineMode: 1),
+          withWeeklyEventFilters: 0, withWeeklyEventsCreateButton: 0, inlineMode: 1),
       ];
     }
 

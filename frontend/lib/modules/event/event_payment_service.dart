@@ -24,6 +24,8 @@ class EventPaymentService {
     double yearlySavingsPerYear = yearlyFullPrice - yearlyPrice;
     double monthlySavingsPerYear = ((monthlyFullPrice - monthlyPrice) * 12).floor().toDouble();
     double monthly3SavingsPerYear = ((monthly3FullPrice - monthly3Price) * 12 / 3).floor().toDouble();
+    double montlyPricePerEvent = double.parse((weeklyPrice * (1 - _monthlyDiscount)).toDouble().toStringAsFixed(2));
+    double montly3PricePerEvent = double.parse((weeklyPrice * (1 - _monthly3Discount)).toDouble().toStringAsFixed(2));
 
     // double minFunds = yearlyPrice;
     // double eventsPerPeriod = 52;
@@ -37,7 +39,9 @@ class EventPaymentService {
     return {
       // 'yearlyPrice': yearlyPrice, 'yearlySavingsPerYear': yearlySavingsPerYear,
       'monthlyPrice': monthlyPrice, 'monthlySavingsPerYear': monthlySavingsPerYear,
+      'monthlyPricePerEvent': montlyPricePerEvent, 'monthlyDiscount': _monthlyDiscount,
       'monthly3Price': monthly3Price, 'monthly3SavingsPerYear': monthly3SavingsPerYear,
+      'monthly3PricePerEvent': montly3PricePerEvent, 'monthly3Discount': _monthly3Discount,
       'eventFunds': payInfo['eventFunds']!
     };
   }
