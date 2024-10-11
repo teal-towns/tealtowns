@@ -580,7 +580,7 @@ class _MixerMatchState extends State<MixerMatch> {
     List<Widget> colsQuestion = [];
     if (widget.mixerGame.state != 'gameOver') {
       colsQuestion = [
-        _style.Text1('${widget.mixerGame.gameDetails['question']}', size: 'xlarge', colorKey: 'primary'),
+        _style.Text1('${widget.mixerGame.gameDetails['question']}', fontWeight: FontWeight.bold),
         _style.SpacingH('medium'),
       ];
     }
