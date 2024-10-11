@@ -287,7 +287,7 @@ class _MixerGameState extends State<MixerGame> {
         String shareUrl = '${config['SERVER_URL']}/mg/${_mixerGame.uName}';
         colsQR = [
           _style.SpacingH('xlarge'),
-          _style.Text1('Invite others to play:', size: 'large'),
+          _style.Text1('Invite others to play:'),
           _style.SpacingH('medium'),
           QrImageView(
             data: shareUrl,
@@ -351,6 +351,7 @@ class _MixerGameState extends State<MixerGame> {
     Widget content = Column(
       // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _style.SpacingH('large'),
         ...colsJoinOrCreate,
         ...colsHostControls,
         ...colsWinner,

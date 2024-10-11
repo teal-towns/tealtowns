@@ -492,8 +492,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     String address = _locationService.JoinAddress(_weeklyEvent.locationAddress);
     if (address.length > 0) {
       colsAddress += [
-        Text(address),
-        SizedBox(height: 10),
+        _style.Text1(address),
+        _style.SpacingH('medium'),
       ];
     }
 

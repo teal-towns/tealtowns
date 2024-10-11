@@ -569,11 +569,11 @@ class _MixerMatchState extends State<MixerMatch> {
       }
       colsSubmitted += [
         ...colsPlayers,
-        // _style.SpacingH('medium'),
-        // _style.Text1('Join other local events to play more!', size: 'large'),
-        // _style.SpacingH('medium'),
-        // NeighborhoodEvents(uName: widget.mixerGame.neighborhoodUName, withAppScaffold: false,
-        //   withWeeklyEventFilters: 0, withWeeklyEventsCreateButton: 0, inlineMode: 1),
+        _style.SpacingH('medium'),
+        _style.Text1('Join other local events to play more!', size: 'large'),
+        _style.SpacingH('medium'),
+        NeighborhoodEvents(uName: widget.mixerGame.neighborhoodUName, withAppScaffold: false,
+          withWeeklyEventFilters: 0, withWeeklyEventsCreateButton: 0, inlineMode: 1),
       ];
     }
 
