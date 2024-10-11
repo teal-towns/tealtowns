@@ -264,7 +264,7 @@ class _MixerMatchState extends State<MixerMatch> {
           showJoinButton = false;
           colsJoinGame += [
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 UserLoginSignup(withHeader: false, mode: 'signup', logInText: 'Log In to Join Game',
                   signUpText: 'Sign Up and Join Game', firstName: _formVals['firstName'],
@@ -296,14 +296,15 @@ class _MixerMatchState extends State<MixerMatch> {
         } else {
           colsJoinGame += [
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _inputFields.inputText(_formVals, 'firstName', label: 'What is your first name?',),
-                _inputFields.inputText(_formVals, 'lastName', label: 'Your last name?',),
-                _style.SpacingH('medium'),
-                TextButton(child: Text('Or Log In / Sign Up'), onPressed: () {
-                  setState(() { _nameMode = 'loginSignup'; });
-                }),
+                _inputFields.inputText(_formVals, 'firstName', label: 'Your name',),
+                // _inputFields.inputText(_formVals, 'firstName', label: 'What is your first name?',),
+                // _inputFields.inputText(_formVals, 'lastName', label: 'Your last name?',),
+                // _style.SpacingH('medium'),
+                // TextButton(child: Text('Or Log In / Sign Up'), onPressed: () {
+                //   setState(() { _nameMode = 'loginSignup'; });
+                // }),
               ],
             ),
           ];
@@ -312,7 +313,7 @@ class _MixerMatchState extends State<MixerMatch> {
       if (widget.mixerGame.state == 'playing') {
         if (showJoinButton) {
           colsJoinGame += [
-            _style.SpacingH('medium'),
+            _style.SpacingH('large'),
             ElevatedButton(child: Text('Join Game'), onPressed: () {
               if (_formVals['answer'].length > 1) {
                 _formVals['name'] = _formVals['firstName'] + ' ' + _formVals['lastName'];
@@ -331,9 +332,15 @@ class _MixerMatchState extends State<MixerMatch> {
       return Container(
         width: 600,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _style.Text1(widget.mixerGame.gameDetails['question']),
+            _style.SpacingH('medium'),
+            _style.Text1('Mixer Match', size: 'xxlarge', colorKey: 'primary'),
+            _style.SpacingH('medium'),
+            _style.Text1('This is a mix and match game. Fill out your answer below and join the game to play.',
+              align: 'center'),
+            _style.SpacingH('medium'),
+            _style.Text1(widget.mixerGame.gameDetails['question'], fontWeight: FontWeight.bold),
             _inputFields.inputText(_formVals, 'answer', label: 'Your answer',),
             // _style.SpacingH('medium'),
             ...colsJoinGame,
@@ -369,7 +376,7 @@ class _MixerMatchState extends State<MixerMatch> {
             },
             child: _style.Text1(name),
             style: FilledButton.styleFrom(
-              backgroundColor: _colors.colors['white'],
+              backgroundColor: _colors.colors['greyLighter'],
               // foregroundColor: _colors.colors['white'],
             ),
           )),
@@ -388,7 +395,7 @@ class _MixerMatchState extends State<MixerMatch> {
             },
             child: _style.Text1(answer,),
             style: FilledButton.styleFrom(
-              backgroundColor: _colors.colors['white'],
+              backgroundColor: _colors.colors['greyLighter'],
               // foregroundColor: _colors.colors['white'],
             ),
           )),
@@ -479,18 +486,23 @@ class _MixerMatchState extends State<MixerMatch> {
       List<Widget> colsDone = [];
       if (colsAnsweredNames.length > 0) {
         colsDone = [
-          _style.Text1('Your Answers (Press to Unmatch)', size: 'large'),
+          _style.SpacingH('xlarge'),
+          _style.Text1('Your Answers (Press to Unmatch)',),
           _style.SpacingH('medium'),
           Row(
             children: [
               Expanded(flex: 1, child: Column(
                 children: [
+                  _style.Text1('Name', fontWeight: FontWeight.bold,),
+                  _style.SpacingH('medium'),
                   ...colsAnsweredNames,
                 ]
               )),
               _style.SpacingV('medium'),
               Expanded(flex: 1, child: Column(
                 children: [
+                  _style.Text1('Answer', fontWeight: FontWeight.bold,),
+                  _style.SpacingH('medium'),
                   ...colsAnsweredAnswers,
                 ]
               )),
@@ -500,13 +512,14 @@ class _MixerMatchState extends State<MixerMatch> {
       }
 
       colsNotSubmitted = [
+        _style.SpacingH('large'),
         _style.Text1('Match each person\'s name to their answer',),
         _style.SpacingH('medium'),
         Row(
           children: [
             Expanded(flex: 1, child: Column(
               children: [
-                _style.Text1('Name', size: 'large'),
+                _style.Text1('Name', fontWeight: FontWeight.bold,),
                 _style.SpacingH('medium'),
                 ...colsNames,
               ]
@@ -514,7 +527,7 @@ class _MixerMatchState extends State<MixerMatch> {
             _style.SpacingV('medium'),
             Expanded(flex: 1, child: Column(
               children: [
-                _style.Text1('Answer', size: 'large'),
+                _style.Text1('Answer', fontWeight: FontWeight.bold,),
                 _style.SpacingH('medium'),
                 ...colsAnswers,
               ]
@@ -545,7 +558,7 @@ class _MixerMatchState extends State<MixerMatch> {
 
       if (_answers.length > 0) {
         colsSubmitted += [
-          _style.Text1('You got ${score} of ${_mixerMatchPlayers.length} correct (${score / _mixerMatchPlayers.length * 100}%)', size: 'large'),
+          _style.Text1('You got ${score} of ${_mixerMatchPlayers.length} correct', size: 'large'),
           _style.SpacingH('medium'),
         ];
       } else if (_mixerMatchPlayers.length > 0) {
@@ -564,12 +577,19 @@ class _MixerMatchState extends State<MixerMatch> {
       ];
     }
 
+    List<Widget> colsQuestion = [];
+    if (widget.mixerGame.state != 'gameOver') {
+      colsQuestion = [
+        _style.Text1('${widget.mixerGame.gameDetails['question']}', size: 'xlarge', colorKey: 'primary'),
+        _style.SpacingH('medium'),
+      ];
+    }
+
     return Align(
       alignment: Alignment.center,
       child: Column(
         children: [
-          _style.Text1('${widget.mixerGame.gameDetails['question']}', size: 'large'),
-          _style.SpacingH('medium'),
+          ...colsQuestion,
           ...colsNotSubmitted,
           ...colsSubmitted,
         ]

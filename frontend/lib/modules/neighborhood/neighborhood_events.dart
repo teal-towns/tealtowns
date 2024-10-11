@@ -78,12 +78,17 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
 
   @override
   Widget build(BuildContext context) {
+    CurrentUserState currentUserState = context.watch<CurrentUserState>();
+    bool withHeader = currentUserState.isLoggedIn;
+    bool withFooter = currentUserState.isLoggedIn;
     if (_loading) {
       Widget content = Column( children: [ LinearProgressIndicator(), ] );
       if (widget.withAppScaffold) {
         return AppScaffoldComponent(
           listWrapper: true,
           body: content,
+          withHeader: withHeader,
+          withFooter: withFooter,
         );
       }
       return content;
@@ -99,12 +104,15 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       ];
     }
 
-    CurrentUserState currentUserState = context.watch<CurrentUserState>();
     Map<String, dynamic> config = _configService.GetConfig();
     List<Widget> cols = [
+      _style.Text1('Neighborhood Events', size: 'xlarge', colorKey: 'primary'),
+      _style.SpacingH('medium'),
+      _style.Text1('Weekly Calendar'),
+      _style.SpacingH('medium'),
       WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
         pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters,
-        showCreateButton: widget.withWeeklyEventsCreateButton,),
+        showCreateButton: widget.withWeeklyEventsCreateButton, viewOnly: 1,),
       _style.SpacingH('medium'),
       // _style.Text1('Pending Events By Interest', size: 'large'),
       // _style.SpacingH('medium'),
@@ -143,23 +151,23 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
     //   _style.SpacingH('medium'),
     // ];
     if (widget.withAppScaffold) {
-      cols += [
-        _style.Text1('Share with your neighbors', size: 'large'),
-        _style.SpacingH('medium'),
-        QrImageView(
-          data: '${config['SERVER_URL']}/ne/${_neighborhood.uName}',
-          version: QrVersions.auto,
-          size: 200.0,
-        ),
-        _style.SpacingH('medium'),
-        Text('${config['SERVER_URL']}/ne/${_neighborhood.uName}'),
-        _style.SpacingH('large'),
-        // _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
-        // _style.SpacingH('medium'),
-        // _buttons.Link(context, 'Play Mixer Game', '/mixer-game', checkLoggedIn: true,),
-        // _style.SpacingH('medium'),
-        ...colsAdmin,
-      ];
+      // cols += [
+      //   _style.Text1('Share with your neighbors', size: 'large'),
+      //   _style.SpacingH('medium'),
+      //   QrImageView(
+      //     data: '${config['SERVER_URL']}/ne/${_neighborhood.uName}',
+      //     version: QrVersions.auto,
+      //     size: 200.0,
+      //   ),
+      //   _style.SpacingH('medium'),
+      //   Text('${config['SERVER_URL']}/ne/${_neighborhood.uName}'),
+      //   _style.SpacingH('large'),
+      //   // _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
+      //   // _style.SpacingH('medium'),
+      //   // _buttons.Link(context, 'Play Mixer Game', '/mixer-game', checkLoggedIn: true,),
+      //   // _style.SpacingH('medium'),
+      //   ...colsAdmin,
+      // ];
     }
     Widget content = Column(
       children: [
@@ -170,6 +178,8 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       return AppScaffoldComponent(
         listWrapper: true,
         body: content,
+        withHeader: withHeader,
+        withFooter: withFooter,
       );
     }
     return content;

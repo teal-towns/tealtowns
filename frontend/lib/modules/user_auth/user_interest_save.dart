@@ -224,7 +224,7 @@ class _UserInterestSaveState extends State<UserInterestSave> {
             setState(() { _hostInterests = _hostInterests; _hostInterestsPending = _hostInterestsPending; });
           },
           style: FilledButton.styleFrom(
-            backgroundColor: selected ? _colors.colors['secondary'] : _colors.colors['greyLight'],
+            backgroundColor: selected ? _colors.colors['secondary'] : _colors.colors['greyLighter'],
             foregroundColor: _colors.colors['brown'],
           ),
         ),
