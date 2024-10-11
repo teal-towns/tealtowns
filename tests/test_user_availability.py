@@ -40,10 +40,11 @@ def test_CheckCommonInterestsAndTimesByUser():
     ]
     userInterests = _stubs_data.CreateBulk(userInterests, collectionName = 'userInterest')
 
+    maxCreatedEvents = 1
     # No availability yet.
     userInterest =  { '_id': userInterests[0]['_id'], 'userId': users[0]['_id'], 'username': users[0]['username'],
         'interests': [ 'fitness', 'soccer', ] }
-    retSave = _user_interest.Save(userInterest)
+    retSave = _user_interest.Save(userInterest, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -54,7 +55,7 @@ def test_CheckCommonInterestsAndTimesByUser():
     userAvailability = { 'userId': users[0]['_id'], 'username': users[0]['username'], 'availableTimesByDay': [
         { 'dayOfWeek': 0, 'times': [ { 'start': '16:00', 'end': '17:00', }], },
     ]}
-    retSave = _user_availability.Save(userAvailability)
+    retSave = _user_availability.Save(userAvailability, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 1
@@ -67,7 +68,7 @@ def test_CheckCommonInterestsAndTimesByUser():
     userAvailability = { 'userId': users[1]['_id'], 'username': users[1]['username'], 'availableTimesByDay': [
         { 'dayOfWeek': 0, 'times': [ { 'start': '16:00', 'end': '17:00', }], },
     ]}
-    retSave = _user_availability.Save(userAvailability)
+    retSave = _user_availability.Save(userAvailability, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -78,7 +79,7 @@ def test_CheckCommonInterestsAndTimesByUser():
     userAvailability = { 'userId': users[2]['_id'], 'username': users[2]['username'], 'availableTimesByDay': [
         { 'dayOfWeek': 1, 'times': [ { 'start': '16:00', 'end': '17:00', }], },
     ]}
-    retSave = _user_availability.Save(userAvailability)
+    retSave = _user_availability.Save(userAvailability, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -89,7 +90,7 @@ def test_CheckCommonInterestsAndTimesByUser():
     userAvailability = { 'userId': users[3]['_id'], 'username': users[3]['username'], 'availableTimesByDay': [
         { 'dayOfWeek': 1, 'times': [ { 'start': '16:00', 'end': '17:00', }], },
     ]}
-    retSave = _user_availability.Save(userAvailability)
+    retSave = _user_availability.Save(userAvailability, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -100,7 +101,7 @@ def test_CheckCommonInterestsAndTimesByUser():
     userAvailability = { 'userId': users[4]['_id'], 'username': users[4]['username'], 'availableTimesByDay': [
         { 'dayOfWeek': 1, 'times': [ { 'start': '16:00', 'end': '17:00', }], },
     ]}
-    retSave = _user_availability.Save(userAvailability)
+    retSave = _user_availability.Save(userAvailability, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -114,7 +115,7 @@ def test_CheckCommonInterestsAndTimesByUser():
     userAvailability = { 'userId': users[5]['_id'], 'username': users[5]['username'], 'availableTimesByDay': [
         { 'dayOfWeek': dayOfWeek, 'times': [ { 'start': startTime, 'end': endTime, }], },
     ]}
-    retSave = _user_availability.Save(userAvailability)
+    retSave = _user_availability.Save(userAvailability, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 1
     assert len(retSave['weeklyEventsInvited']) == 1
@@ -167,10 +168,11 @@ def test_CheckCommonInterestsAndTimesByUserHosts():
     userInterests = _stubs_data.CreateBulk(userInterests, collectionName = 'userInterest')
     userAvailabilitys = _stubs_data.CreateBulk(userAvailabilitys, collectionName = 'userAvailability')
 
+    maxCreatedEvents = 1
     # 9 of 10 shared meal users
     userInterest =  { '_id': userInterests[8]['_id'], 'userId': users[8]['_id'], 'username': users[8]['username'],
         'interests': [ 'event_sharedMeal', 'event_circle' ] }
-    retSave = _user_interest.Save(userInterest)
+    retSave = _user_interest.Save(userInterest, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -180,7 +182,7 @@ def test_CheckCommonInterestsAndTimesByUserHosts():
     # 10 of 10 shared meal users, but no host
     userInterest =  { '_id': userInterests[9]['_id'], 'userId': users[9]['_id'], 'username': users[9]['username'],
         'interests': [ 'event_sharedMeal', 'event_circle' ] }
-    retSave = _user_interest.Save(userInterest)
+    retSave = _user_interest.Save(userInterest, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -190,7 +192,7 @@ def test_CheckCommonInterestsAndTimesByUserHosts():
     # 11 of 10 shared meal users, AND host, so match
     userInterest =  { '_id': userInterests[10]['_id'], 'userId': users[10]['_id'], 'username': users[10]['username'],
         'interests': [ 'event_sharedMeal', 'event_circle' ], 'hostInterests': [ 'event_sharedMeal' ] }
-    retSave = _user_interest.Save(userInterest)
+    retSave = _user_interest.Save(userInterest, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 1
     assert len(retSave['weeklyEventsInvited']) == 1
@@ -209,7 +211,7 @@ def test_CheckCommonInterestsAndTimesByUserHosts():
     # 17 of 18 circle users, this is host
     userInterest =  { '_id': userInterests[16]['_id'], 'userId': users[16]['_id'], 'username': users[16]['username'],
         'interests': [ 'event_circle' ], 'hostInterests': [ 'event_circle' ] }
-    retSave = _user_interest.Save(userInterest)
+    retSave = _user_interest.Save(userInterest, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 0
     assert len(retSave['weeklyEventsInvited']) == 0
@@ -219,7 +221,7 @@ def test_CheckCommonInterestsAndTimesByUserHosts():
     # 18 of 18 circle users
     userInterest =  { '_id': userInterests[17]['_id'], 'userId': users[17]['_id'], 'username': users[17]['username'],
         'interests': [ 'event_circle' ] }
-    retSave = _user_interest.Save(userInterest)
+    retSave = _user_interest.Save(userInterest, maxCreatedEvents = maxCreatedEvents)
     assert retSave['valid'] == 1
     assert len(retSave['weeklyEventsCreated']) == 1
     assert len(retSave['weeklyEventsInvited']) == 1

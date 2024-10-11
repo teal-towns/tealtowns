@@ -10,7 +10,7 @@ def SetTestMode(testMode: int):
     global _testMode
     _testMode = testMode
 
-def Save(userInterest: dict, useThread: int = 1):
+def Save(userInterest: dict, useThread: int = 1, maxCreatedEvents: int = 0):
     userInterest = _mongo_db_crud.CleanId(userInterest)
     if '_id' not in userInterest:
         if 'hostInterests' not in userInterest:
@@ -19,10 +19,12 @@ def Save(userInterest: dict, useThread: int = 1):
             userInterest['hostInterestsPending'] = []
     ret = _mongo_db_crud.Save('userInterest', userInterest, checkGetKey = 'username')
     if useThread and not _testMode:
-        thread = threading.Thread(target=_user_availability.CheckCommonInterestsAndTimesByUser, args=(userInterest['username'],))
+        thread = threading.Thread(target=_user_availability.CheckCommonInterestsAndTimesByUser,
+            args=(userInterest['username'],), kwargs={'maxCreatedEvents': maxCreatedEvents})
         thread.start()
         return ret
-    retCheck = _user_availability.CheckCommonInterestsAndTimesByUser(userInterest['username'])
+    retCheck = _user_availability.CheckCommonInterestsAndTimesByUser(userInterest['username'],
+        maxCreatedEvents = maxCreatedEvents)
     ret['weeklyEventsCreated'] = retCheck['weeklyEventsCreated']
     ret['weeklyEventsInvited'] = retCheck['weeklyEventsInvited']
     ret['notifyUserIds'] = retCheck['notifyUserIds']
