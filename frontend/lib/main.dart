@@ -22,6 +22,7 @@ import './styles/custom_theme.dart';
 import './modules/blog/blog_state.dart';
 import './modules/neighborhood/neighborhood_state.dart';
 import './modules/shared_item/shared_item_state.dart';
+import './modules/mixer/mixer_game_state.dart';
 
 main() async {
   await dotenv.load(fileName: '.env');
@@ -100,6 +101,7 @@ main() async {
       ChangeNotifierProvider(create: (context) => CurrentUserState()),
       ChangeNotifierProvider(create: (context) => BlogState()),
       ChangeNotifierProvider(create: (context) => NeighborhoodState()),
+      ChangeNotifierProvider(create: (context) => MixerGameState()),
       ChangeNotifierProvider(create: (context) => SharedItemState()),
     ],
     child: MyApp(),

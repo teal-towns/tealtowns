@@ -14,14 +14,15 @@ def SetTestMode(testMode: int):
     global _testMode
     _testMode = testMode
 
-def Save(userAvailability: dict, useThread: int = 1):
+def Save(userAvailability: dict, useThread: int = 1, maxCreatedEvents: int = 0):
     userAvailability['availableTimesByDay'] = SortAndMergeTimes(userAvailability['availableTimesByDay'])
     ret = _mongo_db_crud.Save('userAvailability', userAvailability, checkGetKey = 'username')
     if useThread and not _testMode:
-        thread = threading.Thread(target=CheckCommonInterestsAndTimesByUser, args=(userAvailability['username'],))
+        thread = threading.Thread(target=CheckCommonInterestsAndTimesByUser,
+            args=(userAvailability['username'],), kwargs={'maxCreatedEvents': maxCreatedEvents})
         thread.start()
         return ret
-    retCheck = CheckCommonInterestsAndTimesByUser(userAvailability['username'])
+    retCheck = CheckCommonInterestsAndTimesByUser(userAvailability['username'], maxCreatedEvents = maxCreatedEvents)
     ret['weeklyEventsCreated'] = retCheck['weeklyEventsCreated']
     ret['weeklyEventsInvited'] = retCheck['weeklyEventsInvited']
     ret['notifyUserIds'] = retCheck['notifyUserIds']
@@ -46,7 +47,7 @@ def SortAndMergeTimes(availableTimesByDay: list):
     availableTimesByDay = lodash.sort2D(availableTimesByDay, 'dayOfWeek')
     return availableTimesByDay
 
-def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, maxCreatedEvents: int = 1):
+def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, maxCreatedEvents: int = 0):
     ret = { 'valid': 1, 'message': '', 'matches': [], 'weeklyEventsCreated': [], 'weeklyEventsInvited': [],
         'notifyUserIds': { 'sms': [], 'email': [] }, }
     eventInterests = _user_interest.GetEventInterests()['eventInterests']
@@ -114,6 +115,8 @@ def CheckCommonInterestsAndTimesByUser(username: str, minMatchedUsers: int = 3, 
 
         # If have an event, done with this interest.
         if interestMatch:
+            break
+        if maxCreatedEvents <= 0:
             break
 
         minPeople = minMatchedUsers

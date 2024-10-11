@@ -23,8 +23,8 @@ class NeighborhoodEvents extends StatefulWidget {
   int withWeeklyEventFilters;
   int withWeeklyEventsCreateButton;
   int inlineMode;
-  NeighborhoodEvents({this.uName = '', this.withAppScaffold = true, this.withWeeklyEventFilters = 1,
-    this.inlineMode = 0, this.withWeeklyEventsCreateButton = 1, });
+  NeighborhoodEvents({this.uName = '', this.withAppScaffold = true, this.withWeeklyEventFilters = 0,
+    this.inlineMode = 0, this.withWeeklyEventsCreateButton = 0, });
 
   @override
   _NeighborhoodEventsState createState() => _NeighborhoodEventsState();
@@ -106,42 +106,42 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
         pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters,
         showCreateButton: widget.withWeeklyEventsCreateButton,),
       _style.SpacingH('medium'),
-      _style.Text1('Pending Events By Interest', size: 'large'),
-      _style.SpacingH('medium'),
+      // _style.Text1('Pending Events By Interest', size: 'large'),
+      // _style.SpacingH('medium'),
     ];
-    if (widget.inlineMode == 0) {
-      cols += [
-        _buttons.LinkElevated(context, 'Add Your Interests to Start More Events!', '/interests',
-          checkLoggedIn: true,),
-      ];
-    } else {
-      cols += [
-        ElevatedButton(child: Text('Add Your Interests to Start More Events!'), onPressed: () {
-          setState(() { _showUserInterestSave = true; });
-        },),
-      ];
-    }
-    if (_showUserInterestSave) {
-      cols += [
-        UserInterestSave(withAppScaffold: false, onSave: (Map<String, dynamic> data) {
-          setState(() { _showUserInterestSave = false; _showUserAvailabilitySave = true; });
-        }),
-        _style.SpacingH('xLarge'),
-      ];
-    }
-    if (_showUserAvailabilitySave) {
-      cols += [
-        UserAvailabilitySave(withAppScaffold: false, onSave: (Map<String, dynamic> data) {
-          setState(() { _showUserAvailabilitySave = false; });
-        }),
-        _style.SpacingH('xLarge'),
-      ];
-    }
-    cols += [
-      _style.SpacingH('medium'),
-      UserInterests(neighborhoodUName: _neighborhood.uName,),
-      _style.SpacingH('medium'),
-    ];
+    // if (widget.inlineMode == 0) {
+    //   cols += [
+    //     _buttons.LinkElevated(context, 'Add Your Interests to Start More Events!', '/interests',
+    //       checkLoggedIn: true,),
+    //   ];
+    // } else {
+    //   cols += [
+    //     ElevatedButton(child: Text('Add Your Interests to Start More Events!'), onPressed: () {
+    //       setState(() { _showUserInterestSave = true; });
+    //     },),
+    //   ];
+    // }
+    // if (_showUserInterestSave) {
+    //   cols += [
+    //     UserInterestSave(withAppScaffold: false, onSave: (Map<String, dynamic> data) {
+    //       setState(() { _showUserInterestSave = false; _showUserAvailabilitySave = true; });
+    //     }),
+    //     _style.SpacingH('xLarge'),
+    //   ];
+    // }
+    // if (_showUserAvailabilitySave) {
+    //   cols += [
+    //     UserAvailabilitySave(withAppScaffold: false, onSave: (Map<String, dynamic> data) {
+    //       setState(() { _showUserAvailabilitySave = false; });
+    //     }),
+    //     _style.SpacingH('xLarge'),
+    //   ];
+    // }
+    // cols += [
+    //   _style.SpacingH('medium'),
+    //   UserInterests(neighborhoodUName: _neighborhood.uName,),
+    //   _style.SpacingH('medium'),
+    // ];
     if (widget.withAppScaffold) {
       cols += [
         _style.Text1('Share with your neighbors', size: 'large'),
@@ -154,10 +154,10 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
         _style.SpacingH('medium'),
         Text('${config['SERVER_URL']}/ne/${_neighborhood.uName}'),
         _style.SpacingH('large'),
-        _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
-        _style.SpacingH('medium'),
-        _buttons.Link(context, 'Play Mixer Game', '/mixer-game', checkLoggedIn: true,),
-        _style.SpacingH('medium'),
+        // _buttons.Link(context, 'View Neighborhood', '/n/${_neighborhood.uName}', checkLoggedIn: true,),
+        // _style.SpacingH('medium'),
+        // _buttons.Link(context, 'Play Mixer Game', '/mixer-game', checkLoggedIn: true,),
+        // _style.SpacingH('medium'),
         ...colsAdmin,
       ];
     }

@@ -13,6 +13,7 @@ import '../neighborhood/neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
 import '../user_auth/user_login_signup.dart';
 import './mixer_game_class.dart';
+import './mixer_game_state.dart';
 import './mixer_match_player_class.dart';
 
 class MixerMatch extends StatefulWidget {
@@ -54,6 +55,7 @@ class _MixerMatchState extends State<MixerMatch> {
   int _countdown = 60;
   String _gameState = ''; // 'countdown'
   String _nameMode = 'guest';
+  bool _useCountdown = false;
 
   void startTimer() {
     const oneSec = const Duration(seconds: 1);
@@ -97,6 +99,7 @@ class _MixerMatchState extends State<MixerMatch> {
         _playerAnswers.shuffle();
         setState(() { _mixerMatchPlayers = _mixerMatchPlayers;
           _playerNames = _playerNames; _playerAnswers = _playerAnswers; });
+        UpdateMixerGameState(['mixerMatchPlayers', 'playerNames', 'playerAnswers']);
       }
     }));
 
@@ -105,8 +108,11 @@ class _MixerMatchState extends State<MixerMatch> {
       var data = res['data'];
       if (data['valid'] == 1 && data.containsKey('mixerMatchPlayer') && data['mixerMatchPlayer'].containsKey('_id')) {
         _selfPlayer = MixerMatchPlayerClass.fromJson(data['mixerMatchPlayer']);
-        _gameState = widget.mixerGame.state == 'gameOver' ? '' : 'countdown';
+        if (_useCountdown) {
+          _gameState = widget.mixerGame.state == 'gameOver' ? '' : 'countdown';
+        }
         setState(() { _selfPlayer = _selfPlayer; _gameState = _gameState; });
+        UpdateMixerGameState(['selfPlayer', 'gameState']);
         widget.onSelfPlayer({ 'playerId': data['mixerMatchPlayer']['_id'] });
         startTimer();
       }
@@ -117,8 +123,12 @@ class _MixerMatchState extends State<MixerMatch> {
       var data = res['data'];
       if (data['valid'] == 1 && data.containsKey('mixerMatchPlayer') && data['mixerMatchPlayer'].containsKey('_id')) {
         _selfPlayer = MixerMatchPlayerClass.fromJson(data['mixerMatchPlayer']);
-        _gameState = widget.mixerGame.state == 'gameOver' ? '' : 'countdown';
+        // _gameState = widget.mixerGame.state == 'gameOver' ? '' : 'countdown';
+        if (_useCountdown) {
+          _gameState = widget.mixerGame.state == 'gameOver' ? '' : 'countdown';
+        }
         setState(() { _selfPlayer = _selfPlayer; _gameState = _gameState; });
+        UpdateMixerGameState(['selfPlayer', 'gameState']);
         widget.onSelfPlayer({ 'playerId': data['mixerMatchPlayer']['_id'] });
         startTimer();
       }
@@ -143,6 +153,64 @@ class _MixerMatchState extends State<MixerMatch> {
     }
 
     _formVals['mixerGameUName'] = widget.mixerGame.uName;
+
+    var mixerGameState = Provider.of<MixerGameState>(context, listen: false);
+    for (String key in mixerGameState.keyVals.keys) {
+      dynamic val = mixerGameState.keyVals[key];
+      if (key == 'mixerMatchPlayers') {
+        _mixerMatchPlayers = [];
+        for (var i = 0; i < val.length; i++) {
+          _mixerMatchPlayers.add(MixerMatchPlayerClass.fromJson(val[i]));
+        }
+      } else if (key == 'selfPlayer') {
+        _selfPlayer = MixerMatchPlayerClass.fromJson(val);
+      } else if (key == 'gameState') {
+        _gameState = val;
+      } else if (key == 'answers') {
+        _answers = val;
+      } else if (key == 'playerNames') {
+        _playerNames = val;
+      } else if (key == 'playerAnswers') {
+        _playerAnswers = val;
+      } else if (key == 'formVals') {
+        _formVals = val;
+      } else if (key == 'selectedNameIndex') {
+        _selectedNameIndex = val;
+      } else if (key == 'selectedAnswerIndex') {
+        _selectedAnswerIndex = val;
+      }
+    }
+  }
+
+  void UpdateMixerGameState(List<String> keys) {
+    var mixerGameState = Provider.of<MixerGameState>(context, listen: false);
+    var keyVals = mixerGameState.keyVals;
+    for (String key in keys) {
+      if (key == 'selfPlayer') {
+        keyVals[key] = _selfPlayer.toJson();
+      } else if (key == 'mixerMatchPlayers') {
+        List<Map<String, dynamic>> val = [];
+        for (var i = 0; i < _mixerMatchPlayers.length; i++) {
+          val.add(_mixerMatchPlayers[i].toJson());
+        }
+        keyVals[key] = val;
+      } else if (key == 'gameState') {
+        keyVals[key] = _gameState;
+      } else if (key == 'answers') {
+        keyVals[key] = _answers;
+      } else if (key == 'playerNames') {
+        keyVals[key] = _playerNames;
+      } else if (key == 'playerAnswers') {
+        keyVals[key] = _playerAnswers;
+      } else if (key == 'formVals') {
+        keyVals[key] = _formVals;
+      } else if (key == 'selectedNameIndex') {
+        keyVals[key] = _selectedNameIndex;
+      } else if (key == 'selectedAnswerIndex') {
+        keyVals[key] = _selectedAnswerIndex;
+      }
+    }
+    mixerGameState.Save(keyVals);
   }
 
   @override
@@ -165,6 +233,7 @@ class _MixerMatchState extends State<MixerMatch> {
       if (_countdown == 0) {
         gameStart = ElevatedButton(child: Text('Start Game'), onPressed: () {
           setState(() { _gameState = ''; });
+          UpdateMixerGameState(['gameState']);
         });
       }
       return Column(
@@ -211,8 +280,10 @@ class _MixerMatchState extends State<MixerMatch> {
                   if (_formVals['answer'].length > 1) {
                     _socketService.emit('SaveMixerMatchPlayer', { 'mixerMatchPlayer': _formVals });
                     setState(() { _messageJoin = ''; _formVals = _formVals; });
+                    UpdateMixerGameState(['formVals']);
                   } else {
                     setState(() { _messageJoin = 'Please answer the question'; _formVals = _formVals; });
+                    UpdateMixerGameState(['formVals']);
                   }
                 }),
                 _style.SpacingH('medium'),
@@ -262,8 +333,9 @@ class _MixerMatchState extends State<MixerMatch> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _inputFields.inputText(_formVals, 'answer', label: widget.mixerGame.gameDetails['question']),
-            _style.SpacingH('medium'),
+            _style.Text1(widget.mixerGame.gameDetails['question']),
+            _inputFields.inputText(_formVals, 'answer', label: 'Your answer',),
+            // _style.SpacingH('medium'),
             ...colsJoinGame,
           ],
         ),
@@ -292,6 +364,7 @@ class _MixerMatchState extends State<MixerMatch> {
                 _playerNames.add(item1);
                 _playerAnswers.add(item1);
                 setState(() { _answers = _answers; _playerNames = _playerNames; _playerAnswers = _playerAnswers; });
+                UpdateMixerGameState(['answers', 'playerNames', 'playerAnswers']);
               }
             },
             child: _style.Text1(name),
@@ -310,6 +383,7 @@ class _MixerMatchState extends State<MixerMatch> {
                 _playerNames.add(item1);
                 _playerAnswers.add(item1);
                 setState(() { _answers = _answers; _playerNames = _playerNames; _playerAnswers = _playerAnswers; });
+                UpdateMixerGameState(['answers', 'playerNames', 'playerAnswers']);
               }
             },
             child: _style.Text1(answer,),
@@ -342,12 +416,15 @@ class _MixerMatchState extends State<MixerMatch> {
                     _playerAnswers.removeAt(_selectedAnswerIndex);
                     setState(() { _answers = _answers; _selectedNameIndex = -1; _selectedAnswerIndex = -1;
                       _playerNames = _playerNames; _playerAnswers = _playerAnswers; });
+                    UpdateMixerGameState(['answers', 'playerNames', 'playerAnswers', 'selectedNameIndex',
+                      'selectedAnswerIndex']);
                     if (_playerNames.length == 0) {
                       CheckSubmitAnswers(widget.mixerGame);
                     }
                   }
                 }
                 setState(() { _selectedNameIndex = _selectedNameIndex; });
+                UpdateMixerGameState(['selectedNameIndex']);
               }
             },
             child: _style.Text1(item['name']),
@@ -379,12 +456,15 @@ class _MixerMatchState extends State<MixerMatch> {
                     _playerAnswers.removeAt(_selectedAnswerIndex);
                     setState(() { _answers = _answers; _selectedNameIndex = -1; _selectedAnswerIndex = -1;
                       _playerNames = _playerNames; _playerAnswers = _playerAnswers; });
+                    UpdateMixerGameState(['answers', 'playerNames', 'playerAnswers', 'selectedNameIndex',
+                      'selectedAnswerIndex']);
                     if (_playerNames.length == 0) {
                       CheckSubmitAnswers(widget.mixerGame);
                     }
                   }
                 }
                 setState(() { _selectedAnswerIndex = _selectedAnswerIndex; });
+                UpdateMixerGameState(['selectedAnswerIndex']);
               }
             },
             child: _style.Text1(item['answer']),
@@ -420,7 +500,7 @@ class _MixerMatchState extends State<MixerMatch> {
       }
 
       colsNotSubmitted = [
-        _style.Text1('Match each person\'s name to their answer', size: 'large'),
+        _style.Text1('Match each person\'s name to their answer',),
         _style.SpacingH('medium'),
         Row(
           children: [
@@ -476,21 +556,24 @@ class _MixerMatchState extends State<MixerMatch> {
       }
       colsSubmitted += [
         ...colsPlayers,
-        _style.SpacingH('medium'),
-        _style.Text1('Join other local events to play more!', size: 'large'),
-        _style.SpacingH('medium'),
-        NeighborhoodEvents(uName: widget.mixerGame.neighborhoodUName, withAppScaffold: false,
-          withWeeklyEventFilters: 0, withWeeklyEventsCreateButton: 0, inlineMode: 1),
+        // _style.SpacingH('medium'),
+        // _style.Text1('Join other local events to play more!', size: 'large'),
+        // _style.SpacingH('medium'),
+        // NeighborhoodEvents(uName: widget.mixerGame.neighborhoodUName, withAppScaffold: false,
+        //   withWeeklyEventFilters: 0, withWeeklyEventsCreateButton: 0, inlineMode: 1),
       ];
     }
 
-    return Column(
-      children: [
-        _style.Text1('${widget.mixerGame.gameDetails['question']}', size: 'large'),
-        _style.SpacingH('medium'),
-        ...colsNotSubmitted,
-        ...colsSubmitted,
-      ]
+    return Align(
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          _style.Text1('${widget.mixerGame.gameDetails['question']}', size: 'large'),
+          _style.SpacingH('medium'),
+          ...colsNotSubmitted,
+          ...colsSubmitted,
+        ]
+      ),
     );
   }
 
