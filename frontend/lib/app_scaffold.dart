@@ -32,9 +32,12 @@ class AppScaffoldComponent extends StatefulWidget {
   double paddingLeft;
   double paddingRight;
   double paddingTop;
+  bool withHeader;
+  bool withFooter;
 
   AppScaffoldComponent({this.body, this.width = 1200, this.listWrapper = false,
-    this.selectableText = true, this.paddingLeft = 10, this.paddingRight = 10, this.paddingTop = 20,});
+    this.selectableText = true, this.paddingLeft = 30, this.paddingRight = 30, this.paddingTop = 20,
+    this.withHeader = true, this.withFooter = true});
 
   @override
   _AppScaffoldState createState() => _AppScaffoldState();
@@ -362,6 +365,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       ];
     }
 
+    Widget footer = widget.withFooter ? BuildFooter(context, size: size) : SizedBox.shrink();
     if (widget.listWrapper) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,7 +389,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
                   )
                 )),
                 Container(color: Colors.white, height: 20),
-                BuildFooter(context, size: size),
+                footer,
               ]
             )
           )
@@ -498,7 +502,8 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   Widget _buildSmall(BuildContext context, var currentUserState) {
     Widget content = Scaffold(
       endDrawer: _buildDrawer(context, currentUserState),
-      body: _buildBody(context, currentUserState, header: true, size: 'small'),
+      body: _buildBody(context, currentUserState, header: widget.withHeader, size: 'small'),
+      backgroundColor: Colors.white,
     );
     if (widget.selectableText) {
       return SelectionArea(
@@ -509,43 +514,52 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   }
 
   Widget _buildMedium(BuildContext context, var currentUserState) {
-    List<Widget> buttons = [];
-    if (currentUserState.isLoggedIn) {
-      var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
-      // var neighborhoodState = context.watch<NeighborhoodState>();
-      if (neighborhoodState.defaultUserNeighborhood != null) {
+    Widget content = SizedBox.shrink();
+    if (widget.withHeader) {
+      List<Widget> buttons = [];
+      if (currentUserState.isLoggedIn) {
+        var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
+        // var neighborhoodState = context.watch<NeighborhoodState>();
+        if (neighborhoodState.defaultUserNeighborhood != null) {
+          buttons += [
+            _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}',
+              'Neighborhood', Icons.house, context),
+          ];
+        }
         buttons += [
-          _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}',
-            'Neighborhood', Icons.house, context),
+          _buildNavButton('/user', 'My Events', Icons.event, context),
         ];
       }
-      buttons += [
-        _buildNavButton('/user', 'My Events', Icons.event, context),
-      ];
-    }
-    Widget content = Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
+      content = Scaffold(
         backgroundColor: Colors.white,
-        // title: Image.asset('assets/images/logo.png', width: 100, height: 50),
-        title: InkWell(
-          onTap: () {
-            context.go('/home');
-          },
-          child: Image.asset('assets/images/logo.png', width: 100, height: 50),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.white,
+          // title: Image.asset('assets/images/logo.png', width: 100, height: 50),
+          title: InkWell(
+            onTap: () {
+              context.go('/home');
+            },
+            child: Image.asset('assets/images/logo.png', width: 100, height: 50),
+          ),
+          actions: <Widget>[
+            // _buildNavButton('/home', 'Home', Icons.home, context),
+            // _buildNavButton('/own', 'Own', Icons.build, context),
+            ...buttons,
+            // _buildNavButton('/eat', 'Shared Meals', Icons.event, context),
+            _buildUserButton(context, currentUserState),
+            _buildDrawerButton(context),
+          ],
         ),
-        actions: <Widget>[
-          // _buildNavButton('/home', 'Home', Icons.home, context),
-          // _buildNavButton('/own', 'Own', Icons.build, context),
-          ...buttons,
-          // _buildNavButton('/eat', 'Shared Meals', Icons.event, context),
-          _buildUserButton(context, currentUserState),
-          _buildDrawerButton(context),
-        ],
-      ),
-      endDrawer: _buildDrawer(context, currentUserState),
-      body: _buildBody(context, currentUserState, size: 'medium'),
-    );
+        endDrawer: _buildDrawer(context, currentUserState),
+        body: _buildBody(context, currentUserState, size: 'medium'),
+      );
+    } else {
+      content = Scaffold(
+        backgroundColor: Colors.white,
+        body: _buildBody(context, currentUserState, size: 'medium'),
+      );
+    }
     if (widget.selectableText) {
       return SelectionArea(
         child: content,

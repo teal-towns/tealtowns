@@ -107,4 +107,14 @@ class DateTimeService {
     int minuteEnd = int.parse(endTime.substring(3, 5));
     return (hourEnd - hour) * 60 + (minuteEnd - minute);
   }
+
+  String ToAmPm(String time) {
+    int hour = int.parse(time.substring(0, 2));
+    if (hour >= 12) {
+      return '${hour - 12}:${time.substring(3, 5)}AM';
+    }
+    else {
+      return '${hour}:${time.substring(3, 5)}PM';
+    }
+  }
 }

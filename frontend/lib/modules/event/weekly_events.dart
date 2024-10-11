@@ -32,10 +32,11 @@ class WeeklyEvents extends StatefulWidget {
   final int pageWrapper;
   final int updateLngLatOnInit;
   int showCreateButton;
+  int viewOnly;
 
   WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
     this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateLngLatOnInit = 1,
-    this.showCreateButton = 1,});
+    this.showCreateButton = 1, this.viewOnly = 0,});
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -285,12 +286,12 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     }
     bool withImage = weeklyEvents.length <= 3 ? true : false;
     return SizedBox(
-      width: 300,
+      width: 200,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(day),
-          SizedBox(height: 10),
+          _style.Text1(day, size: 'large', colorKey: 'primary'),
+          _style.SpacingH('medium'),
           ...weeklyEvents.map((event) {
             return _buildWeeklyEvent(event, context, currentUserState, withImage: withImage);
           }).toList(),
@@ -349,30 +350,45 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
 
     bool newPage = widget.pageWrapper < 1 ? true : false;
     Widget joinButton = SizedBox.shrink();
-    if (!currentUserState.isLoggedIn) {
-      joinButton = TextButton(child: Text('Join'), onPressed: () {
-        setState(() { _showUserLoginSignup = true; });
-      });
-    } else if (weeklyEvent.priceUSD == 0) {
-      // joinButton = TextButton(child: Text('Join'), onPressed: () {
-      //   // _userEventSaveService.JoinEvent(weeklyEvent.title, weeklyEvent.priceUSD, currentUserState.currentUser.id, (Map<String, dynamic> data) {
-      //     // TODO - track event as joined (need to fetch user joined events for ALL events; just re-fetch here?)
-      //   // });
-      // });
-      joinButton = _buttons.Link(context, 'Join', '/we/${weeklyEvent.uName}', launchUrl: newPage);
-    } else {
-      // joinButton = TextButton(child: Text('Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
-      // });
-      joinButton = _buttons.Link(context, 'Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+    if (widget.viewOnly <= 0) {
+      if (!currentUserState.isLoggedIn) {
+        joinButton = TextButton(child: Text('Join'), onPressed: () {
+          setState(() { _showUserLoginSignup = true; });
+        });
+      } else if (weeklyEvent.priceUSD == 0) {
+        // joinButton = TextButton(child: Text('Join'), onPressed: () {
+        //   // _userEventSaveService.JoinEvent(weeklyEvent.title, weeklyEvent.priceUSD, currentUserState.currentUser.id, (Map<String, dynamic> data) {
+        //     // TODO - track event as joined (need to fetch user joined events for ALL events; just re-fetch here?)
+        //   // });
+        // });
+        joinButton = _buttons.Link(context, 'Join', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+      } else {
+        // joinButton = TextButton(child: Text('Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
+        // });
+        joinButton = _buttons.Link(context, 'Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+      }
     }
+
+    // List<Widget> colsAddress = [];
+    // String address = _locationService.JoinAddress(weeklyEvent.locationAddress);
+    // if (address.length > 0) {
+    //   colsAddress += [
+    //     _style.Text1(address),
+    //   ];
+    // }
+
     return SizedBox(
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...colsImage,
-          _style.Text1('${weeklyEvent.startTime} ${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)'),
+          _style.SpacingH('medium'),
+          // _style.Text1('${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)'),
+          _style.Text1('${weeklyEvent.title}', fontWeight: FontWeight.bold),
           // _style.SpacingH('medium'),
+          _style.Text1('${_dateTime.ToAmPm(weeklyEvent.startTime)}'),
+          // ...colsAddress,
           Row(
             children: [
               joinButton,
@@ -402,6 +418,15 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         eventsByDay.add(events);
       }
 
+      List<Widget> items = [];
+      for (var entry in eventsByDay.asMap().entries) {
+        int dayIndex = entry.key;
+        List<WeeklyEventClass> events = entry.value;
+        if (events.length > 0) {
+          items.add(_buildWeeklyEventDay(daysOfWeek[dayIndex], events, context, currentUserState));
+        }
+      }
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -409,14 +434,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
           Wrap(
             spacing: 20,
             runSpacing: 20,
-            alignment: WrapAlignment.center,
-            children: <Widget> [
-              ...eventsByDay.asMap().entries.map((entry) {
-                int dayIndex = entry.key;
-                List<WeeklyEventClass> events = entry.value;
-                return _buildWeeklyEventDay(daysOfWeek[dayIndex], events, context, currentUserState);
-              }).toList(),
-            ]
+            alignment: WrapAlignment.start,
+            children: items,
           ),
         ]
       );

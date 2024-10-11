@@ -4,7 +4,7 @@ class SelectButtonsFormField extends FormField<String> {
   SelectButtonsFormField({ var options, String? label,
     FormFieldSetter<String>? onSaved, FormFieldValidator<String>? validator,
     String initialValue = '', ValueChanged<String?>? onChanged, Color colorSelected = Colors.blue,
-    Color color = Colors.grey, Color colorText = Colors.white, bool allowEmpty = true, }) : super(
+    Color color = Colors.white, Color colorText = Colors.white, bool allowEmpty = true, }) : super(
       onSaved: onSaved,
       validator: validator,
       initialValue: initialValue,

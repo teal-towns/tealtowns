@@ -46,6 +46,15 @@ class CustomTheme {
           backgroundColor: secondary,
         )
       ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          // foregroundColor: brown,
+          // backgroundColor: secondary,
+          textStyle: TextStyle(
+            fontSize: 15,
+          )
+        )
+      ),
       pageTransitionsTheme: PageTransitionsTheme(builders: {
         TargetPlatform.iOS: FadeTransitionBuilder(),
         TargetPlatform.android: FadeTransitionBuilder(),

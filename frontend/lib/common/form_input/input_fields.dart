@@ -496,7 +496,7 @@ class InputFields {
     return InputWrapper(SelectButtonsFormField(
       options: options,
       colorSelected: _colors.colors['secondary'],
-      color: _colors.colors['greyLight'],
+      color: _colors.colors['greyLighter'],
       colorText: _colors.colors['brown'],
       label: label,
       initialValue: value,
@@ -541,7 +541,7 @@ class InputFields {
     return InputWrapper(MultiSelectButtonsFormField(
       options: options,
       colorSelected: _colors.colors['secondary'],
-      color: _colors.colors['greyLight'],
+      color: _colors.colors['greyLighter'],
       colorText: _colors.colors['brown'],
       label: label,
       initialValue: values,
@@ -746,7 +746,7 @@ class InputFields {
               child: FilledButton(
                 child: Text(option['label']),
                 style: FilledButton.styleFrom(
-                  backgroundColor: _colors.colors['greyLight'],
+                  backgroundColor: _colors.colors['greyLighter'],
                   foregroundColor: _colors.colors['brown'],
                 ),
                 onPressed: () {},

@@ -5,7 +5,7 @@ class MultiSelectButtonsFormField extends FormField<List<String>> {
   MultiSelectButtonsFormField({ var options, String? label,
     FormFieldSetter<List<String>>? onSaved, FormFieldValidator<List<String>>? validator,
     List<String> initialValue = const [], ValueChanged<List<String?>>? onChanged, Color colorSelected = Colors.blue,
-    Color color = Colors.grey, Color colorText = Colors.white, }) : super(
+    Color color = Colors.white, Color colorText = Colors.white, }) : super(
       onSaved: onSaved,
       validator: validator,
       initialValue: initialValue,

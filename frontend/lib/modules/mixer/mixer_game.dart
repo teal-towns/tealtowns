@@ -23,7 +23,7 @@ import '../icebreaker/icebreakers.dart';
 
 class MixerGame extends StatefulWidget {
   String uName;
-  MixerGame({this.uName = ''});
+  MixerGame({this.uName = '',});
 
   @override
   _MixerGameState createState() => _MixerGameState();
@@ -141,28 +141,36 @@ class _MixerGameState extends State<MixerGame> {
 
   @override
   Widget build(BuildContext context) {
+    CurrentUserState currentUserState = context.watch<CurrentUserState>();
+    bool withHeader = currentUserState.isLoggedIn;
+    bool withFooter = currentUserState.isLoggedIn;
     if (_loading) {
+      Widget content = Column( children: [ LinearProgressIndicator(), ] );
       return AppScaffoldComponent(
         listWrapper: true,
-        body: Column( children: [ LinearProgressIndicator() ]),
+        body: content,
+        withHeader: withHeader,
+        withFooter: withFooter,
       );
     }
 
     if (_gameNotFound) {
+      Widget content = Column( children: [
+        _style.Text1('Game Not Found'),
+        _style.SpacingH('medium'),
+        _style.Text1('Try checking the URL and try again.',),
+        _style.SpacingH('medium'),
+        _buttons.Link(context, 'Or Create a New Game', '/mixer-game', checkLoggedIn: true),
+      ]);
       return AppScaffoldComponent(
         listWrapper: true,
-        body: Column( children: [
-          _style.Text1('Game Not Found'),
-          _style.SpacingH('medium'),
-          _style.Text1('Try checking the URL and try again.',),
-          _style.SpacingH('medium'),
-          _buttons.Link(context, 'Or Create a New Game', '/mixer-game', checkLoggedIn: true),
-        ]),
+        body: content,
+        withHeader: withHeader,
+        withFooter: withFooter,
       );
     }
 
     Map<String, dynamic> config = _configService.GetConfig();
-    CurrentUserState currentUserState = context.watch<CurrentUserState>();
     List<Widget> colsHostControls = [];
     List<Widget> colsWinner = [];
     List<Widget> colsScores = [];
@@ -209,20 +217,20 @@ class _MixerGameState extends State<MixerGame> {
                   isWinner = true;
                 }
               }
-              // colsScores += [
-              //   _style.Text1(textTemp),
-              //   _style.SpacingH('medium'),
-              // ];
-              scoresItems.add(_style.Text1(textTemp));
+              colsScores += [
+                _style.Text1(textTemp),
+                _style.SpacingH('medium'),
+              ];
+              // scoresItems.add(_style.Text1(textTemp));
             }
           }
         }
-        if (scoresItems.length > 0) {
-          colsScores += [
-            LayoutWrap(items: scoresItems,),
-            _style.SpacingH('medium'),
-          ];
-        }
+        // if (scoresItems.length > 0) {
+        //   colsScores += [
+        //     LayoutWrap(items: scoresItems,),
+        //     _style.SpacingH('medium'),
+        //   ];
+        // }
 
         if (isHost && _mixerGame.players.length > 0) {
           colsHostControls += [
@@ -259,7 +267,7 @@ class _MixerGameState extends State<MixerGame> {
         }
       }
       if (_mixerGame.gameType == 'match') {
-        if (_mixerGame.state == 'gameOver') {
+        if (_mixerGame.state == 'gameOver' && currentUserState.isLoggedIn) {
           colsGame += [
             // _style.Text1('Game is over',),
             // _style.SpacingH('medium'),
@@ -287,8 +295,8 @@ class _MixerGameState extends State<MixerGame> {
             size: 200.0,
           ),
           _style.SpacingH('medium'),
-          _style.Text1(shareUrl),
-          _style.SpacingH('medium'),
+          // _style.Text1(shareUrl),
+          // _style.SpacingH('medium'),
         ];
       }
     } else {
@@ -340,19 +348,22 @@ class _MixerGameState extends State<MixerGame> {
       ];
     }
 
+    Widget content = Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...colsJoinOrCreate,
+        ...colsHostControls,
+        ...colsWinner,
+        ...colsScores,
+        ...colsGame,
+        ...colsQR,
+      ]
+    );
     return AppScaffoldComponent(
       listWrapper: true,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...colsJoinOrCreate,
-          ...colsHostControls,
-          ...colsWinner,
-          ...colsScores,
-          ...colsGame,
-          ...colsQR,
-        ]
-      )
+      body: content,
+      withHeader: withHeader,
+      withFooter: withFooter,
     );
   }
 }
