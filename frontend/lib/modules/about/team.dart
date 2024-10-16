@@ -20,46 +20,12 @@ class _TeamState extends State<Team> {
   
   // List of headshots, names, and roles
   final List<ImageData> imagesData = [
-    ImageData(
-      imagePath: 'assets/images/team/anh-nguyen.jpeg',
-      name: 'Anh Nguyen',
-      role: '',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/eloah-ramalho.jpeg',
-      name: 'Eloah Ramalho',
-      role: '',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/euny-park.jpeg',
-      name: 'Euny Park',
-      role: '',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/joni-chan.jpeg',
-      name: 'Joni Chan',
-      role: '',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/krishi-saraogi.jpeg',
-      name: 'Krishi Saraogi',
-      role: '',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/luke-madera.jpg',
-      name: 'Luke Madera',
-      role: '',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/morgan-long.jpeg',
-      name: 'Morgan Long',
-      role: '',
-    ),
-    ImageData(
-      imagePath: 'assets/images/team/rebecca-odim.jpg',
-      name: 'Rebecca Odim',
-      role: '',
-    ),
+    // ImageData(imagePath: 'assets/images/team/claire-adair.jpeg', name: 'Claire Adair', role: '',),
+    ImageData(imagePath: 'assets/images/team/euny-park.jpeg', name: 'Euny Park', role: '',),
+    ImageData(imagePath: 'assets/images/team/joni-chan.jpeg', name: 'Joni Chan', role: '',),
+    ImageData(imagePath: 'assets/images/team/luke-madera.jpg', name: 'Luke Madera', role: '',),
+    ImageData(imagePath: 'assets/images/team/morgan-long.jpeg', name: 'Morgan Long', role: '',),
+    ImageData(imagePath: 'assets/images/team/rebecca-odim.jpg', name: 'Rebecca Odim', role: '',),
   ];
   double _imageSize = 200.0;
 

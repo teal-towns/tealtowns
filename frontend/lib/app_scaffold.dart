@@ -194,10 +194,10 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   Widget _buildDrawer(BuildContext context, var currentUserState) {
     List<Widget> columns = [
       _buildLinkButton(context, '/home', 'Home'),
-      _buildLinkButton(context, '/weekly-events', 'Events'),
-      _buildLinkButton(context, '/neighborhoods', 'Neighborhoods'),
-      _buildLinkButton(context, '/own', 'Shared Items'),
-      _buildLinkButton(context, '/ai-urban-planner', 'AI Urban Planner'),
+      // _buildLinkButton(context, '/weekly-events', 'Events'),
+      // _buildLinkButton(context, '/neighborhoods', 'Neighborhoods'),
+      // _buildLinkButton(context, '/own', 'Shared Items'),
+      // _buildLinkButton(context, '/ai-urban-planner', 'AI Urban Planner'),
     ];
     if (currentUserState.isLoggedIn) {
       columns += [
@@ -213,11 +213,11 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     Color footerColor = Colors.white;
 
     List<Map<String, dynamic>> links = [
-      { 'text': 'About', 'link': '/about', },
+      // { 'text': 'About', 'link': '/about', },
       { 'text': 'Blog', 'link': '/blog', },
-      { 'text': 'Team', 'link': '/team', },
-      { 'text': 'Belonging Survey', 'link': '/belonging-survey', },
-      { 'text': 'Neighborhood Journey', 'link': '/neighborhood-journey', },
+      // { 'text': 'Team', 'link': '/team', },
+      // { 'text': 'Belonging Survey', 'link': '/belonging-survey', },
+      // { 'text': 'Neighborhood Journey', 'link': '/neighborhood-journey', },
     ];
     List<TextSpan> spanLinks = [];
     for (var link in links) {
@@ -421,7 +421,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   Widget BuildFooter(BuildContext context, {String size = 'small'}) {
     String email = 'team@tealtowns.org';
     List<Map<String, dynamic>> links = [
-      { 'url': '/about', 'text': 'About' },
+      // { 'url': '/about', 'text': 'About' },
       { 'url': '/blog', 'text': 'Blog' },
     ];
     Color footerColor = _colors.colors['white'];
@@ -450,8 +450,9 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
             )),
             SizedBox(height: 10),
             Text('2024 TealTowns', style: TextStyle(color: footerColor)),
+            Text('501c3 Non Profit. Tax ID: 93-4578617', style: TextStyle(color: footerColor)),
             // SizedBox(height: 10),
-            Text('All Rights Reserved', style: TextStyle(color: footerColor)),
+            // Text('All Rights Reserved', style: TextStyle(color: footerColor)),
             SizedBox(height: 10),
             IconButton(
               iconSize: 25,
@@ -483,16 +484,25 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
           SizedBox(width: 20),
           Text(email, style: TextStyle(color: footerColor)),
           Expanded(flex: 1, child: Container()),
-          ...rowsLinks,
-          SizedBox(width: 20),
-          Text('2024 TealTowns', style: TextStyle(color: footerColor)),
-          SizedBox(width: 20),
-          IconButton(
-            iconSize: 25,
-            icon: Icon(CustomIcon.linkedin, color: footerColor),
-            onPressed: () {
-              _linkService.LaunchURL('https://www.linkedin.com/company/101358571');
-            },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                children: [
+                  ...rowsLinks,
+                  SizedBox(width: 20),
+                  IconButton(
+                    iconSize: 25,
+                    icon: Icon(CustomIcon.linkedin, color: footerColor),
+                    onPressed: () {
+                      _linkService.LaunchURL('https://www.linkedin.com/company/101358571');
+                    },
+                  ),
+                ],
+              ),
+              Text('2024 TealTowns', style: TextStyle(color: footerColor)),
+              Text('501c3 Non Profit. Tax ID: 93-4578617', style: TextStyle(color: footerColor)),
+            ],
           ),
         ]
       )
