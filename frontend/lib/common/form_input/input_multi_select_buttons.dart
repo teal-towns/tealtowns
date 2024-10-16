@@ -11,11 +11,17 @@ class MultiSelectButtonsFormField extends FormField<List<String>> {
       initialValue: initialValue,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (FormFieldState<List<String>> state) {
+        List<Widget> colsLabel = [];
+        if (label != null && label.length > 0) {
+          colsLabel += [
+            Text(label!),
+            SizedBox(height: 10),
+          ];
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label!),
-            SizedBox(height: 10),
+            ...colsLabel,
             Wrap(
               spacing: 10,
               runSpacing: 10,

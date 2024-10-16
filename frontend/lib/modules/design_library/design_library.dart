@@ -30,6 +30,7 @@ class _DesignLibraryState extends State<DesignLibrary> {
     {'value': 3, 'label': 'Neutral'},
     {'value': 4, 'label': 'Agree'},
     {'value': 5, 'label': 'Strongly agree'},
+    {'value': 6, 'label': 'Monthly Subscription \$36. \$8.10 / event; save \$36 / year. Even longer text here.'},
   ];
   Map<String, Map<String, dynamic>> _formFields = {
     'imageUrls': { 'type': 'image', 'multiple': true, 'label': 'Images', 'required': false, },

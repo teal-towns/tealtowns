@@ -113,10 +113,10 @@ class DateTimeService {
     int hour = int.parse(time.substring(0, index));
     String minute = time.substring(index + 1, index + 3);
     if (hour >= 12) {
-      return '${hour - 12}:${minute}PM';
+      return '${hour - 12}:${minute}pm';
     }
     else {
-      return '${hour}:${minute}AM';
+      return '${hour}:${minute}am';
     }
   }
 }

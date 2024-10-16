@@ -83,6 +83,9 @@ class _MapItState extends State<MapIt> {
         options: MapOptions(
           initialCenter: center,
           initialZoom: widget.zoom,
+          interactionOptions: InteractionOptions(
+            flags: InteractiveFlag.all & ~InteractiveFlag.scrollWheelZoom,
+          ),
         ),
         children: [
           TileLayer(

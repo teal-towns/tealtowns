@@ -95,9 +95,10 @@ thread3.start()
 from pay_mercury import pay_mercury as _pay_mercury
 thread4 = threading.Thread(target = _pay_mercury.CheckDoTransactionsLoop, args=())
 thread4.start()
-from user_follow_up import user_follow_up as _user_follow_up
-thread5 = threading.Thread(target = _user_follow_up.CheckDoUserFollowUpLoop, args=())
-thread5.start()
+# Pausing this (ambassador follow ups and auto removals) for now.
+# from user_follow_up import user_follow_up as _user_follow_up
+# thread5 = threading.Thread(target = _user_follow_up.CheckDoUserFollowUpLoop, args=())
+# thread5.start()
 
 # Regular websocket
 async def websocket_handler(request):

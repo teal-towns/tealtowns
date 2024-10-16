@@ -21,7 +21,7 @@ class InputFields {
   ParseService _parseService = ParseService();
 
   Widget inputPhoneNumber(var formVals, String? formValsKey, { String label = '', String hint = '',
-    Function(Map<String, dynamic>)? onChanged = null, bool required = false, String helpText = '', String countryISOCode = '', }) {
+    Function(Map<String, dynamic>)? onChanged = null, bool required = false, String helpText = '', String countryISOCode = 'US', }) {
     String? initialVal = '';
     if (formValsKey == null) {
       initialVal = formVals == null ? '' : formVals.toString();
@@ -41,6 +41,7 @@ class InputFields {
           labelText: label,
         ),
         initialCountryCode: countryISOCode,
+        // initialCountryCode: 'US',
         onChanged: (phone) {
           Map<String, dynamic> value = { 'completeNumber': phone.completeNumber, 'countryISOCode': phone.countryISOCode };
           if (formValsKey == null) {

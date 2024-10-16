@@ -30,7 +30,7 @@ class _UserPhoneState extends State<UserPhone> {
     'phoneNumberCountryISOCode': 'US',
     'whatsappNumber': '',
     'whatsappNumberVerificationKey': '',
-    'whatsappNumberCountryISOCode': '',
+    'whatsappNumberCountryISOCode': 'US',
     'terms': false,
     'mode': 'whatsapp',
   };

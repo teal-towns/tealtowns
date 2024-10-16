@@ -361,12 +361,14 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         //     // TODO - track event as joined (need to fetch user joined events for ALL events; just re-fetch here?)
         //   // });
         // });
-        joinButton = _buttons.Link(context, 'Join', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+        joinButton = _buttons.Link(context, 'View', '/we/${weeklyEvent.uName}', launchUrl: newPage);
       } else {
         // joinButton = TextButton(child: Text('Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
         // });
         joinButton = _buttons.Link(context, 'Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
       }
+    } else if (weeklyEvent.priceUSD != 0) {
+      joinButton = _buttons.Link(context, 'Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
     }
 
     // List<Widget> colsAddress = [];

@@ -230,38 +230,17 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       _socketService.emit('AddEventInsightView', data);
     }
 
+    bool withHeaderFooter = currentUserState.isLoggedIn;
     if (_loading) {
       return AppScaffoldComponent(
         listWrapper: true,
+        withHeader: withHeaderFooter,
+        withFooter: withHeaderFooter,
         body: Padding(
           padding: EdgeInsets.symmetric(vertical: 16.0),
           child: Column( children: [ LinearProgressIndicator() ] ),
         )
       );
-    }
-
-    List<Widget> buttons = [];
-    if (currentUserState.isLoggedIn && (_weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)
-      || currentUserState.hasRole('admin'))) {
-      buttons = [
-        TextButton(
-          onPressed: () {
-            _linkService.Go('/weekly-event-save?id=${_weeklyEvent.id}', context, currentUserState: currentUserState);
-          },
-          child: Text('Edit'),
-        ),
-        SizedBox(width: 10),
-        TextButton(
-          onPressed: () {
-            _socketService.emit('removeWeeklyEvent', { 'id': _weeklyEvent.id });
-          },
-          child: Text('Delete'),
-          style: TextButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.error,
-          ),
-        ),
-        SizedBox(width: 10),
-      ];
     }
 
     List<Widget> admins = [];
@@ -298,23 +277,92 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       }
     }
 
+    List<Widget> buttons = [];
+    List<Widget> colsFlyer = [];
+    List<Widget> colsFeedbackIcebreakers = [];
+    List<Widget> colsInsights = [];
+    List<Widget> colsTags = [];
+
+    List<Widget> colsIcebreakers = [];
+    if (_icebreakers.length > 0 && alreadySignedUp) {
+      colsIcebreakers += [
+        Text('Icebreaker: ${_icebreakers[0].icebreaker}'),
+        SizedBox(height: 10),
+      ];
+    }
+    if (alreadySignedUp) {
+      colsIcebreakers += [
+        _buttons.Link(context, 'Play Mixer Game', '/mixer-game', launchUrl: true),
+        SizedBox(height: 10),
+      ];
+    }
+
+    if (currentUserState.isLoggedIn && (_weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)
+      || currentUserState.hasRole('admin'))) {
+      buttons = [
+        TextButton(
+          onPressed: () {
+            _linkService.Go('/weekly-event-save?id=${_weeklyEvent.id}', context, currentUserState: currentUserState);
+          },
+          child: Text('Edit'),
+        ),
+        SizedBox(width: 10),
+        TextButton(
+          onPressed: () {
+            _socketService.emit('removeWeeklyEvent', { 'id': _weeklyEvent.id });
+          },
+          child: Text('Delete'),
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.error,
+          ),
+        ),
+        SizedBox(width: 10),
+      ];
+
+      colsFlyer = [
+        _buttons.Link(context, 'Print Flyer', '/wep/${_weeklyEvent.uName}'),
+        SizedBox(height: 10),
+      ];
+
+      colsFeedbackIcebreakers = [
+        EventFeedback(weeklyEventId: _weeklyEvent.id, showDetails: 0,),
+        SizedBox(height: 10),
+        ...colsIcebreakers,
+      ];
+
+      if (_eventInsight.uniqueViewsAt.length > 0) {
+        colsInsights += [
+          Text('${_eventInsight.uniqueViewsAt.length} unique views'),
+          SizedBox(height: 10),
+        ];
+      }
+
+      if (_weeklyEvent.tags.length > 0) {
+        colsTags += [
+          Text('Tags: ${_weeklyEvent.tags.join(', ')}'),
+          SizedBox(height: 10),
+        ];
+      }
+    }
+
     Map<String, dynamic> config = _configService.GetConfig();
 
     String shareUrl = '${config['SERVER_URL']}/we/${_weeklyEvent.uName}';
-    List<Widget> colsShareQR = [
-      QrImageView(
-        data: shareUrl,
-        version: QrVersions.auto,
-        size: 200.0,
-      ),
-      SizedBox(height: 10),
-      Text(shareUrl),
-      SizedBox(height: 10),
-    ];
-    List<Widget> colsShare = [
-      Text(shareUrl),
-      SizedBox(height: 10),
-    ];
+    List<Widget> colsShareQR = [];
+    if (alreadySignedUp) {
+      colsShareQR = [
+        Text('Share this event with your neighbors:'),
+        SizedBox(height: 10),
+        QrImageView(
+          data: shareUrl,
+          version: QrVersions.auto,
+          size: 200.0,
+        ),
+        SizedBox(height: 10),
+        // Text(shareUrl),
+        // SizedBox(height: 10),
+      ];
+    }
 
     String text1 = '${_attendeesCount} attending';
     if (_nonHostAttendeesWaitingCount > 0) {
@@ -387,6 +435,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         attendeeInfo += [
           Text('${hostTexts.length} Hosting'),
           Text('${hostTexts.join(', ')}'),
+          _style.SpacingH('medium'),
         ];
       }
       if (waitingHostTexts.length > 0) {
@@ -394,6 +443,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         attendeeInfo += [
           Text('${waitingHostTexts.length} Waiting to Host'),
           Text('${waitingHostTexts.join(', ')}'),
+          _style.SpacingH('medium'),
         ];
       }
       if (attendeeTexts.length > 0) {
@@ -401,6 +451,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         attendeeInfo += [
           Text('${attendeeTexts.length} Attending'),
           Text('${attendeeTexts.join(', ')}'),
+          _style.SpacingH('medium'),
         ];
       }
       if (waitingTexts.length > 0) {
@@ -408,19 +459,25 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         attendeeInfo += [
           Text('${waitingTexts.length} Waiting'),
           Text('${waitingTexts.join(', ')}'),
+          _style.SpacingH('medium'),
         ];
       }
-      attendeeInfo += [ SizedBox(height: 10) ];
     }
 
     if (_nextEvent.start.length > 0) {
       if (!alreadySignedUp) {
         String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
+        List<Widget> colsRsvp = [];
         String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
+        if (rsvpSignUpText.length > 0) {
+          colsRsvp += [
+            Text(rsvpSignUpText),
+          ];
+        }
         attendeeInfo += [
-          Text(rsvpSignUpText),
+          ...colsRsvp,
           SizedBox(height: 10),
-          UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id),
+          UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id, alreadySignedUp: alreadySignedUp,),
           SizedBox(height: 10),
         ];
       } else {
@@ -436,7 +493,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     List<Widget> colsCalendar = [];
-    if (_event.start.length > 0) {
+    if (alreadySignedUp && _event.start.length > 0) {
       String format = 'yMMdTHHmmss';
       String start1 = _dateTime.Format(_event.start, format, local: true);
       String end1 = _event.end.length > 0 ? _event.end : _event.start;
@@ -462,28 +519,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
               return _buttons.Link(context, link['name']!, link['url']!, launchUrl: true);
             })
           ]
-        )
-      ];
-    }
-
-    List<Widget> colsInsights = [];
-    if (_eventInsight.uniqueViewsAt.length > 0) {
-      colsInsights += [
-        Text('${_eventInsight.uniqueViewsAt.length} unique views'),
-        SizedBox(height: 10),
-      ];
-    }
-
-    List<Widget> colsIcebreakers = [];
-    if (_icebreakers.length > 0 && alreadySignedUp) {
-      colsIcebreakers += [
-        Text('Icebreaker: ${_icebreakers[0].icebreaker}'),
-        SizedBox(height: 10),
-      ];
-    }
-    if (alreadySignedUp) {
-      colsIcebreakers += [
-        _buttons.Link(context, 'Play Mixer Game', '/mixer-game', launchUrl: true),
+        ),
         SizedBox(height: 10),
       ];
     }
@@ -506,13 +542,6 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       ];
     }
 
-    List<Widget> colsTags = [];
-    if (_weeklyEvent.tags.length > 0) {
-      colsTags += [
-        Text('Tags: ${_weeklyEvent.tags.join(', ')}'),
-        SizedBox(height: 10),
-      ];
-    }
     Widget content1 = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -562,17 +591,12 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         ...thisWeekEvent,
         ...attendeeInfo,
         SizedBox(height: 10),
-        EventFeedback(weeklyEventId: _weeklyEvent.id, showDetails: 0,),
-        SizedBox(height: 10),
-        ...colsIcebreakers,
-        SizedBox(height: 10),
-        // Container(height: 300, width: 533,
-        YoutubePlayer(
-          controller: _youtubeController,
-          aspectRatio: 16 / 9,
-        ),
+        ...colsFeedbackIcebreakers,
+        // YoutubePlayer(
+        //   controller: _youtubeController,
+        //   aspectRatio: 16 / 9,
         // ),
-        SizedBox(height: 10),
+        // SizedBox(height: 10),
       ]
     );
 
@@ -588,12 +612,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
         ...admins,
         SizedBox(height: 10),
         ...colsCalendar,
-        SizedBox(height: 10),
-        Text('Share this event with your neighbors:'),
-        SizedBox(height: 10),
         ...colsShareQR,
-        _buttons.Link(context, 'Print Flyer', '/wep/${_weeklyEvent.uName}'),
-        SizedBox(height: 10),
+        ...colsFlyer,
         Text('Can\'t make this time or interested in other events?'),
         SizedBox(height: 10),
         _buttons.LinkElevated(context, 'View All Events', '/ne/${_weeklyEvent.neighborhoodUName}'),
@@ -623,6 +643,8 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     return AppScaffoldComponent(
       listWrapper: true,
       width: width,
+      withHeader: withHeaderFooter,
+      withFooter: withHeaderFooter,
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 600) {
