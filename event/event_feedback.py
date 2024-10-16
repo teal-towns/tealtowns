@@ -150,7 +150,8 @@ def GetByWeeklyEvent(weeklyEventId: str, withUserFeedback: int = 0, withCheckAsk
             ret['userFeedbacks'] = retFeedback['userFeedbacks']
     return ret
 
-def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterEndMinutes: int = 20):
+def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterEndMinutes: int = 20,
+    notify: int = 0):
     now = now if now is not None else date_time.now()
     ret = { 'valid': 1, 'message': '', 'newFeedbackEventIds': [], 'notifyByEvent': {}, }
     minDate = date_time.string(now - datetime.timedelta(minutes = endMinutesBuffer))
@@ -171,13 +172,14 @@ def CheckAndCreateForEndingEvents(now = None, endMinutesBuffer: int = 10, afterE
             eventFeedbackByEventId[eventFeedback['eventId']] = eventFeedback
     for event in events:
         if event['_id'] not in eventIdsDoneMap:
-            # Send notification to get feedback.
-            url = GetUrl(event['_id'])
-            smsContent = 'Thanks for attending! What did you think of this event? ' + url
-            messageTemplateVariables = { "1": url }
-            retNotify = _user_event.NotifyUsers(event['_id'], smsContent, minAttendeeCount = 1,
-                messageTemplateKey = "eventFeedback", messageTemplateVariables = messageTemplateVariables)
-            ret['notifyByEvent'][event['_id']] = { 'notifyUserIds': retNotify['notifyUserIds'] }
+            if notify:
+                # Send notification to get feedback.
+                url = GetUrl(event['_id'])
+                smsContent = 'Thanks for attending! What did you think of this event? ' + url
+                messageTemplateVariables = { "1": url }
+                retNotify = _user_event.NotifyUsers(event['_id'], smsContent, minAttendeeCount = 1,
+                    messageTemplateKey = "eventFeedback", messageTemplateVariables = messageTemplateVariables)
+                ret['notifyByEvent'][event['_id']] = { 'notifyUserIds': retNotify['notifyUserIds'] }
             eventFeedback = { "eventId": event['_id'], "feedbackVotes": [], "positiveVotes": [],
                 "notificationSent": 1, }
             if event['_id'] in eventFeedbackByEventId:

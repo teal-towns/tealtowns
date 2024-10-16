@@ -82,7 +82,7 @@ def test_CheckAndCreateForEndingEvents():
 
     # Near end of events 0 and 1, and just after event 2, so all 3 should have feedback created.
     now = date_time.from_string('2024-03-01T17:50:00-07:00')
-    ret = _event_feedback.CheckAndCreateForEndingEvents(now = now)
+    ret = _event_feedback.CheckAndCreateForEndingEvents(now = now, notify = 1)
     assert len(ret['newFeedbackEventIds']) == 3
     for eventId in ret['newFeedbackEventIds']:
         assert eventId in [events[0]['_id'], events[1]['_id'], events[2]['_id']]
@@ -95,7 +95,7 @@ def test_CheckAndCreateForEndingEvents():
     
     # Should NOT send twice.
     now = date_time.from_string('2024-03-01T17:55:00-07:00')
-    ret = _event_feedback.CheckAndCreateForEndingEvents(now = now)
+    ret = _event_feedback.CheckAndCreateForEndingEvents(now = now, notify = 1)
     assert len(ret['newFeedbackEventIds']) == 0
 
     _mongo_mock.CleanUp()

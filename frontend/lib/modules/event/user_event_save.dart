@@ -12,6 +12,7 @@ import './user_event_class.dart';
 import './event_class.dart';
 import './weekly_event_class.dart';
 import '../user_auth/current_user_state.dart';
+import '../user_auth/user_login_signup.dart';
 
 class UserEventSave extends StatefulWidget {
   String eventId;
@@ -45,6 +46,7 @@ class _UserEventSaveState extends State<UserEventSave> {
 
   String _mySharedItemsState = '';
   List<dynamic> _mySharedItems = [];
+  String _mode = '';
 
   @override
   void initState() {
@@ -139,10 +141,17 @@ class _UserEventSaveState extends State<UserEventSave> {
   Widget build(BuildContext context) {
     var currentUserState = context.watch<CurrentUserState>();
     if (!currentUserState.isLoggedIn) {
+      if (_mode == 'loginSignup') {
+        return UserLoginSignup(withHeader: false, mode: 'signup', logInText: 'Log In to Join',
+          signUpText: 'Sign Up to Join', onSave: (Map<String, dynamic> data) {
+        });
+      }
       return ElevatedButton(
         onPressed: () {
-          _linkService.Go('', context, currentUserState: currentUserState);
-          _socketService.TrackEvent('Join Event');
+          // _linkService.Go('', context, currentUserState: currentUserState);
+          // _socketService.TrackEvent('Join Event');
+          _mode = 'loginSignup';
+          setState(() { _mode = _mode; });
         },
         child: Text('Join Event'),
       );

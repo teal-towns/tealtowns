@@ -17,11 +17,13 @@ import './user_event_class.dart';
 import './user_weekly_event_class.dart';
 import './weekly_event_class.dart';
 import '../user_auth/current_user_state.dart';
+import '../user_auth/user_login_signup.dart';
 import '../user_auth/user_phone.dart';
 
 class UserWeeklyEventSave extends StatefulWidget {
   String weeklyEventId;
-  UserWeeklyEventSave({this.weeklyEventId = '',});
+  bool alreadySignedUp;
+  UserWeeklyEventSave({this.weeklyEventId = '', this.alreadySignedUp = false,});
 
   @override
   _UserWeeklyEventSaveState createState() => _UserWeeklyEventSaveState();
@@ -55,6 +57,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     'year': 0,
   };
   bool _loadingPayment = false;
+  String _mode = '';
 
   @override
   void initState() {
@@ -136,24 +139,20 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
   Widget build(BuildContext context) {
     var currentUserState = context.watch<CurrentUserState>();
     if (!currentUserState.isLoggedIn) {
+      if (_mode == 'loginSignup') {
+        return UserLoginSignup(withHeader: false, mode: 'signup', logInText: 'Log In to Join',
+          signUpText: 'Sign Up to Join', onSave: (Map<String, dynamic> data) {
+        });
+      }
       return ElevatedButton(
         onPressed: () {
-          _linkService.Go('', context, currentUserState: currentUserState);
-          _socketService.TrackEvent('Join Event');
+          // _linkService.Go('', context, currentUserState: currentUserState);
+          // _socketService.TrackEvent('Join Event');
+          _mode = 'loginSignup';
+          setState(() { _mode = _mode; });
         },
         child: Text('Join Event'),
       );
-    }
-
-    List<Widget> colsPhone = [];
-    if ((currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) &&
-      (currentUserState.currentUser.whatsappNumber!.length < 1 || currentUserState.currentUser.whatsappNumberVerified < 1)) {
-      colsPhone = [
-        Text('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
-        SizedBox(height: 10),
-        UserPhone(),
-        SizedBox(height: 30),
-      ];
     }
 
     if (!_inited && widget.weeklyEventId.length > 0) {
@@ -189,9 +188,9 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       return Text('You are already subscribed to this weekly event. The RSVP deadline has passed for this week, but you will be signed up for next week!');
     }
 
-    List<Widget> colsSubsription = [];
+    List<Widget> colsSubscription = [];
     if (_weeklyEvent.priceUSD != 0) {
-      colsSubsription = [
+      colsSubscription = [
         BuildSubscriptions(),
         SizedBox(height: 10),
       ];
@@ -236,12 +235,25 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       );
     }
 
+    List<Widget> colsPhone = [];
+    if (widget.alreadySignedUp &&
+      ((currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) &&
+      (currentUserState.currentUser.whatsappNumber!.length < 1 || currentUserState.currentUser.whatsappNumberVerified < 1))) {
+      colsPhone = [
+        Text('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
+        SizedBox(height: 10),
+        UserPhone(),
+        SizedBox(height: 30),
+      ];
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...colsPhone,
-        ...colsSubsription,
+        ...colsSubscription,
         widgetForm,
+        _style.SpacingH('large'),
+        ...colsPhone,
       ]
     );
   }
@@ -276,64 +288,17 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     _subscriptionPrices['3month'] = monthly3Price;
     // _subscriptionPrices['year'] = yearlyPrice;
 
-    Map<String, Map<String, dynamic>> vals = {
-      'single': {
-        'header': 'Single Event: \$${singlePrice}',
-        'body': '',
-      },
-      'month': {
-        'header': 'Monthly Subscription: \$${monthlyPrice}',
-        'body': '\$${monthlyPricePerEvent.toStringAsFixed(2)} / event; save \$${monthlySavingsPerYear} / year',
-      },
-      '3month': {
-        'header': '3 Month Subscription: \$${monthly3Price}',
-        'body': '\$${montly3PricePerEvent.toStringAsFixed(2)} / event; save \$${monthly3SavingsPerYear} / year',
-      },
-      // 'year': {
-      //   'header': 'Yearly Subscription: \$${yearlyPrice}',
-      //   'body': 'Savings: \$${yearlySavingsPerYear} / year',
-      // },
-    };
-    List<Widget> contents = [];
-    for (var keyVal in vals.entries) {
-      String key = keyVal.key;
-      bool selected = _formValsPay['subscription'] == key ? true : false;
-      String colorKey = selected ? 'white' : 'primary';
-      contents += [
-        InkWell(
-          onTap: () {
-            _formValsPay['subscription'] = key;
-            setState(() {
-              _formValsPay = _formValsPay;
-            });
-          },
-          child: Container(
-            padding: EdgeInsets.all(10),
-            color: selected ? _colors.colors['primary'] : _colors.colors['white'],
-            child: Column(
-              children: [
-                _style.Text1(keyVal.value['header'], colorKey: colorKey),
-                _style.SpacingH('medium'),
-                _style.Text1(keyVal.value['body'], colorKey: colorKey),
-              ]
-            ),
-          ),
-        )
-      ];
-    }
-
-    return Column(
-      children: [
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            ...contents,
-          ],
-        ),
-        SizedBox(height: 10),
-      ]
-    );
+    List<Map<String, dynamic>> opts = [
+      {'value': 'single', 'label': 'Single Event: \$${singlePrice}'},
+      // {'value': 'month', 'label': 'Monthly Subscription: \$${monthlyPrice} (\$${monthlyPricePerEvent.toStringAsFixed(0)} / event; save \$${monthlySavingsPerYear} / year)'},
+      // {'value': '3month', 'label': '3 Month Subscription: \$${monthly3Price}; \$${montly3PricePerEvent.toStringAsFixed(0)} / event; save \$${monthly3SavingsPerYear} / year)'},
+      {'value': 'month', 'label': 'Monthly Subscription: \$${monthlyPricePerEvent.toStringAsFixed(0)} (\$${monthlyPrice} / mo)'},
+      {'value': '3month', 'label': '3 Month Subscription: \$${montly3PricePerEvent.toStringAsFixed(0)} (\$${monthly3Price} / 3 mo)'},
+    ];
+    return _inputFields.inputSelectButtons(opts, _formValsPay, 'subscription', onChanged: (val) {
+      _formValsPay['subscription'] = val;
+      setState(() { _formValsPay = _formValsPay; });
+    });
   }
 
   void GetPaymentLink(currentUserState) {

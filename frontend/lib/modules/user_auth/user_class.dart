@@ -38,11 +38,11 @@ class UserClass {
     this.phoneNumber = json['phoneNumber'] ?? '';
     this.phoneNumberVerificationKey = json['phoneNumberVerificationKey'] ?? '';
     this.phoneNumberVerified = json['phoneNumberVerified'] != null ? _parseService.toIntNoNull(json['phoneNumberVerified']) : 0;
-    this.phoneNumberCountryISOCode = json['phoneNumberCountryISOCode'] ?? '';
+    this.phoneNumberCountryISOCode = json['phoneNumberCountryISOCode'] ?? 'US';
     this.whatsappNumber = json['whatsappNumber'] ?? '';
     this.whatsappNumberVerificationKey = json['whatsappNumberVerificationKey'] ?? '';
     this.whatsappNumberVerified = json['whatsappNumberVerified'] != null ? _parseService.toIntNoNull(json['whatsappNumberVerified']) : 0;
-    this.whatsappNumberCountryISOCode = json['whatsappNumberCountryISOCode'] ?? '';
+    this.whatsappNumberCountryISOCode = json['whatsappNumberCountryISOCode'] ?? 'US';
     this.emailVerified = json['emailVerified'] != null ? _parseService.toIntNoNull(json['emailVerified']) : 0;
   }
 
