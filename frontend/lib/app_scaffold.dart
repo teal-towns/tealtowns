@@ -213,7 +213,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     Color footerColor = Colors.white;
 
     List<Map<String, dynamic>> links = [
-      // { 'text': 'About', 'link': '/about', },
+      { 'text': 'About', 'link': '/about', },
       { 'text': 'Blog', 'link': '/blog', },
       // { 'text': 'Team', 'link': '/team', },
       // { 'text': 'Belonging Survey', 'link': '/belonging-survey', },
@@ -421,7 +421,7 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
   Widget BuildFooter(BuildContext context, {String size = 'small'}) {
     String email = 'team@tealtowns.org';
     List<Map<String, dynamic>> links = [
-      // { 'url': '/about', 'text': 'About' },
+      { 'url': '/about', 'text': 'About' },
       { 'url': '/blog', 'text': 'Blog' },
     ];
     Color footerColor = _colors.colors['white'];
