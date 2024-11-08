@@ -7,6 +7,7 @@ import '../app_scaffold.dart';
 import '../common/buttons.dart';
 import '../common/colors_service.dart';
 // import '../common/config_service.dart';
+import '../common/layout_wrap.dart';
 import '../common/style.dart';
 import '../common/video.dart';
 import '../modules/neighborhood/neighborhoods.dart';
@@ -87,22 +88,50 @@ class _HomeState extends State<Home> {
       )
     );
 
+    List<Widget> actionItems = [
+      Column(
+        children: [
+          _style.Text1('Create', size: 'large'),
+          _style.SpacingH('medium'),
+          _style.Text1('Start your TealTowns neighborhood', align: 'center',),
+          _style.SpacingH('medium'),
+          _buttons.LinkElevated(context, 'Become an Ambassador', '/ambassador', track: true),
+        ]
+      ),
+      Column(
+        children: [
+          _style.Text1('Join', size: 'large'),
+          _style.SpacingH('medium'),
+          _style.Text1('Join a TealTowns neighborhood near you', align: 'center',),
+          _style.SpacingH('medium'),
+          _buttons.LinkElevated(context, 'Become a neighbor', '/neighborhoods', track: true),
+        ]
+      ),
+      Column(
+        children: [
+          _style.Text1('Attend', size: 'large'),
+          _style.SpacingH('medium'),
+          _style.Text1('Attend a TealTowns event near you', align: 'center',),
+          _style.SpacingH('medium'),
+          _buttons.LinkElevated(context, 'Find an Event', '/weekly-events', track: true),
+        ]
+      ),
+    ];
+
     Widget content = Container(
       padding: EdgeInsets.only(left: 20, right: 20),
       child: Stack(
         children: [
-          Container(
-            padding: EdgeInsets.only(top: 125),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              // width: 300,
-              // height: 300,
-              child: Image.asset('assets/images/food-dish.png', width: 450, height: 450),
-            ),
-          ),
+          // Container(
+          //   padding: EdgeInsets.only(top: 125),
+          //   child: Align(
+          //     alignment: Alignment.bottomCenter,
+          //     child: Image.asset('assets/images/food-dish.png', width: 450, height: 450),
+          //   ),
+          // ),
           Align(alignment: Alignment.center, child: Container(
             // color: Colors.white,
-            width: 600,
+            width: 1000,
             padding: EdgeInsets.only(top: 50, bottom: 50, left: 50, right: 50),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -116,17 +145,18 @@ class _HomeState extends State<Home> {
               ],
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _style.SpacingH('medium'),
-                _style.Text1('Find your TealTown and share your first meal!', size: 'large', colorKey: 'primary'),
+                _style.Text1('Find your TealTown and share your first meal!', size: 'large', colorKey: 'primary',),
                 _style.SpacingH('medium'),
                 _style.Text1('We believe that communities and a healthier planet go hand-in-hand. TealTowns paves the way for vibrant, resilient living by encouraging neighbors to meet, make friends, and plan events together. By fostering local connections, TealTowns create an environment where everyone feels connected and empowered - one neighbor at a time.'),
                 _style.SpacingH('large'),
-                Align(alignment: Alignment.center,
-                  // child: _buttons.LinkElevated(context, 'Join or Create Your TealTown', '/neighborhoods'),
-                  child: _buttons.LinkElevated(context, 'Create Your TealTown', '/ambassador', track: true),
-                ),
+                // Align(alignment: Alignment.center,
+                //   // child: _buttons.LinkElevated(context, 'Join or Create Your TealTown', '/neighborhoods'),
+                //   child: _buttons.LinkElevated(context, 'Create Your TealTown', '/ambassador', track: true),
+                // ),
+                Align(alignment: Alignment.center, child: LayoutWrap(items: actionItems)),
                 SizedBox(height: 30),
               ],
             ),
@@ -138,6 +168,7 @@ class _HomeState extends State<Home> {
     List<Widget> colsBottom = [
       SizedBox(height: 30),
       content,
+      _style.SpacingH('xlarge'),
       // Container(padding: EdgeInsets.only(left: 20, right: 20), child: Neighborhoods() ),
       // // Extra height for neighborhoods input location overlay.
       // SizedBox(height: 100),
