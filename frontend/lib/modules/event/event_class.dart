@@ -1,7 +1,13 @@
-class EventClass {
-  String id = '', weeklyEventId = '', weeklyEventUName = '', start = '', end = '', neighborhoodUName = '';
+import '../../common/parse_service.dart';
 
-  EventClass(this.id, this.weeklyEventId, this.weeklyEventUName, this.start, this.end, this.neighborhoodUName);
+class EventClass {
+  ParseService _parseService = ParseService();
+
+  String id = '', weeklyEventId = '', weeklyEventUName = '', start = '', end = '', neighborhoodUName = '';
+  Map<String, dynamic> userEventsAttendeeCache = {};
+
+  EventClass(this.id, this.weeklyEventId, this.weeklyEventUName, this.start, this.end, this.neighborhoodUName,
+    this.userEventsAttendeeCache);
 
   EventClass.fromJson(Map<String, dynamic> json) {
     this.id = json.containsKey('_id') ? json['_id'] : json.containsKey('id') ? json['id'] : '';
@@ -10,6 +16,8 @@ class EventClass {
     this.start = json['start'] ?? '';
     this.end = json['end'] ?? '';
     this.neighborhoodUName = json['neighborhoodUName'] ?? '';
+    this.userEventsAttendeeCache = json.containsKey('userEventsAttendeeCache') ?
+      _parseService.parseMapStringDynamic(json['userEventsAttendeeCache']) : {};
   }
 
   Map<String, dynamic> toJson() =>

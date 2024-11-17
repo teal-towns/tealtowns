@@ -7,6 +7,7 @@ import 'package:universal_html/html.dart' as html;
 
 import '../../app_scaffold.dart';
 import '../../common/buttons.dart';
+import '../../common/colors_service.dart';
 import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/form_input/input_location.dart';
@@ -16,11 +17,12 @@ import '../../common/location_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../about/welcome_about.dart';
-import './weekly_event_class.dart';
 import '../neighborhood/neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
 import '../user_auth/user_login_signup.dart';
 // import './user_event_save_service.dart';
+import './event_pay.dart';
+import './weekly_event_class.dart';
 
 class WeeklyEvents extends StatefulWidget {
   final double lat;
@@ -33,10 +35,11 @@ class WeeklyEvents extends StatefulWidget {
   final int updateLngLatOnInit;
   int showCreateButton;
   int viewOnly;
+  bool eventPayWithSubscribe;
 
   WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
     this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateLngLatOnInit = 1,
-    this.showCreateButton = 1, this.viewOnly = 0,});
+    this.showCreateButton = 1, this.viewOnly = 0, this.eventPayWithSubscribe = false,});
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -46,6 +49,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Buttons _buttons = Buttons();
+  ColorsService _colors = ColorsService();
   DateTimeService _dateTime = DateTimeService();
   InputFields _inputFields = InputFields();
   LayoutService _layoutService = LayoutService();
@@ -70,6 +74,9 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   List<WeeklyEventClass> _weeklyEvents = [];
   bool _firstLoadDone = false;
   bool _showUserLoginSignup = false;
+  bool _showEventPay = false;
+  WeeklyEventClass _selectedWeeklyEvent = WeeklyEventClass.fromJson({});
+  bool _alreadySignedUp = false;
 
   List<Map<String, dynamic>> _selectOptsMaxMeters = [
     {'value': 500, 'label': '5 min walk'},
@@ -173,8 +180,30 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       return content;
     }
 
+    List<Widget> colsEventPay = [];
+    if (_showEventPay) {
+      colsEventPay = [
+        EventPay(weeklyEvent: _selectedWeeklyEvent, event: _selectedWeeklyEvent.xEvent,
+          alreadySignedUp: _alreadySignedUp, withEventInfo: true, withSubscribe: widget.eventPayWithSubscribe,
+          showRsvpNote: false,
+          onUpdate: () {
+            setState(() { _showEventPay = false; _alreadySignedUp = false; _selectedWeeklyEvent = WeeklyEventClass.fromJson({}); });
+            _search();
+          }
+        ),
+        _style.SpacingH('medium'),
+        TextButton(
+          onPressed: () {
+            setState(() { _showEventPay = false; _alreadySignedUp = false; _selectedWeeklyEvent = WeeklyEventClass.fromJson({}); });
+          },
+          child: Text('Close'),
+        ),
+        _style.SpacingH('xlarge'),
+      ];
+    }
+
     List<Widget> columnsCreate = [];
-    if (widget.showCreateButton > 0) {
+    if (widget.showCreateButton > 0 && !_showEventPay) {
       columnsCreate = [
         Align(
           alignment: Alignment.topRight,
@@ -194,7 +223,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     }
 
     Widget widgetFilters = SizedBox.shrink();
-    if (widget.showFilters > 0) {
+    if (widget.showFilters > 0 && !_showEventPay) {
       widgetFilters = _layoutService.WrapWidth([
         InputLocation(formVals: _filters, formValsKey: 'inputLocation', label: 'Location',
           guessLocation: !_skipCurrentLocation, onChanged: (Map<String, dynamic> val) {
@@ -210,6 +239,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     Widget body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        ...colsEventPay,
         // WelcomeAbout(),
         // SizedBox(height: 10),
         ...columnsCreate,
@@ -348,8 +378,47 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       ];
     }
 
+    Widget action = SizedBox.shrink();
+    String actionText = '';
+    Color actionColor = _colors.colors['black'];
+    bool alreadyRsvped = false;
+    if (weeklyEvent.xUserEvent.containsKey('attendeeCount')) {
+      int attendees = weeklyEvent.xUserEvent['attendeeCount'];
+      int attendeeAsks = weeklyEvent.xUserEvent['attendeeCountAsk'];
+      int hosting = weeklyEvent.xUserEvent['hostGroupSize'];
+      int hostingAsks = weeklyEvent.xUserEvent['hostGroupSizeMax'];
+      if (attendees > 0 || attendeeAsks > 0) {
+        alreadyRsvped = true;
+        actionText = 'Going ';
+        if (attendeeAsks > 1) {
+          if (attendees == attendeeAsks) {
+            actionText += '(${attendees}) ';
+          } else {
+            actionText += '(${attendees}/${attendeeAsks}) ';
+          }
+        }
+      }
+      if (hosting > 0 || hostingAsks > 0) {
+        actionText += 'Hosting ';
+        if (hostingAsks > 1) {
+          if (hosting == hostingAsks) {
+            actionText += '(${hosting}) ';
+          } else {
+            actionText += '(${hosting}/${hostingAsks}) ';
+          }
+        }
+      }
+      if (actionText.length > 0) {
+        action = Positioned(top: 0, left: 0, child: Container(color: actionColor, padding: EdgeInsets.all(5),
+          child: Text(actionText, style: TextStyle(color: Colors.white),),
+        ),
+        );
+      }
+    }
+
     bool newPage = widget.pageWrapper < 1 ? true : false;
     Widget joinButton = SizedBox.shrink();
+    String joinText = alreadyRsvped ? 'Update RSVP' : 'Join';
     if (widget.viewOnly <= 0) {
       if (!currentUserState.isLoggedIn) {
         joinButton = TextButton(child: Text('Join'), onPressed: () {
@@ -363,12 +432,16 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         // });
         joinButton = _buttons.Link(context, 'View', '/we/${weeklyEvent.uName}', launchUrl: newPage);
       } else {
-        // joinButton = TextButton(child: Text('Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
-        // });
-        joinButton = _buttons.Link(context, 'Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+        // joinButton = _buttons.Link(context, '${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+        joinButton = TextButton(child: Text('${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
+          setState(() { _showEventPay = true; _selectedWeeklyEvent = weeklyEvent; _alreadySignedUp = alreadyRsvped; });
+        });
       }
     } else if (weeklyEvent.priceUSD != 0) {
-      joinButton = _buttons.Link(context, 'Join (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+      // joinButton = _buttons.Link(context, '${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+      joinButton = TextButton(child: Text('${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
+        setState(() { _showEventPay = true; _selectedWeeklyEvent = weeklyEvent; _alreadySignedUp = alreadyRsvped; });
+      });
     }
 
     // List<Widget> colsAddress = [];
@@ -379,18 +452,46 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     //   ];
     // }
 
+    List<Widget> colsAttendees = [];
+    String text = '';
+    if (weeklyEvent.xEvent.userEventsAttendeeCache.containsKey('attendeesCount') &&
+      weeklyEvent.xEvent.userEventsAttendeeCache['attendeesCount'] > 0) {
+      text += '${weeklyEvent.xEvent.userEventsAttendeeCache['attendeesCount']} going ';
+    }
+    if (weeklyEvent.xEvent.userEventsAttendeeCache.containsKey('nonHostAttendeesWaitingCount') &&
+      weeklyEvent.xEvent.userEventsAttendeeCache['nonHostAttendeesWaitingCount'] > 0) {
+      text += '${weeklyEvent.xEvent.userEventsAttendeeCache['nonHostAttendeesWaitingCount']} waiting ';
+    }
+    if (text.length > 0) {
+      colsAttendees = [
+        _style.Text1(text),
+        _style.SpacingH('medium'),
+      ];
+    }
+
     return SizedBox(
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...colsImage,
+          _buttons.LinkWrapper(context, Column(
+            children: [
+              Stack(
+                children: [
+                  ...colsImage,
+                  action,
+                ]
+              ),
+              _style.SpacingH('medium'),
+              // _style.Text1('${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)'),
+              _style.Text1('${weeklyEvent.title}', fontWeight: FontWeight.bold),
+            ]
+          ), '/we/${weeklyEvent.uName}', launchUrl: newPage),
           _style.SpacingH('medium'),
-          // _style.Text1('${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)'),
-          _style.Text1('${weeklyEvent.title}', fontWeight: FontWeight.bold),
           // _style.SpacingH('medium'),
           _style.Text1('${_dateTime.ToAmPm(weeklyEvent.startTime)}'),
           // ...colsAddress,
+          ...colsAttendees,
           Row(
             children: [
               joinButton,
@@ -467,7 +568,6 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         _message = '';
         // _canLoadMore = false;
       });
-      var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
       // if (lastPageNumber != 0) {
       //   _lastPageNumber = lastPageNumber;
       // } else {
@@ -480,7 +580,12 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         'maxMeters': _filters['maxMeters'],
         'withAdmins': 0,
         'type': widget.type,
+        'withEvents': 1,
       };
+      CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+      if (currentUserState.isLoggedIn) {
+        data['withUserEventUserId'] = currentUserState.currentUser.id;
+      }
       _socketService.emit('SearchNearWeeklyEvents', data);
       if (updateUrl) {
         _UpdateUrl();

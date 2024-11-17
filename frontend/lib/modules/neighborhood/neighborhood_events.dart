@@ -107,10 +107,10 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
     Map<String, dynamic> config = _configService.GetConfig();
     List<Widget> cols = [
       _style.SpacingH('large'),
-      _style.Text1('Neighborhood Events', size: 'xlarge', colorKey: 'primary'),
+      _style.Text1('Neighborhood Events', size: 'large',),
       _style.SpacingH('medium'),
-      _style.Text1('Weekly Calendar'),
-      _style.SpacingH('medium'),
+      // _style.Text1('Weekly Calendar'),
+      // _style.SpacingH('medium'),
       WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
         pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters,
         showCreateButton: widget.withWeeklyEventsCreateButton, viewOnly: 1,),

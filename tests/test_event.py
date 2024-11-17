@@ -1,3 +1,5 @@
+import datetime
+
 import date_time
 from event import event as _event
 import mongo_db
@@ -53,6 +55,27 @@ def test_GetNextEvents():
     retEvents = _event.GetNextEvents(weeklyEvent['_id'], now = now)
     assert retEvents['thisWeekEvent']['start'] == '2024-05-25T23:00:00+00:00'
     assert retEvents['nextWeekEvent']['start'] == '2024-05-25T23:00:00+00:00'
+    _mongo_mock.CleanUp()
+
+def test_GetNextEventFromWeekly():
+    _mongo_mock.InitAllCollections()
+    weeklyEvent = {
+        'startTime': '16:00',
+        'endTime': '18:00',
+        'dayOfWeek': 5,
+        'rsvpDeadlineHours': 0,
+        'timezone': 'America/Los_Angeles',
+    }
+    weeklyEvents = _stubs_data.CreateBulk(objs = [weeklyEvent], collectionName = 'weeklyEvent')
+    weeklyEvent = weeklyEvents[0]
+    now = date_time.from_string('2024-03-20 09:00:00+00:00')
+    retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
+    event = retEvent['event']
+
+    now = now + datetime.timedelta(hours = 1)
+    retEvent = _event.GetNextEventFromWeekly(weeklyEvent['_id'], now = now)
+    assert retEvent['event']['_id'] == event['_id']
+
     _mongo_mock.CleanUp()
 
 def test_GetUsersAttending():

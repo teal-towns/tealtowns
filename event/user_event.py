@@ -76,6 +76,7 @@ def Save(userEvent: dict, payType: str):
 
     retOne = _mongo_db_crud.Save('userEvent', userEvent)
     ret['userEvent'] = retOne['userEvent']
+    GetStats(userEvent['eventId'], updateEventCache = 1)
     _user_insight.Save({ 'userId': userEvent['userId'], 'firstEventSignUpAt': date_time.now_string() })
     if checkPay:
         ret['spotsPaidFor'] = retPay['spotsPaidFor']
@@ -191,7 +192,8 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
     userEventsAttendees = mongo_db.find('userEvent', query, sort_obj = sortObj)['items']
     if len(userEventsAttendees) == 0 and not fillAll:
         return ret
-    
+
+    needToUpdateEventCache = 0
     # Get weekly event for awarding credit to host.
     event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(eventId)})['item']
     weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
@@ -314,6 +316,7 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
             if newAttendeeInfos[hostId]['attendeeCount'] == userEventHost['attendeeCountAsk']:
                 mutation['$set']['attendeeStatus'] = 'complete'
             mongo_db.update_one('userEvent', {'eventId': eventId, 'userId': hostId}, mutation)
+            needToUpdateEventCache = 1
             if hostId not in ret['userIdsUpdated']:
                 ret['userIdsUpdated'].append(hostId)
             # Add money to host for event.
@@ -346,6 +349,7 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
                     if newAttendeeInfos[attendeeId]['attendeeCount'] == newAttendeeInfos[attendeeId]['attendeeCountAsk']:
                         mutation['$set']['attendeeStatus'] = 'complete'
                     mongo_db.update_one('userEvent', {'eventId': eventId, 'userId': attendeeId}, mutation)
+                    needToUpdateEventCache = 1
                     if attendeeId not in ret['userIdsUpdated']:
                         ret['userIdsUpdated'].append(attendeeId)
                     # Notify
@@ -373,7 +377,10 @@ def CheckAddHostsAndAttendees(eventId: str, fillAll: int = 0):
     if fillAll:
         retUnused = GiveUnusedCredit(eventId, event = event, weeklyEvent = weeklyEvent)
         ret['notifyUserIdsUnused'] = retUnused['notifyUserIds']
-    
+
+    if needToUpdateEventCache:
+        GetStats(eventId, updateEventCache = 1)
+
     return ret
 
 def GiveUnusedCredit(eventId: str, event: dict, weeklyEvent: dict):
@@ -436,7 +443,7 @@ def GiveEndSubscriptionCredit(weeklyEventId: str, userId: str, maxAmountUSD: flo
                     ret['notifyUserIds']['sms'].append(userId)
     return ret
 
-def GetStats(eventId: str, withUserId: str = ''):
+def GetStats(eventId: str, withUserId: str = '', updateEventCache: int = 0):
     ret = { 'valid': 1, 'message': '', 'attendeesCount': 0, 'attendeesWaitingCount': 0,
         'nonHostAttendeesWaitingCount': 0, 'userEvent': {}, }
     userEvents = mongo_db.find('userEvent', { 'eventId': eventId })['items']
@@ -447,6 +454,18 @@ def GetStats(eventId: str, withUserId: str = ''):
         ret['attendeesWaitingCount'] += userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
         if userEvent['hostGroupSizeMax'] == 0 or userEvent['hostStatus'] == 'complete':
             ret['nonHostAttendeesWaitingCount'] += userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
+    if updateEventCache:
+        query = { '_id': mongo_db.to_object_id(eventId) }
+        mutation = {
+            '$set': {
+                'userEventsAttendeeCache': {
+                    'attendeesCount': ret['attendeesCount'],
+                    'attendeesWaitingCount': ret['attendeesWaitingCount'],
+                    'nonHostAttendeesWaitingCount': ret['nonHostAttendeesWaitingCount'],
+                },
+            }
+        }
+        mongo_db.update_one('event', query, mutation)
     return ret
 
 def GetUsers(eventId: str, withUsers: int = 1):

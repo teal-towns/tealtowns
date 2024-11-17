@@ -8,6 +8,7 @@ def GetDefault():
         'start': _stubs_data.RandomTime(),
         'end': _stubs_data.RandomTime(),
         'neighborhoodUName': _stubs_data.RandomString(6),
+        'userEventsAttendeeCache': {},
     }
 
 def AddDefault():

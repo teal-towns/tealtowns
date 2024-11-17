@@ -2,6 +2,8 @@ import '../../common/classes/location_class.dart';
 import '../../common/image_service.dart';
 import '../../common/parse_service.dart';
 import '../user_auth/user_class.dart';
+import 'event_class.dart';
+// import 'user_event_class.dart';
 
 class WeeklyEventClass {
   ImageService _imageService = ImageService();
@@ -16,11 +18,14 @@ class WeeklyEventClass {
   double rsvpDeadlineHours = 0, priceUSD = 0, hostMoneyPerPersonUSD = 0, xDistanceKm = -999;
   List<UserClass> adminUsers = [];
   String xDay = '';
+  EventClass xEvent = EventClass.fromJson({});
+  // UserEventClass xUserEvent = UserEventClass.fromJson({});
+  Map<String, dynamic> xUserEvent = {};
 
   WeeklyEventClass(this.id, this.uName, this.neighborhoodUName, this.title, this.description, this.startTime, this.endTime,
     this.timezone, this.type, this.createdAt, this.adminUserIds, this.tags,
     this.imageUrls, this.location, this.locationAddress, this.dayOfWeek, this.hostGroupSizeDefault, this.archived, this.rsvpDeadlineHours, this.priceUSD,
-    this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay);
+    this.hostMoneyPerPersonUSD, this.xDistanceKm, this.adminUsers, this.xDay, this.xEvent, this.xUserEvent);
 
   WeeklyEventClass.fromJson(Map<String, dynamic> json, { bool imageUrlsReplaceLocalhost = true }) {
     List<String> days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -48,6 +53,10 @@ class WeeklyEventClass {
     this.xDay = days[this.dayOfWeek];
     this.xDistanceKm = json.containsKey('xDistanceKm') ? _parseService.toDoubleNoNull(json['xDistanceKm']) : -999;
     this.adminUsers = json.containsKey('adminUsers') ? UserClass.parseUsers(json['adminUsers']) : [];
+    this.xEvent = json.containsKey('xEvent') ? EventClass.fromJson(json['xEvent']) : EventClass.fromJson({});
+    // this.xUserEvent = json.containsKey('xUserEvent') ? UserEventClass.fromJson(json['xUserEvent']) :
+    //   UserEventClass.fromJson({});
+    this.xUserEvent = json.containsKey('xUserEvent') ? _parseService.parseMapStringDynamic(json['xUserEvent']) : {};
   }
 
   Map<String, dynamic> toJson() =>

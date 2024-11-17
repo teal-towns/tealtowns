@@ -4,8 +4,10 @@ import date_time
 import lodash
 import mongo_db
 from user_payment import user_payment as _user_payment
+from event import user_event as _user_event
 
 def RunAll():
+    EventAttendeeCache()
     # ToCreditUSD()
     # AddHostInterests()
     # UserNeighborhoodWeeklyUpdateActionsComplete()
@@ -34,6 +36,28 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def EventAttendeeCache():
+    collections = ['event']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'userEventsAttendeeCache': { '$exists': 0 } }
+            fields = { '_id': 1, }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('EventAttendeeCache', collection, len(items))
+            for item in items:
+                _user_event.GetStats(item['_id'], updateEventCache = 1)
+
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def ToCreditUSD():
     collections = ['userMoney']

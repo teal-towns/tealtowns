@@ -30,7 +30,7 @@ def GetByUName(uName: str, withWeeklyEvents: int = 0, withSharedItems: int = 0,
         if withType == 'uName':
             items = mongo_db.find('weeklyEvent', {'neighborhoodUName': neighborhoodUName}, limit = limitCount)['items']
         else:
-            items = _weekly_event.SearchNear(lngLat, maxMeters, limit = limitCount)['weeklyEvents']
+            items = _weekly_event.SearchNearSync(lngLat, maxMeters, limit = limitCount)['weeklyEvents']
         ret['weeklyEventsCount'] = len(items)
         ret['weeklyEvents'] = items[slice(0, weeklyEventsCount)] if len(items) > weeklyEventsCount else items
         if withUniqueEventUsersCount:

@@ -49,6 +49,7 @@ def Save(event: dict):
             weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
             if weeklyEvent is not None:
                 event['weeklyEventUName'] = weeklyEvent['uName']
+        event['userEventsAttendeeCache'] = {}
     else:
         # Do not allow changing some fields.
         eventExisting = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(event['_id'])})['item']
@@ -57,8 +58,9 @@ def Save(event: dict):
             event['priceUSD'] = eventExisting['priceUSD']
     if 'timezone' not in event or event['timezone'] == '':
         event['timezone'] = date_time.GetTimezoneFromLngLat(event['location']['coordinates'])
-    payInfo = _event_payment.GetPayInfo(event['priceUSD'], event['hostGroupSizeDefault'])
-    event['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
+    # payInfo = _event_payment.GetPayInfo(event['priceUSD'], event['hostGroupSizeDefault'])
+    # event['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
+    event['hostMoneyPerPersonUSD'] = _event_payment.GetSingleEventFunds(event['priceUSD'], event['hostGroupSizeDefault'])
     return _mongo_db_crud.Save('event', event)
 
 def Remove(eventId: str):
@@ -89,8 +91,10 @@ def GetNextEventFromWeekly(weeklyEventId: str, minHoursBeforeRsvpDeadline: int =
         'weeklyEventUName': weeklyEvent['uName'],
         'start': retNext['nextStart'],
         'neighborhoodUName': weeklyEvent['neighborhoodUName'],
+        'userEventsAttendeeCache': {},
     }
-    eventFind = mongo_db.find_one('event', event)['item']
+    query = { 'weeklyEventId': weeklyEventId, 'start': event['start'] }
+    eventFind = mongo_db.find_one('event', query)['item']
     if eventFind:
         ret['event'] = eventFind
     elif not eventFind and autoCreate and not weeklyEvent['archived']:
@@ -108,8 +112,10 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
         'weeklyEventUName': weeklyEvent['uName'],
         'start': retNext['thisWeekStart'],
         'neighborhoodUName': weeklyEvent['neighborhoodUName'],
+        'userEventsAttendeeCache': {},
     }
-    eventFind = mongo_db.find_one('event', event)['item']
+    query = { 'weeklyEventId': weeklyEventId, 'start': event['start'] }
+    eventFind = mongo_db.find_one('event', query)['item']
     if not eventFind and autoCreate and not weeklyEvent['archived']:
         event['end'] = retNext['thisWeekEnd']
         eventFind = _mongo_db_crud.Save('event', event)['event']
@@ -121,8 +127,10 @@ def GetNextEvents(weeklyEventId: str, minHoursBeforeRsvpDeadline: int = 0, now =
             'weeklyEventUName': weeklyEvent['uName'],
             'start': retNext['nextStart'],
             'neighborhoodUName': weeklyEvent['neighborhoodUName'],
+            'userEventsAttendeeCache': {},
         }
-        eventNextFind = mongo_db.find_one('event', eventNext)['item']
+        query = { 'weeklyEventId': weeklyEventId, 'start': eventNext['start'] }
+        eventNextFind = mongo_db.find_one('event', query)['item']
         if not eventNextFind and autoCreate and not weeklyEvent['archived']:
             eventNext['end'] = retNext['nextEnd']
             eventNextFind = _mongo_db_crud.Save('event', eventNext)['event']

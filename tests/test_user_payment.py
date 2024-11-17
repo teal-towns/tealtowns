@@ -92,7 +92,7 @@ def test_AddPayment():
     # Direct payment should take revenue and NOT add to user balance.
     ret = _user_payment.AddPayment(users[0]['_id'], 10, 'event', event1['_id'], 'complete', directPayment = 1)
     assert ret['valid'] == 1
-    assert ret['revenueUSD'] == 3.53
+    assert ret['revenueUSD'] == 3.73
     userMoney = mongo_db.find_one('userMoney', {'userId': users[0]['_id']})['item']
     assert userMoney['balanceUSD'] == 0
 
@@ -106,6 +106,6 @@ def test_AddPayment():
     # Negative amount should reduce user balance and take revenue.
     ret = _user_payment.AddPayment(users[0]['_id'], -10, 'event', event1['_id'], 'complete',)
     assert ret['valid'] == 1
-    assert ret['revenueUSD'] == 3.53
+    assert ret['revenueUSD'] == 3.73
     userMoney = mongo_db.find_one('userMoney', {'userId': users[0]['_id']})['item']
     assert userMoney['balanceUSD'] == 5

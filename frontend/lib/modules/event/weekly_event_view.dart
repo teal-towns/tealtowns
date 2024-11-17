@@ -23,9 +23,8 @@ import '../../common/style.dart';
 import './event_class.dart';
 import './event_insight_class.dart';
 import './event_feedback.dart';
+import './event_pay.dart';
 import './user_event_class.dart';
-import './user_weekly_event_save.dart';
-import './user_event_save.dart';
 import './weekly_event_class.dart';
 import '../icebreaker/icebreaker_class.dart';
 import '../mixer/mixer_game.dart';
@@ -147,6 +146,18 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       }
     }));
 
+    _routeIds.add(_socketService.onRoute('GetUserEventUsers', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        _userEvents = [];
+        for (var i = 0; i < data['userEvents'].length; i++) {
+          _userEvents.add(UserEventClass.fromJson(data['userEvents'][i]));
+        }
+        setState(() { _userEvents = _userEvents; });
+      }
+    }));
+
     _routeIds.add(_socketService.onRoute('removeWeeklyEvent', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
@@ -158,18 +169,6 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       setState(() {
         _loading = false;
       });
-    }));
-
-    _routeIds.add(_socketService.onRoute('GetUserEventUsers', callback: (String resString) {
-      var res = jsonDecode(resString);
-      var data = res['data'];
-      if (data['valid'] == 1) {
-        _userEvents = [];
-        for (var i = 0; i < data['userEvents'].length; i++) {
-          _userEvents.add(UserEventClass.fromJson(data['userEvents'][i]));
-        }
-        setState(() { _userEvents = _userEvents; });
-      }
     }));
 
     _routeIds.add(_socketService.onRoute('GetRandomIcebreakers', callback: (String resString) {
@@ -465,31 +464,14 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
     }
 
     if (_nextEvent.start.length > 0) {
-      if (!alreadySignedUp) {
-        String startDate = _dateTime.Format(_nextEvent.start, 'EEEE M/d/y');
-        List<Widget> colsRsvp = [];
-        String rsvpSignUpText = _rsvpDeadlinePassed > 0 ? 'RSVP deadline passed for this week\'s event, but you can sign up for next week\'s: ${startDate}' : '';
-        if (rsvpSignUpText.length > 0) {
-          colsRsvp += [
-            Text(rsvpSignUpText),
-          ];
-        }
-        attendeeInfo += [
-          ...colsRsvp,
-          SizedBox(height: 10),
-          UserWeeklyEventSave(weeklyEventId: _weeklyEvent.id, alreadySignedUp: alreadySignedUp,),
-          SizedBox(height: 10),
-        ];
-      } else {
-        attendeeInfo += [
-          UserEventSave(eventId: _userEvent.eventId, onUpdate: () {
-            _alertService.Show(context, 'RSVP Updated');
+      attendeeInfo += [
+        EventPay(weeklyEvent: _weeklyEvent, event: _nextEvent, alreadySignedUp: alreadySignedUp,
+          rsvpDeadlinePassed: _rsvpDeadlinePassed, onUpdate: () {
             setState(() { _userEvents = []; });
-            _socketService.emit('GetUserEventStats', { 'eventId': _userEvent.eventId });
-          }),
-          SizedBox(height: 10),
-        ];
-      }
+            _socketService.emit('GetUserEventStats', { 'eventId': _nextEvent.id });
+          },),
+        _style.SpacingH('medium'),
+      ];
     }
 
     List<Widget> colsCalendar = [];

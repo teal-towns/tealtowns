@@ -23,8 +23,8 @@ import ml_config
 
 _config = ml_config.get_config()
 
-def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
-    type: str = '', archived: int = 0):
+def SearchNearSync(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
+    type: str = '', archived: int = 0, withEvents: int = 0, now = None):
     query = {}
     if len(lngLat) > 0:
         query = {
@@ -42,9 +42,14 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
     ret = _mongo_db_crud.Search('weeklyEvent', {'title': title, 'type': type}, equalsKeyVals = {'archived': archived},
         limit = limit, skip = skip, query = query, sortKeys = sortKeys)
     userIds = []
+    weeklyEventIds = []
+    weeklyEventIdsMap = {}
     # Calculate distance
     # May also be able to use geoNear https://stackoverflow.com/questions/33864461/mongodb-print-distance-between-two-points
     for index, item in reversed(list(enumerate(ret['weeklyEvents']))):
+        weeklyEventIdsMap[item['_id']] = index
+        if withEvents:
+            weeklyEventIds.append(item['_id'])
         if len(lngLat) > 0:
             ret['weeklyEvents'][index]['xDistanceKm'] = round(_math_polygon.Haversine(item['location']['coordinates'],
                 lngLat, units = 'kilometers'), 3)
@@ -52,6 +57,49 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
             for userId in item['adminUserIds']:
                 if userId not in userIds:
                     userIds.append(userId)
+    ret['userIds'] = userIds
+    ret['weeklyEventIds'] = weeklyEventIds
+    ret['weeklyEventIdsMap'] = weeklyEventIdsMap
+    return ret
+
+async def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
+    type: str = '', archived: int = 0, withEvents: int = 0, withUserEventUserId: str = '', now = None, onUpdate = None):
+    ret = SearchNearSync(lngLat, maxMeters, title, limit, skip, withAdmins = withAdmins,
+        type = type, archived = archived, withEvents = withEvents, now = now)
+    userIds = ret['userIds']
+    weeklyEventIds = ret['weeklyEventIds']
+    weeklyEventIdsMap = ret['weeklyEventIdsMap']
+    del ret['userIds']
+    del ret['weeklyEventIds']
+    del ret['weeklyEventIdsMap']
+
+    if onUpdate:
+        await onUpdate(ret)
+        await asyncio.sleep(0)
+
+    if len(weeklyEventIds) > 0 and withEvents:
+        now = now if now is not None else date_time.now()
+        query = { 'weeklyEventId': { '$in': weeklyEventIds }, 'start': { '$gt': date_time.string(now) } }
+        fields = { 'userEventsAttendeeCache': 1, 'weeklyEventId': 1, 'start': 1, 'end': 1,
+            'neighborhoodUName': 1, 'weeklyEventUName': 1, }
+        events = mongo_db.find('event', query, fields = fields)['items']
+        eventIdToWeeklyEventIdMap = {}
+        eventIds = []
+        for event in events:
+            eventIds.append(event['_id'])
+            eventIdToWeeklyEventIdMap[event['_id']] = event['weeklyEventId']
+            ret['weeklyEvents'][weeklyEventIdsMap[event['weeklyEventId']]]['xEvent'] = event
+        if onUpdate:
+            await onUpdate(ret)
+            await asyncio.sleep(0)
+        if len(withUserEventUserId) > 0:
+            query = { 'eventId': { '$in': eventIds }, 'userId': withUserEventUserId }
+            userEvents = mongo_db.find('userEvent', query)['items']
+            for userEvent in userEvents:
+                ret['weeklyEvents'][weeklyEventIdsMap[eventIdToWeeklyEventIdMap[userEvent['eventId']]]]['xUserEvent'] = userEvent
+            if onUpdate:
+                await onUpdate(ret)
+                await asyncio.sleep(0)
 
     if len(userIds) > 0 and withAdmins:
         listKeyVals = { '_id': userIds }
@@ -67,6 +115,9 @@ def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int
             for userId in event['adminUserIds']:
                 user = usersIdMap[userId] if userId in usersIdMap else {}
                 ret['weeklyEvents'][indexEvent]['adminUsers'].append(user)
+        if onUpdate:
+            await onUpdate(ret)
+            await asyncio.sleep(0)
 
     return ret
 

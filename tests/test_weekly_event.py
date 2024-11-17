@@ -1,4 +1,5 @@
 import datetime
+import pytest
 
 import date_time
 import mongo_db
@@ -129,6 +130,7 @@ def test_WeeklyEventFlow():
     assert len(retTemp['userWeeklyEvent']['_id']) > 0
     assert len(retTemp['notifyUserIdsHosts']['sms']) == 0
     assert len(retTemp['notifyUserIdsAttendees']['sms']) == 0
+    userEvents = mongo_db.find('userEvent', {'eventId': event1['_id']})['items']
     userEvent = mongo_db.find_one('userEvent', {'eventId': event1['_id'], 'userId': users[2]['_id']})['item']
     assert userEvent['attendeeCountAsk'] == 1
 
@@ -605,10 +607,11 @@ def test_SaveWeeklyEvent():
 
     _mongo_mock.CleanUp()
 
-def test_ArchivedWeeklyEvent():
+@pytest.mark.asyncio
+async def test_ArchivedWeeklyEvent():
     _mongo_mock.InitAllCollections()
     weeklyEvents = _stubs_data.CreateBulk(count = 3, collectionName = 'weeklyEvent')
-    ret = _weekly_event.SearchNear([])
+    ret = await _weekly_event.SearchNear([])
     assert len(ret['weeklyEvents']) == 3
 
     now = date_time.from_string('2024-03-20 09:00:00+00:00')
@@ -622,7 +625,7 @@ def test_ArchivedWeeklyEvent():
     # Remove (archive)
     _weekly_event.Remove(weeklyEvents[0]['_id'])
     # Should not show up in search results
-    ret = _weekly_event.SearchNear([])
+    ret = await _weekly_event.SearchNear([])
     assert len(ret['weeklyEvents']) == 2
     for weeklyEvent in ret['weeklyEvents']:
         assert weeklyEvent['_id'] in [weeklyEvents[1]['_id'], weeklyEvents[2]['_id']]

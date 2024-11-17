@@ -60,7 +60,7 @@ class _UserLoginState extends State<UserLogin> {
               UserNeighborhoodClass userNeighborhood = UserNeighborhoodClass.fromJson(data['userNeighborhoods'][i]);
               userNeighborhoods.add(userNeighborhood);
               if (userNeighborhood.status == 'default') {
-                route = '/n/${userNeighborhood.neighborhood.uName}';
+                route = '/ne/${userNeighborhood.neighborhood.uName}';
               }
             }
             Provider.of<NeighborhoodState>(context, listen: false).SetUserNeighborhoods(userNeighborhoods);
