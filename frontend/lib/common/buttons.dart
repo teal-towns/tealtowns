@@ -60,6 +60,16 @@ class Buttons {
     );
   }
 
+  Widget LinkWrapper(BuildContext context, Widget child, String url, {bool checkLoggedIn = false, bool launchUrl = false,
+    bool track = false}) {
+    return InkWell(
+      onTap: () {
+        OnPress(context, url, checkLoggedIn: checkLoggedIn, launchUrl: launchUrl, track: track,);
+      },
+      child: child,
+    );
+  }
+
   void OnPress(BuildContext context, String url, {bool checkLoggedIn = false, bool launchUrl = false,
     bool track = false, String trackEvent = ''}) {
     if (launchUrl) {

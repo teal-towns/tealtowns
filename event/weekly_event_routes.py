@@ -39,6 +39,25 @@ def AddRoutesAsync():
             userOrIP = data['userOrIP'], addEventView = data['addEventView'], onUpdate = OnUpdate)
     _socket.add_route('getWeeklyEventById', GetById, 'async')
 
+    async def SearchNear(data, auth, websocket):
+        async def OnUpdate(data):
+            await _socket.sendAsync(websocket, 'SearchNearWeeklyEvents', data, auth)
+
+        data = lodash.extend_object({
+            'title': '',
+            'limit': 1000,
+            'skip': 0,
+            'withAdmins': 1,
+            'type': '',
+            'withEvents': 0,
+            'withUserEventUserId': '',
+        }, data)
+        lngLat = data['lngLat']
+        return await _weekly_event.SearchNear(lngLat, float(data['maxMeters']), data['title'], data['limit'], data['skip'],
+            data['withAdmins'], data['type'], withEvents = data['withEvents'],
+            withUserEventUserId = data['withUserEventUserId'], onUpdate = OnUpdate)
+    _socket.add_route('SearchNearWeeklyEvents', SearchNear, 'async')
+
 def AddRoutes():
     def Save(data, auth, websocket):
         data['weeklyEvent']['dayOfWeek'] = int(data['weeklyEvent']['dayOfWeek'])
@@ -52,19 +71,6 @@ def AddRoutes():
     def RemoveById(data, auth, websocket):
         return _weekly_event.Remove(data['id'])
     _socket.add_route('removeWeeklyEvent', RemoveById)
-
-    def SearchNear(data, auth, websocket):
-        data = lodash.extend_object({
-            'title': '',
-            'limit': 1000,
-            'skip': 0,
-            'withAdmins': 1,
-            'type': '',
-        }, data)
-        lngLat = data['lngLat']
-        return _weekly_event.SearchNear(lngLat, float(data['maxMeters']), data['title'], data['limit'], data['skip'],
-            data['withAdmins'], data['type'])
-    _socket.add_route('SearchNearWeeklyEvents', SearchNear)
 
     def Search(data, auth, websocket):
         data = lodash.extend_object({

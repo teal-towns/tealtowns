@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import './neighborhood_class.dart';
 import './neighborhood_state.dart';
 import '../user_auth/current_user_state.dart';
+import '../user_auth/user_login_signup.dart';
 import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/form_input/input_location.dart';
@@ -19,7 +20,11 @@ class Neighborhoods extends StatefulWidget {
   double lng;
   double lat;
   double maxMeters;
-  Neighborhoods({this.lat = 0, this.lng = 0, this.maxMeters = 500,});
+  bool showSeeAll;
+  bool showLink;
+  String redirectTo;
+  Neighborhoods({this.lat = 0, this.lng = 0, this.maxMeters = 500, this.showSeeAll = true, this.showLink = true,
+    this.redirectTo = ''});
 
   @override
   _NeighborhoodsState createState() => _NeighborhoodsState();
@@ -41,6 +46,8 @@ class _NeighborhoodsState extends State<Neighborhoods> {
   Map<String, dynamic> _formVals = {
     'inputLocation': {},
   };
+  bool _showLoginSignup = false;
+  String _selectedNeighborhoodUName = '';
 
   @override
   void initState() {
@@ -72,7 +79,11 @@ class _NeighborhoodsState extends State<Neighborhoods> {
           var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
           neighborhoodState.CheckAndGet(userId);
         }
-        context.go('/n/${data['userNeighborhood']['neighborhoodUName']}');
+        String link = '/n/${data['userNeighborhood']['neighborhoodUName']}';
+        if (widget.redirectTo == 'events') {
+          link = '/ne/${data['userNeighborhood']['neighborhoodUName']}';
+        }
+        context.go(link);
       }
     }));
 
@@ -102,10 +113,18 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         SizedBox(height: 10),
       ];
     }
+
     Map<String, dynamic> config = _config.GetConfig();
     List<Widget> content = [];
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
     if (!_locationService.LocationValid(_formVals['inputLocation']['lngLat'])) {
       content = [ Text('Enter your location to see neighborhoods near you.') ];
+    } else if (_showLoginSignup) {
+      content = [
+        UserLoginSignup(withHeader: false, mode: 'signup', onSave: (Map<String, dynamic> data) {
+          SaveUserNeighborhood(_selectedNeighborhoodUName);
+        }),
+      ];
     } else {
       if (_neighborhoods.length <= 0) {
         content = [ Text('No neighborhoods near this location yet, create one!') ];
@@ -113,17 +132,28 @@ class _NeighborhoodsState extends State<Neighborhoods> {
         List<Widget> elements = [];
         for (var i = 0; i < _neighborhoods.length; i++) {
           List<Widget> colsDefault = [ SizedBox.shrink() ];
-          if (Provider.of<CurrentUserState>(context, listen: false).isLoggedIn &&
+          if (!widget.showLink || (currentUserState.isLoggedIn &&
             (!_neighborhoods[i].userNeighborhood.containsKey('status') ||
-            _neighborhoods[i].userNeighborhood['status'] != 'default')) {
+            _neighborhoods[i].userNeighborhood['status'] != 'default'))) {
             colsDefault = [
               ElevatedButton(
                 onPressed: () {
-                  SaveUserNeighborhood(_neighborhoods[i].uName);
+                  if (!currentUserState.isLoggedIn) {
+                    setState(() { _showLoginSignup = true; _selectedNeighborhoodUName = _neighborhoods[i].uName; });
+                  } else {
+                    SaveUserNeighborhood(_neighborhoods[i].uName);
+                  }
                 },
-                child: Text('Make Default'),
+                child: Text('Join'),
               ),
               SizedBox(height: 10),
+            ];
+          }
+          String linkPart = '/n/${_neighborhoods[i].uName}';
+          List<Widget> colsLink = [];
+          if (widget.showLink) {
+            colsLink = [
+              _buttons.LinkInline(context, '${config['SERVER_URL']}${linkPart}', linkPart),
             ];
           }
           elements.add(Column(
@@ -131,7 +161,7 @@ class _NeighborhoodsState extends State<Neighborhoods> {
               Text('${_neighborhoods[i].title} (${_neighborhoods[i].location_DistanceKm} km)'),
               SizedBox(height: 10),
               ...colsDefault,
-              _buttons.LinkInline(context, '${config['SERVER_URL']}/n/${_neighborhoods[i].uName}', '/n/${_neighborhoods[i].uName}'),
+              ...colsLink,
             ]
           ));
         }
@@ -139,28 +169,42 @@ class _NeighborhoodsState extends State<Neighborhoods> {
       }
     }
 
+    List<Widget> colsSeeAll = [];
+    if (widget.showSeeAll) {
+      colsSeeAll = [
+        _buttons.LinkInline(context, 'See All Neighborhoods', '/neighborhood-insights', checkLoggedIn: true),
+        SizedBox(height: 50),
+      ];
+    }
+
+    List<Widget> colsTop = [];
+    if (!_showLoginSignup) {
+      colsTop = [
+        Align(
+            alignment: Alignment.topRight,
+            child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save', checkLoggedIn: true),
+            // child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/ambassador', checkLoggedIn: false),
+          ),
+          _style.SpacingH('medium'),
+          _layoutService.WrapWidth([
+            InputLocation(formVals: _formVals, formValsKey: 'inputLocation', nestedCoordinates: false,
+              onChanged: (Map<String, dynamic> lngLat) {
+                SearchNeighborhoods();
+            })],
+          width: 300),
+          ...colsLoading,
+          SizedBox(height: 10),
+      ];
+    }
+
     return Column(
       children: [
         _style.Text1('Join or create your neighborhood to get started', size: 'large', fontWeight: FontWeight.bold),
         _style.SpacingH('medium'),
-        Align(
-          alignment: Alignment.topRight,
-          // child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/neighborhood-save', checkLoggedIn: true),
-          child: _buttons.LinkElevated(context, 'Create New Neighborhood', '/ambassador', checkLoggedIn: false),
-        ),
-        _style.SpacingH('medium'),
-        _layoutService.WrapWidth([
-          InputLocation(formVals: _formVals, formValsKey: 'inputLocation', nestedCoordinates: false,
-            onChanged: (Map<String, dynamic> lngLat) {
-              SearchNeighborhoods();
-          })],
-        width: 300),
-        ...colsLoading,
-        SizedBox(height: 10),
+        ...colsTop,
         ...content,
         SizedBox(height: 50),
-        _buttons.LinkInline(context, 'See All Neighborhoods', '/neighborhood-insights', checkLoggedIn: true),
-        SizedBox(height: 50),
+        ...colsSeeAll,
       ]
     );
   }

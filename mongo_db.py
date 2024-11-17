@@ -342,7 +342,7 @@ def ValidatePartial(schema: dict, item: dict, parentField: str = ''):
     elif isinstance(schema, dict):
         for index, field in reversed(list(enumerate(item))):
             if field not in schema:
-                print ('mongo_db.ValidatePartial field', field, 'item', item[field])
+                print ('mongo_db.ValidatePartial field', field, 'parentField', parentField, 'item', item[field])
                 del item[field]
                 ret['removedFields'].append(field)
             else:

@@ -17,7 +17,17 @@ import '../user_auth/user_login_signup.dart';
 class UserEventSave extends StatefulWidget {
   String eventId;
   Function()? onUpdate;
-  UserEventSave({this.eventId = '', this.onUpdate = null,});
+  UserEventClass? userEvent;
+  EventClass? event;
+  WeeklyEventClass? weeklyEvent;
+  int? spotsPaidFor;
+  double? availableUSD;
+  double? availableCreditUSD;
+  bool showRsvpNote;
+
+  UserEventSave({this.eventId = '', this.onUpdate = null, this.userEvent = null, this.event = null,
+    this.weeklyEvent = null, this.spotsPaidFor = null, this.availableUSD = null, this.availableCreditUSD = null,
+    this.showRsvpNote = true});
 
   @override
   _UserEventSaveState createState() => _UserEventSaveState();
@@ -68,7 +78,7 @@ class _UserEventSaveState extends State<UserEventSave> {
         setState(() { _formVals = _formVals; _userEvent = _userEvent; });
         if (data.containsKey('event')) {
           _event = EventClass.fromJson(data['event']);
-          setState(() { _formVals = _formVals; });
+          setState(() { _event = _event; });
         }
         if (data.containsKey('weeklyEvent')) {
           _weeklyEvent = WeeklyEventClass.fromJson(data['weeklyEvent']);
@@ -158,7 +168,30 @@ class _UserEventSaveState extends State<UserEventSave> {
     }
     if (!_inited && widget.eventId.length > 0) {
       _inited = true;
-      GetUserEvent();
+      // Init from passed in values to avoid reloading every time (e.g. if switching between
+      // UserEventSave and UserWeeklyEventSave).
+      if (widget.userEvent != null && widget.event != null && widget.weeklyEvent != null &&
+        widget.spotsPaidFor != null && widget.availableUSD != null && widget.availableCreditUSD != null) {
+        _userEvent = widget.userEvent!;
+        _event = widget.event!;
+        _weeklyEvent = widget.weeklyEvent!;
+        _spotsPaidFor = widget.spotsPaidFor!;
+        _availableUSD = widget.availableUSD!;
+        _availableCreditUSD = widget.availableCreditUSD!;
+        _formVals = _userEvent.toJson();
+        if (_formVals['_id'].length < 1) {
+          _formVals['eventId'] = widget.eventId;
+          _formVals['userId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+        }
+        if (_userEvent.id.length > 0) {
+          _formVals = _userEvent.toJson();
+        }
+        _loading = false;
+        // setState(() { _userEvent = _userEvent; _event = _event; _weeklyEvent = _weeklyEvent;
+        //   _spotsPaidFor = _spotsPaidFor; _availableUSD = _availableUSD; _availableCreditUSD = _availableCreditUSD; });
+      } else {
+        GetUserEvent();
+      }
     }
 
     if (_loading || _loadingPayment) {
@@ -257,15 +290,30 @@ class _UserEventSaveState extends State<UserEventSave> {
     double fieldWidth = 350;
     List<Widget> colsAttendee = [];
     if (!alreadySignedUp && showJoin) {
-      colsAttendee += [ _inputFields.inputNumber(_formVals, 'attendeeCountAsk', min: attendeeMin, required: true, label: 'How many total spots would you like (including yourself)?',) ];
+      colsAttendee += [
+        _inputFields.inputNumber(_formVals, 'attendeeCountAsk', min: attendeeMin, required: true,
+          label: 'How many total spots would you like (including yourself)?', onChanged: (double? val)  {
+            if (val != null && val! >= 1) {
+              _formVals['attendeeCountAsk'] = val.toInt();
+              setState(() { _formVals = _formVals;});
+            }
+          },
+        )
+      ];
     }
     List<Widget> colsSignUp = [];
     if (showJoin) {
+      List<Widget> colsNote = [];
+      if (widget.showRsvpNote) {
+        colsNote = [
+          _inputFields.inputText(_formVals, 'rsvpNote', label: 'Note (optional)',),
+        ];
+      }
       colsSignUp = [
         _layoutService.WrapWidth([
           ...colsAttendee,
           ...colsHost,
-          _inputFields.inputText(_formVals, 'rsvpNote', label: 'Note (optional)',),
+          ...colsNote,
         ], width: fieldWidth, align: 'left'),
         SizedBox(height: 10),
       ];
@@ -280,23 +328,28 @@ class _UserEventSaveState extends State<UserEventSave> {
       }
 
       if (showJoin) {
+        double price = _weeklyEvent.priceUSD * _formVals['attendeeCountAsk'];
         colsSignUp += [
           ...colsCreditMoney,
-          ElevatedButton(
-            onPressed: () {
-              setState(() { _message = ''; });
-              if (_formKey.currentState?.validate() == true) {
-                setState(() { _loading = true; });
-                _formKey.currentState?.save();
-                CheckGetGetPaymentLink(currentUserState);
-                _socketService.TrackEvent('Join Event');
-              } else {
-                setState(() { _loading = false; });
-              }
-            },
-            child: Text('Join Event'),
-          )
         ];
+        if (price > 0) {
+          colsSignUp += [
+            ElevatedButton(
+              onPressed: () {
+                setState(() { _message = ''; });
+                if (_formKey.currentState?.validate() == true) {
+                  setState(() { _loading = true; });
+                  _formKey.currentState?.save();
+                  CheckGetGetPaymentLink(currentUserState);
+                  _socketService.TrackEvent('Join Event');
+                } else {
+                  setState(() { _loading = false; });
+                }
+              },
+              child: Text('Join Event: \$${price.toStringAsFixed(0)}'),
+            )
+          ];
+        }
       }
     } else {
       colsSignUp += [

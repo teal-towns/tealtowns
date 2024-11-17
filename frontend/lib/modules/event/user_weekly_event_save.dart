@@ -23,7 +23,16 @@ import '../user_auth/user_phone.dart';
 class UserWeeklyEventSave extends StatefulWidget {
   String weeklyEventId;
   bool alreadySignedUp;
-  UserWeeklyEventSave({this.weeklyEventId = '', this.alreadySignedUp = false,});
+  UserEventClass? userEvent;
+  int? spotsPaidFor;
+  double? availableUSD;
+  double? availableCreditUSD;
+  bool showRsvpNote;
+
+  UserWeeklyEventSave({this.weeklyEventId = '', this.alreadySignedUp = false,
+    this.userEvent = null, this.spotsPaidFor = null, this.availableUSD = null, this.availableCreditUSD = null,
+    this.showRsvpNote = true,
+  });
 
   @override
   _UserWeeklyEventSaveState createState() => _UserWeeklyEventSaveState();
@@ -197,8 +206,12 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
     }
     Widget widgetForm = SizedBox.shrink();
     if (_formValsPay['subscription'] == 'single' || _weeklyEvent.priceUSD == 0) {
-      String eventId = _rsvpDeadlinePassed > 0 ? _nextEvent.id : _event.id;
-      widgetForm = UserEventSave(eventId: eventId);
+      EventClass event = _rsvpDeadlinePassed > 0 ? _nextEvent : _event;
+      String eventId = event.id;
+      widgetForm = UserEventSave(eventId: eventId,
+        userEvent: widget.userEvent, event: event, weeklyEvent: _weeklyEvent, spotsPaidFor: widget.spotsPaidFor,
+        availableUSD: widget.availableUSD, availableCreditUSD: widget.availableCreditUSD,
+        showRsvpNote: widget.showRsvpNote);
     } else {
       double fieldWidth = 250;
       widgetForm = Form(
@@ -228,7 +241,7 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
                   setState(() { _loading = false; });
                 }
               },
-              child: Text('Subscribe'),
+              child: Text('Subscribe \$${_subscriptionPrices[_formValsPay['subscription']]!.toStringAsFixed(0)}'),
             ),
           ]
         ),

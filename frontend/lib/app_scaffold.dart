@@ -274,20 +274,20 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
     if (currentUserState.isLoggedIn) {
       var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
       // var neighborhoodState = context.watch<NeighborhoodState>();
-      if (neighborhoodState.defaultUserNeighborhood != null) {
-        rows += [
-          Expanded(
-            flex: 1,
-            child: _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}', 'Neighborhood', Icons.house, context, width: double.infinity, fontSize: 10),
-          ),
-        ];
-      }
-      rows += [
-        Expanded(
-          flex: 1,
-          child: _buildNavButton('/user', 'My Events', Icons.event, context, width: double.infinity, fontSize: 10),
-        ),
-      ];
+      // if (neighborhoodState.defaultUserNeighborhood != null) {
+      //   rows += [
+      //     Expanded(
+      //       flex: 1,
+      //       child: _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}', 'Neighborhood', Icons.house, context, width: double.infinity, fontSize: 10),
+      //     ),
+      //   ];
+      // }
+      // rows += [
+      //   Expanded(
+      //     flex: 1,
+      //     child: _buildNavButton('/user', 'My Events', Icons.event, context, width: double.infinity, fontSize: 10),
+      //   ),
+      // ];
     }
     rows += [
       // Expanded(
@@ -530,15 +530,15 @@ class _AppScaffoldState extends State<AppScaffoldComponent> {
       if (currentUserState.isLoggedIn) {
         var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
         // var neighborhoodState = context.watch<NeighborhoodState>();
-        if (neighborhoodState.defaultUserNeighborhood != null) {
-          buttons += [
-            _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}',
-              'Neighborhood', Icons.house, context),
-          ];
-        }
-        buttons += [
-          _buildNavButton('/user', 'My Events', Icons.event, context),
-        ];
+        // if (neighborhoodState.defaultUserNeighborhood != null) {
+        //   buttons += [
+        //     _buildNavButton('/n/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}',
+        //       'Neighborhood', Icons.house, context),
+        //   ];
+        // }
+        // buttons += [
+        //   _buildNavButton('/user', 'My Events', Icons.event, context),
+        // ];
       }
       content = Scaffold(
         backgroundColor: Colors.white,

@@ -109,7 +109,12 @@
         "hostMoneyPerPersonUSD": "{Float} @optional",
         "priceUSD": "{Float} @optional [0 if free.]",
         "rsvpDeadlineHours": "{Float} @optional [How many hours before event to allow rsvp]",
-        "imageUrls": [ "{String} @optional" ]
+        "imageUrls": [ "{String} @optional" ],
+        "userEventsAttendeeCache": {
+            "attendeesCount": "{Int} @optional",
+            "attendeesWaitingCount": "{Int} @optional",
+            "nonHostAttendeesWaitingCount": "{Int} @optional"
+        }
     },
     "userWeeklyEvent": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",
