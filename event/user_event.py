@@ -43,8 +43,10 @@ def Save(userEvent: dict, payType: str):
         event = mongo_db.find_one('event', {'_id': mongo_db.to_object_id(userEvent['eventId'])})['item']
         weeklyEvent = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(event['weeklyEventId'])})['item']
         user = mongo_db.find_one('user', {'_id': mongo_db.to_object_id(userEvent['userId'])})['item']
-        if 'hostGroupSizeMax' not in userEvent:
-            userEvent['hostGroupSizeMax'] = 0
+        userEvent = lodash.extend_object({
+            'hostGroupSizeMax': 0,
+            'selfHostCount': 0,
+        }, userEvent)
         # Override some fields
         userEvent = lodash.extend_object(userEvent, {
             'hostStatus': 'pending' if userEvent['hostGroupSizeMax'] > 0 else 'complete',
@@ -65,6 +67,8 @@ def Save(userEvent: dict, payType: str):
         if weeklyEvent['priceUSD'] == 0:
             checkPay = 0
             freeEvent = 1
+    elif userEvent['attendeeCountAsk'] == 0 and userEvent['selfHostCount'] > 0 and checkPay:
+        checkPay = 0
 
     if checkPay:
         retPay = CheckAndTakePayment(userEvent['userId'], userEvent['eventId'], userEvent['attendeeCountAsk'], payType)
@@ -445,12 +449,13 @@ def GiveEndSubscriptionCredit(weeklyEventId: str, userId: str, maxAmountUSD: flo
 
 def GetStats(eventId: str, withUserId: str = '', updateEventCache: int = 0):
     ret = { 'valid': 1, 'message': '', 'attendeesCount': 0, 'attendeesWaitingCount': 0,
-        'nonHostAttendeesWaitingCount': 0, 'userEvent': {}, }
+        'nonHostAttendeesWaitingCount': 0, 'selfHostCount': 0, 'userEvent': {}, }
     userEvents = mongo_db.find('userEvent', { 'eventId': eventId })['items']
     for userEvent in userEvents:
         if userEvent['userId'] == withUserId:
             ret['userEvent'] = userEvent
         ret['attendeesCount'] += userEvent['attendeeCount']
+        ret['selfHostCount'] += userEvent['selfHostCount']
         ret['attendeesWaitingCount'] += userEvent['attendeeCountAsk'] - userEvent['attendeeCount']
         if userEvent['hostGroupSizeMax'] == 0 or userEvent['hostStatus'] == 'complete':
             ret['nonHostAttendeesWaitingCount'] += userEvent['attendeeCountAsk'] - userEvent['attendeeCount']

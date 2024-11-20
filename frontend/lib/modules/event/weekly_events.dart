@@ -77,6 +77,12 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   bool _showEventPay = false;
   WeeklyEventClass _selectedWeeklyEvent = WeeklyEventClass.fromJson({});
   bool _alreadySignedUp = false;
+  bool _showPay = true;
+  bool _showHost = true;
+  bool _autoSave = false;
+  int _hostGroupSizeMax = 0;
+  int _selfHostCount = 0;
+  int _attendeeCountAsk = 0;
 
   List<Map<String, dynamic>> _selectOptsMaxMeters = [
     {'value': 500, 'label': '5 min walk'},
@@ -183,20 +189,28 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     List<Widget> colsEventPay = [];
     if (_showEventPay) {
       colsEventPay = [
-        EventPay(weeklyEvent: _selectedWeeklyEvent, event: _selectedWeeklyEvent.xEvent,
-          alreadySignedUp: _alreadySignedUp, withEventInfo: true, withSubscribe: widget.eventPayWithSubscribe,
-          showRsvpNote: false,
-          onUpdate: () {
-            setState(() { _showEventPay = false; _alreadySignedUp = false; _selectedWeeklyEvent = WeeklyEventClass.fromJson({}); });
-            _search();
-          }
-        ),
-        _style.SpacingH('medium'),
-        TextButton(
-          onPressed: () {
-            setState(() { _showEventPay = false; _alreadySignedUp = false; _selectedWeeklyEvent = WeeklyEventClass.fromJson({}); });
-          },
-          child: Text('Close'),
+        Align(
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              EventPay(weeklyEvent: _selectedWeeklyEvent, event: _selectedWeeklyEvent.xEvent,
+                alreadySignedUp: _alreadySignedUp, withEventInfo: true, withSubscribe: widget.eventPayWithSubscribe,
+                showRsvpNote: false, showPay: _showPay, showHost: _showHost, autoSave: _autoSave,
+                hostGroupSizeMax: _hostGroupSizeMax, selfHostCount: _selfHostCount, attendeeCountAsk: _attendeeCountAsk,
+                onUpdate: () {
+                  setState(() { _showEventPay = false; _alreadySignedUp = false; _selectedWeeklyEvent = WeeklyEventClass.fromJson({}); });
+                  _search();
+                }
+              ),
+              _style.SpacingH('medium'),
+              TextButton(
+                onPressed: () {
+                  setState(() { _showEventPay = false; _alreadySignedUp = false; _selectedWeeklyEvent = WeeklyEventClass.fromJson({}); });
+                },
+                child: Text('Back to Events'),
+              ),
+            ]
+          ),
         ),
         _style.SpacingH('xlarge'),
       ];
@@ -387,7 +401,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       int attendeeAsks = weeklyEvent.xUserEvent['attendeeCountAsk'];
       int hosting = weeklyEvent.xUserEvent['hostGroupSize'];
       int hostingAsks = weeklyEvent.xUserEvent['hostGroupSizeMax'];
-      if (attendees > 0 || attendeeAsks > 0) {
+      int selfHosts = weeklyEvent.xUserEvent['selfHostCount'];
+      if (attendees > 0 || attendeeAsks > 0 || selfHosts > 0) {
         alreadyRsvped = true;
         actionText = 'Going ';
         if (attendeeAsks > 1) {
@@ -417,31 +432,68 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     }
 
     bool newPage = widget.pageWrapper < 1 ? true : false;
-    Widget joinButton = SizedBox.shrink();
     String joinText = alreadyRsvped ? 'Update RSVP' : 'Join';
+    bool defaultJoinButtons = false;
+    List<Widget> joinButtons = [];
     if (widget.viewOnly <= 0) {
       if (!currentUserState.isLoggedIn) {
-        joinButton = TextButton(child: Text('Join'), onPressed: () {
-          setState(() { _showUserLoginSignup = true; });
-        });
+        joinButtons += [
+          TextButton(child: Text('Join'), onPressed: () {
+            setState(() { _showUserLoginSignup = true; });
+          }),
+          _style.SpacingV('medium'),
+        ];
       } else if (weeklyEvent.priceUSD == 0) {
         // joinButton = TextButton(child: Text('Join'), onPressed: () {
         //   // _userEventSaveService.JoinEvent(weeklyEvent.title, weeklyEvent.priceUSD, currentUserState.currentUser.id, (Map<String, dynamic> data) {
         //     // TODO - track event as joined (need to fetch user joined events for ALL events; just re-fetch here?)
         //   // });
         // });
-        joinButton = _buttons.Link(context, 'View', '/we/${weeklyEvent.uName}', launchUrl: newPage);
+        if (alreadyRsvped) {
+          joinButtons += [
+            _buttons.Link(context, 'View', '/we/${weeklyEvent.uName}', launchUrl: newPage),
+            _style.SpacingV('medium'),
+          ];
+        }
       } else {
         // joinButton = _buttons.Link(context, '${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
-        joinButton = TextButton(child: Text('${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
-          setState(() { _showEventPay = true; _selectedWeeklyEvent = weeklyEvent; _alreadySignedUp = alreadyRsvped; });
-        });
+        defaultJoinButtons = true;
       }
     } else if (weeklyEvent.priceUSD != 0) {
       // joinButton = _buttons.Link(context, '${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
-      joinButton = TextButton(child: Text('${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
-        setState(() { _showEventPay = true; _selectedWeeklyEvent = weeklyEvent; _alreadySignedUp = alreadyRsvped; });
-      });
+      defaultJoinButtons = true;
+    }
+    
+    if (defaultJoinButtons) {
+      if (!alreadyRsvped) {
+        joinText = 'Join';
+        String hostButtonText = weeklyEvent.type == 'sharedMeal' ? 'Cook' : 'Host';
+        joinButtons += [
+          // 2 click pay button (allow adding attendees, otherwise would do 1 click).
+          TextButton(child: Text('Pay (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
+            ResetEventPay();
+            setState(() { _showEventPay = true; _selectedWeeklyEvent = weeklyEvent; _alreadySignedUp = alreadyRsvped;
+              _showHost = false; _attendeeCountAsk = 1;
+            });
+          }),
+          _style.SpacingV('medium'),
+          // One click to host button. Default to self host (no payment).
+          TextButton(child: Text('${hostButtonText}'), onPressed: () {
+            ResetEventPay();
+            setState(() { _showEventPay = true; _selectedWeeklyEvent = weeklyEvent; _alreadySignedUp = alreadyRsvped;
+              _showPay = false; _hostGroupSizeMax = weeklyEvent.hostGroupSizeDefault; _selfHostCount = 1; _autoSave = true;
+            });
+          }),
+        ];
+      } else {
+        // Default event pay button.
+        joinButtons += [
+          TextButton(child: Text('${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})'), onPressed: () {
+            ResetEventPay();
+            setState(() { _showEventPay = true; _selectedWeeklyEvent = weeklyEvent; _alreadySignedUp = alreadyRsvped; });
+          }),
+        ];
+      }
     }
 
     // List<Widget> colsAddress = [];
@@ -494,9 +546,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
           ...colsAttendees,
           Row(
             children: [
-              joinButton,
-              // _style.SpacingV('medium'),
-              // _buttons.Link(context, 'View', '/we/${weeklyEvent.uName}', launchUrl: newPage),
+              ...joinButtons,
             ]
           ),
           _style.SpacingH('medium'),
@@ -504,6 +554,23 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         ]
       )
     );
+  }
+
+  void ResetEventPay() {
+    _showPay = true;
+    _showHost = true;
+    _autoSave = false;
+    _hostGroupSizeMax = 0;
+    _selfHostCount = 0;
+    _attendeeCountAsk = 0;
+    setState(() {
+      _showPay = _showPay;
+      _showHost = _showHost;
+      _autoSave = _autoSave;
+      _hostGroupSizeMax = _hostGroupSizeMax;
+      _selfHostCount = _selfHostCount;
+      _attendeeCountAsk = _attendeeCountAsk;
+    });
   }
 
   _buildResults(BuildContext context, CurrentUserState currentUserState) {

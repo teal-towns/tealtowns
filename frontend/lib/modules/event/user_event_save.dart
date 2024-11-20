@@ -24,10 +24,25 @@ class UserEventSave extends StatefulWidget {
   double? availableUSD;
   double? availableCreditUSD;
   bool showRsvpNote;
+  bool showSelfHost;
+  bool showPay;
+  bool showHost;
+  bool autoSave;
+  int attendeeCountAsk;
+  int hostGroupSizeMax;
+  int selfHostCount;
+  // Scenarios / flow:
+  // 1. Host? If yes:
+  // 1a. Self-host? (Do not pay, and host no matter what). NOTE: could self-host but NOT want to host for others.
+  // 1b. NO self-host: pay, and MAY host (pending sign ups). IF host, will get credit / money (back), but still pay up front in case do NOT host.
+  // 2. NO host: pay
+  // In general, self host is rare, and only used up front when user does not have any credits yet.
 
   UserEventSave({this.eventId = '', this.onUpdate = null, this.userEvent = null, this.event = null,
     this.weeklyEvent = null, this.spotsPaidFor = null, this.availableUSD = null, this.availableCreditUSD = null,
-    this.showRsvpNote = true});
+    this.showRsvpNote = true, this.showSelfHost = false, this.showPay = true, this.showHost = true,
+    this.autoSave = false, this.attendeeCountAsk = 0, this.hostGroupSizeMax = 0, this.selfHostCount = 0,
+  });
 
   @override
   _UserEventSaveState createState() => _UserEventSaveState();
@@ -48,6 +63,7 @@ class _UserEventSaveState extends State<UserEventSave> {
   EventClass _event = EventClass.fromJson({});
   WeeklyEventClass _weeklyEvent = WeeklyEventClass.fromJson({});
   bool _inited = false;
+  bool _userEventInited = false;
   final _formKey = GlobalKey<FormState>();
   int _spotsPaidFor = 0;
   double _availableUSD = 0;
@@ -68,13 +84,17 @@ class _UserEventSaveState extends State<UserEventSave> {
       if (data['valid'] == 1) {
         _userEvent = UserEventClass.fromJson(data['userEvent']);
         _formVals = _userEvent.toJson();
+        CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
         if (_formVals['_id'].length < 1) {
           _formVals['eventId'] = widget.eventId;
-          _formVals['userId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+          if (currentUserState.isLoggedIn) {
+            _formVals['userId'] = currentUserState.currentUser.id;
+          }
         }
         if (_userEvent.id.length > 0) {
           _formVals = _userEvent.toJson();
         }
+        InitFormVals();
         setState(() { _formVals = _formVals; _userEvent = _userEvent; });
         if (data.containsKey('event')) {
           _event = EventClass.fromJson(data['event']);
@@ -91,6 +111,13 @@ class _UserEventSaveState extends State<UserEventSave> {
               _availableCreditUSD = data['userCheckPayment']['availableCreditUSD'];
               _weeklyEvent = WeeklyEventClass.fromJson(data['userCheckPayment']['weeklyEvent']);
             });
+        }
+        if (!_userEventInited) {
+          _userEventInited = true;
+          if (widget.autoSave && currentUserState.isLoggedIn) {
+            JoinEvent();
+          }
+          setState(() { _userEventInited = _userEventInited; });
         }
       }
       setState(() { _loading = false; _loadingPayment = false; });
@@ -139,6 +166,8 @@ class _UserEventSaveState extends State<UserEventSave> {
         setState(() { _mySharedItems = _mySharedItems; _mySharedItemsState = 'loaded'; });
       }
     }));
+
+    InitFormVals();
   }
 
   @override
@@ -179,14 +208,22 @@ class _UserEventSaveState extends State<UserEventSave> {
         _availableUSD = widget.availableUSD!;
         _availableCreditUSD = widget.availableCreditUSD!;
         _formVals = _userEvent.toJson();
+        CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
         if (_formVals['_id'].length < 1) {
           _formVals['eventId'] = widget.eventId;
-          _formVals['userId'] = Provider.of<CurrentUserState>(context, listen: false).currentUser.id;
+          if (currentUserState.isLoggedIn) {
+            _formVals['userId'] = currentUserState.currentUser.id;
+          }
         }
         if (_userEvent.id.length > 0) {
           _formVals = _userEvent.toJson();
         }
+        InitFormVals();
+        _userEventInited = true;
         _loading = false;
+        if (widget.autoSave && currentUserState.isLoggedIn) {
+          JoinEvent();
+        }
         // setState(() { _userEvent = _userEvent; _event = _event; _weeklyEvent = _weeklyEvent;
         //   _spotsPaidFor = _spotsPaidFor; _availableUSD = _availableUSD; _availableCreditUSD = _availableCreditUSD; });
       } else {
@@ -219,14 +256,30 @@ class _UserEventSaveState extends State<UserEventSave> {
     }
 
     List<Widget> colsHost = [];
-    if (_weeklyEvent.priceUSD > 0) {
+    if (_weeklyEvent.priceUSD > 0 && widget.showHost) {
       // Do not allow changing if already complete and have a host group.
       if (!(_userEvent.id.length > 0 && _userEvent.hostStatus == 'complete' && _userEvent.hostGroupSize > 0)) {
         String hostLabel = 'How many people will you host? Earn 1 free event per ${_weeklyEvent.hostGroupSizeDefault} people.';
-        colsHost += [ _inputFields.inputNumber(_formVals, 'hostGroupSizeMax', required: true, label: hostLabel,) ];
+        colsHost += [
+          _inputFields.inputNumber(_formVals, 'hostGroupSizeMax', required: true, label: hostLabel, onChanged: (double? val)  {
+            if (val != null && val! >= 0) {
+              _formVals['hostGroupSizeMax'] = val.toInt();
+              // If fill in host first, assume user wants to self host.
+              if (_formVals['attendeeCountAsk'] <= 0) {
+                if (_formVals['hostGroupSizeMax'] > 0 && _formVals['selfHostCount'] <= 0) {
+                  _formVals['selfHostCount'] = 1;
+                } else {
+                  _formVals['selfHostCount'] = 0;
+                }
+              }
+              setState(() { _formVals = _formVals;});
+            }
+          },
+          )
+        ];
       }
     }
-    double attendeeMin = _userEvent.attendeeCount > 0 ? _userEvent.attendeeCount.toDouble() : 1;
+    double attendeeMin = _userEvent.attendeeCount > 0 ? _userEvent.attendeeCount.toDouble() : 0;
 
     List<Widget> colsCreditMoney = [];
     if (_weeklyEvent.priceUSD > 0) {
@@ -251,10 +304,10 @@ class _UserEventSaveState extends State<UserEventSave> {
       // Text('${_attendeesCount} attending, ${_nonHostAttendeesWaitingCount} waiting'),
       // SizedBox(height: 10),
     ];
-    if (_userEvent.attendeeCountAsk > 0) {
+    if (_userEvent.attendeeCountAsk > 0 || _userEvent.selfHostCount > 0) {
       alreadySignedUp = true;
-      if (_userEvent.attendeeCount > 0) {
-        int guestsGoing = _userEvent.attendeeCount - 1;
+      if (_userEvent.attendeeCount > 0 || _userEvent.selfHostCount > 0) {
+        int guestsGoing = _userEvent.attendeeCount + _userEvent.selfHostCount - 1;
         int guestsWaiting = _userEvent.attendeeCountAsk - _userEvent.attendeeCount - 1;
         String text1 = 'You are going';
         if (guestsGoing > 0) {
@@ -289,11 +342,11 @@ class _UserEventSaveState extends State<UserEventSave> {
 
     double fieldWidth = 350;
     List<Widget> colsAttendee = [];
-    if (!alreadySignedUp && showJoin) {
+    if (!alreadySignedUp && showJoin && widget.showPay) {
       colsAttendee += [
         _inputFields.inputNumber(_formVals, 'attendeeCountAsk', min: attendeeMin, required: true,
           label: 'How many total spots would you like (including yourself)?', onChanged: (double? val)  {
-            if (val != null && val! >= 1) {
+            if (val != null && val! >= 0) {
               _formVals['attendeeCountAsk'] = val.toInt();
               setState(() { _formVals = _formVals;});
             }
@@ -301,6 +354,19 @@ class _UserEventSaveState extends State<UserEventSave> {
         )
       ];
     }
+    if (widget.showSelfHost) {
+      colsAttendee += [
+        _inputFields.inputNumber(_formVals, 'selfHostCount', min: 0, required: false,
+          label: 'How many will you self host (no payment required)?', onChanged: (double? val)  {
+            if (val != null && val! >= 0) {
+              _formVals['selfHostCount'] = val.toInt();
+              setState(() { _formVals = _formVals;});
+            }
+          },
+        )
+      ];
+    }
+
     List<Widget> colsSignUp = [];
     if (showJoin) {
       List<Widget> colsNote = [];
@@ -332,21 +398,23 @@ class _UserEventSaveState extends State<UserEventSave> {
         colsSignUp += [
           ...colsCreditMoney,
         ];
-        if (price > 0) {
+        if (price > 0 || _formVals['selfHostCount'] > 0) {
+          String text = 'Join Event';
+          if (price > 0) {
+            text += ' (\$${price.toStringAsFixed(0)})';
+          }
           colsSignUp += [
             ElevatedButton(
               onPressed: () {
                 setState(() { _message = ''; });
                 if (_formKey.currentState?.validate() == true) {
-                  setState(() { _loading = true; });
-                  _formKey.currentState?.save();
-                  CheckGetGetPaymentLink(currentUserState);
+                  JoinEvent();
                   _socketService.TrackEvent('Join Event');
                 } else {
                   setState(() { _loading = false; });
                 }
               },
-              child: Text('Join Event: \$${price.toStringAsFixed(0)}'),
+              child: Text(text),
             )
           ];
         }
@@ -387,9 +455,33 @@ class _UserEventSaveState extends State<UserEventSave> {
     );
   }
 
+  void InitFormVals() {
+    if (widget.attendeeCountAsk > 0) {
+      _formVals['attendeeCountAsk'] = widget.attendeeCountAsk;
+    }
+    if (widget.hostGroupSizeMax > 0) {
+      _formVals['hostGroupSizeMax'] = widget.hostGroupSizeMax;
+    }
+    if (widget.selfHostCount > 0) {
+      _formVals['selfHostCount'] = widget.selfHostCount;
+    }
+  }
+
+  void JoinEvent() {
+    setState(() { _loading = true; });
+    _formKey.currentState?.save();
+    double price = _weeklyEvent.priceUSD * _formVals['attendeeCountAsk'];
+    if (price > 0) {
+      CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+      CheckGetPaymentLink(currentUserState);
+    } else {
+      _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'selfHost' });
+    }
+  }
+
   void GetUserEvent() {
-    String userId = Provider.of<CurrentUserState>(context, listen: false).isLoggedIn ?
-      Provider.of<CurrentUserState>(context, listen: false).currentUser.id : '';
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    String userId = currentUserState.isLoggedIn ? currentUserState.currentUser.id : '';
     var data = {
       'eventId': widget.eventId,
       'userId': userId,
@@ -400,7 +492,7 @@ class _UserEventSaveState extends State<UserEventSave> {
     _socketService.emit('GetUserEvent', data);
   }
 
-  void CheckGetGetPaymentLink(currentUserState) {
+  void CheckGetPaymentLink(currentUserState) {
     double price = _weeklyEvent.priceUSD * _formVals['attendeeCountAsk'];
     if (_weeklyEvent.priceUSD == 0) {
       _socketService.emit('SaveUserEvent', { 'userEvent': _formVals, 'payType': 'free' });

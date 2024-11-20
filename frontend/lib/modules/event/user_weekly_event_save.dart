@@ -28,10 +28,18 @@ class UserWeeklyEventSave extends StatefulWidget {
   double? availableUSD;
   double? availableCreditUSD;
   bool showRsvpNote;
+  bool showSelfHost;
+  bool showPay;
+  bool showHost;
+  bool autoSave;
+  int attendeeCountAsk;
+  int hostGroupSizeMax;
+  int selfHostCount;
 
   UserWeeklyEventSave({this.weeklyEventId = '', this.alreadySignedUp = false,
     this.userEvent = null, this.spotsPaidFor = null, this.availableUSD = null, this.availableCreditUSD = null,
-    this.showRsvpNote = true,
+    this.showRsvpNote = true, this.showSelfHost = false, this.showPay = false, this.showHost = false,
+    this.autoSave = false, this.attendeeCountAsk = 0, this.hostGroupSizeMax = 0, this.selfHostCount = 0,
   });
 
   @override
@@ -211,7 +219,9 @@ class _UserWeeklyEventSaveState extends State<UserWeeklyEventSave> {
       widgetForm = UserEventSave(eventId: eventId,
         userEvent: widget.userEvent, event: event, weeklyEvent: _weeklyEvent, spotsPaidFor: widget.spotsPaidFor,
         availableUSD: widget.availableUSD, availableCreditUSD: widget.availableCreditUSD,
-        showRsvpNote: widget.showRsvpNote);
+        showRsvpNote: widget.showRsvpNote, showSelfHost: widget.showSelfHost, showPay: widget.showPay,
+        showHost: widget.showHost, autoSave: widget.autoSave, attendeeCountAsk: widget.attendeeCountAsk,
+        hostGroupSizeMax: widget.hostGroupSizeMax, selfHostCount: widget.selfHostCount,);
     } else {
       double fieldWidth = 250;
       widgetForm = Form(

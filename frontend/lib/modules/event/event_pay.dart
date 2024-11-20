@@ -22,10 +22,19 @@ class EventPay extends StatefulWidget {
   bool withEventInfo;
   bool withSubscribe;
   bool showRsvpNote;
+  bool showSelfHost;
+  bool showPay;
+  bool showHost;
+  bool autoSave;
+  int attendeeCountAsk;
+  int hostGroupSizeMax;
+  int selfHostCount;
   Function()? onUpdate;
   EventPay({required this.weeklyEvent, required this.event, this.alreadySignedUp = false,
     this.rsvpDeadlinePassed = 0, this.withEventInfo = false, this.withSubscribe = true,
-    this.showRsvpNote = true, this.onUpdate = null});
+    this.showRsvpNote = true, this.showPay = true, this.showHost = true, this.showSelfHost = false, this.autoSave = false,
+    this.attendeeCountAsk = 0, this.selfHostCount = 0, this.hostGroupSizeMax = 0,
+    this.onUpdate = null});
 
   @override
   _EventPayState createState() => _EventPayState();
@@ -115,7 +124,9 @@ class _EventPayState extends State<EventPay> {
       UserEventSave(eventId: widget.event.id,
         userEvent: _userEvent, event: _event, weeklyEvent: _weeklyEvent, spotsPaidFor: _spotsPaidFor,
         availableUSD: _availableUSD, availableCreditUSD: _availableCreditUSD,
-        showRsvpNote: widget.showRsvpNote,
+        showRsvpNote: widget.showRsvpNote, showSelfHost: widget.showSelfHost, showPay: widget.showPay,
+        showHost: widget.showHost, autoSave: widget.autoSave, attendeeCountAsk: widget.attendeeCountAsk,
+        hostGroupSizeMax: widget.hostGroupSizeMax, selfHostCount: widget.selfHostCount,
         onUpdate: () {
           _alertService.Show(context, 'RSVP Updated');
           if (widget.onUpdate != null) {
@@ -139,7 +150,9 @@ class _EventPayState extends State<EventPay> {
           UserWeeklyEventSave(weeklyEventId: widget.weeklyEvent.id, alreadySignedUp: alreadySignedUp,
             userEvent: _userEvent, spotsPaidFor: _spotsPaidFor,
             availableUSD: _availableUSD, availableCreditUSD: _availableCreditUSD,
-            showRsvpNote: widget.showRsvpNote,
+            showRsvpNote: widget.showRsvpNote, showSelfHost: widget.showSelfHost, showPay: widget.showPay,
+            showHost: widget.showHost, autoSave: widget.autoSave, attendeeCountAsk: widget.attendeeCountAsk,
+            hostGroupSizeMax: widget.hostGroupSizeMax, selfHostCount: widget.selfHostCount,
           ),
         ];
       } else {

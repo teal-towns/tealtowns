@@ -56,10 +56,12 @@ class _UserLoginSignupState extends State<UserLoginSignup> {
         }),
       ];
     }
-    return Column(
-      children: [
-        ...cols,
-      ]
+    return Container(width: 450,
+      child: Column(
+        children: [
+          ...cols,
+        ]
+      ),
     );
   }
 }

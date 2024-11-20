@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import re
 import threading
 import time
@@ -63,7 +64,8 @@ def SearchNearSync(lngLat: list, maxMeters: float = 500, title: str = '', limit:
     return ret
 
 async def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
-    type: str = '', archived: int = 0, withEvents: int = 0, withUserEventUserId: str = '', now = None, onUpdate = None):
+    type: str = '', archived: int = 0, withEvents: int = 0, withUserEventUserId: str = '', now = None, onUpdate = None,
+    autoCreateEvents: int = 1):
     ret = SearchNearSync(lngLat, maxMeters, title, limit, skip, withAdmins = withAdmins,
         type = type, archived = archived, withEvents = withEvents, now = now)
     userIds = ret['userIds']
@@ -85,10 +87,24 @@ async def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limi
         events = mongo_db.find('event', query, fields = fields)['items']
         eventIdToWeeklyEventIdMap = {}
         eventIds = []
+        missingEventWeeklyEventIds = copy.deepcopy(weeklyEventIds)
         for event in events:
             eventIds.append(event['_id'])
             eventIdToWeeklyEventIdMap[event['_id']] = event['weeklyEventId']
             ret['weeklyEvents'][weeklyEventIdsMap[event['weeklyEventId']]]['xEvent'] = event
+            if autoCreateEvents and event['weeklyEventId'] in missingEventWeeklyEventIds:
+                missingEventWeeklyEventIds.remove(event['weeklyEventId'])
+
+        if autoCreateEvents and len(missingEventWeeklyEventIds) > 0:
+            for weeklyEventId in missingEventWeeklyEventIds:
+                weeklyEvent = ret['weeklyEvents'][weeklyEventIdsMap[weeklyEventId]]
+                retNext = _event.GetNextEventFromWeekly(weeklyEventId, weeklyEvent = weeklyEvent, now = now, autoCreate = 1)
+                if len(retNext['event']['_id']) > 0:
+                    event = retNext['event']
+                    eventIds.append(event['_id'])
+                    eventIdToWeeklyEventIdMap[event['_id']] = event['weeklyEventId']
+                    ret['weeklyEvents'][weeklyEventIdsMap[event['weeklyEventId']]]['xEvent'] = event
+
         if onUpdate:
             await onUpdate(ret)
             await asyncio.sleep(0)
