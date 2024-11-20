@@ -218,14 +218,14 @@ def GetUsersAttending(daysPast: int = 7, weeklyEventIds = None, now = None,
             eventIds.append(event['_id'])
             weeklyEventUName = weeklyEventsById[event['weeklyEventId']]['uName'] if event['weeklyEventId'] in weeklyEventsById else ''
             ret['eventInfos'].append({ 'id': event['_id'], 'start': event['start'], 'attendeeCount': 0,
-                'firstEventAttendeeCount': 0,
+                'selfHostCount': 0, 'firstEventAttendeeCount': 0,
                 'weeklyEventId': event['weeklyEventId'], 'weeklyEventUName': weeklyEventUName, })
             eventInfosMap[event['_id']] = index
         query = { 'eventId': { '$in': eventIds }, 'attendeeCount': { '$gte': 1 } }
         userIds = mongo_db.findDistinct('userEvent', 'userId', query)['values']
         ret['uniqueUsersCount'] = len(userIds)
         if withFreePaidStats:
-            fields = { 'priceUSD': 1, 'eventId': 1, 'userId': 1, 'attendeeCount': 1, 'createdAt': 1, }
+            fields = { 'priceUSD': 1, 'eventId': 1, 'userId': 1, 'attendeeCount': 1, 'selfHostCount': 1, 'createdAt': 1, }
             userEvents = mongo_db.find('userEvent', query, fields = fields, limit = limit)['items']
             ret['totalEventUsersCount'] = len(userEvents)
             ret['freeEventsCount'] = 0
@@ -237,6 +237,7 @@ def GetUsersAttending(daysPast: int = 7, weeklyEventIds = None, now = None,
             paidEventsMap = {}
             for userEvent in userEvents:
                 ret['eventInfos'][eventInfosMap[userEvent['eventId']]]['attendeeCount'] += userEvent['attendeeCount']
+                ret['eventInfos'][eventInfosMap[userEvent['eventId']]]['selfHostCount'] += userEvent['selfHostCount']
                 # See if this user has attended any events before this.
                 query = { 'eventId': userEvent['eventId'], 'userId': userEvent['userId'],
                     'createdAt': { '$lt': userEvent['createdAt'] } }

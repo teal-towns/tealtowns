@@ -12,6 +12,7 @@ def GetDefault():
         'attendeeCountAsk': random.randint(1, 5),
         'attendeeCount': 0,
         'attendeeStatus': 'pending',
+        'selfHostCount': 0,
         'priceUSD': random.randint(10, 20),
         'eventEnd': _stubs_data.RandomTime(),
     }

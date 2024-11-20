@@ -32,8 +32,9 @@ import '../user_auth/current_user_state.dart';
 
 class WeeklyEventView extends StatefulWidget {
   String uName;
+  bool eventPayWithSubscribe;
 
-  WeeklyEventView({ this.uName = '', });
+  WeeklyEventView({ this.uName = '', this.eventPayWithSubscribe = false, });
 
   @override
   _WeeklyEventViewState createState() => _WeeklyEventViewState();
@@ -389,7 +390,7 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
       for (int i = 0; i < _userEvents.length; i++) {
         String rsvpNote = _userEvents[i].rsvpNote;
         String text = '';
-        if (_userEvents[i].attendeeCount == 0) {
+        if (_userEvents[i].attendeeCount == 0 && _userEvents[i].selfHostCount == 0) {
           text = '${_userEvents[i].user['firstName']} ${_userEvents[i].user['lastName']}';
           if (showEmail) {
             text += ' (${_userEvents[i].user['email']})';
@@ -413,11 +414,12 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
           if (showEmail) {
             text += ' (${_userEvents[i].user['email']})';
           }
-          if (_userEvents[i].attendeeCount > 1) {
+          int totalCount = _userEvents[i].attendeeCount + _userEvents[i].selfHostCount;
+          if (totalCount > 1) {
             if (rsvpNote.length > 0) {
-              text += ' (+${_userEvents[i].attendeeCount - 1}, ${rsvpNote})';
+              text += ' (+${totalCount - 1}, ${rsvpNote})';
             } else {
-              text += ' (+${_userEvents[i].attendeeCount - 1})';
+              text += ' (+${totalCount - 1})';
             }
           } else if (rsvpNote.length > 0) {
             text += ' (${rsvpNote})';
@@ -465,8 +467,11 @@ class _WeeklyEventViewState extends State<WeeklyEventView> {
 
     if (_nextEvent.start.length > 0) {
       attendeeInfo += [
+        _style.SpacingH('medium'),
         EventPay(weeklyEvent: _weeklyEvent, event: _nextEvent, alreadySignedUp: alreadySignedUp,
-          rsvpDeadlinePassed: _rsvpDeadlinePassed, onUpdate: () {
+          rsvpDeadlinePassed: _rsvpDeadlinePassed,
+          withSubscribe: widget.eventPayWithSubscribe,
+          onUpdate: () {
             setState(() { _userEvents = []; });
             _socketService.emit('GetUserEventStats', { 'eventId': _nextEvent.id });
           },),

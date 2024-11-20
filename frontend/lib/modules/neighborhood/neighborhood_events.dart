@@ -107,7 +107,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
     Map<String, dynamic> config = _configService.GetConfig();
     List<Widget> cols = [
       _style.SpacingH('large'),
-      _style.Text1('Neighborhood Events', size: 'large',),
+      _style.Text1('Neighborhood Dinners', size: 'large',),
       _style.SpacingH('medium'),
       // _style.Text1('Weekly Calendar'),
       // _style.SpacingH('medium'),

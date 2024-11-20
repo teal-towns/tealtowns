@@ -139,6 +139,7 @@
         "attendeeCountAsk": "{Int} [1 or 2+ if bringing guests]",
         "attendeeCount": "{Int} [The final attendee count (1 for self), in case not enough hosts for all]",
         "attendeeStatus": "{String} pending|complete",
+        "selfHostCount": "{Int} [Number of attendees not paid for, because self-hosting. Total attendees are thus attendeeCount + selfHostCount.]",
         "priceUSD": "{Float} [the price copied from the weeklyEvent.priceUSD for stats.]",
         "eventEnd": "{String} [timestamp YYYY-MM-DD HH:mm:ss ZZ Copied from event for userFeedback look ups performance]",
         "rsvpNote": "{String} @optional [What host is cooking for shared meal, etc.]"
@@ -438,6 +439,7 @@
                 "id": "{String}",
                 "start": "{String}",
                 "attendeeCount": "{Int}",
+                "selfHostCount": "{Int}",
                 "firstEventAttendeeCount": "{Int}",
                 "weeklyEventId":"{String}",
                 "weeklyEventUName": "{String}"
