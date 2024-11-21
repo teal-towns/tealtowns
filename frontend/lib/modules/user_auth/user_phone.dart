@@ -7,11 +7,16 @@ import 'package:flutter/gestures.dart';
 import '../../common/buttons.dart';
 import '../../common/link_service.dart';
 import '../../common/socket_service.dart';
+import '../../common/style.dart';
 import './user_class.dart';
 import '../../common/form_input/input_fields.dart';
 import './current_user_state.dart';
 
 class UserPhone extends StatefulWidget {
+  Function()? onUpdate;
+
+  UserPhone({this.onUpdate = null,});
+
   @override
   _UserPhoneState createState() => _UserPhoneState();
 }
@@ -22,6 +27,7 @@ class _UserPhoneState extends State<UserPhone> {
   LinkService _linkService = LinkService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
+  Style _style = Style();
 
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> _formVals = {
@@ -97,6 +103,9 @@ class _UserPhoneState extends State<UserPhone> {
         String field = _formVals['mode'] == 'sms' ? 'phoneNumberVerificationKey' : 'whatsappNumberVerificationKey';
         _formVals[field] = '';
         setState(() { _message = 'Phone successfully verified'; });
+        if (widget.onUpdate != null) {
+          widget.onUpdate!();
+        }
       } else {
         setState(() { _message = data['message'].length > 0 ? data['message'] : 'Invalid verification key, please try again.'; });
       }
@@ -123,41 +132,24 @@ class _UserPhoneState extends State<UserPhone> {
     String fieldNumber = _fieldsByMode[_formVals['mode']]!['number']!;
     String fieldVerificationKey = _fieldsByMode[_formVals['mode']]!['verificationKey']!;
     String fieldCountryISOCode = _fieldsByMode[_formVals['mode']]!['countryISOCode']!;
-    String buttonText = (_formVals[fieldVerificationKey]!.length > 0 || _verificationSent) ? 'Verify Phone' : 'Send Verification Code';
+    bool verifying = (_formVals[fieldVerificationKey]!.length > 0 || _verificationSent);
+    String buttonText = verifying ? 'Verify Phone' : 'Send Verification Code';
     List<Widget> buttons = [
       ElevatedButton(
         onPressed: () {
-          setState(() { _message = ''; });
-          if (_formKey.currentState?.validate() == true && _formVals['terms'] == true) {
-            setState(() { _loading = true; });
-            _formKey.currentState?.save();
-            if (_formVals[fieldVerificationKey]!.length > 0) {
-              var data = {
-                'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
-                'mode': _formVals['mode'],
-              };
-              data[fieldVerificationKey] = _formVals[fieldVerificationKey];
-              _socketService.emit('VerifyPhone', data);
-            } else if (_formVals['phoneNumber']!.length >= 8) {
-              if (_formVals['mode'] == 'sms' && !['US'].contains(_formVals[fieldCountryISOCode])) {
-                setState(() { _loading = false; _message = "We currently only accept US phone numbers, please try WhatsApp."; });
-              } else {
-                var data = {
-                  'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
-                  'mode': _formVals['mode'],
-                };
-                data[fieldNumber] = _formVals[fieldNumber];
-                data[fieldCountryISOCode] = _formVals[fieldCountryISOCode];
-                _socketService.emit('SendPhoneVerificationCode', data);
-              }
-            }
-          } else {
-            setState(() { _loading = false; _message = "Please fill out all fields."; });
-          }
+          TrySendPhoneVerificationCode(fieldNumber, fieldVerificationKey, fieldCountryISOCode);
         },
         child: Text(buttonText),
       )
     ];
+    if (verifying) {
+      buttons += [
+        _style.SpacingV('medium'),
+        TextButton(child: Text('Resend Code'), onPressed: () {
+          TrySendPhoneVerificationCode(fieldNumber, fieldVerificationKey, fieldCountryISOCode, resend: true);
+        }),
+      ];
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -165,6 +157,39 @@ class _UserPhoneState extends State<UserPhone> {
         children: buttons
       ),
     );
+  }
+
+  void TrySendPhoneVerificationCode(String fieldNumber, String fieldVerificationKey, String fieldCountryISOCode, {bool resend = false}) {
+    setState(() { _message = ''; });
+    if (resend || (_formKey.currentState?.validate() == true && _formVals['terms'] == true)) {
+      if (resend) {
+        _verificationSent = false;
+      }
+      setState(() { _loading = true; _verificationSent = _verificationSent; });
+      _formKey.currentState?.save();
+      if (_formVals[fieldVerificationKey]!.length > 0) {
+        var data = {
+          'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
+          'mode': _formVals['mode'],
+        };
+        data[fieldVerificationKey] = _formVals[fieldVerificationKey];
+        _socketService.emit('VerifyPhone', data);
+      } else if (_formVals['phoneNumber']!.length >= 8) {
+        if (_formVals['mode'] == 'sms' && !['US'].contains(_formVals[fieldCountryISOCode])) {
+          setState(() { _loading = false; _message = "We currently only accept US phone numbers, please try WhatsApp."; });
+        } else {
+          var data = {
+            'userId': Provider.of<CurrentUserState>(context, listen: false).currentUser.id,
+            'mode': _formVals['mode'],
+          };
+          data[fieldNumber] = _formVals[fieldNumber];
+          data[fieldCountryISOCode] = _formVals[fieldCountryISOCode];
+          _socketService.emit('SendPhoneVerificationCode', data);
+        }
+      }
+    } else {
+      setState(() { _loading = false; _message = "Please fill out all fields."; });
+    }
   }
 
   Widget _buildMessage(BuildContext context) {

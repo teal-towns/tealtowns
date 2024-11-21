@@ -7,7 +7,7 @@ from user_payment import user_payment as _user_payment
 from event import user_event as _user_event
 
 def RunAll():
-    UserEventSelfHost()
+    # UserEventSelfHost()
     # EventAttendeeCache()
     # ToCreditUSD()
     # AddHostInterests()
