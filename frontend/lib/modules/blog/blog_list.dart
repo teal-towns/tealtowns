@@ -71,7 +71,7 @@ class _BlogListState extends State<BlogList> {
     var currentUserState = context.watch<CurrentUserState>();
 
     List<Widget> columnsCreate = [];
-    if (currentUserState.hasRole('admin')) {
+    if (currentUserState.hasRole('admin') || currentUserState.hasRole('tealtownsTeam')) {
       columnsCreate = [
         Align(
           alignment: Alignment.topRight,

@@ -8,6 +8,7 @@ import '../../common/date_time_service.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../user_auth/current_user_state.dart';
+import '../user_auth/user_phone.dart';
 import './event_class.dart';
 import './user_weekly_event_save.dart';
 import './user_event_save.dart';
@@ -53,6 +54,7 @@ class _EventPayState extends State<EventPay> {
   int? _spotsPaidFor = null;
   double? _availableUSD = null;
   double? _availableCreditUSD = null;
+  bool _showPhone = false;
 
   @override
   void initState() {
@@ -108,6 +110,21 @@ class _EventPayState extends State<EventPay> {
       return Column( children: [ LinearProgressIndicator() ]);
     }
 
+    if (_showPhone) {
+      return Column(
+        children: [
+          _style.Text1('Text messages are used to notify you when you are accepted to an event. Enter your phone number to get started.'),
+          _style.SpacingH('medium'),
+          UserPhone(onUpdate: () {
+            if (widget.onUpdate != null) {
+              widget.onUpdate!();
+            }
+          }),
+          _style.SpacingH('large'),
+        ]
+      );
+    }
+
     List<Widget> cols = [];
     String startDate = _dateTime.Format(widget.event.start, 'EEEE M/d/y h:mm a');
     if (widget.withEventInfo) {
@@ -129,9 +146,7 @@ class _EventPayState extends State<EventPay> {
         hostGroupSizeMax: widget.hostGroupSizeMax, selfHostCount: widget.selfHostCount,
         onUpdate: () {
           _alertService.Show(context, 'RSVP Updated');
-          if (widget.onUpdate != null) {
-            widget.onUpdate!();
-          }
+          OnSaved();
         }
       ),
     ];
@@ -153,6 +168,10 @@ class _EventPayState extends State<EventPay> {
             showRsvpNote: widget.showRsvpNote, showSelfHost: widget.showSelfHost, showPay: widget.showPay,
             showHost: widget.showHost, autoSave: widget.autoSave, attendeeCountAsk: widget.attendeeCountAsk,
             hostGroupSizeMax: widget.hostGroupSizeMax, selfHostCount: widget.selfHostCount,
+            onUpdate: () {
+              _alertService.Show(context, 'Subscribed to Event');
+              OnSaved();
+            }
           ),
         ];
       } else {
@@ -174,5 +193,17 @@ class _EventPayState extends State<EventPay> {
         ...cols,
       ]
     );
+  }
+
+  void OnSaved() {
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if ((currentUserState.currentUser.phoneNumber!.length < 1 || currentUserState.currentUser.phoneNumberVerified < 1) &&
+      (currentUserState.currentUser.whatsappNumber!.length < 1 || currentUserState.currentUser.whatsappNumberVerified < 1)) {
+      setState(() { _showPhone = true; });
+    } else {
+      if (widget.onUpdate != null) {
+        widget.onUpdate!();
+      }
+    }
   }
 }

@@ -414,7 +414,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         }
       }
       if (hosting > 0 || hostingAsks > 0) {
-        actionText += 'Hosting ';
+        actionText += weeklyEvent.type == 'sharedMeal' ? 'Cooking' : 'Hosting';
         if (hostingAsks > 1) {
           if (hosting == hostingAsks) {
             actionText += '(${hosting}) ';

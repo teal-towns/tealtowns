@@ -27,6 +27,7 @@ def Send(body: str, toNumber: str, fromNumber: str = '', mode: str = 'sms',
     fromNumber = AddPrefix(fromNumber, prefix)
     toNumber = AddPrefix(toNumber, prefix)
     if _testMode or ('test_mode' in _config['twilio'] and _config['twilio']['test_mode']):
+        log.log('info', 'sms_twilio.Send TEST_MODE debug', 'toNumber', toNumber, 'body', body, 'fromNumber', fromNumber, 'mode', mode)
         return ret
 
     log.log('info', 'sms_twilio.Send debug', 'toNumber', toNumber, 'body', body, 'fromNumber', fromNumber, 'mode', mode)
