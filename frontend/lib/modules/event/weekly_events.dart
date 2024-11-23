@@ -186,6 +186,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       return content;
     }
 
+    Widget widgetEvents = SizedBox.shrink();
     List<Widget> colsEventPay = [];
     if (_showEventPay) {
       colsEventPay = [
@@ -250,6 +251,13 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       ], width: 150);
     }
 
+    if (!_showEventPay) {
+      widgetEvents = Align(
+        alignment: Alignment.center,
+        child: _buildResults(context, currentUserState),
+      );
+    }
+
     Widget body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -265,10 +273,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
             child: widgetFilters,
           ),
         ),
-        Align(
-          alignment: Alignment.center,
-          child: _buildResults(context, currentUserState),
-        ),
+        widgetEvents,
       ]
     );
 
@@ -328,7 +333,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     if (weeklyEvents.length < 1) {
       return SizedBox.shrink();
     }
-    bool withImage = weeklyEvents.length <= 3 ? true : false;
+    // bool withImage = weeklyEvents.length <= 3 ? true : false;
+    double imageHeight = weeklyEvents.length <= 3 ? 100 : 50;
     return SizedBox(
       width: 200,
       child: Column(
@@ -337,14 +343,14 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
           _style.Text1(day, size: 'large', colorKey: 'primary'),
           _style.SpacingH('medium'),
           ...weeklyEvents.map((event) {
-            return _buildWeeklyEvent(event, context, currentUserState, withImage: withImage);
+            return _buildWeeklyEvent(event, context, currentUserState, imageHeight: imageHeight,);
           }).toList(),
         ]
       )
     );
   }
 
-  _buildWeeklyEvent(WeeklyEventClass weeklyEvent, BuildContext context, var currentUserState, { bool withImage = false,}) {
+  _buildWeeklyEvent(WeeklyEventClass weeklyEvent, BuildContext context, var currentUserState, { double imageHeight = 100,}) {
     List<Widget> buttons = [];
     if (currentUserState.isLoggedIn && weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
       List<Widget> buttons = [
@@ -383,16 +389,16 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     // }
 
     List<Widget> colsImage = [];
-    if (withImage) {
-      colsImage = [
-        weeklyEvent.imageUrls.length <= 0 ?
-          Image.asset('assets/images/shared-meal.jpg', height: 100, width: double.infinity, fit: BoxFit.cover,)
-          : Image.network(weeklyEvent.imageUrls![0], height: 100, width: double.infinity, fit: BoxFit.cover),
-        // SizedBox(height: 10),
-      ];
-    }
+    // if (withImage) {
+    colsImage = [
+      weeklyEvent.imageUrls.length <= 0 ?
+        Image.asset('assets/images/shared-meal.jpg', height: imageHeight, width: double.infinity, fit: BoxFit.cover,)
+        : Image.network(weeklyEvent.imageUrls![0], height: imageHeight, width: double.infinity, fit: BoxFit.cover),
+      // SizedBox(height: 10),
+    ];
 
     Widget action = SizedBox.shrink();
+    List<String> actionTexts = [];
     String actionText = '';
     Color actionColor = _colors.colors['black'];
     bool alreadyRsvped = false;
@@ -404,26 +410,31 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       int selfHosts = weeklyEvent.xUserEvent['selfHostCount'];
       if (attendees > 0 || attendeeAsks > 0 || selfHosts > 0) {
         alreadyRsvped = true;
-        actionText = 'Going ';
+        actionText = 'Going';
         if (attendeeAsks > 1) {
           if (attendees == attendeeAsks) {
-            actionText += '(${attendees}) ';
+            actionText += ' (${attendees})';
           } else {
-            actionText += '(${attendees}/${attendeeAsks}) ';
+            actionText += ' (${attendees}/${attendeeAsks})';
           }
         }
+        actionTexts.add(actionText);
       }
-      if (hosting > 0 || hostingAsks > 0) {
-        actionText += weeklyEvent.type == 'sharedMeal' ? 'Cooking' : 'Hosting';
-        if (hostingAsks > 1) {
-          if (hosting == hostingAsks) {
-            actionText += '(${hosting}) ';
+      if (hosting > 0 || hostingAsks > 0 || selfHosts > 0) {
+        actionText = weeklyEvent.type == 'sharedMeal' ? 'Cooking' : 'Hosting';
+        int totalAsks = hostingAsks + selfHosts;
+        int total = hosting + selfHosts;
+        if (totalAsks > 1) {
+          if (total == totalAsks) {
+            actionText += ' (${total})';
           } else {
-            actionText += '(${hosting}/${hostingAsks}) ';
+            actionText += ' (${total}/${totalAsks})';
           }
         }
+        actionTexts.add(actionText);
       }
-      if (actionText.length > 0) {
+      if (actionTexts.length > 0) {
+        actionText = actionTexts.join(', ');
         action = Positioned(top: 0, left: 0, child: Container(color: actionColor, padding: EdgeInsets.all(5),
           child: Text(actionText, style: TextStyle(color: Colors.white),),
         ),
