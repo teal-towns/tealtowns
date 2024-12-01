@@ -137,6 +137,8 @@ def nextMonth(datetime1, hour=0, minute=0, months = 1, day = None):
     if nextMonth > 12:
         nextYear = int(currentYear + int(nextMonth) / 12)
         nextMonth = int(nextMonth) % 12
+        if nextMonth == 0:
+            nextMonth = 12
     else:
         nextMonth = currentMonth + months
         nextYear = currentYear
