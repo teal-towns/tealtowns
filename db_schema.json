@@ -84,7 +84,15 @@
         "priceUSD": "{Float} [0 if free. This is the single event price, which will be discounted for monthly and yearly subscriptions.]",
         "rsvpDeadlineHours": "{Float} [How many hours before event to allow rsvp, otherwise the sign up is for NEXT week]",
         "imageUrls": [ "{String}" ],
-        "archived": "{Int} 1|0"
+        "archived": "{Int} 1|0",
+        "pendingUsers": [
+            {
+                "userId": "{String} [A pending event has at least one pending user; once enough people sign up, these are removed (users are invited to sign up for real)]",
+                "attendeeCountAsk": "{Int}",
+                "hostGroupSizeMax": "{Int}",
+                "selfHostCount": "{Int}"
+            }
+        ]
     },
     "event": {
         "_id": "{ObjectId} ObjectId('123l4k234l')",

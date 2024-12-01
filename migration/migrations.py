@@ -7,6 +7,7 @@ from user_payment import user_payment as _user_payment
 from event import user_event as _user_event
 
 def RunAll():
+    WeeklyEventPendingUsers()
     # UserEventSelfHost()
     # EventAttendeeCache()
     # ToCreditUSD()
@@ -37,6 +38,37 @@ def RunAll():
     # SharedItemUName()
     # ImportCertificationLevels()
     pass
+
+def WeeklyEventPendingUsers():
+    collections = ['weeklyEvent']
+    for collection in collections:
+        limit = 250
+        skip = 0
+        updatedCounter = 0
+        while True:
+            query = {'pendingUsers': { '$exists': 0 } }
+            fields = { '_id': 1, }
+            items = mongo_db.find(collection, query, limit=limit, skip=skip, fields = fields)['items']
+            skip += len(items)
+
+            print ('WeeklyEventPendingUsers', collection, len(items))
+            for item in items:
+                query = {
+                    '_id': mongo_db.to_object_id(item['_id'])
+                }
+                mutation = {
+                    '$set': {
+                        'pendingUsers': [],
+                    }
+                }
+
+                # print (query, mutation)
+                mongo_db.update_one(collection, query, mutation)
+                updatedCounter += 1
+
+            if len(items) < limit:
+                print('Updated ' + str(updatedCounter) + ' items')
+                break
 
 def UserEventSelfHost():
     collections = ['userEvent']

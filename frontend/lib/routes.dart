@@ -37,6 +37,7 @@ import './modules/event/weekly_events_search.dart';
 import './modules/event/event_feedback_save_page.dart';
 import './modules/event/event_feedback_page.dart';
 import './modules/event/featured_event_photo_save.dart';
+import './modules/event/meal_plan_save.dart';
 
 import './modules/icebreaker/icebreakers.dart';
 import './modules/icebreaker/icebreaker_save.dart';
@@ -114,6 +115,7 @@ class Routes {
   static const eventFeedbackSave = '/event-feedback-save';
   static const eventFeedback = '/event-feedback';
   static const featuredEventPhotoSave = '/featured-event-photo-save';
+  static const mealPlanSave = '/mp/:neighborhoodUName';
 
   static const icebreakers = '/icebreakers';
   static const icebreakerSave = '/icebreaker-save';
@@ -569,6 +571,16 @@ class AppGoRouter {
         path: Routes.featuredEventPhotoSave, name: 'featuredEventPhotoSave',
         builder: (BuildContext context, GoRouterState state) => FeaturedEventPhotoSave(
         )
+      ),
+      GoRoute(
+        path: Routes.mealPlanSave, name: 'mealPlanSave',
+        builder: (BuildContext context, GoRouterState state) {
+          String? neighborhoodUName = state.pathParameters["neighborhoodUName"];
+          if (neighborhoodUName != null) {
+            return MealPlanSave(neighborhoodUName: neighborhoodUName);
+          }
+          return NeighborhoodsPage();
+        },
       ),
 
       GoRoute(

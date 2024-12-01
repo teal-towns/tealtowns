@@ -137,6 +137,8 @@ def nextMonth(datetime1, hour=0, minute=0, months = 1, day = None):
     if nextMonth > 12:
         nextYear = int(currentYear + int(nextMonth) / 12)
         nextMonth = int(nextMonth) % 12
+        if nextMonth == 0:
+            nextMonth = 12
     else:
         nextMonth = currentMonth + months
         nextYear = currentYear
@@ -195,3 +197,11 @@ def ToHourMinute(hourMinute: str):
     if posColon == 1:
         return '0' + hourMinute
     return hourMinute
+
+def AddHoursString(hourMinute: str, hours: int = 1):
+    hour = int(hourMinute[0:2].replace(':', ''))
+    minute = hourMinute[3:5]
+    newHour = hour + hours
+    if newHour >= 24:
+        newHour = newHour - 24
+    return str(newHour).zfill(2) + ':' + minute

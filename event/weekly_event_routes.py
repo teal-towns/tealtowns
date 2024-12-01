@@ -91,5 +91,17 @@ def AddRoutes():
         return _weekly_event.SendInvites(data['invites'], data['weeklyEventUName'], data['userId'])
     _socket.add_route('SendWeeklyEventInvites', SendWeeklyEventInvites)
 
+    def CheckAndSavePendingWeeklyEvents(data, auth, websocket):
+        data = lodash.extend_object({
+            'daysOfWeek': [],
+        }, data)
+        return _weekly_event.CheckAndSavePending(data['weeklyEvents'], data['userId'], data['startTimes'],
+            type = data['type'], neighborhoodUName = data['neighborhoodUName'])
+    _socket.add_route('CheckAndSavePendingWeeklyEvents', CheckAndSavePendingWeeklyEvents)
+
+    def UserSubscribedOrPendingWeeklyEvents(data, auth, websocket):
+        return _weekly_event.UserSubscribedOrPending(data['userId'], data['neighborhoodUName'])
+    _socket.add_route('UserSubscribedOrPendingWeeklyEvents', UserSubscribedOrPendingWeeklyEvents)
+
 AddRoutes()
 AddRoutesAsync()

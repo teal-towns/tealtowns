@@ -25,7 +25,7 @@ import ml_config
 _config = ml_config.get_config()
 
 def SearchNearSync(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
-    type: str = '', archived: int = 0, withEvents: int = 0, now = None):
+    type: str = '', archived: int = 0, withEvents: int = 0, now = None, pending: int = 0):
     query = {}
     if len(lngLat) > 0:
         query = {
@@ -40,7 +40,10 @@ def SearchNearSync(lngLat: list, maxMeters: float = 500, title: str = '', limit:
             },
         }
     sortKeys = "dayOfWeek,startTime"
-    ret = _mongo_db_crud.Search('weeklyEvent', {'title': title, 'type': type}, equalsKeyVals = {'archived': archived},
+    equalsKeyVals = {'archived': archived}
+    if not pending:
+        equalsKeyVals['pendingUsers'] = []
+    ret = _mongo_db_crud.Search('weeklyEvent', {'title': title, 'type': type}, equalsKeyVals = equalsKeyVals,
         limit = limit, skip = skip, query = query, sortKeys = sortKeys)
     userIds = []
     weeklyEventIds = []
@@ -192,6 +195,10 @@ async def GetById(weeklyEventId: str, withAdmins: int = 1, withEvent: int = 0, w
     return ret
 
 def Save(weeklyEvent: dict):
+    weeklyEvent = ValidateWeeklyEvent(weeklyEvent)
+    return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)
+
+def ValidateWeeklyEvent(weeklyEvent: dict):
     weeklyEvent = _mongo_db_crud.CleanId(weeklyEvent)
     if '_id' not in weeklyEvent:
         # Many weekly events will have the same title, so just use blank string to keep them shorter.
@@ -199,13 +206,18 @@ def Save(weeklyEvent: dict):
         weeklyEvent = lodash.extend_object({
             'type': '',
             'tags': [],
+            'rsvpDeadlineHours': 0,
+            'imageUrls': [],
             'archived': 0,
+            'pendingUsers': [],
         }, weeklyEvent)
         if weeklyEvent['priceUSD'] > 0 and weeklyEvent['priceUSD'] < 5:
             if weeklyEvent['priceUSD'] < 2.5:
                 weeklyEvent['priceUSD'] = 0
             else:
                 weeklyEvent['priceUSD'] = 5
+        if 'endTime' not in weeklyEvent or len(weeklyEvent['endTime']) < 1:
+            weeklyEvent['endTime'] = date_time.AddHoursString(weeklyEvent['startTime'], 1)
     else:
         # Some field changes require other updates.
         weeklyEventExisting = mongo_db.find_one('weeklyEvent', {'_id': mongo_db.to_object_id(weeklyEvent['_id'])})['item']
@@ -226,7 +238,7 @@ def Save(weeklyEvent: dict):
         weeklyEvent['endTime'] = date_time.ToHourMinute(weeklyEvent['endTime'])
     payInfo = _event_payment.GetSubscriptionDiscounts(weeklyEvent['priceUSD'], weeklyEvent['hostGroupSizeDefault'])
     weeklyEvent['hostMoneyPerPersonUSD'] = payInfo['eventFunds']
-    return _mongo_db_crud.Save('weeklyEvent', weeklyEvent)
+    return weeklyEvent
 
 def SaveBulk(weeklyEvents: list):
     ret = { 'valid': 1, 'message': '', 'weeklyEvents': [], }
@@ -338,3 +350,120 @@ def SendInvites(invites: list, weeklyEventUName: str, userId: str):
             ret['emailAttemptCount'] += 1
     return ret
 
+def GetByTimes(startTimes: list, daysOfWeek: list = [], type: str = '', neighborhoodUName: str = ''):
+    ret = { 'valid': 1, 'message': '', 'weeklyEvents': [], }
+    query = { 'startTime': { '$in': startTimes } }
+    if len(daysOfWeek) > 0:
+        query['dayOfWeek'] = { '$in': daysOfWeek }
+    if len(type) > 0:
+        query['type'] = type
+    if len(neighborhoodUName) > 0:
+        query['neighborhoodUName'] = neighborhoodUName
+    sort = { 'dayOfWeek': 1, 'startTime': 1 }
+    ret['weeklyEvents'] = mongo_db.find('weeklyEvent', query, sort_obj = sort)['items']
+    return ret
+
+def CheckAndSavePending(weeklyEventsNew: list, userId: str, startTimes: list, daysOfWeek: list = [], type: str = '',
+    neighborhoodUName: str = ''):
+    ret = { 'valid': 1, 'message': '', 'weeklyEventsCreated': [], 'weeklyEventUNamesToJoin': [], 'notifyUserIds': { 'sms': [], 'email': [] }, }
+    weeklyEvents = GetByTimes(startTimes, daysOfWeek = daysOfWeek, type = type,
+        neighborhoodUName = neighborhoodUName)['weeklyEvents']
+    # Both should be sorted.
+    weeklyEventsIndex = 0
+    maxIndex = len(weeklyEvents)
+    weeklyEventsSave = []
+
+    location = {}
+    if 'location' not in weeklyEventsNew[0] and neighborhoodUName != '':
+        neighborhood = mongo_db.find_one('neighborhood', {'uName': neighborhoodUName})['item']
+        location = neighborhood['location']
+
+    for weeklyEvent in weeklyEventsNew:
+        while weeklyEventsIndex < maxIndex and (weeklyEvents[weeklyEventsIndex]['dayOfWeek'] < weeklyEvent['dayOfWeek'] or \
+            (weeklyEvents[weeklyEventsIndex]['dayOfWeek'] == weeklyEvent['dayOfWeek'] and \
+            weeklyEvents[weeklyEventsIndex]['startTime'] < weeklyEvent['startTime'])):
+            weeklyEventsIndex += 1
+        # Weekly event already exists. Add pending user (if not already pending).
+        if weeklyEventsIndex < maxIndex and weeklyEvents[weeklyEventsIndex]['dayOfWeek'] == weeklyEvent['dayOfWeek'] and \
+            weeklyEvents[weeklyEventsIndex]['startTime'] == weeklyEvent['startTime']:
+            # If event is already created (no longer pending), can sign up for them (may require payment, so cannnot do it here).
+            if len(weeklyEvents[weeklyEventsIndex]['pendingUsers']) < 1:
+                ret['weeklyEventUNamesToJoin'].append(weeklyEvents[weeklyEventsIndex]['uName'])
+                continue
+            # Ensure user is not already pending.
+            addNew = 1
+            for pendingUser in weeklyEvents[weeklyEventsIndex]['pendingUsers']:
+                if pendingUser['userId'] == userId:
+                    addNew = 0
+                    break
+            if addNew:
+                # Plus 1 as we will add this user.
+                totalPending = len(weeklyEvents[weeklyEventsIndex]['pendingUsers']) + 1
+                # If now have enough pending users, change them all to admins and send invites.
+                if totalPending >= weeklyEvents[weeklyEventsIndex]['hostGroupSizeDefault']:
+                    # Send to current user and then all existing pending users.
+                    userIds = [userId]
+                    retNotify = NotifyUserOfEventActive(userId, weeklyEvents[weeklyEventsIndex]['uName'])
+                    ret['notifyUserIds']['sms'] += retNotify['notifyUserIds']['sms']
+                    ret['notifyUserIds']['email'] += retNotify['notifyUserIds']['email']
+                    for pendingUser in weeklyEvents[weeklyEventsIndex]['pendingUsers']:
+                        userIds.append(pendingUser['userId'])
+                        # Send invites.
+                        retNotify = NotifyUserOfEventActive(pendingUser['userId'], weeklyEvents[weeklyEventsIndex]['uName'])
+                        ret['notifyUserIds']['sms'] += retNotify['notifyUserIds']['sms']
+                        ret['notifyUserIds']['email'] += retNotify['notifyUserIds']['email']
+                    mutation = { '$set': { 'adminUserIds': userIds, 'pendingUsers': [] } }
+                    mongo_db.update_one('weeklyEvent', { '_id': mongo_db.to_object_id(weeklyEvents[weeklyEventsIndex]['_id']) }, mutation)
+                else:
+                    pendingUserNew = {}
+                    for pendingUser in weeklyEvent['pendingUsers']:
+                        if pendingUser['userId'] == userId:
+                            pendingUserNew = pendingUser
+                            mutation = { '$push': { 'pendingUsers': pendingUserNew } }
+                            mongo_db.update_one('weeklyEvent', { '_id': mongo_db.to_object_id(weeklyEvents[weeklyEventsIndex]['_id']) }, mutation)
+                            break
+        # Create new weekly event.
+        else:
+            if 'location' not in weeklyEvent:
+                weeklyEvent['location'] = location
+            weeklyEventsSave.append(ValidateWeeklyEvent(weeklyEvent))
+    if len(weeklyEventsSave) > 0:
+        ret['weeklyEventsCreated'] = mongo_db.insert_many('weeklyEvent', weeklyEventsSave)['items']
+    return ret
+
+def NotifyUserOfEventActive(userId: str, weeklyEventUName: str):
+    ret = { 'valid': 1, 'message': '', 'notifyUserIds': { 'sms': [], 'email': [] }, }
+    retPhone = _user.GetPhone(userId)
+    body = 'Your pending event is now active! Sign up here: ' + GetUrlUName(weeklyEventUName)
+    if retPhone['valid']:
+        messageTemplateVariables = { "1": GetUrlUName(weeklyEventUName) }
+        retSms = _sms_twilio.Send(body, retPhone['phoneNumber'], mode = retPhone['mode'],
+            messageTemplateKey = 'eventPendingMatch', messageTemplateVariables = messageTemplateVariables)
+        ret['notifyUserIds']['sms'].append(retPhone['userId'])
+    elif len(retPhone['email']) > 0:
+        body = ''
+        retEmail = _email_sendgrid.Send('Pending Event is now Active!', body, retPhone['email'])
+        ret['notifyUserIds']['email'].append(retPhone['userId'])
+    return ret
+
+def UserSubscribedOrPending(userId: str, neighborhoodUName: str):
+    ret = { 'valid': 1, 'message': '', 'alreadySubscribed': 0, }
+
+    query = { 'userId': userId }
+    items = mongo_db.find('userWeeklyEvent', query)['items']
+    if len(items) > 0:
+        ret['alreadySubscribed'] = 1
+        ret['userWeeklyEventsCount'] = len(items)
+        return ret
+    
+    query = { 'neighborhoodUName': neighborhoodUName, 'archived': 0 }
+    fields = { 'uName': 1,'pendingUsers': 1 }
+    items = mongo_db.find('weeklyEvent', query, fields = fields)['items']
+    for item in items:
+        for pendingUser in item['pendingUsers']:
+            if pendingUser['userId'] == userId:
+                ret['alreadySubscribed'] = 1
+                ret['weeklyEvent'] = item
+                return ret
+
+    return ret

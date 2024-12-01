@@ -21,6 +21,7 @@ def GetDefault():
         'rsvpDeadlineHours': random.randint(24, 72),
         'imageUrls': [ _stubs_data.RandomImageUrl() ],
         'archived': 0,
+        'pendingUsers': [],
     }
 
 def AddDefault():

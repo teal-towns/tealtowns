@@ -381,12 +381,12 @@ class InputFields {
 
   // TODO: fix: currently the outer component must use onChanged to set state, otherwise the checkbox will not toggle..
   Widget inputCheckbox(var formVals, String formValsKey, { String label = '',
-    var fieldKey = null, String helpText = '', Function(bool)? onChanged = null}) {
+    var formValsValue = null, var fieldKey = null, String helpText = '', Function(bool)? onChanged = null}) {
     bool initialVal = false;
     if (formValsKey == null) {
       initialVal = formVals;
     } else {
-      initialVal = (formVals.containsKey(formValsKey)) ? formVals[formValsKey] : false;
+      initialVal = (formVals.containsKey(formValsKey) && formVals[formValsKey] == formValsValue) ? true : false;
     }
     return InputWrapper(CheckboxFormField(
       title: Text(label),
