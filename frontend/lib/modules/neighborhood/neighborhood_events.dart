@@ -66,9 +66,25 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       }
     }));
 
+    _routeIds.add(_socketService.onRoute('UserSubscribedOrPendingWeeklyEvents', callback: (String resString) {
+      var res = jsonDecode(resString);
+      var data = res['data'];
+      if (data['valid'] == 1) {
+        if (data['alreadySubscribed'] < 1) {
+          context.go('/mp/${widget.uName}');
+        }
+      }
+    }));
+
     var data = { 'uName': widget.uName, 'withAdminContactInfo': 1, };
     _socketService.emit('GetNeighborhoodByUName', data);
-  }
+
+    CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
+    if (currentUserState.isLoggedIn) {
+      data = { 'userId': currentUserState.currentUser.id, 'neighborhoodUName': widget.uName, };
+      _socketService.emit('UserSubscribedOrPendingWeeklyEvents', data);
+    }
+    }
 
   @override
   void dispose() {

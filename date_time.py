@@ -195,3 +195,11 @@ def ToHourMinute(hourMinute: str):
     if posColon == 1:
         return '0' + hourMinute
     return hourMinute
+
+def AddHoursString(hourMinute: str, hours: int = 1):
+    hour = int(hourMinute[0:2].replace(':', ''))
+    minute = hourMinute[3:5]
+    newHour = hour + hours
+    if newHour >= 24:
+        newHour = newHour - 24
+    return str(newHour).zfill(2) + ':' + minute
