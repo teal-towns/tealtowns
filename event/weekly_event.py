@@ -25,7 +25,7 @@ import ml_config
 _config = ml_config.get_config()
 
 def SearchNearSync(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
-    type: str = '', archived: int = 0, withEvents: int = 0, now = None, pending: int = 0):
+    type: str = '', archived: int = 0, withEvents: int = 0, pending: int = 0, now = None):
     query = {}
     if len(lngLat) > 0:
         query = {
@@ -67,10 +67,10 @@ def SearchNearSync(lngLat: list, maxMeters: float = 500, title: str = '', limit:
     return ret
 
 async def SearchNear(lngLat: list, maxMeters: float = 500, title: str = '', limit: int = 250, skip: int = 0, withAdmins: int = 1,
-    type: str = '', archived: int = 0, withEvents: int = 0, withUserEventUserId: str = '', now = None, onUpdate = None,
+    type: str = '', archived: int = 0, withEvents: int = 0, pending: int = 0, withUserEventUserId: str = '', now = None, onUpdate = None,
     autoCreateEvents: int = 1):
     ret = SearchNearSync(lngLat, maxMeters, title, limit, skip, withAdmins = withAdmins,
-        type = type, archived = archived, withEvents = withEvents, now = now)
+        type = type, archived = archived, withEvents = withEvents, pending = pending, now = now)
     userIds = ret['userIds']
     weeklyEventIds = ret['weeklyEventIds']
     weeklyEventIdsMap = ret['weeklyEventIdsMap']

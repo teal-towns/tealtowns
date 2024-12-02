@@ -36,10 +36,11 @@ class WeeklyEvents extends StatefulWidget {
   int showCreateButton;
   int viewOnly;
   bool eventPayWithSubscribe;
+  int pendingEvents;
 
   WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
     this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateLngLatOnInit = 1,
-    this.showCreateButton = 1, this.viewOnly = 0, this.eventPayWithSubscribe = false,});
+    this.showCreateButton = 1, this.viewOnly = 0, this.eventPayWithSubscribe = false, this.pendingEvents = 0});
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -62,6 +63,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   Map<String, dynamic?> _filters = {
     'maxMeters': 1500,
     'inputLocation': { 'lngLat': [0, 0], 'address': {} },
+    'pendingEvents': 0,
   };
   bool _loading = true;
   String _message = '';
@@ -153,6 +155,9 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         break;
       }
     }
+    if (widget.pendingEvents > 0) {
+      _filters['pendingEvents'] = widget.pendingEvents;
+    } 
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _init();
@@ -351,6 +356,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
   }
 
   _buildWeeklyEvent(WeeklyEventClass weeklyEvent, BuildContext context, var currentUserState, { double imageHeight = 100,}) {
+    bool isPending = weeklyEvent.pendingUsers.length > 0 ? true : false;
     List<Widget> buttons = [];
     if (currentUserState.isLoggedIn && weeklyEvent.adminUserIds.contains(currentUserState.currentUser.id)) {
       List<Widget> buttons = [
@@ -454,7 +460,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
           }),
           _style.SpacingV('medium'),
         ];
-      } else if (weeklyEvent.priceUSD == 0) {
+      } else if (!isPending && weeklyEvent.priceUSD == 0) {
         // joinButton = TextButton(child: Text('Join'), onPressed: () {
         //   // _userEventSaveService.JoinEvent(weeklyEvent.title, weeklyEvent.priceUSD, currentUserState.currentUser.id, (Map<String, dynamic> data) {
         //     // TODO - track event as joined (need to fetch user joined events for ALL events; just re-fetch here?)
@@ -470,11 +476,11 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         // joinButton = _buttons.Link(context, '${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
         defaultJoinButtons = true;
       }
-    } else if (weeklyEvent.priceUSD != 0) {
+    } else if (weeklyEvent.priceUSD != 0 && !isPending) {
       // joinButton = _buttons.Link(context, '${joinText} (\$${weeklyEvent.priceUSD.toStringAsFixed(0)})', '/we/${weeklyEvent.uName}', launchUrl: newPage);
       defaultJoinButtons = true;
     }
-    
+
     if (defaultJoinButtons) {
       if (!alreadyRsvped) {
         joinText = 'Join';
@@ -507,6 +513,26 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       }
     }
 
+    if (isPending) {
+      bool userIsAlreadyPending = false;
+      if (currentUserState.isLoggedIn) {
+        for (int i = 0; i < weeklyEvent.pendingUsers.length; i++) {
+          if (weeklyEvent.pendingUsers[i]['userId'] == currentUserState.currentUser.id) {
+            userIsAlreadyPending = true;
+            break;
+          }
+        }
+      }
+      if (!userIsAlreadyPending && weeklyEvent.type == 'sharedMeal') {
+        joinButtons += [
+          TextButton(child: Text('Join Meal Plan'), onPressed: () {
+            context.go('/mp/${weeklyEvent.neighborhoodUName}');
+          }),
+          _style.SpacingV('medium'),
+        ];
+      }
+    }
+
     // List<Widget> colsAddress = [];
     // String address = _locationService.JoinAddress(weeklyEvent.locationAddress);
     // if (address.length > 0) {
@@ -532,39 +558,52 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       ];
     }
 
-    return SizedBox(
+    String titlePrefix = isPending ? '[${weeklyEvent.pendingUsers.length}/${weeklyEvent.hostGroupSizeDefault} pending] ' : '';
+    Widget linkContent = Column(
+      children: [
+        Stack(
+          children: [
+            ...colsImage,
+            action,
+          ]
+        ),
+        _style.SpacingH('medium'),
+        // _style.Text1('${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)'),
+        _style.Text1('${titlePrefix}${weeklyEvent.title}', fontWeight: FontWeight.bold),
+      ]
+    );
+
+    List<Widget> cols = [];
+    if (!isPending || (currentUserState.isLoggedIn && currentUserState.hasRole('admin'))) {
+      cols += [ _buttons.LinkWrapper(context, linkContent, '/we/${weeklyEvent.uName}', launchUrl: newPage) ];
+    } else {
+      cols += [ linkContent ];
+    }
+    cols += [
+      _style.SpacingH('medium'),
+      // _style.SpacingH('medium'),
+      _style.Text1('${_dateTime.ToAmPm(weeklyEvent.startTime)}'),
+      // ...colsAddress,
+      ...colsAttendees,
+      Row(
+        children: [
+          ...joinButtons,
+        ]
+      ),
+      _style.SpacingH('medium'),
+      ...buttons,
+    ];
+
+    double opacity = isPending ? 0.5 : 1;
+    return Opacity(opacity: opacity, child: Container(
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buttons.LinkWrapper(context, Column(
-            children: [
-              Stack(
-                children: [
-                  ...colsImage,
-                  action,
-                ]
-              ),
-              _style.SpacingH('medium'),
-              // _style.Text1('${weeklyEvent.title} (${weeklyEvent.xDistanceKm.toStringAsFixed(1)} km)'),
-              _style.Text1('${weeklyEvent.title}', fontWeight: FontWeight.bold),
-            ]
-          ), '/we/${weeklyEvent.uName}', launchUrl: newPage),
-          _style.SpacingH('medium'),
-          // _style.SpacingH('medium'),
-          _style.Text1('${_dateTime.ToAmPm(weeklyEvent.startTime)}'),
-          // ...colsAddress,
-          ...colsAttendees,
-          Row(
-            children: [
-              ...joinButtons,
-            ]
-          ),
-          _style.SpacingH('medium'),
-          ...buttons,
+          ...cols,
         ]
       )
-    );
+    ));
   }
 
   void ResetEventPay() {
@@ -659,6 +698,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
         'withAdmins': 0,
         'type': widget.type,
         'withEvents': 1,
+        'pending': _filters['pendingEvents'],
       };
       CurrentUserState currentUserState = Provider.of<CurrentUserState>(context, listen: false);
       if (currentUserState.isLoggedIn) {
@@ -676,7 +716,8 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
       String? lng = _filters['inputLocation']['lngLat'][0]?.toString();
       String? lat = _filters['inputLocation']['lngLat'][1]?.toString();
       String? maxMeters = _filters['maxMeters']?.toString();
-      html.window.history.pushState({}, '', '/${widget.routePath}?lng=${lng}&lat=${lat}&range=${maxMeters}');
+      String? pending = _filters['pendingEvents']?.toString();
+      html.window.history.pushState({}, '', '/${widget.routePath}?lng=${lng}&lat=${lat}&range=${maxMeters}&pending=${pending}');
     }
   }
 }

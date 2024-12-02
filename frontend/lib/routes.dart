@@ -504,6 +504,7 @@ class AppGoRouter {
           lat: double.parse(state.uri.queryParameters['lat'] ?? '0'),
           lng: double.parse(state.uri.queryParameters['lng'] ?? '0'),
           maxMeters: double.parse(state.uri.queryParameters['range'] ?? '1500'),
+          pendingEvents: int.parse(state.uri.queryParameters['pending'] ?? '0'),
         ),
       ),
       GoRoute(
