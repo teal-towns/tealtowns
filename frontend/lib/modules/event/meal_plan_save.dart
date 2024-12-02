@@ -9,6 +9,7 @@ import '../../common/layout_wrap.dart';
 import '../../common/socket_service.dart';
 import '../../common/style.dart';
 import '../user_auth/current_user_state.dart';
+import '../user_auth/user_login_signup.dart';
 
 class MealPlanSave extends StatefulWidget {
   String neighborhoodUName;
@@ -114,6 +115,18 @@ class _MealPlanSaveState extends State<MealPlanSave> {
 
   @override
   Widget build(BuildContext context) {
+    CurrentUserState currentUserState = context.watch<CurrentUserState>();
+    if (!currentUserState.isLoggedIn) {
+      Widget content = Column(children: [ UserLoginSignup(mode: 'signup', onSave: (Map<String, dynamic> data) {}) ]);
+      if (widget.pageWrapper == 1) {
+        return AppScaffoldComponent(
+          listWrapper: true,
+          body: content,
+        );
+      }
+      return content;
+    }
+
     List<Map<String, dynamic>> selectOptsTimes = [];
     for (int i = 0; i < widget.startTimes.length; i++) {
       selectOptsTimes.add({'value': widget.startTimes[i], 'label': widget.startTimes[i]});
@@ -200,7 +213,6 @@ class _MealPlanSaveState extends State<MealPlanSave> {
     }
 
     Widget content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _style.Text1('${widget.headerTitle}', size: 'large'),
         _style.SpacingH('medium'),
