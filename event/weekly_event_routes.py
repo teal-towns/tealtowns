@@ -51,11 +51,12 @@ def AddRoutesAsync():
             'type': '',
             'withEvents': 0,
             'withUserEventUserId': '',
+            'pending': 0,
         }, data)
         lngLat = data['lngLat']
         return await _weekly_event.SearchNear(lngLat, float(data['maxMeters']), data['title'], data['limit'], data['skip'],
             data['withAdmins'], data['type'], withEvents = data['withEvents'],
-            withUserEventUserId = data['withUserEventUserId'], onUpdate = OnUpdate)
+            withUserEventUserId = data['withUserEventUserId'], pending = data['pending'], onUpdate = OnUpdate)
     _socket.add_route('SearchNearWeeklyEvents', SearchNear, 'async')
 
 def AddRoutes():

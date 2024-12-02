@@ -248,7 +248,7 @@ class _MealPlanSaveState extends State<MealPlanSave> {
     List<Map<String, dynamic>> weeklyEvents = [];
     for (int i = 0; i < _eventsByDay.length; i++) {
       if (_eventsByDay[i]['startTime'].length > 0) {
-        Map<String, dynamic> event = defaultEvent;
+        Map<String, dynamic> event = Map<String, dynamic>.from(defaultEvent);
         event['dayOfWeek'] = i;
         event['startTime'] = _eventsByDay[i]['startTime'];
         Map<String, dynamic> pendingUser = { 'userId': userId, 'attendeeCountAsk': 0, 'hostGroupSizeMax': 0, 'selfHostCount': 0,};

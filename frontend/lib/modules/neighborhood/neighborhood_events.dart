@@ -129,7 +129,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       // _style.SpacingH('medium'),
       WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
         pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters,
-        showCreateButton: widget.withWeeklyEventsCreateButton, viewOnly: 1,),
+        showCreateButton: widget.withWeeklyEventsCreateButton, viewOnly: 1, pendingEvents: 1, ),
       _style.SpacingH('medium'),
       // _style.Text1('Pending Events By Interest', size: 'large'),
       // _style.SpacingH('medium'),
