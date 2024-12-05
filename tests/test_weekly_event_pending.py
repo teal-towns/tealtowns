@@ -136,7 +136,7 @@ def test_WeeklyEventsPending():
     assert retGet['weeklyEvents'][2]['startTime'] == '17:30'
     assert len(retGet['weeklyEvents'][2]['pendingUsers']) == 2
 
-    # Save pending events for user 2. 1 existing. Since host group size is 3, should create new event.
+    # Save pending events for user 2. 1 existing. Since host group size is 3, should have enough people BUT no hosts yet.
     weeklyEventsNew = [
         lodash.extend_object(weeklyEventDefault, { 'dayOfWeek': 1, 'startTime': '17:30', 'pendingUsers': [
             { 'userId': users[2]['_id'], 'attendeeCountAsk': 1, 'hostGroupSizeMax': 0, 'selfHostCount': 0 }
@@ -145,7 +145,28 @@ def test_WeeklyEventsPending():
     ret = _weekly_event.CheckAndSavePending(weeklyEventsNew, users[2]['_id'], startTimes, type = type,
         neighborhoodUName = neighborhoods[0]['uName'])
     assert len(ret['weeklyEventsCreated']) == 0
-    assert len(ret['notifyUserIds']['sms']) == 3
+    assert len(ret['notifyUserIds']['sms']) == 0
+    assert len(ret['notifyUserIds']['email']) == 0
+    retGet = _weekly_event.GetByTimes(startTimes, neighborhoodUName = neighborhoods[0]['uName'], type = type)
+    assert len(retGet['weeklyEvents']) == 5
+    assert retGet['weeklyEvents'][0]['dayOfWeek'] == 0
+    assert retGet['weeklyEvents'][0]['startTime'] == '17:30'
+    assert len(retGet['weeklyEvents'][0]['pendingUsers']) == 2
+    assert retGet['weeklyEvents'][2]['dayOfWeek'] == 1
+    assert retGet['weeklyEvents'][2]['startTime'] == '17:30'
+    assert len(retGet['weeklyEvents'][2]['pendingUsers']) == 3
+    assert len(retGet['weeklyEvents'][2]['adminUserIds']) == 0
+
+    # Save pending events for user 3. 1 existing. Host, so should create event.
+    weeklyEventsNew = [
+        lodash.extend_object(weeklyEventDefault, { 'dayOfWeek': 1, 'startTime': '17:30', 'pendingUsers': [
+            { 'userId': users[3]['_id'], 'attendeeCountAsk': 1, 'hostGroupSizeMax': 10, 'selfHostCount': 0 }
+        ] }),
+    ]
+    ret = _weekly_event.CheckAndSavePending(weeklyEventsNew, users[3]['_id'], startTimes, type = type,
+        neighborhoodUName = neighborhoods[0]['uName'])
+    assert len(ret['weeklyEventsCreated']) == 0
+    assert len(ret['notifyUserIds']['sms']) == 4
     assert len(ret['notifyUserIds']['email']) == 0
     retGet = _weekly_event.GetByTimes(startTimes, neighborhoodUName = neighborhoods[0]['uName'], type = type)
     assert len(retGet['weeklyEvents']) == 5
@@ -155,8 +176,9 @@ def test_WeeklyEventsPending():
     assert retGet['weeklyEvents'][2]['dayOfWeek'] == 1
     assert retGet['weeklyEvents'][2]['startTime'] == '17:30'
     assert len(retGet['weeklyEvents'][2]['pendingUsers']) == 0
-    assert len(retGet['weeklyEvents'][2]['adminUserIds']) == 3
+    assert len(retGet['weeklyEvents'][2]['adminUserIds']) == 1
+    # Only host should be admin.
     for adminUserId in retGet['weeklyEvents'][2]['adminUserIds']:
-        assert adminUserId in [users[0]['_id'], users[1]['_id'], users[2]['_id']]
+        assert adminUserId in [users[3]['_id']]
 
     _mongo_mock.CleanUp()

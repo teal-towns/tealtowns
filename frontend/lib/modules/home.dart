@@ -43,6 +43,8 @@ class _HomeState extends State<Home> {
         children: [
           _style.Text1('Neighbor Dinners', size: 'xlarge'),
           _style.SpacingH('medium'),
+          _style.Text1('At TealTowns, we believe the loneliness and climate crises can be solved by connecting people together to work on local green (nature based) projects. The first step is to join (or create) your neighborhood community to meet for weekly shared meals.',),
+          _style.SpacingH('medium'),
           Neighborhoods(showSeeAll: false, showLink: false, redirectTo: 'events',),
         ]
       )

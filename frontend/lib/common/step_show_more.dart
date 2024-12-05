@@ -4,8 +4,11 @@ class StepShowMore extends StatefulWidget {
   List<Widget> stepsContent;
   bool showAll;
   Widget? header;
+  double spacing;
+  String align;
 
-  StepShowMore({Key? key, required this.stepsContent, this.showAll = false, this.header = null, }) : super(key: key);
+  StepShowMore({Key? key, required this.stepsContent, this.showAll = false, this.header = null, this.spacing = 10,
+    this.align = 'start', }) : super(key: key);
 
   @override
   _StepShowMoreState createState() => _StepShowMoreState();
@@ -21,6 +24,9 @@ class _StepShowMoreState extends State<StepShowMore> {
     for (int i = 0; i < widget.stepsContent.length; i++) {
       if (i <= _stepIndex || widget.showAll) {
         cols.add(widget.stepsContent[i]);
+        if (widget.spacing > 0) {
+          cols.add(SizedBox(height: widget.spacing));
+        }
       } else {
         break;
       }
@@ -37,9 +43,10 @@ class _StepShowMoreState extends State<StepShowMore> {
         )
       );
     }
+    CrossAxisAlignment align = widget.align == 'center' ? CrossAxisAlignment.center : CrossAxisAlignment.start;
     return (
       Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: align,
         children: [
           ...cols,
         ]
