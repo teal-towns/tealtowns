@@ -392,15 +392,25 @@ def CheckAndSavePending(weeklyEventsNew: list, userId: str, startTimes: list, da
                 continue
             # Ensure user is not already pending.
             addNew = 1
+            hostUserIds = []
+            pendingUserNew = {}
+            for pendingUser in weeklyEvent['pendingUsers']:
+                if pendingUser['userId'] == userId:
+                    pendingUserNew = pendingUser
+                    if 'hostGroupSizeMax' in pendingUserNew and pendingUserNew['hostGroupSizeMax'] > 0:
+                        hostUserIds.append(pendingUserNew['userId'])
+                    break
+
             for pendingUser in weeklyEvents[weeklyEventsIndex]['pendingUsers']:
                 if pendingUser['userId'] == userId:
                     addNew = 0
-                    break
+                if pendingUser['hostGroupSizeMax'] > 0:
+                    hostUserIds.append(pendingUser['userId'])
             if addNew:
                 # Plus 1 as we will add this user.
                 totalPending = len(weeklyEvents[weeklyEventsIndex]['pendingUsers']) + 1
-                # If now have enough pending users, change them all to admins and send invites.
-                if totalPending >= weeklyEvents[weeklyEventsIndex]['hostGroupSizeDefault']:
+                # If now have enough pending users and at least 1 host, change hosts to admins and send invites.
+                if totalPending >= weeklyEvents[weeklyEventsIndex]['hostGroupSizeDefault'] and len(hostUserIds) > 0:
                     # Send to current user and then all existing pending users.
                     userIds = [userId]
                     retNotify = NotifyUserOfEventActive(userId, weeklyEvents[weeklyEventsIndex]['uName'])
@@ -412,16 +422,12 @@ def CheckAndSavePending(weeklyEventsNew: list, userId: str, startTimes: list, da
                         retNotify = NotifyUserOfEventActive(pendingUser['userId'], weeklyEvents[weeklyEventsIndex]['uName'])
                         ret['notifyUserIds']['sms'] += retNotify['notifyUserIds']['sms']
                         ret['notifyUserIds']['email'] += retNotify['notifyUserIds']['email']
-                    mutation = { '$set': { 'adminUserIds': userIds, 'pendingUsers': [] } }
+                    mutation = { '$set': { 'adminUserIds': hostUserIds, 'pendingUsers': [] } }
                     mongo_db.update_one('weeklyEvent', { '_id': mongo_db.to_object_id(weeklyEvents[weeklyEventsIndex]['_id']) }, mutation)
                 else:
-                    pendingUserNew = {}
-                    for pendingUser in weeklyEvent['pendingUsers']:
-                        if pendingUser['userId'] == userId:
-                            pendingUserNew = pendingUser
-                            mutation = { '$push': { 'pendingUsers': pendingUserNew } }
-                            mongo_db.update_one('weeklyEvent', { '_id': mongo_db.to_object_id(weeklyEvents[weeklyEventsIndex]['_id']) }, mutation)
-                            break
+                    if 'userId' in pendingUserNew:
+                        mutation = { '$push': { 'pendingUsers': pendingUserNew } }
+                        mongo_db.update_one('weeklyEvent', { '_id': mongo_db.to_object_id(weeklyEvents[weeklyEventsIndex]['_id']) }, mutation)
         # Create new weekly event.
         else:
             if 'location' not in weeklyEvent:

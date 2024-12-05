@@ -9,6 +9,7 @@ import '../../common/buttons.dart';
 import '../../common/config_service.dart';
 import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
+import '../../common/step_show_more.dart';
 import '../../common/style.dart';
 import '../event/weekly_events.dart';
 import './neighborhood_class.dart';
@@ -121,15 +122,32 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
     }
 
     Map<String, dynamic> config = _configService.GetConfig();
+
+    List<Widget> stepsContent = [
+      _style.Text1('Neighbor Dinners', size: 'large',),
+      Column(
+        children: [
+          _style.Text1('Pending events will activate once enough people sign up. Invite your neighbors!'),
+          QrImageView(
+            data: '${config['SERVER_URL']}/ne/${_neighborhood.uName}',
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
+        ],
+      ),
+    ];
+
     List<Widget> cols = [
       _style.SpacingH('large'),
-      _style.Text1('Neighbor Dinners', size: 'large',),
+      StepShowMore(stepsContent: stepsContent, align: 'center',),
+      // _style.Text1('Neighbor Dinners', size: 'large',),
       _style.SpacingH('medium'),
       // _style.Text1('Weekly Calendar'),
       // _style.SpacingH('medium'),
       WeeklyEvents(lat: _neighborhood.location.coordinates[1], lng: _neighborhood.location.coordinates[0],
         pageWrapper: 0, updateLngLatOnInit: 0, showFilters: widget.withWeeklyEventFilters,
-        showCreateButton: widget.withWeeklyEventsCreateButton, viewOnly: 1, pendingEvents: 1, ),
+        showCreateButton: widget.withWeeklyEventsCreateButton, viewOnly: 1, pendingEvents: 1,
+        neighborhoodUName: widget.uName,),
       _style.SpacingH('medium'),
       // _style.Text1('Pending Events By Interest', size: 'large'),
       // _style.SpacingH('medium'),
@@ -186,6 +204,7 @@ class _NeighborhoodEventsState extends State<NeighborhoodEvents> {
       //   ...colsAdmin,
       // ];
     }
+
     Widget content = Column(
       children: [
         ...cols,
