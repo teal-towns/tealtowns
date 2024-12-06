@@ -28,7 +28,7 @@ class _HomeState extends State<Home> {
     super.initState();
 
     var neighborhoodState = Provider.of<NeighborhoodState>(context, listen: false);
-    if (neighborhoodState.defaultUserNeighborhood != null) {
+    if (neighborhoodState.defaultUserNeighborhood != null && neighborhoodState.defaultUserNeighborhood!.neighborhood.uName.length > 0) {
       Timer(Duration(milliseconds: 100), () {
         context.go('/ne/${neighborhoodState.defaultUserNeighborhood!.neighborhood.uName}');
       });

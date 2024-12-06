@@ -6,7 +6,10 @@ from neighborhood import user_neighborhood as _user_neighborhood
 def addRoutes():
 
     def Save(data, auth, websocket):
-        return _user_neighborhood.Save(data['userNeighborhood'])
+        data = lodash.extend_object({
+            'returnWithNeighborhood': 0,
+        }, data)
+        return _user_neighborhood.Save(data['userNeighborhood'], returnWithNeighborhood = data['returnWithNeighborhood'])
     _socket.add_route('SaveUserNeighborhood', Save)
 
     def Search(data, auth, websocket):

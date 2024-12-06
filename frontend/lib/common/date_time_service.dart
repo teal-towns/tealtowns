@@ -108,15 +108,23 @@ class DateTimeService {
     return (hourEnd - hour) * 60 + (minuteEnd - minute);
   }
 
-  String ToAmPm(String time) {
+  String ToAmPm(String time, { bool short = false }) {
     int index = time.indexOf(':');
     int hour = int.parse(time.substring(0, index));
     String minute = time.substring(index + 1, index + 3);
-    if (hour >= 12) {
-      return '${hour - 12}:${minute}pm';
+    String newTime = '';
+    if (hour > 12) {
+      newTime = '${hour - 12}:${minute}pm';
+    } else if (hour == 12) {
+      newTime = '${hour}:${minute}pm';
+    } else if (hour == 0) {
+      newTime = '12:${minute}am';
+    } else {
+      newTime = '${hour}:${minute}am';
     }
-    else {
-      return '${hour}:${minute}am';
+    if (short) {
+      newTime = newTime.substring(0, newTime.length - 1);
     }
+    return newTime;
   }
 }

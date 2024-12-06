@@ -45,7 +45,7 @@ def Search(stringKeyVals: dict = {}, limit: int = 250, skip: int = 0, withNeighb
 
     return ret
 
-def Save(userNeighborhood: dict, useThread: int = 1, maxCreatedEvents: int = 0):
+def Save(userNeighborhood: dict, useThread: int = 1, maxCreatedEvents: int = 0, returnWithNeighborhood: int = 0):
     if 'userId' not in userNeighborhood or 'neighborhoodUName' not in userNeighborhood:
         return { 'valid': 0, 'message': 'Missing userId or neighborhoodUName' }
     if 'status' in userNeighborhood and userNeighborhood['status'] == 'default':
@@ -75,12 +75,17 @@ def Save(userNeighborhood: dict, useThread: int = 1, maxCreatedEvents: int = 0):
             userNeighborhood['vision'] = ''
     ret = _mongo_db_crud.Save('userNeighborhood', userNeighborhood)
     _user_insight.Save({ 'userId': userNeighborhood['userId'], 'firstNeighborhoodJoinAt': date_time.now_string() })
+
+    if returnWithNeighborhood:
+        ret['userNeighborhood']['neighborhood'] = mongo_db.find_one('neighborhood', {'uName': userNeighborhood['neighborhoodUName']})['item']
+
     if useThread and not _testMode:
         thread = threading.Thread(target=_user_availability.CheckCommonInterestsAndTimesByUser,
             args=(username,), kwargs={'maxCreatedEvents': maxCreatedEvents})
         thread.start()
         return ret
     _user_availability.CheckCommonInterestsAndTimesByUser(username, maxCreatedEvents = maxCreatedEvents)
+
     return ret
 
 def RemoveRole(username: str, neighborhoodUName: str, role: str, removeRelated: int = 1):

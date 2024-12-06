@@ -45,6 +45,10 @@ class NeighborhoodState extends ChangeNotifier {
         var data = res['data'];
         if (data['valid'] == 1) {
           if (_userId.length > 0) {
+            // Set for timing, then re-check and get all.
+            if (data.containsKey('userNeighborhood')) {
+              SetUserNeighborhoods([UserNeighborhoodClass.fromJson(data['userNeighborhood'])]);
+            }
             CheckAndGet(_userId);
           }
         }
@@ -110,6 +114,7 @@ class NeighborhoodState extends ChangeNotifier {
         'userId': userId,
         'status': status,
       },
+      'returnWithNeighborhood': 1,
     };
     _socketService.emit('SaveUserNeighborhood', data);
   }
