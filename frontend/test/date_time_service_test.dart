@@ -59,4 +59,14 @@ void main() {
     ret = { 'dayOfWeek': 1, 'startTime': '01:00' };
     expect(service.WeekdayTimezone(0, '17:00', 'America/Los_Angeles', 'Etc/GMT'), ret);
   });
+
+  test('DateTimeService.ToAmPm', () {
+    final service = DateTimeService();
+    expect(service.ToAmPm('00:00'), '12:00am');
+    expect(service.ToAmPm('00:30'), '12:30am');
+    expect(service.ToAmPm('12:30'), '12:30pm');
+    expect(service.ToAmPm('11:59'), '11:59am');
+    expect(service.ToAmPm('12:00'), '12:00pm');
+    expect(service.ToAmPm('23:59'), '11:59pm');
+  });
 }

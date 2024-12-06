@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_wrap.dart';
 import '../../common/socket_service.dart';
@@ -25,7 +26,7 @@ class MealPlanSave extends StatefulWidget {
   List<Map<String, dynamic>> eventsByDayDefaults;
 
   MealPlanSave({this.pageWrapper = 1, this.neighborhoodUName = '', this.type = 'sharedMeal', this.title = 'Shared Meal',
-    this.daysOfWeek = const [0,1,2,3,4,5,6], this.startTimes = const ['17:30', '19:30',], this.hostGroupSizeDefault = 10,
+    this.daysOfWeek = const [0,1,2,3,4,5,6], this.startTimes = const ['17:30', '19:30'], this.hostGroupSizeDefault = 10,
     this.priceUSD = 9.0, this.headerTitle = 'Neighborhood Meal Plan', this.eventsByDayDefaults = const [
       { 'startTime': '17:30' }, { 'startTime': '17:30' }, { 'startTime': '17:30' }, { 'startTime': '17:30' }, {}, {}, {},
     ]});
@@ -35,12 +36,14 @@ class MealPlanSave extends StatefulWidget {
 }
 
 class _MealPlanSaveState extends State<MealPlanSave> {
+  DateTimeService _dateTime = DateTimeService();
   InputFields _inputFields = InputFields();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Style _style = Style();
 
   bool _saving = false;
+  bool _showLoginSignup = false;
   List<Map<String, dynamic>> _selectOptsHost = [
     { 'value': 'pay', 'label': 'Pay' },
     { 'value': 'cook', 'label': 'Cook' },
@@ -117,9 +120,14 @@ class _MealPlanSaveState extends State<MealPlanSave> {
   @override
   Widget build(BuildContext context) {
     CurrentUserState currentUserState = context.watch<CurrentUserState>();
-    if (!currentUserState.isLoggedIn) {
-      Widget content = Column(children: [ UserLoginSignup(mode: 'signup', neighborhoodUName: widget.neighborhoodUName,
-        onSave: (Map<String, dynamic> data) {}) ]);
+    if (_showLoginSignup) {
+      Widget content = Column(children: [
+        UserLoginSignup(mode: 'signup', neighborhoodUName: widget.neighborhoodUName,
+        onSave: (Map<String, dynamic> data) {
+          Save(context);
+          setState(() { _showLoginSignup = false; });
+        })
+      ]);
       if (widget.pageWrapper == 1) {
         return AppScaffoldComponent(
           listWrapper: true,
@@ -129,17 +137,17 @@ class _MealPlanSaveState extends State<MealPlanSave> {
       return content;
     }
 
-    List<Map<String, dynamic>> selectOptsTimes = [];
-    for (int i = 0; i < widget.startTimes.length; i++) {
-      selectOptsTimes.add({'value': widget.startTimes[i], 'label': widget.startTimes[i]});
-    }
+    // List<Map<String, dynamic>> selectOptsTimes = [];
+    // for (int i = 0; i < widget.startTimes.length; i++) {
+    //   selectOptsTimes.add({'value': widget.startTimes[i], 'label': widget.startTimes[i]});
+    // }
     List<Widget> days = [];
     double rowHeight = 43;
     // Left column for labels (times and cooking).
     List<Widget> colsTimes = [];
     for (int j = 0; j < widget.startTimes.length; j++) {
       colsTimes += [
-        Container(height: rowHeight, child: _style.Text1('${widget.startTimes[j]}')),
+        Container(height: rowHeight, child: _style.Text1('${_dateTime.ToAmPm(widget.startTimes[j], short: true)}')),
       ];
     }
     days += [
@@ -209,7 +217,11 @@ class _MealPlanSaveState extends State<MealPlanSave> {
     } else {
       colsSave = [
         ElevatedButton(child: Text('Save'), onPressed: () {
-          Save(context);
+          if (!currentUserState.isLoggedIn) {
+            setState(() { _showLoginSignup = true; });
+          } else {
+            Save(context);
+          }
         }),
       ];
     }
@@ -233,7 +245,7 @@ class _MealPlanSaveState extends State<MealPlanSave> {
         StepShowMore(stepsContent: stepsContent, align: 'center',),
         // _style.Text1('Which days would you like to eat (and optionally cook)?'),
         _style.SpacingH('medium'),
-        LayoutWrap(items: days, align: 'left', spacing: 5, width: 40,),
+        LayoutWrap(items: days, align: 'left', spacing: 5, width: 50,),
         _style.SpacingH('medium'),
         // _inputFields.inputMultiSelectButtons(_selectOptsDays, _formVals, 'hostCook', label: 'Would you like to cook any days?'),
         // _style.SpacingH('medium'),
