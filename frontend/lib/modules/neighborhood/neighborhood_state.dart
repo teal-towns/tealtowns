@@ -11,7 +11,6 @@ class NeighborhoodState extends ChangeNotifier {
   SocketService _socketService = SocketService();
   LocalstorageService _localstorageService = LocalstorageService();
 
-  LocalStorage? _localstorage = null;
   List<String> _routeIds = [];
   // String _status = "done";
   String _userId = '';
@@ -56,16 +55,9 @@ class NeighborhoodState extends ChangeNotifier {
     }
   }
 
-  void GetLocalstorage() {
-    if (_localstorage == null) {
-      Init();
-      _localstorage = _localstorageService.localstorage;
-    }
-  }
-
   void CheckAndGet(String userId, {bool notify = true}) {
-    GetLocalstorage();
-    List<dynamic>? _localStorageUserNeighborhoods = _localstorage?.getItem('userNeighborhoods');
+    Init();
+    List<dynamic>? _localStorageUserNeighborhoods = _localstorageService.GetItem('userNeighborhoods');
     List<UserNeighborhoodClass> userNeighborhoods = _localStorageUserNeighborhoods != null ?
       UserNeighborhoodClass.parseList(_localStorageUserNeighborhoods) : [];
     if (userNeighborhoods.length < 1) {
@@ -85,8 +77,8 @@ class NeighborhoodState extends ChangeNotifier {
       }
     }
 
-    GetLocalstorage();
-    _localstorage?.setItem('userNeighborhoods', UserNeighborhoodClass.toJsonList(userNeighborhoods));
+    Init();
+    _localstorageService.SetItem('userNeighborhoods', UserNeighborhoodClass.toJsonList(userNeighborhoods));
 
     if (notify) {
       notifyListeners();
@@ -97,8 +89,8 @@ class NeighborhoodState extends ChangeNotifier {
     _userNeighborhoods = [];
     _defaultUserNeighborhood = null;
 
-    GetLocalstorage();
-    _localstorage?.deleteItem('userNeighborhoods');
+    Init();
+    _localstorageService.RemoveItem('userNeighborhoods');
 
     if (notify) {
       notifyListeners();

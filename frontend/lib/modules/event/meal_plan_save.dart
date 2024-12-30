@@ -8,7 +8,6 @@ import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_wrap.dart';
 import '../../common/socket_service.dart';
-import '../../common/step_show_more.dart';
 import '../../common/style.dart';
 import '../user_auth/current_user_state.dart';
 import '../user_auth/user_login_signup.dart';
@@ -226,24 +225,13 @@ class _MealPlanSaveState extends State<MealPlanSave> {
       ];
     }
 
-    List<Widget> stepsContent = [
-      Text("Which days would you like to eat (and optionally cook)?"),
-      Text("We all eat every day, let\'s eat better together! Grab and go or give yourself space and time to engage in a meal with others."),
-      Text("Save money: \$8 per meal (compared to \$13 average) or free if you cook."),
-      Text("Save time: No cooking, ordering, or deciding what to eat, just show up."),
-      Text("Build belonging: 35% of Americans are chronically lonely and 50% say no one knows them well. Join a daily or weekly group meal to build local relationships."),
-      Text("Improve sustainability: 1/3 of food is wasted. Avoid food waste and reduce food delivery carbon footprint (packaging, transportation)."),
-      Text("Get healthy: 95% of Americans don\'t get enough fiber, which can be found in fruits, vegetables, legumes, and whole grains. We suggest home cooked, healthy recipes."),
-    ];
-
-    Widget content = Column(
+    Widget contentSave = Column(
       children: [
         _style.Text1('${widget.headerTitle}', size: 'large'),
+        // _style.SpacingH('medium'),
+        // _style.Text1(''),
         _style.SpacingH('medium'),
-        _style.Text1(''),
-        _style.SpacingH('medium'),
-        StepShowMore(stepsContent: stepsContent, align: 'center',),
-        // _style.Text1('Which days would you like to eat (and optionally cook)?'),
+        _style.Text1('Which days would you like to eat (and optionally cook)?'),
         _style.SpacingH('medium'),
         LayoutWrap(items: days, align: 'left', spacing: 5, width: 50,),
         _style.SpacingH('medium'),
@@ -256,6 +244,44 @@ class _MealPlanSaveState extends State<MealPlanSave> {
         _style.SpacingH('medium'),
         ...colsSave,
         _style.SpacingH('medium'),
+      ],
+    );
+
+    List<Map<String, dynamic>> steps = [
+      { 'title': 'Choose What Works', 'text': 'We all eat every day, let\'s eat better together! Grab and go or give yourself space and time to engage in a meal with others.' },
+      { 'title': 'Save Money', 'text': '\$8 per meal (compared to \$13 average) or free if you cook.' },
+      { 'title': 'Save Time', 'text': 'No cooking, ordering, or deciding what to eat, just show up.' },
+      { 'title': 'Build Belonging', 'text': '35% of Americans are chronically lonely and 50% say no one knows them well. Join a daily or weekly group meal to build local relationships.' },
+      { 'title': 'Improve Sustainability', 'text': '1/3 of food is wasted. Avoid food waste and reduce food delivery carbon footprint (packaging, transportation).' },
+      { 'title': 'Get Healthy', 'text': '95% of Americans don\'t get enough fiber, which can be found in fruits, vegetables, legumes, and whole grains. We suggest home cooked, healthy recipes.' },
+    ];
+    List<Widget> colsSteps = [];
+    for (int i = 0; i < steps.length; i++) {
+      colsSteps += [
+        Column(
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _style.Text1('${steps[i]['title']}', size: 'large', fontWeight: FontWeight.bold),
+            _style.Text1('${steps[i]['text']}'),
+            _style.SpacingH('medium'),
+          ],
+        )
+      ];
+    }
+    Widget contentInfo = Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...colsSteps,
+      ]
+    );
+
+    Widget content = Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 20,
+      runSpacing: 20,
+      children: [
+        SizedBox(width: 500, child: contentSave),
+        SizedBox(width: 500, child: contentInfo),
       ],
     );
 
