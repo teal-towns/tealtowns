@@ -249,7 +249,7 @@ class _MealPlanSaveState extends State<MealPlanSave> {
 
     List<Map<String, dynamic>> steps = [
       { 'title': 'Choose What Works', 'text': 'We all eat every day, let\'s eat better together! Grab and go or give yourself space and time to engage in a meal with others.' },
-      { 'title': 'Save Money', 'text': '\$8 per meal (compared to \$13 average) or free if you cook.' },
+      { 'title': 'Save Money', 'text': '\$9 per meal (compared to \$15 average) or free if you cook.' },
       { 'title': 'Save Time', 'text': 'No cooking, ordering, or deciding what to eat, just show up.' },
       { 'title': 'Build Belonging', 'text': '35% of Americans are chronically lonely and 50% say no one knows them well. Join a daily or weekly group meal to build local relationships.' },
       { 'title': 'Improve Sustainability', 'text': '1/3 of food is wasted. Avoid food waste and reduce food delivery carbon footprint (packaging, transportation).' },
