@@ -18,6 +18,14 @@ def test_nextMonth():
     next = date_time.nextMonth(datetime1, months = 25)
     assert date_time.string(next) == '2026-02-10T00:00:00+00:00'
 
+    datetime1 = date_time.from_string('2024-12-30 18:26:00')
+    next = date_time.nextMonth(datetime1, months = 2)
+    assert date_time.string(next) == '2025-02-28T00:00:00+00:00'
+
+    datetime1 = date_time.from_string('2023-12-30 18:26:00')
+    next = date_time.nextMonth(datetime1, months = 2)
+    assert date_time.string(next) == '2024-02-29T00:00:00+00:00'
+
 def test_ToTimezone():
     timezone = "America/Los_Angeles"
     # Same timezone
