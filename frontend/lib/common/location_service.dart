@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:location/location.dart';
@@ -18,15 +19,12 @@ class LocationService {
   LocalstorageService _localstorageService = LocalstorageService();
   ParseService _parseService = ParseService();
 
-  LocalStorage? _localstorage = null;
   // Cached version.
   List<double> _lngLat = [0, 0];
 
   List<double> GetLngLat() {
     if (!LocationValid(_lngLat)) {
-      getLocalstorage();
-      LocalStorage _localStorage = _localstorageService.localstorage;
-      List<dynamic>? lngLatLocalStored = _localStorage.getItem('locationLngLat');
+      List<dynamic>? lngLatLocalStored = _localstorageService.GetItem('locationLngLat', parseType: 'listDynamic');
       if (lngLatLocalStored != null) {
         List<double> lngLat = [lngLatLocalStored[0], lngLatLocalStored[1]];
         return lngLat;
@@ -35,16 +33,9 @@ class LocationService {
     return _lngLat;
   }
 
-  void getLocalstorage() {
-    if (_localstorage == null) {
-      _localstorage = _localstorageService.localstorage;
-    }
-  }
-
   void SetLngLat(List<double> lngLat) {
     _lngLat = lngLat;
-    getLocalstorage();
-    _localstorage?.setItem('locationLngLat', [lngLat[0], lngLat[1]]);
+    _localstorageService.SetItem('locationLngLat', [lngLat[0], lngLat[1]]);
   }
 
   bool LocationValid(List<double> lngLat) {

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -9,7 +10,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 //import 'dart:html' if (dart.library.html);
 //}
 import 'package:universal_html/html.dart';
-import 'package:url_strategy/url_strategy.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import './common/config_service.dart';
 import './common/localstorage_service.dart';
@@ -65,15 +66,17 @@ main() async {
     }
   }
 
-  LocalstorageService _localstorageService = LocalstorageService();
-  _localstorageService.init(dotenv.env['APP_NAME']);
+  // LocalstorageService _localstorageService = LocalstorageService();
+  // _localstorageService.init(dotenv.env['APP_NAME']);
+  await initLocalStorage();
 
   SocketService _socketService = SocketService();
   _socketService.connect({ 'default': dotenv.env['SOCKET_URL_PUBLIC'] });
 
   TrackInsightService _trackInsightService = TrackInsightService();
 
-  setPathUrlStrategy();
+  // setPathUrlStrategy();
+  usePathUrlStrategy();
 
   Mixpanel? mixpanel = null;
   if (dotenv.env['MIXPANEL_TOKEN'] != null && dotenv.env['MIXPANEL_TOKEN']!.length > 0) {

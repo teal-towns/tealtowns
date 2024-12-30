@@ -178,9 +178,11 @@ class _LandState extends State<Land> {
       return Column(
         children: [
           AbsorbPointer(
-            child: Mapbox(mapWidth: viewWidth, mapHeight: mapHeight, onChanged: _onChangeMap,
-              latitude: double.parse(_formVals['latCenter'].toString()), longitude: double.parse(_formVals['lngCenter'].toString()), zoom: 15,
-              polygons: _polygons, coordinatesDraw: _coordinatesDraw, ),
+            // TODO - mapbox_gl is outdated and throws compile errors; need to replace. https://pub.dev/packages/mapbox_gl
+            child: Container(),
+            // child: Mapbox(mapWidth: viewWidth, mapHeight: mapHeight, onChanged: _onChangeMap,
+            //   latitude: double.parse(_formVals['latCenter'].toString()), longitude: double.parse(_formVals['lngCenter'].toString()), zoom: 15,
+            //   polygons: _polygons, coordinatesDraw: _coordinatesDraw, ),
           ),
           SizedBox(height: 10),
           // TODO - add back in once add google bucket to backend config.
@@ -214,9 +216,11 @@ class _LandState extends State<Land> {
           child: Column(
             children: [
               AbsorbPointer(
-                child: Mapbox(mapWidth: _sideWidth, mapHeight: mapHeight, onChanged: _onChangeMap,
-                  latitude: double.parse(_formVals['latCenter'].toString()), longitude: double.parse(_formVals['lngCenter'].toString()), zoom: 15,
-                  polygons: _polygons, coordinatesDraw: _coordinatesDraw ),
+                // TODO - mapbox_gl is outdated and throws compile errors; need to replace. https://pub.dev/packages/mapbox_gl
+                child: Container(),
+                // child: Mapbox(mapWidth: _sideWidth, mapHeight: mapHeight, onChanged: _onChangeMap,
+                //   latitude: double.parse(_formVals['latCenter'].toString()), longitude: double.parse(_formVals['lngCenter'].toString()), zoom: 15,
+                //   polygons: _polygons, coordinatesDraw: _coordinatesDraw ),
               ),
               SizedBox(height: 10),
               // TODO - add back in once add google bucket to backend config.

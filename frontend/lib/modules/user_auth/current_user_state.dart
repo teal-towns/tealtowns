@@ -17,7 +17,6 @@ class CurrentUserState extends ChangeNotifier {
 
   UserClass? _currentUser;
   bool _isLoggedIn = false;
-  LocalStorage? _localstorage = null;
   List<String> _routeIds = [];
   String _status = "done";
   List<String> _redirectUrls = [];
@@ -93,13 +92,6 @@ class CurrentUserState extends ChangeNotifier {
     }
   }
 
-  void getLocalstorage() {
-    if (_localstorage == null) {
-      init();
-      _localstorage = _localstorageService.localstorage;
-    }
-  }
-
   void SetAppData(Map<String, dynamic> appData) {
     for (String key in appData.keys) {
       _appData[key] = appData[key];
@@ -131,8 +123,8 @@ class CurrentUserState extends ChangeNotifier {
     _isLoggedIn = true;
     _socketService.setAuth(user.id, user.sessionId);
 
-    getLocalstorage();
-    _localstorage?.setItem('currentUser', user.toJson());
+    init();
+    _localstorageService.SetItem('currentUser', user.toJson());
 
     notifyListeners();
   }
@@ -157,8 +149,8 @@ class CurrentUserState extends ChangeNotifier {
     _isLoggedIn = false;
     _socketService.setAuth('', '');
 
-    getLocalstorage();
-    _localstorage?.deleteItem('currentUser');
+    init();
+    _localstorageService.RemoveItem('currentUser');
 
     _routerRedirectUrls = [];
     _routerRedirectTimeout = null;
@@ -170,8 +162,8 @@ class CurrentUserState extends ChangeNotifier {
   }
 
   void checkAndLogin() {
-    getLocalstorage();
-    Map<String, dynamic>? _localStorageUser = _localstorage?.getItem('currentUser');
+    init();
+    Map<String, dynamic>? _localStorageUser = _localstorageService.GetItem('currentUser', parseType: 'mapStringDynamic');
     UserClass? user = _localStorageUser != null ? UserClass.fromJson(_localStorageUser) : null;
     if (user != null && user.id.length > 0 && user.sessionId.length > 0) {
       _status = "loading";
@@ -192,8 +184,7 @@ class CurrentUserState extends ChangeNotifier {
 
   Future<List<dynamic>> getUserLocation() async {
     List<dynamic> _lngLat = [];
-    LocalStorage _localStorage = _localstorageService.localstorage;
-    List<dynamic>? _lngLatLocalStored = _localStorage.getItem('lngLat');
+    List<dynamic>? _lngLatLocalStored = _localstorageService.GetItem('lngLat');
     if (_lngLatLocalStored != null) {
       _lngLat = _lngLatLocalStored;
     }
@@ -202,7 +193,7 @@ class CurrentUserState extends ChangeNotifier {
     } else {
       LocationData coordinates = await Location().getLocation();
       if (coordinates.latitude != null) {
-        _localstorageService.localstorage.setItem('lngLat', [coordinates.longitude, coordinates.latitude]);
+        _localstorageService.SetItem('lngLat', [coordinates.longitude, coordinates.latitude]);
           _lngLat = [coordinates.longitude!, coordinates.latitude!];
       }
     }
