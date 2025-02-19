@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.1+8
+version: 1.0.2
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -29,6 +29,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -38,7 +40,7 @@ dependencies:
   flutter_markdown: ^0.7.1
   file_picker: ^8.0.3
   flutter_dotenv: ^5.1.0
-  flutter_map: ^6.1.0
+  flutter_map: ^7.0.2
   get_ip_address: ^0.0.7
   go_router: ^14.0.2
   google_fonts: ^6.1.0
@@ -46,21 +48,20 @@ dependencies:
   intl: ^0.19.0
   intl_phone_field: ^3.2.0
   latlong2: ^0.9.1
-  localstorage: ^4.0.1+4
-  location: ^6.0.2
-  location_picker_flutter_map: ^3.0.1
-  mapbox_gl: ^0.16.0
+  localstorage: ^5.0.0
+  location: ^7.0.1
+  location_picker_flutter_map: ^3.1.0
+  # mapbox_gl: ^0.16.0
   mixpanel_flutter: ^2.0.0
   multiple_search_selection: ^2.7.0
   provider: ^6.0.5
   qr_flutter: ^4.1.0
   sentry_flutter: ^8.4.0
   screenshot: ^3.0.0
-  timezone: ^0.9.3
+  timezone: ^0.10.0
   universal_html: ^2.2.4
   url_launcher: ^6.1.14
-  url_strategy: ^0.2.0
-  web_socket_channel: ^2.4.0
+  web_socket_channel: ^3.0.1
   youtube_player_iframe: ^5.1.3
   flutter_box_transform: ^0.4.6
 

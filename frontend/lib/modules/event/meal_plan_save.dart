@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app_scaffold.dart';
+import '../../common/date_time_service.dart';
 import '../../common/form_input/input_fields.dart';
 import '../../common/layout_wrap.dart';
 import '../../common/socket_service.dart';
@@ -24,7 +25,7 @@ class MealPlanSave extends StatefulWidget {
   List<Map<String, dynamic>> eventsByDayDefaults;
 
   MealPlanSave({this.pageWrapper = 1, this.neighborhoodUName = '', this.type = 'sharedMeal', this.title = 'Shared Meal',
-    this.daysOfWeek = const [0,1,2,3,4,5,6], this.startTimes = const ['17:30', '19:30',], this.hostGroupSizeDefault = 10,
+    this.daysOfWeek = const [0,1,2,3,4,5,6], this.startTimes = const ['17:30', '19:30'], this.hostGroupSizeDefault = 10,
     this.priceUSD = 9.0, this.headerTitle = 'Neighborhood Meal Plan', this.eventsByDayDefaults = const [
       { 'startTime': '17:30' }, { 'startTime': '17:30' }, { 'startTime': '17:30' }, { 'startTime': '17:30' }, {}, {}, {},
     ]});
@@ -34,12 +35,14 @@ class MealPlanSave extends StatefulWidget {
 }
 
 class _MealPlanSaveState extends State<MealPlanSave> {
+  DateTimeService _dateTime = DateTimeService();
   InputFields _inputFields = InputFields();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
   Style _style = Style();
 
   bool _saving = false;
+  bool _showLoginSignup = false;
   List<Map<String, dynamic>> _selectOptsHost = [
     { 'value': 'pay', 'label': 'Pay' },
     { 'value': 'cook', 'label': 'Cook' },
@@ -116,8 +119,14 @@ class _MealPlanSaveState extends State<MealPlanSave> {
   @override
   Widget build(BuildContext context) {
     CurrentUserState currentUserState = context.watch<CurrentUserState>();
-    if (!currentUserState.isLoggedIn) {
-      Widget content = Column(children: [ UserLoginSignup(mode: 'signup', onSave: (Map<String, dynamic> data) {}) ]);
+    if (_showLoginSignup) {
+      Widget content = Column(children: [
+        UserLoginSignup(mode: 'signup', neighborhoodUName: widget.neighborhoodUName,
+        onSave: (Map<String, dynamic> data) {
+          Save(context);
+          setState(() { _showLoginSignup = false; });
+        })
+      ]);
       if (widget.pageWrapper == 1) {
         return AppScaffoldComponent(
           listWrapper: true,
@@ -127,17 +136,17 @@ class _MealPlanSaveState extends State<MealPlanSave> {
       return content;
     }
 
-    List<Map<String, dynamic>> selectOptsTimes = [];
-    for (int i = 0; i < widget.startTimes.length; i++) {
-      selectOptsTimes.add({'value': widget.startTimes[i], 'label': widget.startTimes[i]});
-    }
+    // List<Map<String, dynamic>> selectOptsTimes = [];
+    // for (int i = 0; i < widget.startTimes.length; i++) {
+    //   selectOptsTimes.add({'value': widget.startTimes[i], 'label': widget.startTimes[i]});
+    // }
     List<Widget> days = [];
     double rowHeight = 43;
     // Left column for labels (times and cooking).
     List<Widget> colsTimes = [];
     for (int j = 0; j < widget.startTimes.length; j++) {
       colsTimes += [
-        Container(height: rowHeight, child: _style.Text1('${widget.startTimes[j]}')),
+        Container(height: rowHeight, child: _style.Text1('${_dateTime.ToAmPm(widget.startTimes[j], short: true)}')),
       ];
     }
     days += [
@@ -207,18 +216,24 @@ class _MealPlanSaveState extends State<MealPlanSave> {
     } else {
       colsSave = [
         ElevatedButton(child: Text('Save'), onPressed: () {
-          Save(context);
+          if (!currentUserState.isLoggedIn) {
+            setState(() { _showLoginSignup = true; });
+          } else {
+            Save(context);
+          }
         }),
       ];
     }
 
-    Widget content = Column(
+    Widget contentSave = Column(
       children: [
         _style.Text1('${widget.headerTitle}', size: 'large'),
+        // _style.SpacingH('medium'),
+        // _style.Text1(''),
         _style.SpacingH('medium'),
         _style.Text1('Which days would you like to eat (and optionally cook)?'),
         _style.SpacingH('medium'),
-        LayoutWrap(items: days, align: 'left', spacing: 5, width: 40,),
+        LayoutWrap(items: days, align: 'left', spacing: 5, width: 50,),
         _style.SpacingH('medium'),
         // _inputFields.inputMultiSelectButtons(_selectOptsDays, _formVals, 'hostCook', label: 'Would you like to cook any days?'),
         // _style.SpacingH('medium'),
@@ -229,6 +244,44 @@ class _MealPlanSaveState extends State<MealPlanSave> {
         _style.SpacingH('medium'),
         ...colsSave,
         _style.SpacingH('medium'),
+      ],
+    );
+
+    List<Map<String, dynamic>> steps = [
+      { 'title': 'Choose What Works', 'text': 'We all eat every day, let\'s eat better together! Grab and go or give yourself space and time to engage in a meal with others.' },
+      { 'title': 'Save Money', 'text': '\$9 per meal (compared to \$15 average) or free if you cook.' },
+      { 'title': 'Save Time', 'text': 'No cooking, ordering, or deciding what to eat, just show up.' },
+      { 'title': 'Build Belonging', 'text': '35% of Americans are chronically lonely and 50% say no one knows them well. Join a daily or weekly group meal to build local relationships.' },
+      { 'title': 'Improve Sustainability', 'text': '1/3 of food is wasted. Avoid food waste and reduce food delivery carbon footprint (packaging, transportation).' },
+      { 'title': 'Get Healthy', 'text': '95% of Americans don\'t get enough fiber, which can be found in fruits, vegetables, legumes, and whole grains. We suggest home cooked, healthy recipes.' },
+    ];
+    List<Widget> colsSteps = [];
+    for (int i = 0; i < steps.length; i++) {
+      colsSteps += [
+        Column(
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _style.Text1('${steps[i]['title']}', size: 'large', fontWeight: FontWeight.bold),
+            _style.Text1('${steps[i]['text']}'),
+            _style.SpacingH('medium'),
+          ],
+        )
+      ];
+    }
+    Widget contentInfo = Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...colsSteps,
+      ]
+    );
+
+    Widget content = Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 20,
+      runSpacing: 20,
+      children: [
+        SizedBox(width: 500, child: contentSave),
+        SizedBox(width: 500, child: contentInfo),
       ],
     );
 
@@ -254,6 +307,7 @@ class _MealPlanSaveState extends State<MealPlanSave> {
         Map<String, dynamic> pendingUser = { 'userId': userId, 'attendeeCountAsk': 0, 'hostGroupSizeMax': 0, 'selfHostCount': 0,};
         if (_eventsByDay[i]['host'] == 'cook') {
           pendingUser['selfHostCount'] = 1;
+          pendingUser['hostGroupSizeMax'] = widget.hostGroupSizeDefault;
         } else {
           pendingUser['attendeeCountAsk'] = _formVals['attendeeCountAsk'];
         }

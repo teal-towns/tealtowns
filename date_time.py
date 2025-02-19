@@ -1,3 +1,4 @@
+from calendar import monthrange
 import datetime
 import dateutil.parser
 import dateparser
@@ -126,7 +127,7 @@ def floor_time_interval(datetime1, interval, unit = 'minutes'):
         return datetime1.replace(year = years, month = 0, day = 0, hour = 0, minute = 0, second = 0, microsecond = 0)
     return None
 
-def nextMonth(datetime1, hour=0, minute=0, months = 1, day = None):
+def nextMonth(datetime1, hour = 0, minute = 0, months = 1, day = None):
     day = datetime1.day if day is None else 1
     hour = datetime1.hour if hour is None else 0
     minute = datetime1.minute if minute is None else 0
@@ -142,6 +143,11 @@ def nextMonth(datetime1, hour=0, minute=0, months = 1, day = None):
     else:
         nextMonth = currentMonth + months
         nextYear = currentYear
+
+    maxDays = monthrange(nextYear, nextMonth)[1]
+    if day > maxDays:
+        day = maxDays
+
     nextDatetime = datetime.datetime(nextYear, nextMonth, day, hour, minute, 0, \
         tzinfo=pytz.timezone('UTC'))
     return nextDatetime

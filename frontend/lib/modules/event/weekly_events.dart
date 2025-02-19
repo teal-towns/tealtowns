@@ -37,10 +37,12 @@ class WeeklyEvents extends StatefulWidget {
   int viewOnly;
   bool eventPayWithSubscribe;
   int pendingEvents;
+  String neighborhoodUName;
 
   WeeklyEvents({ this.lat = 0, this.lng = 0, this.maxMeters = 1500, this.type = '',
     this.routePath = 'weekly-events', this.showFilters = 1, this.pageWrapper = 1, this.updateLngLatOnInit = 1,
-    this.showCreateButton = 1, this.viewOnly = 0, this.eventPayWithSubscribe = false, this.pendingEvents = 0});
+    this.showCreateButton = 1, this.viewOnly = 0, this.eventPayWithSubscribe = false, this.pendingEvents = 0,
+    this.neighborhoodUName = '',});
 
   @override
   _WeeklyEventsState createState() => _WeeklyEventsState();
@@ -179,7 +181,7 @@ class _WeeklyEventsState extends State<WeeklyEvents> {
     if (_showUserLoginSignup) {
       Widget content = Column(
         children: [
-          UserLoginSignup(onSave: (Map<String, dynamic> data) {
+          UserLoginSignup(neighborhoodUName: widget.neighborhoodUName, onSave: (Map<String, dynamic> data) {
             setState(() { _showUserLoginSignup = false; });
           }),
           _style.SpacingH('xLarge'),
