@@ -72,12 +72,17 @@ class LocationService {
     var currentUser = Provider.of<CurrentUserState>(context, listen: false).currentUser;
     List<double> lngLat = [0, 0];
     if (useUser && currentUser != null && currentUser.location.coordinates.length > 0 &&
-      LocationValid(currentUser.location.coordinates)) {
+        LocationValid(currentUser.location.coordinates)) {
       lngLat = [_parseService.Precision(currentUser.location.coordinates[0], 5),
         _parseService.Precision(currentUser.location.coordinates[1], 5)];
       SetLngLat(lngLat);
-    }
+    } 
     else {
+      bool hasPermission =
+          await _location.hasPermission() == PermissionStatus.granted;
+      if (!hasPermission) {
+        return _lngLat;
+      }
       var coordinates = await _location.getLocation();
       if (coordinates.latitude != null) {
         lngLat = [_parseService.Precision(coordinates.longitude!, 5),

@@ -133,8 +133,8 @@ class _SharedItemSaveState extends State<SharedItemSave> {
             if (data.containsKey('sharedItemOwner') && data['sharedItemOwner'].containsKey('_id')) {
               sharedItemOwnerId = data['sharedItemOwner']['_id'];
             }
-            // If new item that is already bought, user is already an owner and there is nothing to invest, so skip owner page.
-            if (widget.id.length < 1 && _parseService.toIntNoNull(data['sharedItem']['bought']) > 0) {
+              // If item is already bought, user is already an owner and there is nothing to invest, so skip owner page.
+              if (_parseService.toIntNoNull(data['sharedItem']['bought']) > 0) {
               context.go('/own');
             } else {
               context.go('/shared-item-owner-save?sharedItemId=${sharedItemId}&id=${sharedItemOwnerId}');

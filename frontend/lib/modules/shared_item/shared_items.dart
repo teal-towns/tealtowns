@@ -19,7 +19,7 @@ import './shared_item_state.dart';
 import './shared_item_service.dart';
 import './shared_item_owner_class.dart';
 import '../user_auth/current_user_state.dart';
-
+import '../../common/parse_service.dart';
 
 class SharedItems extends StatefulWidget {
   final double lat;
@@ -88,7 +88,7 @@ class _SharedItemsState extends State<SharedItems> {
   @override
   void initState() {
     super.initState();
-
+    
     _routeIds.add(_socketService.onRoute('searchSharedItems', callback: (String resString) {
       var res = jsonDecode(resString);
       var data = res['data'];
@@ -339,7 +339,10 @@ class _SharedItemsState extends State<SharedItems> {
       sharedItem.monthsToPayBack!, sharedItem.maxOwners, sharedItem.maintenancePerYear!);
     texts = _sharedItemService.GetTexts(paymentInfo['downPerPersonWithFee']!,
       paymentInfo['monthlyPaymentWithFee']!, paymentInfo['monthsToPayBack']!, sharedItem.currency);
-    String perPersonMaxOwners = "${texts['perPerson']} with max owners (${sharedItem.maxOwners})";
+    String perPersonMaxOwners =
+        ParseService().toIntNoNull(sharedItem.bought) > 0
+            ? ''
+            : "${['perPerson']} with max owners (${sharedItem.maxOwners})";
 
     String fundingRequired = "${_currency.Format(sharedItem.fundingRequired, sharedItem.currency!)} funding required";
     List<Widget> colsInvest = [];
@@ -366,7 +369,8 @@ class _SharedItemsState extends State<SharedItems> {
         ];
       } else {
         colsCoBuy = [
-          Text('You paid ${_currency.Format(sharedItem.sharedItemOwner_current.totalPaid, sharedItem.currency)}. Once there are enough co-owners you will own this!'),
+          Text(
+              'Owner paid ${_currency.Format(sharedItem.sharedItemOwner_current.totalPaid, sharedItem.currency)}. ${sharedItem.bought == 1 ? '' : 'Once there are enough co-owners you will own this!'}'),
         ];
       }
     } else {

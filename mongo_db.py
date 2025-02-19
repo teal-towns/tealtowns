@@ -290,7 +290,7 @@ def Validate(collectionName: str, item: dict, allowPartial: int = 0,
     skipRequired: list = ['_id', 'createdAt', 'updatedAt'], insertDefaults = {}):
     ret = { 'valid': 1, 'message': '', 'item': item, 'removedFields': [], }
 
-    if not HaveId(item) and len(insertDefaults) > 0:
+    if HaveId(item) and len(insertDefaults) > 0:
         item = lodash.extend_object(insertDefaults, item)
 
     CheckGetSchema()
