@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -7,6 +8,7 @@ import '../../app_scaffold.dart';
 import '../../common/config_service.dart';
 import '../../common/currency_service.dart';
 import '../../common/link_service.dart';
+import '../../common/parse_service.dart';
 import '../../common/socket_service.dart';
 import './shared_item_class.dart';
 import './shared_item_service.dart';
@@ -74,9 +76,26 @@ class _SharedItemState extends State<SharedItem> {
     }
 
     var currentUserState = context.watch<CurrentUserState>();
-    List<Widget> buttons = [];
-    if (currentUserState.isLoggedIn && _sharedItem.currentOwnerUserId == currentUserState.currentUser.id) {
-      buttons = [
+    List<Widget> buttons = [
+      ElevatedButton(
+        onPressed: () async {
+          String msg =
+              'Hey! Can I borrow ${_sharedItem.title} from you? ${'https://tealtowns.com/si/${_sharedItem.uName}'}';
+          Clipboard.setData(ClipboardData(text: msg)).then((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(
+                      'A request message has been copied to your clipboard!')),
+            );
+          });
+        },
+        child: Text('Reqest'),
+      ),
+      SizedBox(width: 10),
+    ];
+    if (currentUserState.isLoggedIn &&
+        _sharedItem.currentOwnerUserId == currentUserState.currentUser.id) {
+      buttons.addAll([
         ElevatedButton(
           onPressed: () {
             Provider.of<SharedItemState>(context, listen: false).setSharedItem(_sharedItem);
@@ -85,7 +104,7 @@ class _SharedItemState extends State<SharedItem> {
           child: Text('Edit'),
         ),
         SizedBox(width: 10),
-      ];
+      ]);
     }
 
     List<Widget> columnsDistance = [];
@@ -131,7 +150,8 @@ class _SharedItemState extends State<SharedItem> {
         ];
       } else {
         colsCoBuy = [
-          Text('You paid ${_currency.Format(_sharedItem.sharedItemOwner_current.totalPaid, _sharedItem.currency)}. Once there are enough co-owners you will own this!'),
+          Text(
+              'Owner paid ${_currency.Format(_sharedItem.sharedItemOwner_current.totalPaid, _sharedItem.currency)}. ${ParseService().toIntNoNull(_sharedItem.bought) > 0 ? '' : 'Once there are enough co-owners you will own this!'}'),
         ];
       }
     } else {
