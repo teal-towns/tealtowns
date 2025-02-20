@@ -66,7 +66,7 @@ class _SharedItemState extends State<SharedItem> {
   Widget build(BuildContext context) {
     if (_loading) {
       return AppScaffoldComponent(
-          listWrapper: true,
+        listWrapper: true,
         body: Column(
           children: [
             LinearProgressIndicator(),
@@ -98,10 +98,8 @@ class _SharedItemState extends State<SharedItem> {
       buttons.addAll([
         ElevatedButton(
           onPressed: () {
-            Provider.of<SharedItemState>(context, listen: false)
-                .setSharedItem(_sharedItem);
-            _linkService.Go('/shared-item-save?id=${_sharedItem.id}', context,
-                currentUserState: currentUserState);
+            Provider.of<SharedItemState>(context, listen: false).setSharedItem(_sharedItem);
+            _linkService.Go('/shared-item-save?id=${_sharedItem.id}', context, currentUserState: currentUserState);
           },
           child: Text('Edit'),
         ),
@@ -185,42 +183,42 @@ class _SharedItemState extends State<SharedItem> {
     Map<String, dynamic> config = _configService.GetConfig();
     String shareUrl = '${config['SERVER_URL']}/si/${_sharedItem.uName}';
     return AppScaffoldComponent(
-        listWrapper: true,
-        body: Column(
-          children: [
+      listWrapper: true,
+      body: Column(
+        children: [
           _sharedItem.imageUrls.length <= 0 ?
             Image.asset('assets/images/no-image-available-icon-flat-vector.jpeg', height: 300, width: double.infinity, fit: BoxFit.cover,)
               :Image.network(_sharedItem.imageUrls![0], height: 300, width: double.infinity, fit: BoxFit.cover),
-            SizedBox(height: 5),
+          SizedBox(height: 5),
           Text(_sharedItem.title!,
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            SizedBox(height: 5),
-            ...columnsDistance,
-            Text("${perPersonMaxOwners}"),
-            SizedBox(height: 10),
-            ...colsCoBuy,
-            SizedBox(height: 10),
-            ...colsInvest,
-            Text('${_sharedItem.description}'),
-            SizedBox(height: 10),
-            ...colsStatus,
+            style: Theme.of(context).textTheme.displayMedium,
+          ),
+          SizedBox(height: 5),
+          ...columnsDistance,
+          Text("${perPersonMaxOwners}"),
+          SizedBox(height: 10),
+          ...colsCoBuy,
+          SizedBox(height: 10),
+          ...colsInvest,
+          Text('${_sharedItem.description}'),
+          SizedBox(height: 10),
+          ...colsStatus,
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...buttons,
             ]
           ),
-            SizedBox(height: 10),
-            QrImageView(
-              data: shareUrl,
-              version: QrVersions.auto,
-              size: 200.0,
-            ),
-            SizedBox(height: 10),
-            Text(shareUrl),
-            SizedBox(height: 10),
-          ],
+          SizedBox(height: 10),
+          QrImageView(
+            data: shareUrl,
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
+          SizedBox(height: 10),
+          Text(shareUrl),
+          SizedBox(height: 10),
+        ],
       )
     );
   }
