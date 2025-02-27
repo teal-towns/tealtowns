@@ -135,14 +135,14 @@ def Save(sharedItem: dict, now = None):
     sharedItem = _mongo_db_crud.CleanId(sharedItem)
     if '_id' not in sharedItem:
         sharedItem['uName'] = lodash.CreateUName(sharedItem['title'])
-        insertDefaults = {
+    if 'fundingRequired' not in sharedItem and 'currentPrice' in sharedItem:
+        sharedItem['fundingRequired'] = sharedItem['currentPrice']
+    insertDefaults = {
         'pledgedOwners': 0,
         'currency': 'USD',
         'status': 'available',
         'currentGenerationStart': date_time.now_string(),
     }
-    if 'fundingRequired' not in sharedItem and 'currentPrice' in sharedItem:
-        sharedItem['fundingRequired'] = sharedItem['currentPrice']
     # sharedItem = SharedItemClass(**sharedItem).dict()
     retCheck = mongo_db.Validate('sharedItem', sharedItem, insertDefaults = insertDefaults)
     if not retCheck['valid']:

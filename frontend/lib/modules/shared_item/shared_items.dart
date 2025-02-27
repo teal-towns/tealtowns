@@ -20,6 +20,7 @@ import './shared_item_service.dart';
 import './shared_item_owner_class.dart';
 import '../user_auth/current_user_state.dart';
 import '../../common/parse_service.dart';
+import './shared_item.dart';
 
 class SharedItems extends StatefulWidget {
   final double lat;
@@ -344,60 +345,8 @@ class _SharedItemsState extends State<SharedItems> {
             ? ''
             : "${['perPerson']} with max owners (${sharedItem.maxOwners})";
 
-    String fundingRequired = "${_currency.Format(sharedItem.fundingRequired, sharedItem.currency!)} funding required";
-    List<Widget> colsInvest = [];
-    if (sharedItem.fundingRequired! > 0) {
-      colsInvest = [
-        Text('${fundingRequired}'),
-        SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () {
-            String id = sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
-          },
-          child: Text('Invest'),
-        ),
-        SizedBox(height: 10),
-      ];
-    }
 
-    List<Widget> colsCoBuy = [];
-    if (sharedItem.sharedItemOwner_current.sharedItemId == sharedItem.id) {
-      if (sharedItem.sharedItemOwner_current.investorOnly > 0) {
-        colsCoBuy = [
-          Text('You invested ${_currency.Format(sharedItem.sharedItemOwner_current.totalPaid, sharedItem.currency)}. Once there are enough co-owners you can purchase this and will start being paid back.'),
-        ];
-      } else {
-        colsCoBuy = [
-          Text(
-              'Owner paid ${_currency.Format(sharedItem.sharedItemOwner_current.totalPaid, sharedItem.currency)}. ${sharedItem.bought == 1 ? '' : 'Once there are enough co-owners you will own this!'}'),
-        ];
-      }
-    } else {
-      colsCoBuy += [
-        ElevatedButton(
-          onPressed: () {
-            String id = sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
-          },
-          child: Text('Co-Buy'),
-        ),
-      ];
-    }
 
-    List<Widget> colsStatus = [];
-    if (sharedItem.sharedItemOwner_current.status == 'pendingMonthlyPayment') {
-      colsStatus = [
-        ElevatedButton(
-          onPressed: () {
-            String id = sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
-          },
-          child: Text('Set Up Monthly Payments'),
-        ),
-        SizedBox(height: 10),
-      ];
-    }
 
     return SizedBox(
       width: 300,
@@ -421,12 +370,13 @@ class _SharedItemsState extends State<SharedItems> {
           // SizedBox(height: 10),
           Text("${perPersonMaxOwners}"),
           SizedBox(height: 10),
-          ...colsCoBuy,
-          SizedBox(height: 10),
-          ...colsInvest,
-          Text('${sharedItem.description}'),
-          SizedBox(height: 10),
-          ...colsStatus,
+          SharedItemSections(
+            sharedItem: sharedItem,
+            currentUserState: currentUserState,
+            currencyService: _currency,
+            linkService: _linkService,
+            parseService: ParseService(),
+          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
