@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -17,10 +16,10 @@ import '../../common/location_service.dart';
 import './shared_item_class.dart';
 import './shared_item_state.dart';
 import './shared_item_service.dart';
-import './shared_item_owner_class.dart';
 import '../user_auth/current_user_state.dart';
 import '../../common/parse_service.dart';
-import './shared_item.dart';
+import './shared_item_widgets.dart';
+
 
 class SharedItems extends StatefulWidget {
   final double lat;
