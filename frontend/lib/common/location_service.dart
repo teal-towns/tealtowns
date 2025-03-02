@@ -69,11 +69,6 @@ class LocationService {
       SetLngLat(lngLat);
     }
     else {
-      bool hasPermission =
-          await _location.hasPermission() == PermissionStatus.granted;
-      if (!hasPermission) {
-        return _lngLat;
-      }
       var coordinates = await _location.getLocation();
       if (coordinates.latitude != null) {
         lngLat = [_parseService.Precision(coordinates.longitude!, 5),

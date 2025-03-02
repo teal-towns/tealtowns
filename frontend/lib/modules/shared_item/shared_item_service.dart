@@ -41,6 +41,16 @@ class SharedItemService {
 
   Map<String, dynamic> GetPayments(double currentPrice, int monthsToPayBack, int numOwners,
     double maintenancePerYear, {String currency = 'USD'}) {
+    if (monthsToPayBack <= 0) {
+      return {
+        'monthlyPayment': 0,
+        'monthlyPaymentWithFee': 0,
+        'downPerPerson': 0,
+        'downPerPersonWithFee': 0,
+        'investorProfit': 0,
+        'monthsToPayBack': 0,
+      };
+    }
     double returnPerMonthFactor = _investmentReturnPerYearFactor / 12;
     double investorProfit = currentPrice * returnPerMonthFactor * monthsToPayBack;
     double totalToPayBack = currentPrice + investorProfit;

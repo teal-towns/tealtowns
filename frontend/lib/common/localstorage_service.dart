@@ -19,12 +19,10 @@ class LocalstorageService {
     if (value == null) {
       return null;
     }
-    Map<String, dynamic> json = jsonDecode(value);
     if (parseType == 'listDynamic') {
-      return value;
-      // return json.decode(value!) as List<dynamic>?;
+      return json.decode(value) as List<dynamic>?;
     } else if (parseType == 'mapStringDynamic') {
-      return _parseService.parseMapStringDynamic(json);
+      return _parseService.parseMapStringDynamic(json.decode(value));
     }
     return json;
   }

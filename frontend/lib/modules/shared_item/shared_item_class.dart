@@ -7,7 +7,7 @@ class SharedItemClass {
   ParseService _parseService = ParseService();
   ImageService _imageService = ImageService();
 
-  String id = '', uName = '', neighborhoodUName = '', title = '', description = '', currentOwnerUserId = '',
+  String id = '', uName = '', neighborhoodUName = '', title = '', description = '', currentOwnerUserId = '', currentGenerationStart = '',
     currentPurchaserUserId = '', status = '', currency = '';
   List<String> tags = [], imageUrls = [];
   LocationClass location = LocationClass.fromJson({});
@@ -18,7 +18,7 @@ class SharedItemClass {
   SharedItemOwnerClass sharedItemOwner_current = SharedItemOwnerClass.fromJson({});
 
   SharedItemClass(this.id, this.uName, this.neighborhoodUName, this.title, this.description, this.imageUrls,
-    this.currentOwnerUserId, this.currentPurchaserUserId, this.tags,
+    this.currentOwnerUserId, this.currentGenerationStart, this.currentPurchaserUserId, this.tags,
     this.location, this.bought, this.originalPrice, this.currentPrice, this.currency, this.generation, this.monthsToPayBack,
     this.maintenancePerYear, this.maintenanceAvailable, this.minOwners, this.maxOwners, this.maxMeters, this.status,
     this.pledgedOwners, this.fundingRequired, this.xDistanceKm, this.sharedItemOwner_current);
@@ -31,6 +31,7 @@ class SharedItemClass {
     this.description = json['description'] ?? '';
     this.imageUrls = _imageService.GetUrls(_parseService.parseListString(json['imageUrls'] != null ? json['imageUrls'] : []));
     this.currentOwnerUserId = json['currentOwnerUserId'] ?? '';
+    this.currentGenerationStart = json['currentGenerationStart'] ?? '';
     this.currentPurchaserUserId = json['currentPurchaserUserId'] ?? '';
     this.tags = _parseService.parseListString(json['tags'] != null ? json['tags'] : []);
     this.location = LocationClass.fromJson(json['location'] ?? {});
@@ -64,6 +65,7 @@ class SharedItemClass {
       'description': description,
       'imageUrls': imageUrls,
       'currentOwnerUserId': currentOwnerUserId,
+      'currentGenerationStart': currentGenerationStart,
       'currentPurchaserUserId': currentPurchaserUserId,
       'tags': tags,
       'location': { 'type': 'Point', 'coordinates': location.coordinates },
