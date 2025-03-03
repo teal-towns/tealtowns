@@ -14,6 +14,7 @@ import './shared_item_class.dart';
 import './shared_item_service.dart';
 import './shared_item_state.dart';
 import '../user_auth/current_user_state.dart';
+import 'shared_item_sections.dart';
 
 class SharedItem extends StatefulWidget {
   String uName;
@@ -30,6 +31,7 @@ class _SharedItemState extends State<SharedItem> {
   SharedItemService _sharedItemService = SharedItemService();
   List<String> _routeIds = [];
   SocketService _socketService = SocketService();
+  ParseService _parseService = ParseService();
 
   SharedItemClass _sharedItem = SharedItemClass.fromJson({});
   bool _loading = true;
@@ -125,61 +127,6 @@ class _SharedItemState extends State<SharedItem> {
       paymentInfo['monthlyPaymentWithFee']!, paymentInfo['monthsToPayBack']!, _sharedItem.currency);
     String perPersonMaxOwners = "${texts['perPerson']} with max owners (${_sharedItem.maxOwners})";
 
-    String fundingRequired = "${_currency.Format(_sharedItem.fundingRequired, _sharedItem.currency!)} funding required";
-    List<Widget> colsInvest = [];
-    if (_sharedItem.fundingRequired! > 0) {
-      colsInvest = [
-        Text('${fundingRequired}'),
-        SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () {
-            String id = _sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${_sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
-          },
-          child: Text('Invest'),
-        ),
-        SizedBox(height: 10),
-      ];
-    }
-
-    List<Widget> colsCoBuy = [];
-    if (_sharedItem.sharedItemOwner_current.sharedItemId == _sharedItem.id) {
-      if (_sharedItem.sharedItemOwner_current.investorOnly > 0) {
-        colsCoBuy = [
-          Text('You invested ${_currency.Format(_sharedItem.sharedItemOwner_current.totalPaid, _sharedItem.currency)}. Once there are enough co-owners you can purchase this and will start being paid back.'),
-        ];
-      } else {
-        colsCoBuy = [
-          Text(
-              'Owner paid ${_currency.Format(_sharedItem.sharedItemOwner_current.totalPaid, _sharedItem.currency)}. ${ParseService().toIntNoNull(_sharedItem.bought) > 0 ? '' : 'Once there are enough co-owners you will own this!'}'),
-        ];
-      }
-    } else {
-      colsCoBuy += [
-        ElevatedButton(
-          onPressed: () {
-            String id = _sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${_sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
-          },
-          child: Text('Co-Buy'),
-        ),
-      ];
-    }
-
-    List<Widget> colsStatus = [];
-    if (_sharedItem.sharedItemOwner_current.status == 'pendingMonthlyPayment') {
-      colsStatus = [
-        ElevatedButton(
-          onPressed: () {
-            String id = _sharedItem.sharedItemOwner_current.id;
-            _linkService.Go('/shared-item-owner-save?sharedItemId=${_sharedItem.id}&id=${id}', context, currentUserState: currentUserState);
-          },
-          child: Text('Set Up Monthly Payments'),
-        ),
-        SizedBox(height: 10),
-      ];
-    }
-
     Map<String, dynamic> config = _configService.GetConfig();
     String shareUrl = '${config['SERVER_URL']}/si/${_sharedItem.uName}';
     return AppScaffoldComponent(
@@ -195,14 +142,14 @@ class _SharedItemState extends State<SharedItem> {
           ),
           SizedBox(height: 5),
           ...columnsDistance,
-          Text("${perPersonMaxOwners}"),
-          SizedBox(height: 10),
-          ...colsCoBuy,
-          SizedBox(height: 10),
-          ...colsInvest,
-          Text('${_sharedItem.description}'),
-          SizedBox(height: 10),
-          ...colsStatus,
+          if(_parseService.toIntNoNull(_sharedItem.bought) <= 0) Text("${perPersonMaxOwners}"),
+            SharedItemSections( 
+            sharedItem: _sharedItem,
+            currentUserState: currentUserState,
+            currencyService: _currency,
+            linkService: _linkService,
+            parseService: _parseService,
+          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -234,3 +181,4 @@ class _SharedItemState extends State<SharedItem> {
     _socketService.emit('GetSharedItemByUName', data);
   }
 }
+
