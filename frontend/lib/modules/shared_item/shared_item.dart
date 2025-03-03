@@ -14,7 +14,7 @@ import './shared_item_class.dart';
 import './shared_item_service.dart';
 import './shared_item_state.dart';
 import '../user_auth/current_user_state.dart';
-import './shared_item_widgets.dart';
+import 'shared_item_sections.dart';
 
 class SharedItem extends StatefulWidget {
   String uName;
